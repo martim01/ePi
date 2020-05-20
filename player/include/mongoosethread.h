@@ -10,7 +10,7 @@
 #include <vector>
 #include <initializer_list>
 #include "inimanager.h"
-
+#include "json/json.h"
 
 class MongooseThread
 {
@@ -26,11 +26,6 @@ class MongooseThread
         ///< @brief Creates the thread that runs the webserver loop
         void Run();
 
-        /** @brief Sends the given message with the given id to any websocket that is interested in messages with that id
-        *   @param sId the id of the message (made up of pipe+id)
-        *   @param sMessage the JSON encoded message
-        **/
-        void SendWSMessage(const std::string& sId, std::string sMessage);
 
         /** Handles a logout event
         *   @param pConnection the mg_connection that caused the event
@@ -61,100 +56,13 @@ class MongooseThread
         **/
         void EventHttp(mg_connection *pConnection, int nEvent, void* pData);
 
-        /** @brief Sends all the current status to the passed connection. Called when pConnection first connects
-        *   @param pConnection the mg_connection to send the data to
-        **/
-        void SendAll(mg_connection* pConnection);
-
-        /** @brief Sends a message to pConnection telling the browser to redirect to the login page as its session has expired
-        *   @param pConnection the mg_connection to send the data to
-        **/
-        void SendLogOut(mg_connection* pConnection);
-
-        /** @brief Checks whether the passed username and password exist and match
-        *   @param pConnection the mg_connection to send the data to
-        *   @param sUsername the passed username
-        *   @param sPassword the passed password
-        *   @return <i>string</i> empty if the username exists and the password is correct, else error to report
-        **/
-        std::string CheckLogin(mg_connection* pConnection, const std::string& sUsername, const std::string& sPassword);
-
-
-
-        /** @brief Sends dynamic data in response to javascript ajax requests
-        *   @param sUser the username that corresponds to the connection
-        *   @param vEndpoint the rest of the endpoint that the connection is targetting
-        *   @param pConnection the mg_connection to send the data to
-        *   @param pMessage the http_message that we've been sent
-        **/
-        void DoAjax(const std::string& sUser, std::vector<std::string>& vEndpoint, mg_connection* pConnection, http_message* pMessage);
-
-        /** @brief Sends dynamic data in response to javascript ajax requests
-        *   @param sUser the username that corresponds to the connection
-        *   @param vEndpoint the rest of the endpoint that the connection is targetting
-        *   @param pConnection the mg_connection to send the data to
-        *   @param pMessage the http_message that we've been sent
-        **/
-        void DoAjaxUsers(const std::string& sUser, std::vector<std::string>& vEndpoint, mg_connection* pConnection, http_message* pMessage);
-
-        /** @brief Sends dynamic data in response to javascript ajax requests
-        *   @param sUser the username that corresponds to the connection
-        *   @param vEndpoint the rest of the endpoint that the connection is targetting
-        *   @param pConnection the mg_connection to send the data to
-        *   @param pMessage the http_message that we've been sent
-        **/
-        void DoAjaxNs(const std::string& sUser, std::vector<std::string>& vEndpoint, mg_connection* pConnection, http_message* pMessage);
-
-        /** @brief Sends dynamic data in response to javascript ajax requests
-        *   @param vEndpoint the rest of the endpoint that the connection is targetting
-        *   @param pConnection the mg_connection to send the data to
-        *   @param pMessage the http_message that we've been sent
-        **/
-        void DoAjaxLogs(std::vector<std::string>& vEndpoint, mg_connection* pConnection, http_message* pMessage);
-
-        std::string CreateLogs(std::vector<std::string>& vEndpoint);
-
-        void SendLogs(const std::string& sLog, mg_connection* pConnection);
-
-        void DownloadLogs(const std::vector<std::string>& vEndpoint, const std::string& sLog, mg_connection* pConnection);
-
-        /** @brief Send a Json array containing all the user data to the provided connection
-        *   @param sUser the username that corresponds to the connection
-        *   @param pConnection the mg_connection to send the data to
-        **/
-        void SendUsers(const std::string& sUser, mg_connection* pConnection);
-
-
-        /** @brief Attempt to create a user whose details are given in pMessage
-        *   @param sUser the username that corresponds to the connection
-        *   @param pConnection the mg_connection to send the data to
-        *   @param pMessage the http_message that we've been sent
-        **/
-        void CreateUser(const std::string& sUser, mg_connection* pConnection, http_message* pMessage);
-
-        /** @brief Attempt to delete a user whose details are given in pMessage
-        *   @param sUser the username that corresponds to the connection
-        *   @param pConnection the mg_connection to send the data to
-        *   @param pMessage the http_message that we've been sent
-        **/
-        void DeleteUser(const std::string& sUser, mg_connection* pConnection, http_message* pMessage);
-
-
-
-        /** @brief Attempt to change a user's password
-        *   @param sUser the username that corresponds to the connection
-        *   @param pConnection the mg_connection to send the data to
-        *   @param pMessage the http_message that we've been sent
-        **/
-        void ChangePassword(const std::string& sUser, mg_connection* pConnection, http_message* pMessage);
-
 
         /** @brief Send a JSON encoded error message to the provided connection containing the provided error
         *   @param pConnection the mg_connection to send the data to
         *   @param sError the error message
-	*   @param nVersion the version of the file, if any, that caused the error
+        *   @param nCode the error code
         **/
-        void SendError(mg_connection* pConnection, const std::string& sError, int nVersion=-1);
+        void SendError(mg_connection* pConnection, const std::string& sError, int nCode=-1);
 
 
         /** @brief Handle the browser sendin us an audio file
@@ -166,23 +74,51 @@ class MongooseThread
         /** @brief Called when a network source file us started to be uploaded. Updates version numbers and status of the ns ini file so no other files can be uploaded as weel
 
         **/
-        void StartUpload(http_message* pMessage);
+        bool UploadAllowed(mg_connection* pConnection, http_message* pMessage);
 
         /** @brief Called when the network source file has finished uploading. Copies the file to the working directory and executes the network source compiler
         **/
         void EndUpload(mg_connection *pConnection);
 
-        void SendQueue();
+        void SendStatus();
 
 
-        std::string GetFilteredLog(time_t nTimeFrom, time_t nTimeTo, const std::string& sPath, bool bTab, const std::vector<std::string>& vFilter, bool (*filter)(const std::string& sLine, const std::vector<std::string>& vFilter));
+        void DoReply(mg_connection* pConnection, int nCode, const Json::Value& jsonResponse, const std::string& sContentType = "application/json");
+
+        void DoHttpGet(mg_connection* pConnection, const std::string& sUrl);
+        void DoHttpPut(mg_connection* pConnection, const std::string& sUrl, http_message* pMessage);
+        void DoHttpDelete(mg_connection* pConnection, const std::string& sUrl, http_message* pMessage);
+        void DoHttpPost(mg_connection* pConnection, const std::string& sUrl, http_message* pMessage);
+
+
+        void DoGetFiles(mg_connection* pConnection, std::queue<std::string>& qSplit);
+        void DoGetPlaylists(mg_connection* pConnection, std::queue<std::string>& qSplit);
+        void DoGetSchedules(mg_connection* pConnection, std::queue<std::string>& qSplit);
+        void DoGetConfig(mg_connection* pConnection);
+        void DoGetInfo(mg_connection* pConnection);
+        void DoGetPower(mg_connection* pConnection);
+
+        void StatusChange(mg_connection* pConnection, http_message* pMessage);
+        void PowerChange(mg_connection* pConnection, http_message* pMessage);
+        void ConfigChange(mg_connection* pConnection, http_message* pMessage);
+        void FileMove(mg_connection* pConnection, http_message* pMessage, const std::string& sUid);
+        void PlaylistModify(mg_connection* pConnection, http_message* pMessage, const std::string& sUid);
+        void ScheduleModify(mg_connection* pConnection, http_message* pMessage, const std::string& sUid);
+
+
+        void FileDelete(mg_connection* pConnection, http_message* pMessage, const std::string& sUid);
+        void PlaylistDelete(mg_connection* pConnection, http_message* pMessage, const std::string& sUid);
+        void ScheduleDelete(mg_connection* pConnection, http_message* pMessage, const std::string& sUid);
+
+        void FileUpload(mg_connection* pConnection, http_message* pMessage);
+        void PlaylistUpload(mg_connection* pConnection, http_message* pMessage);
+        void ScheduleUpload(mg_connection* pConnection, http_message* pMessage);
+
+
+
 
         mg_connection* m_pConnection;
         std::string m_sIniPath;
-        std::string m_sNsFilePath;
-        std::string m_sNsBinPath;
-        std::string m_sLogPath;
-        std::string m_sVsePath;
         std::string m_sServerName;
 
         mg_mgr m_mgr;
@@ -190,17 +126,30 @@ class MongooseThread
         mg_serve_http_opts m_ServerOpts;
 
         std::mutex m_mutex;
-        std::map<std::string, std::string> m_mData;
-
-
-        //std::set<std::string> m_setAllowed;
-        std::set<mg_connection*> m_setAllowed;
-
 
         bool m_bUploadAllowed;
 
-        std::queue<std::pair<std::string,std::string> > m_queueWS;
+        /**
+        x-epi                               GET
+        x-epi/status                        GET PUT
+        x-epi/files                         GET     POST
+        x-epi/files/xxx                     GET PUT
+        x-epi/playlists                     GET     POST
+        x-epi/playlists/xxx                 GET PUT
+        x-epi/schedules                     GET     POST
+        x-epi/schedules/xxx                 GET PUT
+        x-epi/power                         GET PUT
+        x-epi/config                        GET PUT
+        x-epi/info                          GET
+        **/
 
+        static const std::string EP_ROOT;
+        static const std::string EP_STATUS;
+        static const std::string EP_POWER;
+        static const std::string EP_CONFIG;
+        static const std::string EP_SCHEDULES;
+        static const std::string EP_PLAYLISTS;
+        static const std::string EP_FILES;
+        static const std::string EP_INFO;
 
-		std::map<std::string, unsigned long int> m_mMaxLogLength;
 };
