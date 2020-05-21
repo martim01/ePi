@@ -128,10 +128,10 @@ iniSection* iniManager::GetSection(const string& sSectionName)
 /*!
     \fn iniManager::GetIniString(const string& sSection, const string& sKey, const string& sDefault)
  */
-const string& iniManager::GetIniString(const string& sSection, const string& sKey, const string& sDefault)
+const string& iniManager::GetIniString(const string& sSection, const string& sKey, const string& sDefault) const
 {
     //does the section exist?
-    itSection it = m_mSections.find(sSection);
+    auto it = m_mSections.find(sSection);
 	if(it==m_mSections.end())
 		return sDefault;
 
@@ -142,10 +142,10 @@ const string& iniManager::GetIniString(const string& sSection, const string& sKe
 /*!
     \fn iniManager::GetIniInt(const string& sSection, const string& sKey, int nDefault)
  */
-int iniManager::GetIniInt(const string& sSection, const string& sKey, int nDefault)
+int iniManager::GetIniInt(const string& sSection, const string& sKey, int nDefault) const
 {
     //does the section exist?
-	itSection it = m_mSections.find(sSection);
+	auto it = m_mSections.find(sSection);
 	if(it==m_mSections.end())
 		return nDefault;
 
@@ -155,10 +155,10 @@ int iniManager::GetIniInt(const string& sSection, const string& sKey, int nDefau
 /*!
     \fn iniManager::GetIniDouble(const string& sSection, const string& sKey, double dDefault)
  */
-double iniManager::GetIniDouble(const string& sSection, const string& sKey, double dDefault)
+double iniManager::GetIniDouble(const string& sSection, const string& sKey, double dDefault) const
 {
     //does the section exist?
-	itSection it = m_mSections.find(sSection);
+	auto it = m_mSections.find(sSection);
 	if(it==m_mSections.end())
 		return dDefault;
 

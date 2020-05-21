@@ -10,8 +10,12 @@ AudioFile::AudioFile(const std::string& sType) : Resource(sType)
 
 }
 
+AudioFile::AudioFile(const Json::Value& jsData) : Resource(jsData)
+{
+}
 
-void AudioFile::UpdateJson()
+
+void AudioFile::InitJson()
 {
     if(OpenToRead())
     {

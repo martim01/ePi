@@ -1,6 +1,11 @@
 # depslib dependency file v1.0
-1589898285 source:/home/pi/ePi/player/src/main.cpp
+1590072759 source:/home/pi/ePi/player/src/main.cpp
 	<iostream>
+	"resourcemanager.h"
+	"inimanager.h"
+	"log.h"
+	"mongoosethread.h"
+	<memory>
 
 1589898358 source:/home/pi/ePi/player/src/mongoose.c
 	"mongoose.h"
@@ -296,13 +301,13 @@
 	<stdint.h>
 	<stdio.h>
 
-1589983566 source:/home/pi/ePi/player/src/inimanager.cpp
+1590072665 source:/home/pi/ePi/player/src/inimanager.cpp
 	"inimanager.h"
 	"inisection.h"
 	<sstream>
 	"log.h"
 
-1589898375 /home/pi/ePi/player/include/inimanager.h
+1590072650 /home/pi/ePi/player/include/inimanager.h
 	<map>
 	<string>
 	<stdio.h>
@@ -327,21 +332,16 @@
 	<cstdlib>
 	"log.h"
 
-1589983439 source:/home/pi/ePi/player/src/audiofile.cpp
+1590071080 source:/home/pi/ePi/player/src/audiofile.cpp
 	"audiofile.h"
 
-1589984232 /home/pi/ePi/player/include/audiofile.h
+1590071273 /home/pi/ePi/player/include/audiofile.h
 	"resource.h"
 	<chrono>
 
-1589984072 /home/pi/ePi/player/include/resource.h
+1590071092 /home/pi/ePi/player/include/resource.h
 	<string>
 	"json/json.h"
-	<list>
-	<map>
-	<chrono>
-	<mutex>
-	<sstream>
 
 1589963296 /home/pi/ePi/external/jsoncpp/dist/json/json.h
 	<cstring>
@@ -380,7 +380,16 @@
 	<sstream>
 	"config.h"
 
-1589972300 source:/home/pi/ePi/player/src/resourcemanager.cpp
+1590071848 source:/home/pi/ePi/player/src/resourcemanager.cpp
+	"resourcemanager.h"
+	<iostream>
+	<fstream>
+	"utils.h"
+	"audiofile.h"
+	"wavfile.h"
+	"mp3file.h"
+	"sndfile.hh"
+	"log.h"
 
 1589963296 source:/home/pi/ePi/external/jsoncpp/dist/jsoncpp.cpp
 	"json/json.h"
@@ -456,7 +465,7 @@
 1589983831 /home/pi/ePi/external/uuid/guid.h
 	"copyrt.h"
 
-1589984068 source:/home/pi/ePi/player/src/resource.cpp
+1590071111 source:/home/pi/ePi/player/src/resource.cpp
 	"resource.h"
 	"utils.h"
 
@@ -468,26 +477,27 @@
 	<chrono>
 	<queue>
 
-1589986010 source:/home/pi/ePi/player/src/utils.cpp
+1590069407 source:/home/pi/ePi/player/src/utils.cpp
 	"utils.h"
 	<sstream>
 	<sys/types.h>
 	<unistd.h>
 	<iostream>
+	<iomanip>
 	<string.h>
 	<syslog.h>
 	"guid.h"
 	"utils.h"
 
-1589985560 source:/home/pi/ePi/player/src/wavfile.cpp
+1590071314 source:/home/pi/ePi/player/src/wavfile.cpp
 	"wavfile.h"
 	"sndfile.hh"
 
-1589985376 /home/pi/ePi/player/include/wavfile.h
+1590071273 /home/pi/ePi/player/include/wavfile.h
 	"audiofile.h"
 	<memory>
 
-1589986542 source:/home/pi/ePi/player/src/mongoosethread.cpp
+1590073051 source:/home/pi/ePi/player/src/mongoosethread.cpp
 	"mongoosethread.h"
 	<iostream>
 	<thread>
@@ -502,8 +512,9 @@
 	"log.h"
 	<chrono>
 	"utils.h"
+	"resourcemanager.h"
 
-1589986416 /home/pi/ePi/player/include/mongoosethread.h
+1590071955 /home/pi/ePi/player/include/mongoosethread.h
 	"mongoose.h"
 	<string>
 	<sstream>
@@ -514,5 +525,24 @@
 	<vector>
 	<initializer_list>
 	"inimanager.h"
+	"response.h"
+
+1590071298 source:/home/pi/ePi/player/src/mp3file.cpp
+	"mp3file.h"
+
+1590048220 /home/pi/ePi/player/include/mp3file.h
+	"audiofile.h"
+	<memory>
+
+1590068341 /home/pi/ePi/player/include/resourcemanager.h
+	<map>
+	<memory>
+	<mutex>
+	<thread>
+	"json/json.h"
+	"inimanager.h"
+	"response.h"
+
+1590067921 /home/pi/ePi/player/include/response.h
 	"json/json.h"
 

@@ -9,8 +9,10 @@ class WavFile : public AudioFile
     public:
         WavFile(const std::string& sUid, const std::string& sLabel, const std::string& sDescription);
         WavFile();
+        WavFile(const Json::Value& jsData);
         virtual ~WavFile();
 
+        static int IsWavFile(const std::string& sFile);
         bool OpenToRead() override;
         int64_t ReadAudio(float* pBuffer, int nSize, unsigned int nLoop) override;
         bool Close() override;

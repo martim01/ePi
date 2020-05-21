@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <iostream>
+#include <iomanip>
 #include <string.h>
 #include <syslog.h>
 #include "guid.h"
@@ -118,10 +119,10 @@ bool mkpath(const std::string& sPath, mode_t mode)
 
     for(size_t i = 0; i < vSplit.size(); i++)
     {
-	if(sPath[0] == '/' && i == 0)
-	{
-		ssPath << '/';
-	}
+        if(sPath[0] == '/' && i == 0)
+        {
+            ssPath << '/';
+        }
         ssPath << vSplit[i];
         if(do_mkdir(ssPath.str(), mode) == false)
         {
@@ -159,12 +160,26 @@ std::string CreateGuid(const std::string& sName)
     uuid_t guid;
     uuid_create_md5_from_name(&guid, NameSpace_OID, sName.c_str(), sName.length());
 
+    std::stringstream ss;
+    ss << std::hex
+       << std::setw(8) << std::setfill('0') << guid.time_low << "-"
+       << std::setw(4) << std::setfill('0') << guid.time_mid << "-"
+       << std::setw(4) << std::setfill('0') << guid.time_hi_and_version << "-"
+       << std::setw(2) << std::setfill('0') << guid.clock_seq_hi_and_reserved
+       << std::setw(2) << std::setfill('0') << guid.clock_seq_low << "-"
+       << std::setw(2) << std::setfill('0') << guid.node[0]
+       << std::setw(2) << std::setfill('0') << guid.node[1]
+       << std::setw(2) << std::setfill('0') << guid.node[2]
+       << std::setw(2) << std::setfill('0') << guid.node[3]
+       << std::setw(2) << std::setfill('0') << guid.node[4]
+       << std::setw(2) << std::setfill('0') << guid.node[5];
 
-    std::array<char,40> output;
+    return ss.str();
+    /*std::array<char,40> output;
     snprintf(output.data(), output.size(), "%08x-%04hx-%04hx-%02x%02x-%02x%02x%02x%02x%02x%02x",
              guid.time_low, guid.time_mid, guid.time_hi_and_version, guid.clock_seq_hi_and_reserved, guid.clock_seq_low,
              guid.node[0], guid.node[1], guid.node[2], guid.node[3], guid.node[4], guid.node[5]);
-    return std::string(output.data());
+    return std::string(output.data());*/
 }
 
 

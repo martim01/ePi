@@ -61,14 +61,14 @@ public:
     *   @param sDefault the default value of the key (this is returned if the key is not set)
     *   @return <i>string</i> the value of the key
     **/
-    const std::string& GetIniString(const std::string& sSection, const std::string& sKey, const std::string& sDefault);
+    const std::string& GetIniString(const std::string& sSection, const std::string& sKey, const std::string& sDefault) const;
     /** @brief Get the ini value for the specified key in the specified section.
     *   @param sSection the section of the ini file the key live is
     *   @param sKey the key you want to retrieve the value of
     *   @param nDefault the default value of the key (this is returned if the key is not set)
     *   @return <i>int</i> the value of the key
     **/
-	int GetIniInt(const std::string& sSection, const std::string& sKey, int nDefault);
+	int GetIniInt(const std::string& sSection, const std::string& sKey, int nDefault) const;
 
 	/** @brief Get the double value for the specified key in the specified section.
     *   @param sSection the section of the ini file the key live is
@@ -76,7 +76,7 @@ public:
     *   @param dDefault the default value of the key (this is returned if the key is not set)
     *   @return <i>double</i> the value of the key
     **/
-	double GetIniDouble(const std::string& sSection, const std::string& sKey, double dDefault);
+	double GetIniDouble(const std::string& sSection, const std::string& sKey, double dDefault) const;
 
     /** @brief Writes the stored sections and keys into an ini file
     *   @param sFilename the path and filename of the ini file to write to

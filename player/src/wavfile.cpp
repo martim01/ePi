@@ -12,14 +12,26 @@ WavFile::WavFile(const std::string& sUid, const std::string& sLabel, const std::
 
 
 
-WavFile::WavFile() : AudioFile("wavfile")
+WavFile::WavFile() : AudioFile(std::string("wavfile"))
 {
+
+}
+
+WavFile::WavFile(const Json::Value& jsData) : AudioFile(jsData)
+{
+
 
 }
 
 WavFile::~WavFile()
 {
 
+}
+
+int WavFile::IsWavFile(const std::string& sFile)
+{
+    SndfileHandle sf(sFile, SFM_READ);
+    return sf.error();
 }
 
 

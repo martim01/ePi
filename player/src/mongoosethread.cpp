@@ -12,6 +12,8 @@
 #include "log.h"
 #include <chrono>
 #include "utils.h"
+#include "resourcemanager.h"
+
 
 using namespace std;
 using namespace pml;
@@ -111,23 +113,22 @@ void MongooseThread::EventHttp(mg_connection *pConnection, int nEvent, void* pDa
 
     //lock_guard<mutex> lg(m_mutex);
     http_message* pMessage = reinterpret_cast<http_message*>(pData);
-    string sMethod(pMessage->method.p);
     string sUri;
     sUri.assign(pMessage->uri.p, pMessage->uri.len);
 
-    if(CmpNoCase(sMethod, "GET"))
+    if(mg_vcmp(&pMessage->method, "GET") == 0)
     {
         DoHttpGet(pConnection, sUri);
     }
-    else if(CmpNoCase(sMethod, "POST"))
+    else if(mg_vcmp(&pMessage->method, "POST") == 0)
     {
         DoHttpPost(pConnection, sUri, pMessage);
     }
-    else if(CmpNoCase(sMethod, "PUT"))
+    else if(mg_vcmp(&pMessage->method, "PUT") == 0)
     {
         DoHttpPut(pConnection, sUri, pMessage);
     }
-    else if(CmpNoCase(sMethod, "DELETE"))
+    else if(mg_vcmp(&pMessage->method, "DELETE") == 0)
     {
         DoHttpDelete(pConnection, sUri, pMessage);
     }
@@ -141,23 +142,23 @@ void MongooseThread::HandleEvent(mg_connection *pConnection, int nEvent, void* p
 {
     //lock_guard<recursive_mutex> lg(m_mutex);
     if(nEvent != 4 && nEvent != 6)
-        Log::Get(Log::LOG_DEBUG) << "HandleEvent: " << nEvent << endl;
+        Log::Get(Log::LOG_DEBUG) << "MongooseThread\tHandleEvent: " << nEvent << endl;
     switch (nEvent)
     {
     case MG_EV_WEBSOCKET_HANDSHAKE_DONE:
     {
-        Log::Get(Log::LOG_DEBUG) << "Event Websocket" << endl;
+        Log::Get(Log::LOG_DEBUG) << "MongooseThread\tEvent Websocket" << endl;
         //lock_guard<recursive_mutex> lg(m_mutex);
         EventWebsocket(pConnection, nEvent, pData);
-        Log::Get(Log::LOG_DEBUG) << "Done" << endl;
+        Log::Get(Log::LOG_DEBUG) << "MongooseThread\tDone" << endl;
     }
     break;
     case MG_EV_HTTP_REQUEST:
     {
-        Log::Get(Log::LOG_DEBUG) << "Event HTTP" << endl;
+        Log::Get(Log::LOG_DEBUG) << "MongooseThread\tEvent HTTP" << endl;
         //lock_guard<recursive_mutex> lg(m_mutex);
         EventHttp(pConnection, nEvent, pData);
-        Log::Get(Log::LOG_DEBUG) << "Done" << endl;
+        Log::Get(Log::LOG_DEBUG) << "MongooseThread\tDone" << endl;
     }
     break;
     case MG_EV_TIMER:
@@ -167,13 +168,13 @@ void MongooseThread::HandleEvent(mg_connection *pConnection, int nEvent, void* p
     break;
     case MG_EV_CLOSE:
     {
-        Log::Get(Log::LOG_DEBUG) << "Event Close" << endl;
+        Log::Get(Log::LOG_DEBUG) << "MongooseThread\tEvent Close" << endl;
         //lock_guard<recursive_mutex> lg(m_mutex);
         if (is_websocket(pConnection))
         {
             pConnection->user_data = 0;
         }
-        Log::Get(Log::LOG_DEBUG) << "Done" << endl;
+        Log::Get(Log::LOG_DEBUG) << "MongooseThread\tDone" << endl;
     }
     break;
     case MG_EV_HTTP_MULTIPART_REQUEST:
@@ -203,21 +204,11 @@ void MongooseThread::HandleEvent(mg_connection *pConnection, int nEvent, void* p
 }
 
 
-MongooseThread::MongooseThread() : m_pConnection(0)
+
+MongooseThread::MongooseThread(const iniManager& iniConfig, ResourceManager& manager) :
+    m_manager(manager),
+    m_pConnection(nullptr)
 {
-
-}
-
-MongooseThread& MongooseThread::Get()
-{
-    static MongooseThread mong;
-    return mong;
-}
-
-void MongooseThread::Init(iniManager& iniConfig)
-{
-
-    m_sIniPath = CreatePath(iniConfig.GetIniString("paths", "inifiles","."));
 
     //check for ssl
     string sCert = iniConfig.GetIniString("ssl", "cert", "");
@@ -313,11 +304,11 @@ void MongooseThread::SendStatus()
 
 void MongooseThread::SendError(mg_connection* pConnection, const string& sError, int nCode)
 {
-    Json::Value jsValue;
-    jsValue["error"] = sError;
-    jsValue["code"] = nCode;
+    response theResponse(nCode);
+    theResponse.jsonData["error"] = sError;
+    theResponse.jsonData["code"] = nCode;
 
-    DoReply(pConnection, nCode, jsValue);
+    DoReply(pConnection, theResponse);
 }
 
 
@@ -347,14 +338,15 @@ void MongooseThread::EndUpload(mg_connection *pConnection)
 
 }
 
-void MongooseThread::DoReply(mg_connection* pConnection, int nCode, const Json::Value& jsonResponse, const std::string& sContentType)
+void MongooseThread::DoReply(mg_connection* pConnection,const response& theResponse)
 {
-    Log::Get() << "MongooseThread::DoReply " << jsonResponse << endl;
+    Log::Get() << "MongooseThread::DoReply " << theResponse.nHttpCode << endl;
+    Log::Get() << "MongooseThread::DoReply " << theResponse.jsonData << endl;
 
     stringstream ssHeaders;
-    ssHeaders << "HTTP/1.1 " << nCode << "\r\n"
+    ssHeaders << "HTTP/1.1 " << theResponse.nHttpCode << "\r\n"
               << "Transfer-Encoding: chunked\r\n"
-              << "Content-Type: " << sContentType << "\r\n"
+              << "Content-Type: " << "application/json" << "\r\n"
               << "Access-Control-Allow-Origin:*\r\n"
               << "Access-Control-Allow-Methods:GET, PUT, POST, HEAD, OPTIONS, DELETE\r\n"
               << "Access-Control-Allow-Headers:Content-Type, Accept\r\n"
@@ -362,7 +354,7 @@ void MongooseThread::DoReply(mg_connection* pConnection, int nCode, const Json::
     mg_printf(pConnection, "%s", ssHeaders.str().c_str());
 
     std::stringstream ssJson;
-    ssJson << jsonResponse;
+    ssJson << theResponse.jsonData;
     mg_printf_http_chunk(pConnection, ssJson.str().c_str());
     mg_send_http_chunk(pConnection, "", 0); //send empty chunk to inidicate end
 }
@@ -372,29 +364,31 @@ void MongooseThread::DoReply(mg_connection* pConnection, int nCode, const Json::
 
 void MongooseThread::DoHttpGet(mg_connection* pConnection, const std::string& sUrl)
 {
+    Log::Get(Log::LOG_DEBUG) << "MongooseThread\tDoHttpGet: " << sUrl << std::endl;
+
     queue<string> qSplit;
     SplitString(qSplit, sUrl, '/');
 
     if(qSplit.empty())
     {
-        Json::Value jsNode;
-        jsNode.append(EP_ROOT);
-        DoReply(pConnection, 200, jsNode);
+        response theResponse;
+        theResponse.jsonData.append(EP_ROOT);
+        DoReply(pConnection, theResponse);
     }
     else if(CmpNoCase(qSplit.front(), EP_ROOT))
     {
         qSplit.pop();
         if(qSplit.empty())
         {
-            Json::Value jsNode;
-            jsNode.append(EP_FILES);
-            jsNode.append(EP_PLAYLISTS);
-            jsNode.append(EP_SCHEDULES);
-            jsNode.append(EP_POWER);
-            jsNode.append(EP_CONFIG);
-            jsNode.append(EP_INFO);
+            response theResponse;
+            theResponse.jsonData.append(EP_FILES);
+            theResponse.jsonData.append(EP_PLAYLISTS);
+            theResponse.jsonData.append(EP_SCHEDULES);
+            theResponse.jsonData.append(EP_POWER);
+            theResponse.jsonData.append(EP_CONFIG);
+            theResponse.jsonData.append(EP_INFO);
 
-            DoReply(pConnection, 200, jsNode);
+            DoReply(pConnection, theResponse);
         }
         else
         {
@@ -542,11 +536,11 @@ void MongooseThread::DoGetFiles(mg_connection* pConnection, std::queue<std::stri
 {
     if(qSplit.empty())
     {
-        //get a list of all the files
+        DoReply(pConnection, m_manager.GetFiles());
     }
     else if(qSplit.size() == 1)
     {
-        //return details of particular file
+        DoReply(pConnection, m_manager.GetFile(qSplit.front()));
     }
     else
     {
@@ -558,11 +552,11 @@ void MongooseThread::DoGetPlaylists(mg_connection* pConnection, std::queue<std::
 {
     if(qSplit.empty())
     {
-        //get a list of all the files
+        DoReply(pConnection, m_manager.GetPlaylists());
     }
     else if(qSplit.size() == 1)
     {
-        //return details of particular file
+        DoReply(pConnection, m_manager.GetPlaylist(qSplit.front()));
     }
     else
     {
@@ -574,11 +568,11 @@ void MongooseThread::DoGetSchedules(mg_connection* pConnection, std::queue<std::
 {
     if(qSplit.empty())
     {
-        //get a list of all the files
+        DoReply(pConnection, m_manager.GetSchedules());
     }
     else if(qSplit.size() == 1)
     {
-        //return details of particular file
+        DoReply(pConnection, m_manager.GetSchedule(qSplit.front()));
     }
     else
     {

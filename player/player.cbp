@@ -53,6 +53,7 @@
 			<Add directory="../external/log/include" />
 			<Add directory="include" />
 			<Add directory="../external/uuid" />
+			<Add directory="../external/cpp-base64" />
 		</Compiler>
 		<Linker>
 			<Add library="pthread" />
@@ -69,10 +70,9 @@
 		<Unit filename="include/mongoose.h" />
 		<Unit filename="include/mongoosethread.h" />
 		<Unit filename="include/mp3file.h" />
-		<Unit filename="include/playlist.h" />
 		<Unit filename="include/resource.h" />
 		<Unit filename="include/resourcemanager.h" />
-		<Unit filename="include/schedule.h" />
+		<Unit filename="include/response.h" />
 		<Unit filename="include/utils.h" />
 		<Unit filename="include/wavfile.h" />
 		<Unit filename="src/audiofile.cpp" />
@@ -83,6 +83,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/mongoosethread.cpp" />
+		<Unit filename="src/mp3file.cpp" />
 		<Unit filename="src/resource.cpp" />
 		<Unit filename="src/resourcemanager.cpp" />
 		<Unit filename="src/utils.cpp" />

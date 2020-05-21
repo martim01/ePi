@@ -8,6 +8,7 @@ Resource::Resource(const std::string& sType, const std::string& sUid, const std:
     m_json["description"] = sDescription;
     m_json["uid"] = sUid;
     m_json["created"] = GetCurrentTimeAsString(false);
+    m_json["type"] = sType;
 }
 
 Resource::Resource(const std::string& sType) :
@@ -15,11 +16,21 @@ Resource::Resource(const std::string& sType) :
 {
 }
 
-
-
-const Json::Value& Resource::GetJson()
+Resource::Resource(const std::string& sType, const std::string& sUid, const Json::Value& jsData) : m_sType(sType),
+m_json(jsData)
 {
-    UpdateJson();
+    m_json["uid"] = sUid;
+    m_json["created"] = GetCurrentTimeAsString(false);
+    m_json["type"] = sType;
+}
+
+Resource::Resource(const Json::Value& jsData) : m_json(jsData)
+{
+
+}
+
+const Json::Value& Resource::GetJson() const
+{
     return m_json;
 }
 
@@ -29,13 +40,18 @@ const std::string& Resource::GetType() const
     return m_sType;
 }
 
-const std::string& Resource::GetUid() const
+std::string Resource::GetUid() const
 {
     return m_json["uid"].asString();
 }
 
-std::string Resource::GetJsonParseError()
+std::string Resource::GetLabel() const
 {
-    return m_ssJsonError.str();
+    return m_json["label"].asString();
 }
 
+
+void Resource::UpdateJson(const Json::Value& jsData)
+{
+    m_json = jsData;
+}

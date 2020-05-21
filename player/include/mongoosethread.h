@@ -10,18 +10,15 @@
 #include <vector>
 #include <initializer_list>
 #include "inimanager.h"
-#include "json/json.h"
+#include "response.h"
+
+class ResourceManager;
 
 class MongooseThread
 {
     public:
 
-        ///< @brief Get the singleton class
-        static MongooseThread& Get();
-
-        /** @brief Initialises the class
-        **/
-        void Init(iniManager& iniConfig);
+        MongooseThread(const iniManager& iniConfig, ResourceManager& manager);
 
         ///< @brief Creates the thread that runs the webserver loop
         void Run();
@@ -37,7 +34,7 @@ class MongooseThread
 
     private:
 
-        MongooseThread();
+
 
         ///< @brief the main mongoose loop. Called in a separate thread by Run()
         void Loop();
@@ -83,7 +80,7 @@ class MongooseThread
         void SendStatus();
 
 
-        void DoReply(mg_connection* pConnection, int nCode, const Json::Value& jsonResponse, const std::string& sContentType = "application/json");
+        void DoReply(mg_connection* pConnection, const response& theResponse);
 
         void DoHttpGet(mg_connection* pConnection, const std::string& sUrl);
         void DoHttpPut(mg_connection* pConnection, const std::string& sUrl, http_message* pMessage);
@@ -114,8 +111,7 @@ class MongooseThread
         void PlaylistUpload(mg_connection* pConnection, http_message* pMessage);
         void ScheduleUpload(mg_connection* pConnection, http_message* pMessage);
 
-
-
+        ResourceManager& m_manager;
 
         mg_connection* m_pConnection;
         std::string m_sIniPath;
