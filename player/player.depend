@@ -1,11 +1,12 @@
 # depslib dependency file v1.0
-1590072759 source:/home/pi/ePi/player/src/main.cpp
+1590155387 source:/home/pi/ePi/player/src/main.cpp
 	<iostream>
 	"resourcemanager.h"
 	"inimanager.h"
 	"log.h"
-	"mongoosethread.h"
+	"mongooseserver.h"
 	<memory>
+	"endpoints.h"
 
 1589898358 source:/home/pi/ePi/player/src/mongoose.c
 	"mongoose.h"
@@ -339,7 +340,7 @@
 	"resource.h"
 	<chrono>
 
-1590071092 /home/pi/ePi/player/include/resource.h
+1590145896 /home/pi/ePi/player/include/resource.h
 	<string>
 	"json/json.h"
 
@@ -380,7 +381,7 @@
 	<sstream>
 	"config.h"
 
-1590071848 source:/home/pi/ePi/player/src/resourcemanager.cpp
+1590155635 source:/home/pi/ePi/player/src/resourcemanager.cpp
 	"resourcemanager.h"
 	<iostream>
 	<fstream>
@@ -465,11 +466,11 @@
 1589983831 /home/pi/ePi/external/uuid/guid.h
 	"copyrt.h"
 
-1590071111 source:/home/pi/ePi/player/src/resource.cpp
+1590146675 source:/home/pi/ePi/player/src/resource.cpp
 	"resource.h"
 	"utils.h"
 
-1589986020 /home/pi/ePi/player/include/utils.h
+1590146659 /home/pi/ePi/player/include/utils.h
 	<string>
 	<vector>
 	<sys/stat.h>
@@ -477,7 +478,7 @@
 	<chrono>
 	<queue>
 
-1590069407 source:/home/pi/ePi/player/src/utils.cpp
+1590154447 source:/home/pi/ePi/player/src/utils.cpp
 	"utils.h"
 	<sstream>
 	<sys/types.h>
@@ -497,7 +498,7 @@
 	"audiofile.h"
 	<memory>
 
-1590073051 source:/home/pi/ePi/player/src/mongoosethread.cpp
+1590141359 source:/home/pi/ePi/player/src/mongoosethread.cpp
 	"mongoosethread.h"
 	<iostream>
 	<thread>
@@ -514,7 +515,7 @@
 	"utils.h"
 	"resourcemanager.h"
 
-1590071955 /home/pi/ePi/player/include/mongoosethread.h
+1590141281 /home/pi/ePi/player/include/mongoosethread.h
 	"mongoose.h"
 	<string>
 	<sstream>
@@ -526,6 +527,8 @@
 	<initializer_list>
 	"inimanager.h"
 	"response.h"
+	<functional>
+	"namedtype.h"
 
 1590071298 source:/home/pi/ePi/player/src/mp3file.cpp
 	"mp3file.h"
@@ -534,7 +537,7 @@
 	"audiofile.h"
 	<memory>
 
-1590068341 /home/pi/ePi/player/include/resourcemanager.h
+1590155561 /home/pi/ePi/player/include/resourcemanager.h
 	<map>
 	<memory>
 	<mutex>
@@ -543,6 +546,55 @@
 	"inimanager.h"
 	"response.h"
 
-1590067921 /home/pi/ePi/player/include/response.h
+1590143003 /home/pi/ePi/player/include/response.h
 	"json/json.h"
+
+1590140645 /home/pi/ePi/player/include/namedtype.h
+	<string>
+
+1590156178 source:/home/pi/ePi/player/src/endpoints.cpp
+	"endpoints.h"
+	"resourcemanager.h"
+	<functional>
+	<vector>
+	"utils.h"
+	"json/json.h"
+	<sstream>
+	"log.h"
+
+1590147271 /home/pi/ePi/player/include/endpoints.h
+	"response.h"
+	"mongooseserver.h"
+
+1590152725 /home/pi/ePi/player/include/mongooseserver.h
+	"mongoose.h"
+	<string>
+	<sstream>
+	<mutex>
+	<map>
+	<set>
+	<queue>
+	<vector>
+	<initializer_list>
+	"inimanager.h"
+	"response.h"
+	<functional>
+	"namedtype.h"
+
+1590155878 source:/home/pi/ePi/player/src/mongooseserver.cpp
+	"mongooseserver.h"
+	<iostream>
+	<thread>
+	<initializer_list>
+	"json/json.h"
+	<sstream>
+	"inisection.h"
+	<fstream>
+	<chrono>
+	<iomanip>
+	<map>
+	"log.h"
+	<chrono>
+	"utils.h"
+	"resourcemanager.h"
 

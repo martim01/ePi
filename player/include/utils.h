@@ -6,7 +6,7 @@
 #include <chrono>
 #include <queue>
 
-extern void SplitString(std::vector<std::string>& vSplit, std::string str, char cSplit, size_t nMax=0);
+extern std::vector<std::string> SplitString(std::string str, char cSplit, size_t nMax=0);
 extern void SplitString(std::queue<std::string>& qSplit, std::string str, char cSplit);
 
 
@@ -27,3 +27,5 @@ extern bool JsonMemberExistsAndIsNotNull(const Json::Value& jsObject, const std:
 
 extern std::string ConvertTimeToString(std::chrono::time_point<std::chrono::high_resolution_clock> tp, bool bIncludeNano=true);
 extern std::string GetCurrentTimeAsString(bool bIncludeNano=true);
+
+extern Json::Value ConvertToJson(const std::string& str);

@@ -21,9 +21,9 @@ static uuid_t NameSpace_OID = { /* 6ba7b812-9dad-11d1-80b4-00c04fd430c8 */
 
 
 
-void SplitString(vector<string>& vSplit, string str, char cSplit, size_t nMax)
+vector<string> SplitString(string str, char cSplit, size_t nMax)
 {
-    vSplit.clear();
+    vector<string> vSplit;
     istringstream f(str);
     string s;
 
@@ -41,6 +41,7 @@ void SplitString(vector<string>& vSplit, string str, char cSplit, size_t nMax)
             }
         }
     }
+    return vSplit;
 }
 
 void SplitString(queue<string>& qSplit, string str, char cSplit)
@@ -113,8 +114,7 @@ bool do_mkdir(const std::string& sPath, mode_t mode)
 bool mkpath(const std::string& sPath, mode_t mode)
 {
 
-    vector<string> vSplit;
-    SplitString(vSplit, sPath, '/');
+    vector<string> vSplit(SplitString(sPath, '/'));
     stringstream ssPath;
 
     for(size_t i = 0; i < vSplit.size(); i++)
@@ -165,14 +165,14 @@ std::string CreateGuid(const std::string& sName)
        << std::setw(8) << std::setfill('0') << guid.time_low << "-"
        << std::setw(4) << std::setfill('0') << guid.time_mid << "-"
        << std::setw(4) << std::setfill('0') << guid.time_hi_and_version << "-"
-       << std::setw(2) << std::setfill('0') << guid.clock_seq_hi_and_reserved
-       << std::setw(2) << std::setfill('0') << guid.clock_seq_low << "-"
-       << std::setw(2) << std::setfill('0') << guid.node[0]
-       << std::setw(2) << std::setfill('0') << guid.node[1]
-       << std::setw(2) << std::setfill('0') << guid.node[2]
-       << std::setw(2) << std::setfill('0') << guid.node[3]
-       << std::setw(2) << std::setfill('0') << guid.node[4]
-       << std::setw(2) << std::setfill('0') << guid.node[5];
+       << std::setw(2) << std::setfill('0') << (int)guid.clock_seq_hi_and_reserved
+       << std::setw(2) << std::setfill('0') << (int)guid.clock_seq_low << "-"
+       << std::setw(2) << std::setfill('0') << (int)guid.node[0]
+       << std::setw(2) << std::setfill('0') << (int)guid.node[1]
+       << std::setw(2) << std::setfill('0') << (int)guid.node[2]
+       << std::setw(2) << std::setfill('0') << (int)guid.node[3]
+       << std::setw(2) << std::setfill('0') << (int)guid.node[4]
+       << std::setw(2) << std::setfill('0') << (int)guid.node[5];
 
     return ss.str();
     /*std::array<char,40> output;
@@ -216,4 +216,15 @@ bool JsonMemberExistsAndIsNull(const Json::Value& jsObject, const std::string& s
 bool JsonMemberExistsAndIsNotNull(const Json::Value& jsObject, const std::string& sMember)
 {
     return (jsObject.isMember(sMember) && (jsObject[sMember].isNull()==false));
+}
+
+
+Json::Value ConvertToJson(const std::string& str)
+{
+    std::stringstream ss;
+    ss.str(str);
+    Json::Value jsData;
+    ss >> jsData;
+
+    return jsData;
 }

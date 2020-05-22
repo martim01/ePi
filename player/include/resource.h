@@ -23,10 +23,14 @@ class Resource
 
         const std::string& GetType() const;
 
+        void Lock(bool bLock);
+        bool IsLocked() const;
 
     protected:
         std::string m_sType;
         Json::Value m_json;
+
+
 
 };
 

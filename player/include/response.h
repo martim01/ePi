@@ -3,7 +3,7 @@
 
 struct response
 {
-    response(unsigned short nCode=200) : nHttpCode(200){}
+    response(unsigned short nCode=200) : nHttpCode(nCode){}
     response(const response& aResponse) : nHttpCode(aResponse.nHttpCode), jsonData(aResponse.jsonData){};
     response& operator=(const response& aResponse)
     {

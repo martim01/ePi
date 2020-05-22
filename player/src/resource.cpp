@@ -9,11 +9,18 @@ Resource::Resource(const std::string& sType, const std::string& sUid, const std:
     m_json["uid"] = sUid;
     m_json["created"] = GetCurrentTimeAsString(false);
     m_json["type"] = sType;
+    m_json["locked"] = false;
 }
 
 Resource::Resource(const std::string& sType) :
     m_sType(sType)
 {
+    m_json["label"] = "";
+    m_json["description"] = "";
+    m_json["uid"] = "";
+    m_json["created"] = GetCurrentTimeAsString(false);
+    m_json["type"] = "";
+    m_json["locked"] = false;
 }
 
 Resource::Resource(const std::string& sType, const std::string& sUid, const Json::Value& jsData) : m_sType(sType),
@@ -22,11 +29,12 @@ m_json(jsData)
     m_json["uid"] = sUid;
     m_json["created"] = GetCurrentTimeAsString(false);
     m_json["type"] = sType;
+    m_json["locked"] = false;
 }
 
 Resource::Resource(const Json::Value& jsData) : m_json(jsData)
 {
-
+    m_json["locked"] = false;
 }
 
 const Json::Value& Resource::GetJson() const
@@ -54,4 +62,14 @@ std::string Resource::GetLabel() const
 void Resource::UpdateJson(const Json::Value& jsData)
 {
     m_json = jsData;
+}
+
+void Resource::Lock(bool bLock)
+{
+    m_json["locked"] = bLock;
+}
+
+bool Resource::IsLocked() const
+{
+    return m_json["locked"].asBool();
 }

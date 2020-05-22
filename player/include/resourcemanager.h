@@ -22,7 +22,8 @@ class ResourceManager
         response AddSchedule(const Json::Value& jsData);
         response AddPlaylist(const Json::Value& jsData);
 
-        response ModifyFile(const std::string& sUid, const std::string& sUploadName, const std::string& sLabel, const std::string& sDescription);
+        response ModifyFile(const std::string& sUid, const std::string& sUploadName);
+        response ModifyFileMeta(const std::string& sUid, const Json::Value& jsData);
         response ModifySchedule(const std::string& sUid, const Json::Value& jsData);
         response ModifyPlaylist(const std::string& sUid, const Json::Value& jsData);
 
@@ -39,6 +40,13 @@ class ResourceManager
         response GetPlaylist(const std::string& sUid);
 
 
+        std::map<std::string, std::shared_ptr<AudioFile> >::const_iterator GetFilesBegin() const;
+        std::map<std::string, std::shared_ptr<AudioFile> >::const_iterator GetFilesEnd() const;
+        std::map<std::string, std::shared_ptr<Resource> >::const_iterator GetSchedulesBegin() const;
+        std::map<std::string, std::shared_ptr<Resource> >::const_iterator GetSchedulesEnd() const;
+        std::map<std::string, std::shared_ptr<Resource> >::const_iterator GetPlaylistsBegin() const;
+        std::map<std::string, std::shared_ptr<Resource> >::const_iterator GetPlaylistsEnd() const;
+
     private:
         bool LoadResources();
         bool SaveResources();
@@ -47,6 +55,9 @@ class ResourceManager
         response ParseFile(const std::string& sUploadName, const std::string& sLabel, const std::string& sDescription);
         response ParseSchedule(const Json::Value& jsData);
         response ParsePlaylist(const Json::Value& jsData);
+
+        bool FileExists(const std::string& sLabel);
+        bool ResourceExists(const std::string& sLabel, const std::map<std::string, std::shared_ptr<Resource> >& mResource);
 
 
         std::string m_sAudioFilePath;
