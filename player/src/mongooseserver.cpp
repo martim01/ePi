@@ -78,11 +78,12 @@ static void ev_handler(mg_connection *pConnection, int nEvent, void* pData)
 
 static mg_str file_upload(mg_connection*, mg_str file_name)
 {
-    Log::Get(Log::LOG_DEBUG) << "upload" << endl;
-    // @todo need to get the endpoint to see what the file type is...
+    std::cout <<"File_upload: " << file_name.len << std::endl;
+    // @todo need to get the endpoint to     see what the file type is...
+    std::string strFile("/tmp/"+CreateGuid());
 
-    char* filename= reinterpret_cast<char*>(malloc(strlen("/tmp/audio")+1));
-    strcpy(filename, "/tmp/audio");
+    char* filename= reinterpret_cast<char*>(malloc(strFile.length()+1));
+    strcpy(filename, strFile.c_str());
     return mg_mk_str(filename);
 }
 
@@ -154,13 +155,14 @@ void MongooseServer::HandleEvent(mg_connection *pConnection, int nEvent, void* p
             Log::Get(Log::LOG_DEBUG) << "MongooseServer\tDone" << endl;
             break;
         case MG_EV_HTTP_MULTIPART_REQUEST:
-            /*if(UploadAllowed(pConnection, reinterpret_cast<http_message*>(pData)))
+            if(UploadAllowed(pConnection, reinterpret_cast<http_message*>(pData)))
             {
+                //@todo store endpoint for later
             }
             else
             {
                 // @todo send a not allowed to upload to this endpoint error
-            }*/
+            }
             break;
         case MG_EV_HTTP_PART_BEGIN:
             mg_file_upload_handler(pConnection, nEvent, pData, file_upload);
@@ -170,7 +172,13 @@ void MongooseServer::HandleEvent(mg_connection *pConnection, int nEvent, void* p
             break;
         case MG_EV_HTTP_PART_END:
             mg_file_upload_handler(pConnection, nEvent, pData, file_upload);
-            EndUpload(pConnection);
+            EndUpload(pConnection, pData);
+            break;
+        case MG_EV_HTTP_MULTIPART_REQUEST_END:
+            Log::Get() << "Request end" << std::endl;
+            //@todo process request;
+            break;
+
         case 0:
             break;
         }
@@ -302,18 +310,31 @@ bool MongooseServer::UploadAllowed(mg_connection* pConnection, http_message* pMe
     // @todo Check the endpoint is allowed
 
     Log::Get(Log::LOG_INFO) << "Starting upload" << endl;
+    string sUri;
+    sUri.assign(pMessage->uri.p, pMessage->uri.len);
+
+    string sMethod(pMessage->method.p);
+    Log::Get() << sMethod << std::endl;
+    size_t nSpace = sMethod.find(' ');
+    sMethod = sMethod.substr(0, nSpace);
+
+    Log::Get() << "MongooseServer\tEndpoint: <" << sMethod << ", " << sUri << ">" << std::endl;
+
     return true;
 }
 
-void MongooseServer::EndUpload(mg_connection *pConnection)
+void MongooseServer::EndUpload(mg_connection *pConnection, void* pData)
 {
     // @todo  get the endpoint so we know what should have been uploaded
     Log::Get(Log::LOG_INFO) << "Finished upload" << endl;
 
+    mg_http_multipart_part *mp = (mg_http_multipart_part *) pData;
+    std::cout << mp->file_name << " : " << mp->var_name << std::endl;
+
     //copy the file...
 //    stringstream ssFile;
 //    ssFile << m_sNsFilePath << "network_" << m_iniNs.GetIniInt("pending", "version",0) << ".src";
-//    ifstream src("/tmp/ns_temp.src", ios::binary);
+ //   ifstream src("/tmp/ns_temp.src", ios::binary);
 //    ofstream dst(ssFile.str(), ios::binary);
 //    dst << src.rdbuf();
 //    dst.close();

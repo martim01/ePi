@@ -96,7 +96,7 @@ class MongooseServer
 
         /** @brief Called when a file has finished uploading.
         **/
-        void EndUpload(mg_connection *pConnection);
+        void EndUpload(mg_connection *pConnection, void* pData);
 
 
         void DoReply(mg_connection* pConnection, const response& theResponse);
