@@ -26,9 +26,47 @@ ResourceManager::~ResourceManager()
     SaveResources();
 }
 
-response ResourceManager::AddFile( const std::string& sUploadName, const std::string& sLabel, const std::string& sDescription)
+
+response ResourceManager::AddFiles(const Json::Value& jsData)
 {
     std::lock_guard<std::mutex> lg(m_mutex);
+    pml::Log::Get() << "ResourceManager\tAddFiles: " << jsData << " ";
+
+    response theResponse(ParseFiles(jsData));
+    if(theResponse.nHttpCode ==400)
+    {
+        pml::Log::Get(pml::Log::LOG_ERROR) << "failed - incorrect JSON" << std::endl;
+    }
+    else
+    {
+        theResponse.jsonData["files"] = Json::Value(Json::arrayValue);
+        //check we have metadata for each of the uploaded files..
+        for(auto const& name : jsData["multipart"]["files"].getMemberNames())
+        {
+            std::vector<std::string> vSplit(SplitString(name, '_'));
+
+            if(vSplit.size() != 2 || jsData["multipart"]["data"]["label_"+vSplit[1]].isString() == false || jsData["multipart"]["data"]["description_"+vSplit[1]].isString() == false)
+            {
+                theResponse.nHttpCode = 400;
+                theResponse.jsonData["metadata"].append("No metadata set for file: "+name);
+                pml::Log::Get(pml::Log::LOG_WARN) << " file '" << name << "' has no metadata.";
+                remove(jsData["multipart"]["files"][name].asString().c_str());
+            }
+            else
+            {
+                pml::Log::Get() << " ---- " << std::endl;
+                pml::Log::Get() << " ---- " << jsData["multipart"]["files"][name] << " ----";
+                response aResponse(AddFile(jsData["multipart"]["files"][name].asString(), jsData["multipart"]["data"]["label_"+vSplit[1]].asString(), jsData["multipart"]["data"]["description_"+vSplit[1]].asString()));
+                theResponse.jsonData["files"].append(aResponse.jsonData);
+            }
+        }
+    }
+    pml::Log::Get(pml::Log::LOG_DEBUG) << std::endl;
+    return theResponse;
+}
+
+response ResourceManager::AddFile( const std::string& sUploadName, const std::string& sLabel, const std::string& sDescription)
+{
 
     pml::Log::Get() << "ResourceManager\tAddFile: ";
     response theResponse(ParseFile(sUploadName, sLabel, sDescription));
@@ -49,7 +87,6 @@ response ResourceManager::AddFile( const std::string& sUploadName, const std::st
     {
         std::string sUid(CreateGuid());
 
-        //@todo copy the file across with the new name
         std::ifstream src(sUploadName, std::ios::binary);
         std::ofstream dst(m_sAudioFilePath+sUid, std::ios::binary);
         dst << src.rdbuf();
@@ -62,7 +99,7 @@ response ResourceManager::AddFile( const std::string& sUploadName, const std::st
 
         if(theResponse.nHttpCode == WAV)
         {
-            pFile = std::dynamic_pointer_cast<AudioFile>(std::make_shared<WavFile>(sUid, sLabel, sDescription));
+            pFile = std::dynamic_pointer_cast<AudioFile>(std::make_shared<WavFile>(m_sAudioFilePath, sUid, sLabel, sDescription));
         }
         else
         {
@@ -72,9 +109,12 @@ response ResourceManager::AddFile( const std::string& sUploadName, const std::st
         if(m_mFiles.insert(std::make_pair(sUid, pFile)).second)
         {
             SaveResources();
+            pFile->InitJson();
+
             theResponse.nHttpCode = 201;
             theResponse.jsonData["result"] = "Success";
             theResponse.jsonData["uid"] = sUid;
+            theResponse.jsonData["details"] = pFile->GetJson();
         }
         else
         {
@@ -173,23 +213,11 @@ response ResourceManager::AddPlaylist(const Json::Value& jsData)
     return theResponse;
 }
 
-response ResourceManager::ModifyFile(const std::string& sUid, const std::string& sUploadName)
+response ResourceManager::ModifyFile(const std::string& sUid, const Json::Value& jsData)
 {
     std::lock_guard<std::mutex> lg(m_mutex);
 
     pml::Log::Get() << "ResourceManager\tModifyFile: ";
-
-    response theResponse;
-    // @todo
-    return theResponse;
-}
-
-response ResourceManager::ModifyFileMeta(const std::string& sUid, const Json::Value& jsData)
-{
-    std::lock_guard<std::mutex> lg(m_mutex);
-
-    pml::Log::Get() << "ResourceManager\tModifyFileMeta: ";
-
     response theResponse;
     auto itFile = m_mFiles.find(sUid);
     if(itFile == m_mFiles.end())
@@ -206,27 +234,63 @@ response ResourceManager::ModifyFileMeta(const std::string& sUid, const Json::Va
     }
     else
     {
-        theResponse = ParseResource(jsData);
-        if(theResponse.nHttpCode == 200)
+        if(jsData["multipart"].isObject())
         {
-            if(FileExists(jsData["label"].asString()))
+            //modifying the actual file
+            if(jsData["multipart"]["files"].isObject() == false || jsData["multipart"]["files"]["file"].isString() == false)
             {
-                theResponse.nHttpCode = 409;
-                theResponse.jsonData["result"] = "File already exists with the given label.";
-                pml::Log::Get(pml::Log::LOG_ERROR) << "failed - label already in use" << std::endl;
+                theResponse.nHttpCode = 400;
+                theResponse.jsonData["result"] = "No file uploaded";
             }
             else
             {
-                itFile->second->UpdateJson(jsData);
-                theResponse.jsonData["result"] = "Success";
-                pml::Log::Get() << "success" << std::endl;
+                std::ifstream src(jsData["multipart"]["files"]["file"].asString(), std::ios::binary);
+                std::ofstream dst(m_sAudioFilePath+sUid, std::ios::binary);
+                dst << src.rdbuf();
+                dst.close();
+                src.close();
+                remove(jsData["multipart"]["files"]["file"].asString().c_str());
+
+                itFile->second->InitJson();
+                theResponse.nHttpCode = 200;
+                theResponse.jsonData = itFile->second->GetJson();
                 SaveResources();
             }
         }
         else
-        {
-            pml::Log::Get(pml::Log::LOG_ERROR) << "failed - incorrect JSON" << std::endl;
+        {   //modifying the label and description
+            theResponse = ModifyFileMeta(itFile, jsData);
         }
+    }
+    return theResponse;
+}
+
+response ResourceManager::ModifyFileMeta(const std::map<std::string, std::shared_ptr<AudioFile> >::iterator& itFile, const Json::Value& jsData)
+{
+
+    pml::Log::Get() << "ResourceManager\tModifyFileMeta: ";
+
+    response theResponse(ParseResource(jsData));
+
+    if(theResponse.nHttpCode == 200)
+    {
+        if(FileExists(jsData["label"].asString()))
+        {
+            theResponse.nHttpCode = 409;
+            theResponse.jsonData["result"] = "File already exists with the given label.";
+            pml::Log::Get(pml::Log::LOG_ERROR) << "failed - label already in use" << std::endl;
+        }
+        else
+        {
+            itFile->second->UpdateJson(jsData);
+            theResponse.jsonData["result"] = "Success";
+            pml::Log::Get() << "success" << std::endl;
+            SaveResources();
+        }
+    }
+    else
+    {
+        pml::Log::Get(pml::Log::LOG_ERROR) << "failed - incorrect JSON" << std::endl;
     }
     return theResponse;
 }
@@ -537,6 +601,26 @@ response ResourceManager::ParseResource(const Json::Value& jsData)
     return theResponse;
 }
 
+response ResourceManager::ParseFiles(const Json::Value& jsData)
+{
+    response theResponse;
+    if(jsData["multipart"].isObject() == false)
+    {
+        theResponse.nHttpCode = 400;
+        theResponse.jsonData["multipart"] = "No multipart data sent";
+    }
+    if(jsData["files"].isObject() == false)
+    {
+        theResponse.nHttpCode = 400;
+        theResponse.jsonData["files"] = "No files sent";
+    }
+    else if(jsData["data"].isObject() == false)
+    {
+        theResponse.nHttpCode = 400;
+        theResponse.jsonData["data"] = "No data sent";
+    }
+    return theResponse;
+}
 
 response ResourceManager::ParseFile(const std::string& sUploadName, const std::string& sLabel, const std::string& sDescription)
 {
@@ -718,7 +802,9 @@ bool ResourceManager::LoadResources()
         {
             if(jsResources["files"][i]["type"].asString() == "wavfile")
             {
-                m_mFiles.insert(std::make_pair(jsResources["files"][i]["uid"].asString(), std::make_shared<WavFile>(jsResources["files"][i])));
+                std::shared_ptr<WavFile> pFile = std::make_shared<WavFile>(jsResources["files"][i]);
+                pFile->InitJson();
+                m_mFiles.insert(std::make_pair(jsResources["files"][i]["uid"].asString(), pFile));
             }
             else
             {

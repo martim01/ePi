@@ -13,36 +13,35 @@ class Endpoints
         bool CreateEndpoints();
 
 
-        response GetRoot(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
-        response GetEpi(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
+        response GetRoot(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response GetEpi(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
 
-        response GetFiles(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
-        response GetPlaylists(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
-        response GetSchedules(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
-        response GetConfig(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
-        response GetInfo(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
-        response GetPower(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
-        response GetFile(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
-        response GetPlaylist(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
-        response GetSchedule(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
-        response GetStatus(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
+        response GetFiles(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response GetPlaylists(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response GetSchedules(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response GetConfig(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response GetInfo(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response GetPower(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response GetFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response GetPlaylist(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response GetSchedule(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response GetStatus(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
 
-        response PutStatus(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
-        response PutPower(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
-        response PutConfig(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
-        response PutFile(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
-        response PutFileMeta(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
-        response PutPlaylist(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
-        response PutSchedule(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
+        response PutStatus(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response PutPower(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response PutConfig(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response PutFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response PutPlaylist(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response PutSchedule(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
 
 
-        response DeleteFile(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
-        response DeletePlaylist(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
-        response DeleteSchedule(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
+        response DeleteFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response DeletePlaylist(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response DeleteSchedule(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
 
-        response PostFile(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
-        response PostPlaylist(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
-        response PostSchedule(mg_connection* pConnection, http_message* pMessage, const std::string& sUrl);
+        response PostFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response PostPlaylist(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response PostSchedule(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
 
 
 

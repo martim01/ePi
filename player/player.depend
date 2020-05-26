@@ -333,10 +333,10 @@
 	<cstdlib>
 	"log.h"
 
-1590071080 source:/home/pi/ePi/player/src/audiofile.cpp
+1590502470 source:/home/pi/ePi/player/src/audiofile.cpp
 	"audiofile.h"
 
-1590071273 /home/pi/ePi/player/include/audiofile.h
+1590502451 /home/pi/ePi/player/include/audiofile.h
 	"resource.h"
 	<chrono>
 
@@ -381,7 +381,7 @@
 	<sstream>
 	"config.h"
 
-1590155635 source:/home/pi/ePi/player/src/resourcemanager.cpp
+1590503083 source:/home/pi/ePi/player/src/resourcemanager.cpp
 	"resourcemanager.h"
 	<iostream>
 	<fstream>
@@ -490,11 +490,11 @@
 	"guid.h"
 	"utils.h"
 
-1590071314 source:/home/pi/ePi/player/src/wavfile.cpp
+1590502517 source:/home/pi/ePi/player/src/wavfile.cpp
 	"wavfile.h"
 	"sndfile.hh"
 
-1590071273 /home/pi/ePi/player/include/wavfile.h
+1590502522 /home/pi/ePi/player/include/wavfile.h
 	"audiofile.h"
 	<memory>
 
@@ -530,14 +530,14 @@
 	<functional>
 	"namedtype.h"
 
-1590071298 source:/home/pi/ePi/player/src/mp3file.cpp
+1590502566 source:/home/pi/ePi/player/src/mp3file.cpp
 	"mp3file.h"
 
-1590048220 /home/pi/ePi/player/include/mp3file.h
+1590502550 /home/pi/ePi/player/include/mp3file.h
 	"audiofile.h"
 	<memory>
 
-1590155561 /home/pi/ePi/player/include/resourcemanager.h
+1590504494 /home/pi/ePi/player/include/resourcemanager.h
 	<map>
 	<memory>
 	<mutex>
@@ -552,7 +552,7 @@
 1590140645 /home/pi/ePi/player/include/namedtype.h
 	<string>
 
-1590156178 source:/home/pi/ePi/player/src/endpoints.cpp
+1590501578 source:/home/pi/ePi/player/src/endpoints.cpp
 	"endpoints.h"
 	"resourcemanager.h"
 	<functional>
@@ -562,11 +562,11 @@
 	<sstream>
 	"log.h"
 
-1590147271 /home/pi/ePi/player/include/endpoints.h
+1590504539 /home/pi/ePi/player/include/endpoints.h
 	"response.h"
 	"mongooseserver.h"
 
-1590158397 /home/pi/ePi/player/include/mongooseserver.h
+1590492953 /home/pi/ePi/player/include/mongooseserver.h
 	"mongoose.h"
 	<string>
 	<sstream>
@@ -580,8 +580,10 @@
 	"response.h"
 	<functional>
 	"namedtype.h"
+	<map>
+	<list>
 
-1590157123 source:/home/pi/ePi/player/src/mongooseserver.cpp
+1590503246 source:/home/pi/ePi/player/src/mongooseserver.cpp
 	"mongooseserver.h"
 	<iostream>
 	<thread>

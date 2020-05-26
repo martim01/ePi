@@ -7,7 +7,7 @@
 class Mp3File : public AudioFile
 {
     public:
-        Mp3File(const std::string& sUid, const std::string& sLabel, const std::string& sDescription);
+        Mp3File(const std::string& sPath, const std::string& sUid, const std::string& sLabel, const std::string& sDescription);
         Mp3File();
         virtual ~Mp3File();
 

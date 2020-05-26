@@ -5,7 +5,7 @@
 class AudioFile : public Resource
 {
     public:
-        AudioFile(const std::string& sType, const std::string& sUid, const std::string& sLabel, const std::string& sDescription);
+        AudioFile(const std::string& sType, const std::string& sPath, const std::string& sUid, const std::string& sLabel, const std::string& sDescription);
         AudioFile(const std::string& sType);
         AudioFile(const Json::Value& jsData);
 

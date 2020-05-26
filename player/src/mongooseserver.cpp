@@ -76,19 +76,6 @@ static void ev_handler(mg_connection *pConnection, int nEvent, void* pData)
     pThread->HandleEvent(pConnection, nEvent, pData);
 }
 
-static mg_str file_upload(mg_connection*, mg_str file_name)
-{
-    std::cout <<"File_upload: " << file_name.len << std::endl;
-    // @todo need to get the endpoint to     see what the file type is...
-    std::string strFile("/tmp/"+CreateGuid());
-
-    char* filename= reinterpret_cast<char*>(malloc(strFile.length()+1));
-    strcpy(filename, strFile.c_str());
-    return mg_mk_str(filename);
-}
-
-
-
 
 void MongooseServer::EventWebsocket(mg_connection *pConnection, int nEvent, void* pData)
 {
@@ -121,11 +108,21 @@ void MongooseServer::EventHttp(mg_connection *pConnection, int nEvent, void* pDa
     }
     else
     {
+        std::string sQuery, sData;
+        if(pMessage->body.len > 0)
+        {
+            sData.assign(pMessage->body.p, pMessage->body.len);
+        }
+        if(pMessage->query_string.len > 0)
+        {
+            sQuery.assign(pMessage->query_string.p, pMessage->query_string.len);
+        }
+
         //find the callback function assigned to the method and url
         auto itCallback = m_mEndpoints.find(endpoint(method(sMethod),url(sUri)));
         if(itCallback != m_mEndpoints.end())
         {
-            DoReply(pConnection, itCallback->second(pConnection, pMessage, sUri));
+            DoReply(pConnection, itCallback->second(pConnection, query(sQuery), postData(sData), url(sUri)));
         }
         else
         {   //none found so sne a "not found" error
@@ -155,33 +152,24 @@ void MongooseServer::HandleEvent(mg_connection *pConnection, int nEvent, void* p
             Log::Get(Log::LOG_DEBUG) << "MongooseServer\tDone" << endl;
             break;
         case MG_EV_HTTP_MULTIPART_REQUEST:
-            if(UploadAllowed(pConnection, reinterpret_cast<http_message*>(pData)))
-            {
-                //@todo store endpoint for later
-            }
-            else
-            {
-                // @todo send a not allowed to upload to this endpoint error
-            }
+            MultipartBegin(pConnection, reinterpret_cast<http_message*>(pData));
             break;
         case MG_EV_HTTP_PART_BEGIN:
-            mg_file_upload_handler(pConnection, nEvent, pData, file_upload);
+            PartBegin(pConnection, reinterpret_cast<mg_http_multipart_part*>(pData));
             break;
         case MG_EV_HTTP_PART_DATA:
-            mg_file_upload_handler(pConnection, nEvent, pData, file_upload);
+            PartData(pConnection, reinterpret_cast<mg_http_multipart_part*>(pData));
             break;
         case MG_EV_HTTP_PART_END:
-            mg_file_upload_handler(pConnection, nEvent, pData, file_upload);
-            EndUpload(pConnection, pData);
+            PartEnd(pConnection, reinterpret_cast<mg_http_multipart_part*>(pData));
             break;
         case MG_EV_HTTP_MULTIPART_REQUEST_END:
-            Log::Get() << "Request end" << std::endl;
-            //@todo process request;
+            MultipartEnd(pConnection, reinterpret_cast<mg_http_multipart_part*>(pData));
             break;
 
         case 0:
             break;
-        }
+    }
 }
 
 
@@ -189,6 +177,8 @@ void MongooseServer::HandleEvent(mg_connection *pConnection, int nEvent, void* p
 MongooseServer::MongooseServer(const iniManager& iniConfig) :
     m_pConnection(nullptr)
 {
+
+    m_multipartData.itEndpoint = m_mEndpoints.end();
 
     //check for ssl
     string sCert = iniConfig.GetIniString("ssl", "cert", "");
@@ -271,7 +261,7 @@ void MongooseServer::Loop()
 }
 
 
-bool MongooseServer::AddEndpoint(const endpoint& theEndpoint, std::function<response(mg_connection*, http_message*, const std::string& )> func)
+bool MongooseServer::AddEndpoint(const endpoint& theEndpoint, std::function<response(mg_connection*, const query&, const postData&, const url& )> func)
 {
     Log::Get(Log::LOG_DEBUG) << "MongooseServer\t" << "AddEndpoint <" << theEndpoint.first.Get() << ", " << theEndpoint.second.Get() << "> ";
     if(m_mEndpoints.find(theEndpoint) != m_mEndpoints.end())
@@ -303,45 +293,141 @@ void MongooseServer::SendError(mg_connection* pConnection, const string& sError,
     DoReply(pConnection, theResponse);
 }
 
-
-bool MongooseServer::UploadAllowed(mg_connection* pConnection, http_message* pMessage)
+void MongooseServer::ClearMultipartData()
 {
-    // @todo check not already uploading/checking a file
-    // @todo Check the endpoint is allowed
+    m_multipartData.itEndpoint = m_mEndpoints.end();
+    m_multipartData.mData.clear();
+    m_multipartData.mFiles.clear();
+    if(m_multipartData.ofs.is_open())
+    {
+        m_multipartData.ofs.close();
+    }
+}
 
+bool MongooseServer::MultipartBegin(mg_connection* pConnection, http_message* pMessage)
+{
     Log::Get(Log::LOG_INFO) << "Starting upload" << endl;
     string sUri;
     sUri.assign(pMessage->uri.p, pMessage->uri.len);
-
     string sMethod(pMessage->method.p);
     Log::Get() << sMethod << std::endl;
     size_t nSpace = sMethod.find(' ');
     sMethod = sMethod.substr(0, nSpace);
 
-    Log::Get() << "MongooseServer\tEndpoint: <" << sMethod << ", " << sUri << ">" << std::endl;
+    Log::Get() << "MongooseServer\tUpload: <" << sMethod << ", " << sUri << ">" << std::endl;
 
+    ClearMultipartData();
+    m_multipartData.itEndpoint = m_mEndpoints.find(endpoint(sMethod, sUri));
+    if(m_multipartData.itEndpoint == m_mEndpoints.end())
+    {
+        SendError(pConnection, "Method not allowed.", 405);
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+
+bool MongooseServer::PartBegin(mg_connection* pConnection, mg_http_multipart_part* pPart)
+{
+    Log::Get() << "MongooseServer\tPartBegin: '" << pPart->file_name << "' '" << pPart->var_name << "' " << std::endl;
+    if(std::string(pPart->file_name) != "")
+    {
+        auto pairFile = m_multipartData.mFiles.insert(std::make_pair(std::string(pPart->var_name), "/tmp/"+CreateGuid()));
+        m_multipartData.ofs.open(pairFile.first->second, std::ios::binary);
+        if(m_multipartData.ofs.is_open() == false)
+        {
+            ClearMultipartData();
+            SendError(pConnection, "Failed to open a file", 500);
+            return false;
+        }
+    }
+    else
+    {
+        m_multipartData.mData.insert(std::make_pair(pPart->var_name, ""));
+    }
     return true;
 }
 
-void MongooseServer::EndUpload(mg_connection *pConnection, void* pData)
+bool MongooseServer::PartData(mg_connection* pConnection, mg_http_multipart_part* pPart)
 {
-    // @todo  get the endpoint so we know what should have been uploaded
-    Log::Get(Log::LOG_INFO) << "Finished upload" << endl;
-
-    mg_http_multipart_part *mp = (mg_http_multipart_part *) pData;
-    std::cout << mp->file_name << " : " << mp->var_name << std::endl;
-
-    //copy the file...
-//    stringstream ssFile;
-//    ssFile << m_sNsFilePath << "network_" << m_iniNs.GetIniInt("pending", "version",0) << ".src";
- //   ifstream src("/tmp/ns_temp.src", ios::binary);
-//    ofstream dst(ssFile.str(), ios::binary);
-//    dst << src.rdbuf();
-//    dst.close();
-//    src.close();
-//    remove("/tmp/ns_temp.src");
-
+    if(std::string(pPart->file_name) != "" && m_multipartData.ofs.is_open())
+    {
+        m_multipartData.ofs.write(pPart->data.p, pPart->data.len);
+        m_multipartData.ofs.flush();
+        if(!m_multipartData.ofs)
+        {
+            ClearMultipartData();
+            SendError(pConnection, "Failed to write to file", 500);
+            return false;
+        }
+    }
+    else
+    {
+        auto itData = m_multipartData.mData.find(pPart->var_name);
+        if(itData != m_multipartData.mData.end())
+        {
+            itData->second.append(pPart->data.p, pPart->data.len);
+        }
+        else
+        {
+            SendError(pConnection, "Failed to store form data", 500);
+            return false;
+        }
+    }
+    return true;
 }
+
+bool MongooseServer::PartEnd(mg_connection* pConnection, mg_http_multipart_part* pPart)
+{
+    if(m_multipartData.ofs.is_open())
+    {
+        m_multipartData.ofs.close();
+    }
+    return true;
+}
+
+
+bool MongooseServer::MultipartEnd(mg_connection* pConnection, mg_http_multipart_part* pPart)
+{
+    Log::Get(Log::LOG_DEBUG) << "MongooseServer\tFinished Multipart" << endl;
+
+
+    Json::Value jsData;
+
+    for(auto pairData : m_multipartData.mData)
+    {
+        Log::Get() << "MongooseServer\tMultipart: " << pairData.first << "=" << pairData.second << std::endl;
+        jsData[pairData.first] = pairData.second;
+    }
+    Json::Value jsFiles;
+    for(auto pairFiles : m_multipartData.mFiles)
+    {
+        Log::Get() << "MongooseServer\tMultipart Files: " << pairFiles.first << "=" << pairFiles.second << std::endl;
+        jsFiles[pairFiles.first] = pairFiles.second;
+    }
+
+    Json::Value jsBody;
+    jsBody["multipart"]["data"] = jsData;
+    jsBody["multipart"]["files"] = jsFiles;
+
+    std::stringstream ss;
+    ss << jsBody;
+
+    if(m_multipartData.itEndpoint != m_mEndpoints.end())
+    {
+        DoReply(pConnection, m_multipartData.itEndpoint->second(pConnection, query(""), postData(ss.str()), m_multipartData.itEndpoint->first.second));
+        return true;
+    }
+    else
+    {
+        SendError(pConnection, "Not found", 404);
+        return false;
+    }
+}
+
 
 void MongooseServer::DoReply(mg_connection* pConnection,const response& theResponse)
 {
@@ -393,3 +479,5 @@ void MongooseServer::SendOptions(mg_connection* pConnection, const std::string& 
         mg_send_http_chunk(pConnection, "", 0); //send empty chunk to inidicate end
     }
 }
+
+

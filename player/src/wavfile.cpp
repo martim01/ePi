@@ -3,8 +3,8 @@
 #include "sndfile.hh"
 
 
-WavFile::WavFile(const std::string& sUid, const std::string& sLabel, const std::string& sDescription) :
-    AudioFile("wavfile", sUid, sLabel, sDescription),
+WavFile::WavFile(const std::string& sPath, const std::string& sUid, const std::string& sLabel, const std::string& sDescription) :
+    AudioFile("wavfile", sPath, sUid, sLabel, sDescription),
     m_pHandle(nullptr)
 {
 
@@ -41,7 +41,7 @@ bool WavFile::OpenToRead()
 	{
 		Close();
 	}
-    m_pHandle = std::unique_ptr<SndfileHandle>(new SndfileHandle(m_json["label"].asString(), SFM_READ, 0,0,0)); //todo need path
+    m_pHandle = std::unique_ptr<SndfileHandle>(new SndfileHandle(m_json["path"].asString()+m_json["uid"].asString(), SFM_READ, 0,0,0)); //todo need path
     return (m_pHandle!=nullptr);
 }
 

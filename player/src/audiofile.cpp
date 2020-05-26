@@ -1,8 +1,9 @@
 #include "audiofile.h"
 
-AudioFile::AudioFile(const std::string& sType, const std::string& sUid, const std::string& sLabel, const std::string& sDescription) :
+AudioFile::AudioFile(const std::string& sType, const std::string& sPath, const std::string& sUid, const std::string& sLabel, const std::string& sDescription) :
 Resource(sType, sUid, sLabel, sDescription)
 {
+    m_json["path"] = sPath;
 }
 
 AudioFile::AudioFile(const std::string& sType) : Resource(sType)

@@ -7,7 +7,7 @@ class SndfileHandle;
 class WavFile : public AudioFile
 {
     public:
-        WavFile(const std::string& sUid, const std::string& sLabel, const std::string& sDescription);
+        WavFile(const std::string& sPath, const std::string& sUid, const std::string& sLabel, const std::string& sDescription);
         WavFile();
         WavFile(const Json::Value& jsData);
         virtual ~WavFile();

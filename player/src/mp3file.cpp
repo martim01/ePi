@@ -1,7 +1,7 @@
 #include "mp3file.h"
 
-Mp3File::Mp3File(const std::string& sUid, const std::string& sLabel, const std::string& sDescription) :
-    AudioFile("Mp3file", sUid, sLabel, sDescription)
+Mp3File::Mp3File(const std::string& sPath, const std::string& sUid, const std::string& sLabel, const std::string& sDescription) :
+    AudioFile("Mp3file", sPath, sUid, sLabel, sDescription)
 {
 
 }
