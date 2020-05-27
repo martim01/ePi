@@ -10,7 +10,11 @@
 #include "log.h"
 
 
-ResourceManager::ResourceManager(const iniManager& iniConfig)
+ResourceManager::ResourceManager()
+{
+}
+
+void ResourceManager::Init(const iniManager& iniConfig)
 {
     m_sAudioFilePath = CreatePath(iniConfig.GetIniString("Paths", "Audio", "/var/ePi/audio"));
     m_sResourcePath = CreatePath(iniConfig.GetIniString("Paths", "Resources", "/var/ePi/resources"));
@@ -886,4 +890,19 @@ std::map<std::string, std::shared_ptr<Resource> >::const_iterator ResourceManage
 std::map<std::string, std::shared_ptr<Resource> >::const_iterator ResourceManager::GetPlaylistsEnd() const
 {
     return m_mPlaylists.end();
+}
+
+std::map<std::string, std::shared_ptr<AudioFile> >::const_iterator ResourceManager::FindFile(const std::string& sUid) const
+{
+    return m_mFiles.find(sUid);
+}
+
+std::map<std::string, std::shared_ptr<Resource> >::const_iterator ResourceManager::FindSchedule(const std::string& sUid) const
+{
+    return m_mSchedules.find(sUid);
+}
+
+std::map<std::string, std::shared_ptr<Resource> >::const_iterator ResourceManager::FindPlaylist(const std::string& sUid) const
+{
+    return m_mPlaylists.find(sUid);
 }

@@ -40,8 +40,9 @@ class MongooseServer
 {
     public:
 
-        MongooseServer(const iniManager& iniConfig);
+        MongooseServer();
 
+        bool Init(const iniManager& iniConfig);
         ///< @brief Creates the thread that runs the webserver loop
         void Run();
 
@@ -65,6 +66,8 @@ class MongooseServer
         *   @return <i>bool</i> true on success
         **/
         bool DeleteEndpoint(const endpoint& theEndpoint);
+
+        void SendWebsocketMessage(const Json::Value& jsMessage);
 
         static const method GET;
         static const method POST;
@@ -118,8 +121,6 @@ class MongooseServer
         void ClearMultipartData();
 
 
-        void GetInfo();
-
         mg_connection* m_pConnection;
         std::string m_sIniPath;
         std::string m_sServerName;
@@ -133,4 +134,6 @@ class MongooseServer
 
         std::queue<Json::Value> m_qWsMessages;
         multipartData m_multipartData;
+
+        std::mutex m_mutex;
 };

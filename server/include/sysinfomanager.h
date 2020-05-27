@@ -7,17 +7,20 @@
 class SysInfoManager
 {
     public:
-        static SysInfoManager& Get();
-
+        SysInfoManager();
+        void SetDiskPath(const std::string& sPath)
+        {
+            m_sPath = sPath;
+        }
         Json::Value GetInfo();
 
     private:
 
-        SysInfoManager();
+        std::string m_sPath;
 
 
         Json::Value GetSysInfo();
-        Json::Value GetDiskInfo(const std::string& sPath);
+        Json::Value GetDiskInfo();
         Json::Value GetCpuInfo();
         Json::Value GetApplicationInfo();
 

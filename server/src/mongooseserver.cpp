@@ -174,12 +174,17 @@ void MongooseServer::HandleEvent(mg_connection *pConnection, int nEvent, void* p
 
 
 
-MongooseServer::MongooseServer(const iniManager& iniConfig) :
+MongooseServer::MongooseServer() :
     m_pConnection(nullptr)
 {
 
     m_multipartData.itEndpoint = m_mEndpoints.end();
 
+
+}
+
+bool MongooseServer::Init(const iniManager& iniConfig)
+{
     //check for ssl
     string sCert = iniConfig.GetIniString("ssl", "cert", "");
     string sKey = iniConfig.GetIniString("ssl", "key", "");
@@ -231,10 +236,12 @@ MongooseServer::MongooseServer(const iniManager& iniConfig) :
         Log::Get(Log::LOG_INFO) << m_pConnection->user_data << endl;
         Log::Get(Log::LOG_INFO) << s_ServerOpts.document_root << endl;
         Log::Get(Log::LOG_INFO) << "--------------------------" << endl;
+        return true;
     }
     else
     {
         Log::Get(Log::LOG_ERROR) << "Could not start webserver" << endl;
+        return false;
     }
 }
 
@@ -256,11 +263,6 @@ void MongooseServer::Loop()
         while (true)
         {
             mg_mgr_poll(&m_mgr, 50);
-            if(nCount == 20)
-            {
-                nCount = 0;
-                GetInfo();
-            }
             SendWSQueue();
             ++nCount;
         }
@@ -489,15 +491,12 @@ void MongooseServer::SendOptions(mg_connection* pConnection, const std::string& 
 }
 
 
-void MongooseServer::GetInfo()
-{
-    m_qWsMessages.push(SysInfoManager::Get().GetInfo());
-}
+
 
 
 void MongooseServer::SendWSQueue()
 {
-    // @todo(martim01) lock mutex here
+    std::lock_guard<std::mutex> lg(m_mutex);
     if(m_pConnection)
     {
         while(m_qWsMessages.empty() == false)
@@ -521,4 +520,11 @@ void MongooseServer::SendWSQueue()
             m_qWsMessages.pop();
         }
     }
+}
+
+
+void MongooseServer::SendWebsocketMessage(const Json::Value& jsMessage)
+{
+    std::lock_guard<std::mutex> lg(m_mutex);
+    m_qWsMessages.push(jsMessage);
 }

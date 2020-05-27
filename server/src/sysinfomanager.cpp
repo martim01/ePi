@@ -5,16 +5,12 @@
 #include "utils.h"
 
 SysInfoManager::SysInfoManager() :
+ m_sPath("/"),
  m_startTime(std::chrono::high_resolution_clock::now())
 {
 
 }
 
-SysInfoManager& SysInfoManager::Get()
-{
-    static SysInfoManager sys;
-    return sys;
-}
 
 Json::Value SysInfoManager::GetSysInfo()
 {
@@ -60,12 +56,12 @@ Json::Value SysInfoManager::GetSysInfo()
 }
 
 
-Json::Value SysInfoManager::GetDiskInfo(const std::string& sPath)
+Json::Value SysInfoManager::GetDiskInfo()
 {
     Json::Value jsInfo;
 
     struct statvfs info;
-    int nError = statvfs(sPath.c_str(), &info);
+    int nError = statvfs(m_sPath.c_str(), &info);
     if(nError !=0)
     {
         jsInfo["error_code"] = nError;
@@ -89,7 +85,7 @@ Json::Value SysInfoManager::GetInfo()
 {
     Json::Value jsInfo;
     jsInfo["system"] = GetSysInfo();
-    jsInfo["disk"] = GetDiskInfo("/var/ePi");   // @todo(martim01) get the path from the inimanager
+    jsInfo["disk"] = GetDiskInfo();
     jsInfo["cpu"] = GetCpuInfo();
     jsInfo["application"] = GetApplicationInfo();
 

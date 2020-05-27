@@ -14,10 +14,10 @@ class Resource;
 class ResourceManager
 {
     public:
-        ResourceManager(const iniManager& iniConfig);
-
+        ResourceManager();
         ~ResourceManager();
 
+        void Init(const iniManager& iniConfig);
 
         response AddFiles(const Json::Value& jsData);
         response AddSchedule(const Json::Value& jsData);
@@ -40,13 +40,19 @@ class ResourceManager
         response GetSchedule(const std::string& sUid);
         response GetPlaylist(const std::string& sUid);
 
+        const std::string& GetAudioPath() { return m_sAudioFilePath; }
 
         std::map<std::string, std::shared_ptr<AudioFile> >::const_iterator GetFilesBegin() const;
         std::map<std::string, std::shared_ptr<AudioFile> >::const_iterator GetFilesEnd() const;
+
         std::map<std::string, std::shared_ptr<Resource> >::const_iterator GetSchedulesBegin() const;
         std::map<std::string, std::shared_ptr<Resource> >::const_iterator GetSchedulesEnd() const;
         std::map<std::string, std::shared_ptr<Resource> >::const_iterator GetPlaylistsBegin() const;
         std::map<std::string, std::shared_ptr<Resource> >::const_iterator GetPlaylistsEnd() const;
+
+        std::map<std::string, std::shared_ptr<AudioFile> >::const_iterator FindFile(const std::string& sUid) const;
+        std::map<std::string, std::shared_ptr<Resource> >::const_iterator FindSchedule(const std::string& sUid) const;
+        std::map<std::string, std::shared_ptr<Resource> >::const_iterator FindPlaylist(const std::string& sUid) const;
 
     private:
         bool LoadResources();
