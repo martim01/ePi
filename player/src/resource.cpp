@@ -7,7 +7,7 @@ Resource::Resource(const std::string& sType, const std::string& sUid, const std:
     m_json["label"] = sLabel;
     m_json["description"] = sDescription;
     m_json["uid"] = sUid;
-    m_json["created"] = GetCurrentTimeAsString(false);
+    m_json["created"] = GetCurrentTimeAsIsoString();
     m_json["type"] = sType;
     m_json["locked"] = false;
 }
@@ -18,7 +18,7 @@ Resource::Resource(const std::string& sType) :
     m_json["label"] = "";
     m_json["description"] = "";
     m_json["uid"] = "";
-    m_json["created"] = GetCurrentTimeAsString(false);
+    m_json["created"] = GetCurrentTimeAsIsoString();
     m_json["type"] = "";
     m_json["locked"] = false;
 }
@@ -27,7 +27,7 @@ Resource::Resource(const std::string& sType, const std::string& sUid, const Json
 m_json(jsData)
 {
     m_json["uid"] = sUid;
-    m_json["created"] = GetCurrentTimeAsString(false);
+    m_json["created"] = GetCurrentTimeAsIsoString();
     m_json["type"] = sType;
     m_json["locked"] = false;
 }

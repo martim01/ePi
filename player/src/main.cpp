@@ -5,10 +5,14 @@
 #include "mongooseserver.h"
 #include <memory>
 #include "endpoints.h"
+#include "sysinfomanager.h"
+
+
 using namespace std;
 
 int main()
 {
+    SysInfoManager::Get();  //to set the starttime
 
     pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
     iniManager ini;

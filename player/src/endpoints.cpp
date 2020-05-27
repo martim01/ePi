@@ -1,5 +1,6 @@
 #include "endpoints.h"
 #include "resourcemanager.h"
+#include "sysinfomanager.h"
 #include <functional>
 #include <vector>
 #include "utils.h"
@@ -43,7 +44,7 @@ bool Endpoints::CreateEndpoints()
 
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "CreateEndpoints" << std::endl;
 
-    //m_server.AddEndpoint(endpoint(MongooseServer::GET, url(EP_ROOT), std::bind(&Endpoints::GetRoot, this, _1,_2,_3));
+    m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_ROOT), std::bind(&Endpoints::GetRoot, this, _1,_2,_3,_4));
     m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_EPI), std::bind(&Endpoints::GetEpi, this, _1,_2,_3,_4));
     m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_STATUS), std::bind(&Endpoints::GetStatus, this, _1,_2,_3,_4));
     m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_POWER), std::bind(&Endpoints::GetPower, this, _1,_2,_3,_4));
@@ -138,7 +139,7 @@ response Endpoints::GetConfig(mg_connection* pConnection, const query& theQuery,
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetConfig" << std::endl;
     response theResponse;
 
-    // @todo GetConfig
+    // @todo(martim01) GetConfig
 
     return theResponse;
 }
@@ -148,7 +149,7 @@ response Endpoints::GetStatus(mg_connection* pConnection, const query& theQuery,
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetStatus" << std::endl;
     response theResponse;
 
-    // @todo GetStatus
+    // @todo(martim01) GetStatus
     // Playing or not.
     // If playing then the file and time of playing and type of playing (file, schedule or playlist)
     return theResponse;
@@ -160,8 +161,8 @@ response Endpoints::GetInfo(mg_connection* pConnection, const query& theQuery, c
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetInfo" << std::endl;
     response theResponse;
 
-    // @todo GetInfo
-    // version number of websever and player
+    theResponse.jsonData = SysInfoManager::Get().GetInfo();
+
 
     return theResponse;
 }
@@ -170,7 +171,7 @@ response Endpoints::GetPower(mg_connection* pConnection, const query& theQuery, 
 {
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetPower" << std::endl;
     response theResponse;
-    // @todo GetPower
+    // @todo(martim01) GetPower
     // uptime
 
     return theResponse;
@@ -205,7 +206,7 @@ response Endpoints::PutStatus(mg_connection* pConnection, const query& theQuery,
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutStatus" << std::endl;
     response theResponse(501);
 
-    // @todo PutStatus
+    // @todo(martim01) PutStatus
     // play, pause, stop
     // file/schedule playlist
     // uid
@@ -218,7 +219,7 @@ response Endpoints::PutPower(mg_connection* pConnection, const query& theQuery, 
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutPower" << std::endl;
     response theResponse(501);
 
-    // @todo PutPower
+    // @todo(martim01) PutPower
     // restart server, restart os, shutdown
 
     return theResponse;
@@ -228,7 +229,7 @@ response Endpoints::PutConfig(mg_connection* pConnection, const query& theQuery,
 {
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutConfig" << std::endl;
     response theResponse(501);
-    //@todo PutConfig
+    // @todo(martim01) PutConfig
     // not sure yet
 
     return theResponse;
@@ -265,7 +266,7 @@ response Endpoints::DeleteFile(mg_connection* pConnection, const query& theQuery
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "DeleteFile" << std::endl;
     std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
 
-    response theResponse(DeleteFile(vSplit.back()));
+    response theResponse(m_manager.DeleteFile(vSplit.back()));
     if(theResponse.nHttpCode == 200)
     {
         url theUrl(url(EP_FILES.Get()+"/"+vSplit.back()));
@@ -316,7 +317,6 @@ response Endpoints::DeleteSchedule(mg_connection* pConnection, const query& theQ
 
 response Endpoints::PostFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
-    // @todo currently assuming only 1 file. Allow for multiples...
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PostFile" << std::endl;
     Json::Value jsonData(ConvertToJson(theData.Get()));
 

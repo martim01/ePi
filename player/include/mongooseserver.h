@@ -114,9 +114,11 @@ class MongooseServer
 
         void SendOptions(mg_connection* pConnection, const std::string& sUrl);
 
-
+        void SendWSQueue();
         void ClearMultipartData();
 
+
+        void GetInfo();
 
         mg_connection* m_pConnection;
         std::string m_sIniPath;
@@ -129,5 +131,6 @@ class MongooseServer
         std::map<endpoint, std::function<response(mg_connection*, const query&, const postData&, const url&)>> m_mEndpoints;
         std::multimap<std::string, method> m_mmOptions;
 
+        std::queue<Json::Value> m_qWsMessages;
         multipartData m_multipartData;
 };

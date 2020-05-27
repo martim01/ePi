@@ -12,6 +12,24 @@
 		<meta http-equiv="Cache-Control" content="max-age=0">
 		<title>ePI</title>
 		<script type="text/javascript" language="javascript">
+			
+			function ws_connect(endpoint)
+			{
+				console.log("ws_connect: "+'ws://' + endpoint);
+				var g_ws = new WebSocket('ws://' + endpoint);
+				
+				g_ws.onopen = function(ev)  { console.log(ev); };
+				g_ws.onerror = function(ev) { console.log(ev); };
+				g_ws.onclose = function(ev) { console.log(ev); };
+				g_ws.filter = function(jsonObj){};
+	
+				g_ws.onmessage = function(ev) 
+				{
+					var jsonObj = JSON.parse(ev.data);
+					console.log(jsonObj);
+				}
+			}
+					
 			function postSchedule()
 			{
 				console.log("postSchedule");
@@ -55,7 +73,7 @@
 			}
 		</script>
 	</head>
-	<body>
+	<body onload="ws_connect('127.0.0.1:8080')">
 	<button onclick="postSchedule()">Schedule</button>
 	<form method="post" enctype="multipart/form-data" style="text-align: left" onsubmit="return false;" id="upload_form">
 		<div class="grid grid_server" id="upload_grid">

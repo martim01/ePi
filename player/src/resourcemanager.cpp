@@ -103,7 +103,7 @@ response ResourceManager::AddFile( const std::string& sUploadName, const std::st
         }
         else
         {
-            //@todo mp3file
+            // @todo(martim01) mp3file
         }
 
         if(m_mFiles.insert(std::make_pair(sUid, pFile)).second)
@@ -808,7 +808,7 @@ bool ResourceManager::LoadResources()
             }
             else
             {
-                //@todo mp3
+                // @todo(martim01) mp3
             }
         }
     }

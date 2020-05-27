@@ -26,6 +26,11 @@ extern bool JsonMemberExistsAndIsNull(const Json::Value& jsObject, const std::st
 extern bool JsonMemberExistsAndIsNotNull(const Json::Value& jsObject, const std::string& sMember);
 
 extern std::string ConvertTimeToString(std::chrono::time_point<std::chrono::high_resolution_clock> tp, bool bIncludeNano=true);
+extern std::string ConvertTimeToIsoString(std::chrono::time_point<std::chrono::high_resolution_clock> tp);
 extern std::string GetCurrentTimeAsString(bool bIncludeNano=true);
+extern std::string GetCurrentTimeAsIsoString();
 
 extern Json::Value ConvertToJson(const std::string& str);
+
+
+

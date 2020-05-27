@@ -13,7 +13,7 @@
 #include <chrono>
 #include "utils.h"
 #include "resourcemanager.h"
-
+#include "sysinfomanager.h"
 
 using namespace std;
 using namespace std::placeholders;
@@ -252,9 +252,17 @@ void MongooseServer::Loop()
     if(m_pConnection)
     {
         mg_set_protocol_http_websocket(m_pConnection);
+        int nCount = 0;
         while (true)
         {
-            mg_mgr_poll(&m_mgr, 250);
+            mg_mgr_poll(&m_mgr, 50);
+            if(nCount == 20)
+            {
+                nCount = 0;
+                GetInfo();
+            }
+            SendWSQueue();
+            ++nCount;
         }
         mg_mgr_free(&m_mgr);
     }
@@ -481,3 +489,36 @@ void MongooseServer::SendOptions(mg_connection* pConnection, const std::string& 
 }
 
 
+void MongooseServer::GetInfo()
+{
+    m_qWsMessages.push(SysInfoManager::Get().GetInfo());
+}
+
+
+void MongooseServer::SendWSQueue()
+{
+    // @todo(martim01) lock mutex here
+    if(m_pConnection)
+    {
+        while(m_qWsMessages.empty() == false)
+        {
+            std::stringstream ssMessage;
+            ssMessage << m_qWsMessages.front();
+
+            //turn message into array
+            char *cstr = new char[ssMessage.str().length() + 1];
+            strcpy(cstr, ssMessage.str().c_str());
+
+
+            for (mg_connection* pConnection = mg_next(m_pConnection->mgr, NULL); pConnection != NULL; pConnection = mg_next(m_pConnection->mgr, pConnection))
+            {
+                if(is_websocket(pConnection))
+                {
+                    mg_send_websocket_frame(pConnection, WEBSOCKET_OP_TEXT, cstr, strlen(cstr));
+                }
+            }
+            delete[] cstr;
+            m_qWsMessages.pop();
+        }
+    }
+}

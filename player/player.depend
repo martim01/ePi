@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1590155387 source:/home/pi/ePi/player/src/main.cpp
+1590573432 source:/home/pi/ePi/player/src/main.cpp
 	<iostream>
 	"resourcemanager.h"
 	"inimanager.h"
@@ -7,6 +7,7 @@
 	"mongooseserver.h"
 	<memory>
 	"endpoints.h"
+	"sysinfomanager.h"
 
 1589898358 source:/home/pi/ePi/player/src/mongoose.c
 	"mongoose.h"
@@ -381,7 +382,7 @@
 	<sstream>
 	"config.h"
 
-1590503083 source:/home/pi/ePi/player/src/resourcemanager.cpp
+1590568546 source:/home/pi/ePi/player/src/resourcemanager.cpp
 	"resourcemanager.h"
 	<iostream>
 	<fstream>
@@ -466,11 +467,11 @@
 1589983831 /home/pi/ePi/external/uuid/guid.h
 	"copyrt.h"
 
-1590146675 source:/home/pi/ePi/player/src/resource.cpp
+1590574692 source:/home/pi/ePi/player/src/resource.cpp
 	"resource.h"
 	"utils.h"
 
-1590146659 /home/pi/ePi/player/include/utils.h
+1590574670 /home/pi/ePi/player/include/utils.h
 	<string>
 	<vector>
 	<sys/stat.h>
@@ -478,7 +479,7 @@
 	<chrono>
 	<queue>
 
-1590154447 source:/home/pi/ePi/player/src/utils.cpp
+1590574658 source:/home/pi/ePi/player/src/utils.cpp
 	"utils.h"
 	<sstream>
 	<sys/types.h>
@@ -552,9 +553,10 @@
 1590140645 /home/pi/ePi/player/include/namedtype.h
 	<string>
 
-1590501578 source:/home/pi/ePi/player/src/endpoints.cpp
+1590576044 source:/home/pi/ePi/player/src/endpoints.cpp
 	"endpoints.h"
 	"resourcemanager.h"
+	"sysinfomanager.h"
 	<functional>
 	<vector>
 	"utils.h"
@@ -566,7 +568,7 @@
 	"response.h"
 	"mongooseserver.h"
 
-1590492953 /home/pi/ePi/player/include/mongooseserver.h
+1590576236 /home/pi/ePi/player/include/mongooseserver.h
 	"mongoose.h"
 	<string>
 	<sstream>
@@ -583,7 +585,7 @@
 	<map>
 	<list>
 
-1590503246 source:/home/pi/ePi/player/src/mongooseserver.cpp
+1590573561 source:/home/pi/ePi/player/src/mongooseserver.cpp
 	"mongooseserver.h"
 	<iostream>
 	<thread>
@@ -599,4 +601,18 @@
 	<chrono>
 	"utils.h"
 	"resourcemanager.h"
+	"sysinfomanager.h"
+
+1590576103 /home/pi/ePi/player/include/sysinfomanager.h
+	<map>
+	<string>
+	"json/json.h"
+	<chrono>
+
+1590576102 source:/home/pi/ePi/player/src/sysinfomanager.cpp
+	"sysinfomanager.h"
+	<sys/sysinfo.h>
+	<sys/statvfs.h>
+	<fstream>
+	"utils.h"
 

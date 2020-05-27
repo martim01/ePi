@@ -9,6 +9,7 @@
 #include "guid.h"
 #include "utils.h"
 
+
 using namespace std;
 
 static uuid_t NameSpace_OID = { /* 6ba7b812-9dad-11d1-80b4-00c04fd430c8 */
@@ -142,6 +143,12 @@ std::string GetCurrentTimeAsString(bool bIncludeNano)
     return ConvertTimeToString(tp, bIncludeNano);
 }
 
+std::string GetCurrentTimeAsIsoString()
+{
+    std::chrono::time_point<std::chrono::high_resolution_clock> tp(std::chrono::high_resolution_clock::now());
+    return ConvertTimeToIsoString(tp);
+}
+
 std::string ConvertTimeToString(std::chrono::time_point<std::chrono::high_resolution_clock> tp, bool bIncludeNano)
 {
     std::stringstream sstr;
@@ -152,6 +159,15 @@ std::string ConvertTimeToString(std::chrono::time_point<std::chrono::high_resolu
         sstr << ":" << (std::chrono::duration_cast<std::chrono::nanoseconds>(tp.time_since_epoch()).count()%1000000000);
     }
     return sstr.str();
+}
+
+std::string ConvertTimeToIsoString(std::chrono::time_point<std::chrono::high_resolution_clock> tp)
+{
+    std::time_t  t = std::chrono::system_clock::to_time_t(tp);
+    std::stringstream ss;
+
+    ss << std::put_time(std::localtime(&t), "%FT%T%z");
+    return ss.str();
 }
 
 
@@ -228,3 +244,6 @@ Json::Value ConvertToJson(const std::string& str)
 
     return jsData;
 }
+
+
+
