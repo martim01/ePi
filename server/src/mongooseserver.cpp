@@ -96,6 +96,11 @@ void MongooseServer::EventHttp(mg_connection *pConnection, int nEvent, void* pDa
     string sUri;
     sUri.assign(pMessage->uri.p, pMessage->uri.len);
 
+    if(sUri[sUri.length()-1] == '/')    //get rid of trailling /
+    {
+        sUri = sUri.substr(0, sUri.length()-1);
+    }
+
     string sMethod(pMessage->method.p);
     size_t nSpace = sMethod.find(' ');
     sMethod = sMethod.substr(0, nSpace);
@@ -175,7 +180,9 @@ void MongooseServer::HandleEvent(mg_connection *pConnection, int nEvent, void* p
 
 
 MongooseServer::MongooseServer() :
-    m_pConnection(nullptr)
+    m_pConnection(nullptr),
+    m_nPollTimeout(100),
+    m_loopCallback(nullptr)
 {
 
     m_multipartData.itEndpoint = m_mEndpoints.end();
@@ -245,12 +252,21 @@ bool MongooseServer::Init(const iniManager& iniConfig)
     }
 }
 
-void MongooseServer::Run()
+void MongooseServer::Run(bool bThread, unsigned int nTimeoutMs)
 {
     if(m_pConnection)
     {
-        thread th(&MongooseServer::Loop, this);
-        th.detach();
+        m_nPollTimeout = nTimeoutMs;
+
+        if(bThread)
+        {
+            thread th(&MongooseServer::Loop, this);
+            th.detach();
+        }
+        else
+        {
+            Loop();
+        }
     }
 }
 
@@ -262,8 +278,18 @@ void MongooseServer::Loop()
         int nCount = 0;
         while (true)
         {
-            mg_mgr_poll(&m_mgr, 50);
+            auto now = std::chrono::high_resolution_clock::now();
+
+            mg_mgr_poll(&m_mgr, m_nPollTimeout);
+
+            auto took = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now().time_since_epoch()-now.time_since_epoch());
+
+            if(m_loopCallback)
+            {
+                m_loopCallback(std::chrono::duration_cast<std::chrono::milliseconds>(took).count());
+            }
             SendWSQueue();
+
             ++nCount;
         }
         mg_mgr_free(&m_mgr);
@@ -479,7 +505,7 @@ void MongooseServer::SendOptions(mg_connection* pConnection, const std::string& 
 
         for(; itOption != m_mmOptions.upper_bound(sUrl); ++itOption)
         {
-            ssHeaders << " " << itOption->second.Get();
+            ssHeaders << ", " << itOption->second.Get();
         }
         ssHeaders << "\r\n"
                   << "Access-Control-Allow-Headers:Content-Type, Accept\r\n"
@@ -487,6 +513,7 @@ void MongooseServer::SendOptions(mg_connection* pConnection, const std::string& 
         mg_printf(pConnection, "%s", ssHeaders.str().c_str());
 
         mg_send_http_chunk(pConnection, "", 0); //send empty chunk to inidicate end
+
     }
 }
 
@@ -497,6 +524,7 @@ void MongooseServer::SendOptions(mg_connection* pConnection, const std::string& 
 void MongooseServer::SendWSQueue()
 {
     std::lock_guard<std::mutex> lg(m_mutex);
+
     if(m_pConnection)
     {
         while(m_qWsMessages.empty() == false)
@@ -527,4 +555,10 @@ void MongooseServer::SendWebsocketMessage(const Json::Value& jsMessage)
 {
     std::lock_guard<std::mutex> lg(m_mutex);
     m_qWsMessages.push(jsMessage);
+}
+
+void MongooseServer::SetLoopCallback(std::function<void(unsigned int)> func)
+{
+    std::lock_guard<std::mutex> lg(m_mutex);
+    m_loopCallback = func;
 }

@@ -1,10 +1,12 @@
 #include "launcher.h"
 #include "utils.h"
 #include "resource.h"
-#include <spawn.h>
 #include <unistd.h>
 #include <string>
-
+#include "log.h"
+#include <thread>
+#include <sys/wait.h>
+#include <sys/types.h>
 
 bool ReadFromPipe(int nFd, std::string& sBuffer, std::vector<std::string>& vLines)
 {
@@ -32,261 +34,216 @@ bool ReadFromPipe(int nFd, std::string& sBuffer, std::vector<std::string>& vLine
         }
         return true;
     }
+//    else if(nRead == 0)
+//    {
+//        pml::Log::Get(pml::Log::LOG_INFO) << "Pipe read EOF" << std::endl;
+//    }
+//    else
+//    {
+//        pml::Log::Get(pml::Log::LOG_ERROR) << "Pipe read error: " << nRead << "=" << strerror(nRead) << std::endl;
+//    }
 
     return false;
 }
 
 
 
-Launcher::Launcher(ResourceManager& manager)  : m_manager(manager), m_pid(0)
+Launcher::Launcher()
+: m_pid(0),
+m_sPlayer("/home/pi/ePi/player3/bin/Debug/player3"),
+m_statusCallback(nullptr),
+m_exitCallback(nullptr)
 {
 
 }
 
-
-response Launcher::Play(const Json::Value& jsData)
+void Launcher::AddCallbacks(std::function<void(const std::string&)> statusCallback, std::function<void(int)> exitCallback)
 {
-
-    //check if player is running
-    if(m_pid != 0)
-    {
-        response theResponse(409);
-        theResponse.jsonData["result"] = "Player already running";
-        return theResponse;
-    }
-
-    //if not check the data is valid
-    if(jsData["type"].isString() == false)
-    {
-        response theResponse(400);
-        theResponse.jsonData["result"] = "Type not set";
-        return theResponse;
-    }
-    else if(jsData["uid"].isString() == false)
-    {
-        response theResponse(400);
-        theResponse.jsonData["result"] = "uid not set";
-        return theResponse;
-    }
-    else if(CmpNoCase(jsData["type"].asString(), "file"))
-    {
-        return PlayFile(jsData);
-    }
-    else if(CmpNoCase(jsData["type"].asString(), "playlist"))
-    {
-        return PlayPlaylist(jsData);
-    }
-    else if(CmpNoCase(jsData["type"].asString(), "schedule"))
-    {
-        return PlaySchedule(jsData);
-    }
-    else
-    {
-        response theResponse(400);
-        theResponse.jsonData["result"] = "Type not valid";
-        return theResponse;
-    }
+    m_statusCallback = statusCallback;
+    m_exitCallback = exitCallback;
 }
 
-response Launcher::PlayFile(const Json::Value& jsData)
+bool Launcher::IsPlaying() const
 {
-    if(m_manager.FindFile(jsData["uid"].asString()) == m_manager.GetFilesEnd())
-    {
-        response theResponse(404);
-        theResponse.jsonData["result"] = "file not found";
-        return theResponse;
-    }
-    else
-    {
-        return LaunchPlayer("file", jsData["uid"]);
-    }
-
+    return (m_pid!=0);
 }
 
-response Launcher::PlaySchedule(const Json::Value& jsData)
-{
-    auto itPlaylist = m_manager.FindPlaylist(jsData["uid"].asString());
-    if(itPlaylist == m_manager.GetPlaylistsEnd())
-    {
-        response theResponse(404);
-        theResponse.jsonData["result"] = "playlist not found";
-        return theResponse;
-    }
-    else
-    {
-        return LaunchPlayer("playlist", itPlaylist->second->GetJson());
-    }
-}
-
-response Launcher::PlayPlaylist(const Json::Value& jsData)
-{
-    auto itSchedule = m_manager.FindSchedule(jsData["uid"].asString());
-    if(itSchedule == m_manager.GetSchedulesEnd())
-    {
-        response theResponse(404);
-        theResponse.jsonData["result"] = "schedule not found";
-        return theResponse;
-    }
-    else
-    {
-        return LaunchPlayer("schedule", itSchedule->second->GetJson());
-    }
-
-}
-
-response Launcher::Pause(const Json::Value& jsData)
-{
-    if(m_pid == 0)
-    {
-        response theResponse(409);
-        theResponse.jsonData["result"] = "Player not running";
-        return theResponse;
-    }
-
-    // @todo(martim01) send a signal to tell child to pause
-}
-
-response Launcher::Stop(const Json::Value& jsData)
-{
-    if(m_pid == 0)
-    {
-        response theResponse(409);
-        theResponse.jsonData["result"] = "Player not running";
-        return theResponse;
-    }
-    // @todo(martim01) send a signal to tell the child to stop
-}
 
 
 response Launcher::LaunchPlayer(std::string sType, const Json::Value& jsData)
 {
+    pml::Log::Get(pml::Log::LOG_DEBUG) << "Launcher\tLaunchPlayer: ";
 
-    posix_spawn_file_actions_t action;
-
-    int nError = pipe(m_cout_pipe);
+    int nError = pipe(m_nPipe);
     if(nError != 0)
     {
         response theResponse(500);
-        theResponse.jsonData["result"] = "Could not open cout pipe";
+        theResponse.jsonData["result"] = "Could not open pipe";
         theResponse.jsonData["error_code"] = nError;
         theResponse.jsonData["error"] = strerror(nError);
+
+        pml::Log::Get(pml::Log::LOG_ERROR) << "could not open pipe: " << strerror(nError) << std::endl;
+
         return theResponse;
     }
 
-    nError = pipe(m_cerr_pipe);
-    if(nError != 0)
+
+    m_pid = fork();
+    if(m_pid < 0)
     {
-        close(m_cout_pipe[0]);
-        close(m_cout_pipe[1]);
+        close(m_nPipe[WRITE]);
+        close(m_nPipe[READ]);
         response theResponse(500);
-        theResponse.jsonData["result"] = "Could not open cerr pipe";
+        theResponse.jsonData["result"] = "Could not fork";
         theResponse.jsonData["error_code"] = nError;
         theResponse.jsonData["error"] = strerror(nError);
+
+        pml::Log::Get(pml::Log::LOG_ERROR) << "could not fork: " << strerror(nError) << std::endl;
+
         return theResponse;
     }
+    else if(m_pid > 0)
+    {   // Parent
+        close(m_nPipe[WRITE]);  //close write end
 
-    posix_spawn_file_actions_init(&action);
-    posix_spawn_file_actions_addclose(&action, m_cout_pipe[0]);
-    posix_spawn_file_actions_addclose(&action, m_cerr_pipe[0]);
-    posix_spawn_file_actions_adddup2(&action, m_cout_pipe[1],1);
-    posix_spawn_file_actions_adddup2(&action, m_cerr_pipe[1],2);
-    posix_spawn_file_actions_addclose(&action, m_cout_pipe[1]);
-    posix_spawn_file_actions_addclose(&action, m_cerr_pipe[1]);
+        response theResponse(200);
+        theResponse.jsonData["result"] = true;
 
-    std::stringstream ssData;
-    ssData << jsData;
-    std::string sData = ssData.str();
+        //launch the pipe thread
+        PipeThread();
 
-    char* args[] = {&sType[0], &sData[0], nullptr};
-
-    //Launc the application
-    nError = posix_spawn(&m_pid, m_sPlayer.c_str(), &action, NULL, &args[0], NULL);
-    if(nError)
-    {
-        response theResponse(500);
-        theResponse.jsonData["result"] = "Could not launch player";
-        theResponse.jsonData["error_code"] = nError;
-        theResponse.jsonData["error"] = strerror(nError);
         return theResponse;
     }
+    else
+    {   //child
+        close(m_nPipe[READ]);
+        dup2(m_nPipe[WRITE],STDOUT_FILENO);
 
-    close(m_cout_pipe[1]);
-    close(m_cerr_pipe[1]);
+        std::stringstream ssData;
+        ssData << jsData;
+        std::string sData = ssData.str();
 
-    //launch the pipe thread
-    PipeThread();
+        char* args[] = {&m_sPlayer[0], &sType[0], &sData[0], nullptr};
+        nError = execv(m_sPlayer.c_str(), args);
 
-    response theResponse(200);
-    theResponse.jsonData["result"] = "Success";
-
-    return theResponse;
+        if(nError)
+        {
+            std::cout << "Exec failed: " << m_sPlayer << std::endl;
+            exit(-1);
+        }
+    }
 }
 
 
+response Launcher::StopPlayer()
+{
+    response theResponse;
+    if(m_pid == 0)
+    {
+        theResponse.nHttpCode = 409;
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("Player not running");
+        pml::Log::Get(pml::Log::LOG_WARN) << "- Player not running" << std::endl;
+    }
+    else
+    {
+        int nError = kill(m_pid, SIGTERM);
+        if(nError != 0)
+        {
+            theResponse.nHttpCode = 500;
+            theResponse.jsonData["result"] = "Could not send signal to player";
+            theResponse.jsonData["reason"] = strerror(nError);
+            pml::Log::Get(pml::Log::LOG_ERROR) << "- Could not send signal to player" << std::endl;
+        }
+        else
+        {
+            theResponse.jsonData["result"] = true;
+        }
+    }
+    return theResponse;
+}
+
+response Launcher::PausePlayer()
+{
+    response theResponse;
+    if(m_pid == 0)
+    {
+        theResponse.nHttpCode = 409;
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("Player not running");
+        pml::Log::Get(pml::Log::LOG_WARN) << "- Player not running" << std::endl;
+    }
+    return theResponse;
+}
 
 void Launcher::PipeThread()
 {
+
+
     std::thread th([this]()
     {
         fd_set read_set;
         memset(&read_set, 0, sizeof(read_set));
-        FD_SET(m_cout_pipe[0], &read_set);
-        FD_SET(m_cerr_pipe[0], &read_set);
+        FD_SET(m_nPipe[READ], &read_set);
 
-        int nMaxFd = std::max(m_cout_pipe[0], m_cerr_pipe[0]);
         timespec timeout = {5,0};
 
         std::string sOut, sError;
         std::vector<std::string> vOut;
         std::vector<std::string> vError;
 
-        int nSelect = pselect(nMaxFd+1, &read_set, NULL, NULL, &timeout, NULL);
-        if(nSelect == 0)
+        while(true)
         {
-            //timeout
-            // @todo(martim01) no messages for 5 seconds? player must have hung. Kill it and report error
-        }
-        else if(nSelect > 0)
-        {
-            if(FD_ISSET(m_cout_pipe[0], &read_set))
+            FD_SET(m_nPipe[READ], &read_set);
+
+            int nSelect = pselect(m_nPipe[READ]+1, &read_set, NULL, NULL, &timeout, NULL);
+            if(nSelect == 0)
             {
-                if(ReadFromPipe(m_cout_pipe[0], sOut, vOut))
-                {
-                    // @todo(martim01) Turn in to JSON and sent to server
-                }
-                else
-                {
-                    FD_CLR(m_cout_pipe[0], &read_set);
-                    close(m_cout_pipe[0]);
-                    m_cout_pipe[0] = -1;
-
-                    //have to assume player has closed...
-                    // @todo(martim01) exit the thread and let everyone know player has exited
-                }
-
+                //timeout
+                // @todo(martim01) no messages for 5 seconds? player must have hung. Kill it and report error
+                pml::Log::Get() << "PipeThread\tTimeout" << std::endl;
             }
-            else if(FD_ISSET(m_cerr_pipe[0], &read_set))
+            else if(nSelect > 0)
             {
-                if(ReadFromPipe(m_cerr_pipe[0], sError, vError))
+                if(FD_ISSET(m_nPipe[READ], &read_set))
                 {
-                    // @todo(martim01) Turn in to JSON and send to server
-                }
-                else
-                {
-                    FD_CLR(m_cerr_pipe[0], &read_set);
-                    close(m_cerr_pipe[0]);
-                    m_cerr_pipe[0] = -1;
+                    if(ReadFromPipe(m_nPipe[READ], sOut, vOut))
+                    {
+                        if(m_statusCallback)
+                        {
+                            for(size_t i = 0; i < vOut.size(); i++)
+                            {
+                                m_statusCallback(vOut[i]);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        FD_CLR(m_nPipe[READ], &read_set);
+                        close(m_nPipe[READ]);
+                        m_nPipe[READ] = -1;
+                        pml::Log::Get() << "PipeThread\tEOF or Read Error" << std::endl;
+                        break;
 
-                    //have to assume player has closed...
-                    // @todo(martim01) exit the thread and let everyone know player has exited
+                    }
+
                 }
             }
+            else    //error
+            {
+                pml::Log::Get() << "PipeThread\tSelect Error" << std::endl;
+                break;
+            }
         }
-        else    //error
+        // @todo(martim01) should we check the app has actually stopped?
+        int nStatus;
+        waitpid(m_pid, &nStatus,0);
+        m_pid = 0;
+        if(m_exitCallback)
         {
-            //probably means player has closed...
-            // @todo(martim01) exit the thread and let everyone know player has exited
+            m_exitCallback(nStatus);
         }
+
     });
     th.detach();
 }

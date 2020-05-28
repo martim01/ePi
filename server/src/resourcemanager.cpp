@@ -10,7 +10,7 @@
 #include "log.h"
 
 
-ResourceManager::ResourceManager()
+ResourceManager::ResourceManager(Launcher& launcher) : m_launcher(launcher)
 {
 }
 
@@ -52,7 +52,8 @@ response ResourceManager::AddFiles(const Json::Value& jsData)
             if(vSplit.size() != 2 || jsData["multipart"]["data"]["label_"+vSplit[1]].isString() == false || jsData["multipart"]["data"]["description_"+vSplit[1]].isString() == false)
             {
                 theResponse.nHttpCode = 400;
-                theResponse.jsonData["metadata"].append("No metadata set for file: "+name);
+                theResponse.jsonData["result"] = false;
+                theResponse.jsonData["reason"].append("No metadata set for file: "+name);
                 pml::Log::Get(pml::Log::LOG_WARN) << " file '" << name << "' has no metadata.";
                 remove(jsData["multipart"]["files"][name].asString().c_str());
             }
@@ -83,7 +84,8 @@ response ResourceManager::AddFile( const std::string& sUploadName, const std::st
     else if(FileExists(sLabel))
     {
         theResponse.nHttpCode = 409;
-        theResponse.jsonData["result"] = "File already exists with the given label.";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("File already exists with the given label.");
         pml::Log::Get(pml::Log::LOG_ERROR) << "failed - label already in use" << std::endl;
         remove(sUploadName.c_str());
     }
@@ -116,7 +118,7 @@ response ResourceManager::AddFile( const std::string& sUploadName, const std::st
             pFile->InitJson();
 
             theResponse.nHttpCode = 201;
-            theResponse.jsonData["result"] = "Success";
+            theResponse.jsonData["result"] = true;
             theResponse.jsonData["uid"] = sUid;
             theResponse.jsonData["details"] = pFile->GetJson();
         }
@@ -124,7 +126,8 @@ response ResourceManager::AddFile( const std::string& sUploadName, const std::st
         {
             pml::Log::Get(pml::Log::LOG_ERROR) << "failed - could not create uid" << std::endl;
             theResponse.nHttpCode = 409;
-            theResponse.jsonData["result"] = "Unable to create unique id for item";
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("Unable to create unique id for item");
         }
         pml::Log::Get() << "success" << std::endl;
     }
@@ -143,7 +146,8 @@ response ResourceManager::AddSchedule(const Json::Value& jsData)
         if(ResourceExists(jsData["label"].asString(), m_mSchedules))
         {
             theResponse.nHttpCode = 409;
-            theResponse.jsonData["result"] = "Schedule already exists with the given label.";
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("Schedule already exists with the given label.");
             pml::Log::Get(pml::Log::LOG_ERROR) << "failed - label already in use" << std::endl;
         }
         else
@@ -154,14 +158,15 @@ response ResourceManager::AddSchedule(const Json::Value& jsData)
             {
                 SaveResources();
                 theResponse.nHttpCode = 201;
-                theResponse.jsonData["result"] = "Success";
+                theResponse.jsonData["result"] = true;
                 theResponse.jsonData["uid"] = sUid;
                 pml::Log::Get() << "success" << std::endl;
             }
             else
             {
                 theResponse.nHttpCode = 409;
-                theResponse.jsonData["result"] = "Unable to create unique id for item";
+                theResponse.jsonData["result"] = false;
+                theResponse.jsonData["reason"].append("Unable to create unique id for item");
                 pml::Log::Get(pml::Log::LOG_ERROR) << "failed - unable to create uid" << std::endl;
             }
         }
@@ -186,7 +191,8 @@ response ResourceManager::AddPlaylist(const Json::Value& jsData)
         if(ResourceExists(jsData["label"].asString(), m_mPlaylists))
         {
             theResponse.nHttpCode = 409;
-            theResponse.jsonData["result"] = "Playlist already exists with the given label.";
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("Playlist already exists with the given label.");
             pml::Log::Get(pml::Log::LOG_ERROR) << "failed - label already in use" << std::endl;
         }
         else
@@ -197,14 +203,15 @@ response ResourceManager::AddPlaylist(const Json::Value& jsData)
             {
                 SaveResources();
                 theResponse.nHttpCode = 201;
-                theResponse.jsonData["result"] = "Success";
+                theResponse.jsonData["result"] = true;
                 theResponse.jsonData["uid"] = sUid;
                 pml::Log::Get() << "success" << std::endl;
             }
             else
             {
                 theResponse.nHttpCode = 409;
-                theResponse.jsonData["result"] = "Unable to create unique id for item";
+                theResponse.jsonData["result"] = false;
+                theResponse.jsonData["reason"].append("Unable to create unique id for item");
 
                 pml::Log::Get(pml::Log::LOG_ERROR) << "failed - unable to create uid" << std::endl;
             }
@@ -227,13 +234,15 @@ response ResourceManager::ModifyFile(const std::string& sUid, const Json::Value&
     if(itFile == m_mFiles.end())
     {
         theResponse.nHttpCode = 404;
-        theResponse.jsonData["result"] = "File with uid '"+sUid+"' not found.";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("File with uid '"+sUid+"' not found.");
         pml::Log::Get(pml::Log::LOG_ERROR) << "failed - file '" << sUid << "'not found" << std::endl;
     }
     else if(itFile->second->IsLocked())
     {
         theResponse.nHttpCode = 423;
-        theResponse.jsonData["result"] = "File with uid '"+sUid+"' is locked.";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("File with uid '"+sUid+"' is locked.");
         pml::Log::Get(pml::Log::LOG_ERROR) << "failed - file '" << sUid << "'is locked" << std::endl;
     }
     else
@@ -244,7 +253,8 @@ response ResourceManager::ModifyFile(const std::string& sUid, const Json::Value&
             if(jsData["multipart"]["files"].isObject() == false || jsData["multipart"]["files"]["file"].isString() == false)
             {
                 theResponse.nHttpCode = 400;
-                theResponse.jsonData["result"] = "No file uploaded";
+                theResponse.jsonData["result"] = false;
+                theResponse.jsonData["reason"].append("No file uploaded");
             }
             else
             {
@@ -258,6 +268,7 @@ response ResourceManager::ModifyFile(const std::string& sUid, const Json::Value&
                 itFile->second->InitJson();
                 theResponse.nHttpCode = 200;
                 theResponse.jsonData = itFile->second->GetJson();
+                theResponse.jsonData["result"] = true;
                 SaveResources();
             }
         }
@@ -281,13 +292,14 @@ response ResourceManager::ModifyFileMeta(const std::map<std::string, std::shared
         if(FileExists(jsData["label"].asString()))
         {
             theResponse.nHttpCode = 409;
-            theResponse.jsonData["result"] = "File already exists with the given label.";
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("File already exists with the given label.");
             pml::Log::Get(pml::Log::LOG_ERROR) << "failed - label already in use" << std::endl;
         }
         else
         {
             itFile->second->UpdateJson(jsData);
-            theResponse.jsonData["result"] = "Success";
+            theResponse.jsonData["result"] = true;
             pml::Log::Get() << "success" << std::endl;
             SaveResources();
         }
@@ -310,13 +322,15 @@ response ResourceManager::ModifySchedule(const std::string& sUid, const Json::Va
     if(itSchedule == m_mSchedules.end())
     {
         theResponse.nHttpCode = 404;
-        theResponse.jsonData["result"] = "Schedule with uid '"+sUid+"' not found.";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("Schedule with uid '"+sUid+"' not found.");
         pml::Log::Get(pml::Log::LOG_ERROR) << "failed - schedule '" << sUid << "'not found" << std::endl;
     }
     else if(itSchedule->second->IsLocked())
     {
         theResponse.nHttpCode = 423;
-        theResponse.jsonData["result"] = "Schedule with uid '"+sUid+"' is locked.";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("Schedule with uid '"+sUid+"' is locked.");
     }
     else
     {
@@ -326,13 +340,14 @@ response ResourceManager::ModifySchedule(const std::string& sUid, const Json::Va
             if(ResourceExists(jsData["label"].asString(), m_mSchedules))
             {
                 theResponse.nHttpCode = 409;
-                theResponse.jsonData["result"] = "Schedule already exists with the given label.";
+                theResponse.jsonData["result"] = false;
+                theResponse.jsonData["reason"].append("Schedule already exists with the given label.");
                 pml::Log::Get(pml::Log::LOG_ERROR) << "failed - label already in use" << std::endl;
             }
             else
             {
                 itSchedule->second->UpdateJson(jsData);
-                theResponse.jsonData["result"] = "Success";
+                theResponse.jsonData["result"] = true;
                 pml::Log::Get() << "success" << std::endl;
                 SaveResources();
             }
@@ -356,13 +371,15 @@ response ResourceManager::ModifyPlaylist(const std::string& sUid, const Json::Va
     if(itPlaylist == m_mPlaylists.end())
     {
         theResponse.nHttpCode = 404;
-        theResponse.jsonData["result"] = "Playlist with uid '"+sUid+"' not found.";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("Playlist with uid '"+sUid+"' not found.");
         pml::Log::Get(pml::Log::LOG_ERROR) << "failed - playlist '" << sUid << "' not found" << std::endl;
     }
     else if(itPlaylist->second->IsLocked())
     {
         theResponse.nHttpCode = 423;
-        theResponse.jsonData["result"] = "Playlist with uid '"+sUid+"' is locked.";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("Playlist with uid '"+sUid+"' is locked.");
     }
     else
     {
@@ -372,13 +389,14 @@ response ResourceManager::ModifyPlaylist(const std::string& sUid, const Json::Va
             if(ResourceExists(jsData["label"].asString(), m_mPlaylists))
             {
                 theResponse.nHttpCode = 409;
-                theResponse.jsonData["result"] = "Playlist already exists with the given label.";
+                theResponse.jsonData["result"] = false;
+                theResponse.jsonData["reason"].append("Playlist already exists with the given label.");
                 pml::Log::Get(pml::Log::LOG_ERROR) << "failed - label already in use" << std::endl;
             }
             else
             {
                 itPlaylist->second->UpdateJson(jsData);
-                theResponse.jsonData["result"] = "Success";
+                theResponse.jsonData["result"] = true;
                 pml::Log::Get() << "success" << std::endl;
                 SaveResources();
             }
@@ -402,13 +420,15 @@ response ResourceManager::DeleteFile(const std::string& sUid)
     if(itFile == m_mFiles.end())
     {
         theResponse.nHttpCode = 404;
-        theResponse.jsonData["result"] = "File with uid '"+sUid+"' not found.";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("File with uid '"+sUid+"' not found.");
         pml::Log::Get(pml::Log::LOG_ERROR) << "failed - file '" << sUid << "' not found" << std::endl;
     }
     else if(itFile->second->IsLocked())
     {
         theResponse.nHttpCode = 423;
-        theResponse.jsonData["result"] = "File with uid '"+sUid+"' is locked.";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("File with uid '"+sUid+"' is locked.");
         pml::Log::Get(pml::Log::LOG_ERROR) << "failed - file '" << sUid << "' is locked" << std::endl;
 
     }
@@ -418,7 +438,7 @@ response ResourceManager::DeleteFile(const std::string& sUid)
         remove(std::string(m_sAudioFilePath+sUid).c_str());  //delete the actual file as well
 
         SaveResources();
-        theResponse.jsonData["result"] = "File with uid '"+sUid+"' deleted.";
+        theResponse.jsonData["result"] = true;
         pml::Log::Get() << "success" << std::endl;
     }
     return theResponse;
@@ -435,20 +455,22 @@ response ResourceManager::DeleteSchedule(const std::string& sUid)
     if(itSchedule == m_mSchedules.end())
     {
         theResponse.nHttpCode = 404;
-        theResponse.jsonData["result"] = "Schedule with uid '"+sUid+"' not found.";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("Schedule with uid '"+sUid+"' not found.");
         pml::Log::Get(pml::Log::LOG_ERROR) << "failed - schedule '" << sUid << "' not found" << std::endl;
     }
     else if(itSchedule->second->IsLocked())
     {
         theResponse.nHttpCode = 423;
-        theResponse.jsonData["result"] = "Schedule with uid '"+sUid+"' is locked.";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("Schedule with uid '"+sUid+"' is locked.");
         pml::Log::Get(pml::Log::LOG_ERROR) << "failed - schedule '" << sUid << "' is locked" << std::endl;
     }
     else
     {
         m_mSchedules.erase(sUid);
         SaveResources();
-        theResponse.jsonData["result"] = "Schedule with uid '"+sUid+"' deleted.";
+        theResponse.jsonData["result"] = true;
         pml::Log::Get() << "success" << std::endl;
     }
     return theResponse;
@@ -466,20 +488,22 @@ response ResourceManager::DeletePlaylist(const std::string& sUid)
     if(itPlaylist == m_mPlaylists.end())
     {
         theResponse.nHttpCode = 404;
-        theResponse.jsonData["result"] = "Playlist with uid '"+sUid+"' not found.";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("Playlist with uid '"+sUid+"' not found.");
         pml::Log::Get(pml::Log::LOG_ERROR) << "failed - playlist '" << sUid << "' not found" << std::endl;
     }
     else if(itPlaylist->second->IsLocked())
     {
         theResponse.nHttpCode = 423;
-        theResponse.jsonData["result"] = "Playlist with uid '"+sUid+"' is locked.";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("Playlist with uid '"+sUid+"' is locked.");
         pml::Log::Get(pml::Log::LOG_ERROR) << "failed - playlist '" << sUid << "' is locked" << std::endl;
     }
     else
     {
         m_mPlaylists.erase(sUid);
         SaveResources();
-        theResponse.jsonData["result"] = "Playlist with uid '"+sUid+"' deleted.";
+        theResponse.jsonData["result"] = true;
         pml::Log::Get() << "success" << std::endl;
     }
     return theResponse;
@@ -544,7 +568,8 @@ response ResourceManager::GetFile(const std::string& sUid)
     else
     {
         theResponse.nHttpCode = 404;
-        theResponse.jsonData["result"] = "File with uid '"+sUid+"' not found.";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("File with uid '"+sUid+"' not found.");
     }
     return theResponse;
 }
@@ -563,7 +588,8 @@ response ResourceManager::GetSchedule(const std::string& sUid)
     else
     {
         theResponse.nHttpCode = 404;
-        theResponse.jsonData["result"] = "Schedule with uid '"+sUid+"' not found.";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("Schedule with uid '"+sUid+"' not found.");
     }
     return theResponse;
 }
@@ -582,7 +608,8 @@ response ResourceManager::GetPlaylist(const std::string& sUid)
     else
     {
         theResponse.nHttpCode = 404;
-        theResponse.jsonData["result"] = "Playlist with uid '"+sUid+"' not found.";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("Playlist with uid '"+sUid+"' not found.");
     }
     return theResponse;
 }
@@ -595,12 +622,14 @@ response ResourceManager::ParseResource(const Json::Value& jsData)
     if(jsData["label"].isString() == false  || jsData["label"].asString().empty())
     {
         theResponse.nHttpCode = 400;
-        theResponse.jsonData["label"] = "No label sent or wrong type";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("No label sent or wrong type");
     }
     if(jsData["description"].isString() == false  || jsData["description"].asString().empty())
     {
         theResponse.nHttpCode = 400;
-        theResponse.jsonData["description"] = "No description sent or wrong type";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("No description sent or wrong type");
     }
     return theResponse;
 }
@@ -611,17 +640,20 @@ response ResourceManager::ParseFiles(const Json::Value& jsData)
     if(jsData["multipart"].isObject() == false)
     {
         theResponse.nHttpCode = 400;
-        theResponse.jsonData["multipart"] = "No multipart data sent";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("No multipart data sent");
     }
     if(jsData["files"].isObject() == false)
     {
         theResponse.nHttpCode = 400;
-        theResponse.jsonData["files"] = "No files sent";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("No files sent");
     }
     else if(jsData["data"].isObject() == false)
     {
         theResponse.nHttpCode = 400;
-        theResponse.jsonData["data"] = "No data sent";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("No data sent");
     }
     return theResponse;
 }
@@ -632,12 +664,14 @@ response ResourceManager::ParseFile(const std::string& sUploadName, const std::s
     if(sLabel.empty())
     {
         theResponse.nHttpCode = 400;
-        theResponse.jsonData["label"] = "Label is empty";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("Label is empty");
     }
     if(sDescription.empty())
     {
         theResponse.nHttpCode = 400;
-        theResponse.jsonData["description"] = "Description is empty";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("Description is empty");
     }
 
     //now work out the file type...
@@ -651,15 +685,18 @@ response ResourceManager::ParseFile(const std::string& sUploadName, const std::s
             break;
         case SF_ERR_SYSTEM:
             theResponse.nHttpCode = 500;
-            theResponse.jsonData["file"] = "System error";
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("System error");
          break;
         case SF_ERR_MALFORMED_FILE:
             theResponse.nHttpCode = 422;
-            theResponse.jsonData["file"] = "Malformed file";
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("Malformed file");
             break;
         case SF_ERR_UNSUPPORTED_ENCODING:
             theResponse.nHttpCode = 415;
-            theResponse.jsonData["file"] = "Unsupported encoding";
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("Unsupported encoding");
             break;
     }
     return theResponse;
@@ -670,10 +707,18 @@ response ResourceManager::ParseSchedule(const Json::Value& jsData)
 {
     response theResponse(ParseResource(jsData));
 
-    if(jsData["schedule"].isArray() == false)
+    /**
+    {
+        "files" : [
+                        { "uid" : "", "loop" : true/false, "cron" : "0 0 0 0 0 0 0" },
+                    ]
+    }
+    **/
+    if(jsData["files"].isArray() == false)
     {
         theResponse.nHttpCode = 400;
-        theResponse.jsonData["schedule"] = "No schedule sent or wrong type";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("No schedule sent or wrong type");
         theResponse.jsonData["data"] = jsData;
     }
 
@@ -681,20 +726,22 @@ response ResourceManager::ParseSchedule(const Json::Value& jsData)
         return theResponse;
 
     //now check the schedule is valid
-    for(size_t i=0; i < jsData["schedule"].size(); i++)
+    for(size_t i=0; i < jsData["files"].size(); i++)
     {
-        if(jsData["schedule"][i].isObject() == false ||
-           jsData["schedule"][i]["offset"].isUInt64() == false || jsData["schedule"][i]["file"].isString() == false || jsData["schedule"][i]["loop"].isBool() == false)
+        if(jsData["files"][i].isObject() == false ||
+           jsData["files"][i]["cron"].isString() == false || jsData["files"][i]["uid"].isString() == false || jsData["files"][i]["loop"].isBool() == false)
         {
             theResponse.nHttpCode = 400;
-            theResponse.jsonData["schedule"]="Not all schedule entries are correct";
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("Not all schedule entries are correct");
             theResponse.jsonData["data"] = jsData;
             return theResponse;
         }
-        else if(m_mFiles.find(jsData["schedule"][i]["file"].asString()) == m_mFiles.end())
+        else if(m_mFiles.find(jsData["files"][i]["uid"].asString()) == m_mFiles.end())
         {
             theResponse.nHttpCode = 400;
-            theResponse.jsonData["schedule"]="File '"+jsData["schedule"][i]["file"].asString()+"' does not exist";
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("File '"+jsData["files"][i]["file"].asString()+"' does not exist");
             theResponse.jsonData["data"] = jsData;
             return theResponse;
         }
@@ -707,10 +754,20 @@ response ResourceManager::ParsePlaylist(const Json::Value& jsData)
 {
     response theResponse(ParseResource(jsData));
 
+    /**
+    {
+        "files" : [
+                      { "uid" : "", "loop": n },
+                      { "uid" : "", "loop": n }
+                      ]
+    }
+    **/
+
     if(jsData["playlist"].isArray() == false)
     {
         theResponse.nHttpCode = 400;
-        theResponse.jsonData["playlist"] = "No playlist sent or wrong type";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("No playlist sent or wrong type");
         theResponse.jsonData["data"] = jsData;
     }
 
@@ -718,19 +775,21 @@ response ResourceManager::ParsePlaylist(const Json::Value& jsData)
         return theResponse;
 
     //now check the schedule is valid
-    for(size_t i=0; i < jsData["playlist"].size(); i++)
+    for(size_t i=0; i < jsData["files"].size(); i++)
     {
-        if(jsData["playlist"][i].isString() == false)
+        if(jsData["files"][i].isObject() == false || jsData["files"][i]["uid"].isString() == false)
         {
             theResponse.nHttpCode = 400;
-            theResponse.jsonData["playlist"]="Not all playlist entries are correct";
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("Not all playlist entries are correct");
             theResponse.jsonData["data"] = jsData;
             return theResponse;
         }
-        else if(m_mFiles.find(jsData["playlist"][i].asString()) == m_mFiles.end())
+        else if(m_mFiles.find(jsData["files"][i]["uid"].asString()) == m_mFiles.end())
         {
             theResponse.nHttpCode = 400;
-            theResponse.jsonData["playlist"]="File '"+jsData["playlist"][i].asString()+"' does not exist";
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("File '"+jsData["files"][i].asString()+"' does not exist");
             theResponse.jsonData["data"] = jsData;
             return theResponse;
         }
@@ -905,4 +964,209 @@ std::map<std::string, std::shared_ptr<Resource> >::const_iterator ResourceManage
 std::map<std::string, std::shared_ptr<Resource> >::const_iterator ResourceManager::FindPlaylist(const std::string& sUid) const
 {
     return m_mPlaylists.find(sUid);
+}
+
+
+void ResourceManager::LockResource(const std::string& sUid, bool bLock)
+{
+
+    auto itFile = m_mFiles.find(sUid);
+    if(itFile != m_mFiles.end())
+    {
+        itFile->second->Lock(bLock);
+
+    }
+    else
+    {
+        auto itPlaylist = m_mPlaylists.find(sUid);
+        if(itPlaylist != m_mPlaylists.end())
+        {
+            itPlaylist->second->Lock(bLock);
+            //lock all the files in the playlist as well....
+            for(size_t i = 0; i < itPlaylist->second->GetJson()["files"].size(); i++)
+            {
+                LockResource(itPlaylist->second->GetJson()["files"][i]["uid"].asString(), bLock);
+            }
+        }
+        else
+        {
+            auto itSchedule = m_mSchedules.find(sUid);
+            if(itSchedule != m_mSchedules.end())
+            {
+                itSchedule->second->Lock(bLock);
+                for(size_t i = 0; i < itSchedule->second->GetJson()["files"].size(); i++)
+                {
+                    LockResource(itSchedule->second->GetJson()["files"][i]["uid"].asString(), bLock);
+                }
+            }
+        }
+    }
+}
+
+
+response ResourceManager::ModifyStatus(const Json::Value& jsData)
+{
+    pml::Log::Get(pml::Log::LOG_DEBUG) << "ResourceManager\t" << "ModifyStatus: ";
+    if(jsData["command"].isString() == false)
+    {
+        response theResponse(400);
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("No command sent");
+        pml::Log::Get(pml::Log::LOG_ERROR) << " no command sent" << std::endl;
+        return theResponse;
+    }
+
+    if(CmpNoCase(jsData["command"].asString(), "play"))
+    {
+        pml::Log::Get(pml::Log::LOG_INFO) << "play " << std::endl;
+        return Play(jsData);
+    }
+    else if(CmpNoCase(jsData["command"].asString(), "pause"))
+    {
+        pml::Log::Get(pml::Log::LOG_INFO) << "pause" << std::endl;
+        return Pause(jsData);
+    }
+    else if(CmpNoCase(jsData["command"].asString(), "stop"))
+    {
+        pml::Log::Get(pml::Log::LOG_INFO) << "stop" << std::endl;
+        return  Stop(jsData);
+    }
+    else
+    {
+        response theResponse(400);
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("Invalid command sent");
+        pml::Log::Get(pml::Log::LOG_ERROR) << "'" << jsData["command"].asString() <<"' is not a valid command" << std::endl;
+        return theResponse;
+    }
+
+}
+
+response ResourceManager::Play(const Json::Value& jsData)
+{
+    pml::Log::Get(pml::Log::LOG_DEBUG) << "ResourceManager\tPlay: ";
+
+    //check if already playing
+    if(m_launcher.IsPlaying())
+    {
+        response theResponse(409);
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("Player already running");
+        pml::Log::Get(pml::Log::LOG_WARN) << "- Player already running" << std::endl;
+        return theResponse;
+    }
+
+    //check if data is valid
+    if(jsData["type"].isString() == false)
+    {
+        response theResponse(400);
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("Type not set");
+        pml::Log::Get(pml::Log::LOG_ERROR) << "Type not set" << std::endl;
+        return theResponse;
+    }
+    else if(jsData["uid"].isString() == false)
+    {
+        response theResponse(400);
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("uid not set");
+        pml::Log::Get(pml::Log::LOG_ERROR) << "uid not set" << std::endl;
+        return theResponse;
+    }
+
+    //play correct type
+    response theResponse(400);
+    if(CmpNoCase(jsData["type"].asString(), "file"))
+    {
+        theResponse = PlayFile(jsData);
+    }
+    else if(CmpNoCase(jsData["type"].asString(), "playlist"))
+    {
+        theResponse = PlayPlaylist(jsData);
+    }
+    else if(CmpNoCase(jsData["type"].asString(), "schedule"))
+    {
+        theResponse = PlaySchedule(jsData);
+    }
+    else
+    {
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("Type not valid");
+    }
+
+    //Lock the resource if we managed to play it.
+    if(theResponse.nHttpCode == 200)
+    {
+        m_sResourcePlaying = jsData["uid"].asString();
+        LockResource(m_sResourcePlaying,true);
+    }
+    return theResponse;
+}
+
+response ResourceManager::PlayFile(const Json::Value& jsData)
+{
+    pml::Log::Get(pml::Log::LOG_DEBUG) << "Launcher\tPlay: ";
+    if(FindFile(jsData["uid"].asString()) == GetFilesEnd())
+    {
+        response theResponse(404);
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("file not found");
+        pml::Log::Get(pml::Log::LOG_ERROR) << "file not found" << std::endl;
+        return theResponse;
+    }
+    else
+    {
+        return m_launcher.LaunchPlayer("f", jsData["uid"]);
+    }
+
+}
+
+response ResourceManager::PlayPlaylist(const Json::Value& jsData)
+{
+    auto itPlaylist = FindPlaylist(jsData["uid"].asString());
+    if(itPlaylist == GetPlaylistsEnd())
+    {
+        response theResponse(404);
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("playlist not found");
+        return theResponse;
+    }
+    else
+    {
+        return m_launcher.LaunchPlayer("p", itPlaylist->second->GetJson());
+    }
+}
+
+response ResourceManager::PlaySchedule(const Json::Value& jsData)
+{
+    auto itSchedule = FindSchedule(jsData["uid"].asString());
+    if(itSchedule == GetSchedulesEnd())
+    {
+        response theResponse(404);
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("schedule not found");
+        return theResponse;
+    }
+    else
+    {
+        return m_launcher.LaunchPlayer("s", itSchedule->second->GetJson());
+    }
+}
+
+response ResourceManager::Pause(const Json::Value& jsData)
+{
+    return m_launcher.PausePlayer();
+}
+
+response ResourceManager::Stop(const Json::Value& jsData)
+{
+
+    return m_launcher.StopPlayer();
+
+}
+
+
+void ResourceManager::LockPlayingResource(bool bLock)
+{
+    LockResource(m_sResourcePlaying, bLock);
 }

@@ -1,37 +1,35 @@
 #pragma once
 #include "json/json.h"
 #include "response.h"
-#include "resourcemanager.h"
+#include <functional>
 
 class Launcher
 {
     public:
-        Launcher(ResourceManager& manager);
+        Launcher();
 
-        response Play(const Json::Value& jsData);
-        response Pause(const Json::Value& jsData);
-        response Stop(const Json::Value& jsData);
-
-
-    private:
-        response PlayFile(const Json::Value& jsData);
-        response PlaySchedule(const Json::Value& jsData);
-        response PlayPlaylist(const Json::Value& jsData);
+        void AddCallbacks(std::function<void(const std::string&)> statusCallback, std::function<void(int)> m_exitCallback);
 
         response LaunchPlayer(std::string sType, const Json::Value& jsData);
 
+        response PausePlayer();
+        response StopPlayer();
+
+        bool IsPlaying() const;
+
+    private:
+
         void PipeThread();
 
-
-        ResourceManager& m_manager;
-
         pid_t m_pid;
-        int m_cout_pipe[2];
-        int m_cerr_pipe[2];
+        int m_nPipe[2];
+        enum {READ=0, WRITE};
+
         int m_nExitCode;
 
         std::string m_sPlayer;
 
-        ;
+        std::function<void(const std::string&)> m_statusCallback;
+        std::function<void(int)> m_exitCallback;
 };
 

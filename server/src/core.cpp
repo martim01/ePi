@@ -8,6 +8,8 @@
 #include <sstream>
 #include "log.h"
 #include <spawn.h>
+#include <sys/wait.h>
+#include <sys/types.h>
 
 using namespace std::placeholders;
 using namespace pml;
@@ -33,8 +35,7 @@ const url Core::EP_FILES       = url(EP_EPI.Get()+"/"+FILES);
 const url Core::EP_INFO        = url(EP_EPI.Get()+"/"+INFO);
 
 
-Core::Core() :
-m_launcher(m_manager)
+Core::Core() : m_manager(m_launcher)
 {
     pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
     pml::Log::Get() << "Core\tStart" << std::endl;
@@ -52,7 +53,10 @@ void Core::Run()
     if(m_server.Init(ini))
     {
         CreateEndpoints();
-        m_server.Run();   //start the webserver
+
+        m_launcher.AddCallbacks(std::bind(&Core::StatusCallback, this, _1), std::bind(&Core::ExitCallback, this, _1));
+
+        m_server.Run(true,50);   //start the webserver
 
         //loop forever
         while(true)
@@ -116,6 +120,8 @@ bool Core::CreateEndpoints()
         m_server.AddEndpoint(endpoint(MongooseServer::DELETE, theUrl), std::bind(&Core::DeleteSchedule, this, _1,_2,_3,_4));
     }
 
+
+
     return true;
 }
 
@@ -137,6 +143,7 @@ response Core::GetEpi(mg_connection* pConnection, const query& theQuery, const p
     theResponse.jsonData.append(POWER);
     theResponse.jsonData.append(CONFIG);
     theResponse.jsonData.append(INFO);
+    theResponse.jsonData.append(STATUS);
     return theResponse;
 }
 
@@ -170,12 +177,12 @@ response Core::GetConfig(mg_connection* pConnection, const query& theQuery, cons
 
 response Core::GetStatus(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
+    //lock as jsStatus can be called by pipe thread and server thread
+    std::lock_guard<std::mutex> lg(m_mutex);
+
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetStatus" << std::endl;
     response theResponse;
-
-    // @todo(martim01) GetStatus
-    // Playing or not.
-    // If playing then the file and time of playing and type of playing (file, schedule or playlist)
+    theResponse.jsonData = m_jsStatus;
     return theResponse;
 }
 
@@ -183,8 +190,8 @@ response Core::GetStatus(mg_connection* pConnection, const query& theQuery, cons
 response Core::GetInfo(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetInfo" << std::endl;
-    response theResponse;
 
+    response theResponse;
     theResponse.jsonData = m_info.GetInfo();
 
 
@@ -227,39 +234,9 @@ response Core::GetSchedule(mg_connection* pConnection, const query& theQuery, co
 response Core::PutStatus(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutStatus" << std::endl;
-    response theResponse;
-
     Json::Value jsData(ConvertToJson(theData.Get()));
-    if(jsData["command"].isString() == false)
-    {
-        theResponse.nHttpCode = 400;
-        theResponse.jsonData["result"] = "No command sent";
-        Log::Get(Log::LOG_ERROR) << " no command sent" << std::endl;
-    }
-    else if(CmpNoCase(jsData["command"].asString(), "play"))
-    {
-        Log::Get(Log::LOG_INFO) << "play" << std::endl;
-    }
-    else if(CmpNoCase(jsData["command"].asString(), "pause"))
-    {
-        Log::Get(Log::LOG_INFO) << "pause" << std::endl;
-    }
-    else if(CmpNoCase(jsData["command"].asString(), "stop"))
-    {
-        Log::Get(Log::LOG_INFO) << "stop" << std::endl;
-    }
-    else
-    {
-        theResponse.nHttpCode = 400;
-        theResponse.jsonData["result"] = "Invalid command sent";
-        Log::Get(Log::LOG_ERROR) << "'" << jsData["command"].asString() <<"' is not a valid command" << std::endl;
-    }
-    // @todo(martim01) PutStatus
-    // play, pause, stop
-    // file/schedule playlist
-    // uid
 
-    return theResponse;
+    return m_manager.ModifyStatus(jsData);
 }
 
 response Core::PutPower(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
@@ -441,3 +418,51 @@ response Core::PostSchedule(mg_connection* pConnection, const query& theQuery, c
 }
 
 
+void Core::StatusCallback(const std::string& sData)
+{
+    //lock as jsStatus can be called by pipe thread and server thread
+    std::lock_guard<std::mutex> lg(m_mutex);
+
+    m_jsStatus = Json::Value(Json::objectValue);    //reset
+
+    m_jsStatus["player"] ="running";
+    m_jsStatus["status"] = ConvertToJson(sData);
+    m_server.SendWebsocketMessage(m_jsStatus);
+}
+
+void Core::ExitCallback(int nExit)
+{
+    pml::Log::Get() << "Player exited" << std::endl;
+    // unlock resources
+    m_manager.LockPlayingResource(false);
+
+    //lock as jsStatus can be called by pipe thread and server thread
+    std::lock_guard<std::mutex> lg(m_mutex);
+
+    m_jsStatus = Json::Value(Json::objectValue);    //reset
+
+    m_jsStatus["player"] = "stopped";
+    if(WIFEXITED(nExit))
+    {
+        m_jsStatus["exit"]["code"] = WEXITSTATUS(nExit);
+    }
+    if(WIFSIGNALED(nExit))
+    {
+        m_jsStatus["exit"]["signal"]["code"] = WTERMSIG(nExit);
+        m_jsStatus["exit"]["signal"]["description"] = strsignal(WTERMSIG(nExit));
+        if(WCOREDUMP(nExit))
+        {
+            m_jsStatus["exit"]["core_dump"] = true;
+        }
+    }
+    if(WIFSTOPPED(nExit))
+    {
+        m_jsStatus["stopped"]["signal"] = WSTOPSIG(nExit);
+    }
+    if(WIFCONTINUED(nExit))
+    {
+        m_jsStatus["resumed"]["signal"] = WSTOPSIG(nExit);
+    }
+
+    m_server.SendWebsocketMessage(m_jsStatus);
+}

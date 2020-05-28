@@ -15,6 +15,7 @@ class Core
         void Run();
 
 
+
         response GetRoot(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
         response GetEpi(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
 
@@ -46,16 +47,19 @@ class Core
         response PostSchedule(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
 
 
+        void StatusCallback(const std::string& sData);
+        void ExitCallback(int nPid);
 
     private:
+        Launcher m_launcher;
         ResourceManager m_manager;
         MongooseServer m_server;
         SysInfoManager m_info;
-        Launcher m_launcher;
+
 
         bool CreateEndpoints();
 
-
+        Json::Value m_jsStatus;
 
          /**
         x-epi                               GET
@@ -91,5 +95,5 @@ class Core
         static const std::string FILES;
         static const std::string INFO;
 
-
+        std::mutex m_mutex;
 };

@@ -30,8 +30,11 @@
 *.exe
 *.out
 *.app
+server/bin
+player3/bin
 
 
 # Codeblocks
 *.depend
 *.layout
+

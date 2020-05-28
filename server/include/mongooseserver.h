@@ -43,8 +43,12 @@ class MongooseServer
         MongooseServer();
 
         bool Init(const iniManager& iniConfig);
-        ///< @brief Creates the thread that runs the webserver loop
-        void Run();
+
+        /** @brief Creates the thread that runs the webserver loop
+        *   @param bThread if true will run in a separate thread, if false will run in main thread
+        *   @param nTimeoutms the time in milliseconds to wait for a mongoose event to happen
+        **/
+        void Run(bool bThread, unsigned int nTimeoutMs=100);
 
 
         /** Handles an event
@@ -66,6 +70,11 @@ class MongooseServer
         *   @return <i>bool</i> true on success
         **/
         bool DeleteEndpoint(const endpoint& theEndpoint);
+
+        /** Sets the function that will be called every time the poll function times out or an event happens
+        *   @param func the function to call. It will be passed one argument, the number of milliseconds since it was last called
+        **/
+        void SetLoopCallback(std::function<void(unsigned int)> func);
 
         void SendWebsocketMessage(const Json::Value& jsMessage);
 
@@ -129,6 +138,9 @@ class MongooseServer
 
         mg_serve_http_opts m_ServerOpts;
 
+        int m_nPollTimeout;
+
+        std::function<void(unsigned int)> m_loopCallback;
         std::map<endpoint, std::function<response(mg_connection*, const query&, const postData&, const url&)>> m_mEndpoints;
         std::multimap<std::string, method> m_mmOptions;
 
@@ -136,4 +148,5 @@ class MongooseServer
         multipartData m_multipartData;
 
         std::mutex m_mutex;
+        bool m_bThreaded;
 };

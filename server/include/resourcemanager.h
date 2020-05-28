@@ -6,6 +6,8 @@
 #include "json/json.h"
 #include "inimanager.h"
 #include "response.h"
+#include "launcher.h"
+
 
 class AudioFile;
 class Resource;
@@ -14,7 +16,7 @@ class Resource;
 class ResourceManager
 {
     public:
-        ResourceManager();
+        ResourceManager(Launcher& launcher);
         ~ResourceManager();
 
         void Init(const iniManager& iniConfig);
@@ -40,7 +42,9 @@ class ResourceManager
         response GetSchedule(const std::string& sUid);
         response GetPlaylist(const std::string& sUid);
 
-        const std::string& GetAudioPath() { return m_sAudioFilePath; }
+        response ModifyStatus(const Json::Value& jsData);
+
+
 
         std::map<std::string, std::shared_ptr<AudioFile> >::const_iterator GetFilesBegin() const;
         std::map<std::string, std::shared_ptr<AudioFile> >::const_iterator GetFilesEnd() const;
@@ -54,9 +58,16 @@ class ResourceManager
         std::map<std::string, std::shared_ptr<Resource> >::const_iterator FindSchedule(const std::string& sUid) const;
         std::map<std::string, std::shared_ptr<Resource> >::const_iterator FindPlaylist(const std::string& sUid) const;
 
+        void LockPlayingResource(bool bLock);
+        const std::string& GetAudioPath() { return m_sAudioFilePath; }
+
+
+
     private:
         bool LoadResources();
         bool SaveResources();
+
+        void LockResource(const std::string& sUid, bool bLock);
 
         response AddFile(const std::string& sUploadName, const std::string& sLabel, const std::string& sDescription);
         response ModifyFileMeta(const std::map<std::string, std::shared_ptr<AudioFile> >::iterator& itFile, const Json::Value& jsData);
@@ -71,6 +82,14 @@ class ResourceManager
         bool ResourceExists(const std::string& sLabel, const std::map<std::string, std::shared_ptr<Resource> >& mResource);
 
 
+        response Play(const Json::Value& jsData);
+        response Pause(const Json::Value& jsData);
+        response Stop(const Json::Value& jsData);
+
+        response PlayFile(const Json::Value& jsData);
+        response PlayPlaylist(const Json::Value& jsData);
+        response PlaySchedule(const Json::Value& jsData);
+
         std::string m_sAudioFilePath;
         std::string m_sResourcePath;
         std::string m_sLogPath;
@@ -80,6 +99,9 @@ class ResourceManager
         std::map<std::string, std::shared_ptr<Resource> > m_mPlaylists;
 
         std::mutex m_mutex;
+
+        Launcher& m_launcher;
+        std::string m_sResourcePlaying;
 
         enum {WAV=250, MP3=251};
 };
