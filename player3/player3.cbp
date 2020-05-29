@@ -11,7 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="w abeabbbf-1acf-3fd8-b0c2-4e571a3b510e 2 0" />
+				<Option parameters="w 48.wav 2 0" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>

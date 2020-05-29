@@ -47,12 +47,16 @@ void PlaySoundFile(std::mutex& mainMutex, std::condition_variable& mainCV, Playo
         }
         //Init the resampler
         int nSampleRate = sf.GetSampleRate();
-        Resampler resample(48000);
-        if(resample.Init(sf.GetChannels(), sf.GetSampleRate()) == false)
-        {
-            return;
-        }
 
+        std::unique_ptr<Resampler>pSampler(nullptr);
+        if(nSampleRate != 48000)
+        {
+            pSampler = std::unique_ptr<Resampler>(new Resampler(48000));
+            if(pSampler->Init(sf.GetChannels(), sf.GetSampleRate()) == false)
+            {
+                return;
+            }
+        }
 
         std::chrono::time_point<std::chrono::high_resolution_clock> start(std::chrono::high_resolution_clock::now());
 
@@ -69,13 +73,20 @@ void PlaySoundFile(std::mutex& mainMutex, std::condition_variable& mainCV, Playo
         while(nTimesToPlay != 0)
         {
             int64_t nRead = sf.ReadAudio(vRead,nOffset, nTimesToPlay);
-            if(!resample.Resample(vRead, vResample))
+            if(pSampler != nullptr)
             {
-                jsStatus["error"] = true;
+                if(!pSampler->Resample(vRead, vResample))
+                {
+                    jsStatus["error"] = true;
+                }
+                else
+                {
+                    player.AddSamples(vResample);
+                }
             }
             else
             {
-                player.AddSamples(vResample);
+                player.AddSamples(vRead);
             }
             //wait for player to say it needs more samples
             std::unique_lock<std::mutex> lck(mainMutex);
@@ -116,7 +127,7 @@ int main(int argc, char* argv[])
 
     std::mutex mainMutex;
     std::condition_variable mainCv;
-    Playout player(mainMutex, mainCv, 3);
+    Playout player(mainMutex, mainCv, 0);
     player.Init(0.4);
 
     //debug stuff
