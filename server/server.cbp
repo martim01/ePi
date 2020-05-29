@@ -53,12 +53,16 @@
 			<Add directory="../external/log/include" />
 			<Add directory="include" />
 			<Add directory="../external/uuid" />
-			<Add directory="../external/cpp-base64" />
+			<Add directory="../common/include" />
 		</Compiler>
 		<Linker>
 			<Add library="pthread" />
 			<Add directory="../external/log/lib" />
 		</Linker>
+		<Unit filename="../common/include/utils.h" />
+		<Unit filename="../common/src/inimanager.cpp" />
+		<Unit filename="../common/src/inisection.cpp" />
+		<Unit filename="../common/src/utils.cpp" />
 		<Unit filename="../external/jsoncpp/dist/jsoncpp.cpp" />
 		<Unit filename="../external/uuid/guid.cpp" />
 		<Unit filename="../external/uuid/guid.h" />
@@ -66,8 +70,6 @@
 		<Unit filename="../external/uuid/md5.h" />
 		<Unit filename="include/audiofile.h" />
 		<Unit filename="include/core.h" />
-		<Unit filename="include/inimanager.h" />
-		<Unit filename="include/inisection.h" />
 		<Unit filename="include/launcher.h" />
 		<Unit filename="include/mongoose.h" />
 		<Unit filename="include/mongooseserver.h" />
@@ -77,12 +79,10 @@
 		<Unit filename="include/resourcemanager.h" />
 		<Unit filename="include/response.h" />
 		<Unit filename="include/sysinfomanager.h" />
-		<Unit filename="include/utils.h" />
+		<Unit filename="include/uidutils.h" />
 		<Unit filename="include/wavfile.h" />
 		<Unit filename="src/audiofile.cpp" />
 		<Unit filename="src/core.cpp" />
-		<Unit filename="src/inimanager.cpp" />
-		<Unit filename="src/inisection.cpp" />
 		<Unit filename="src/launcher.cpp" />
 		<Unit filename="src/main.cpp" />
 		<Unit filename="src/mongoose.c">
@@ -93,7 +93,7 @@
 		<Unit filename="src/resource.cpp" />
 		<Unit filename="src/resourcemanager.cpp" />
 		<Unit filename="src/sysinfomanager.cpp" />
-		<Unit filename="src/utils.cpp" />
+		<Unit filename="src/uidutils.cpp" />
 		<Unit filename="src/wavfile.cpp" />
 		<Extensions>
 			<code_completion />

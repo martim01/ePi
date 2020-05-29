@@ -90,6 +90,9 @@ class ResourceManager
         response PlayPlaylist(const Json::Value& jsData);
         response PlaySchedule(const Json::Value& jsData);
 
+        response GetSchedulesAndPlaylistsContainingFile(const std::string& sUid);
+        Json::Value GetResourcesFileIn(const std::string& sUid, std::map<std::string, std::shared_ptr<Resource> >& mResource);
+
         std::string m_sAudioFilePath;
         std::string m_sResourcePath;
         std::string m_sLogPath;

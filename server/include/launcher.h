@@ -10,7 +10,7 @@ class Launcher
 
         void AddCallbacks(std::function<void(const std::string&)> statusCallback, std::function<void(int)> m_exitCallback);
 
-        response LaunchPlayer(std::string sType, const Json::Value& jsData);
+        response LaunchPlayer(std::string sType, const Json::Value& jsData, int nLoop=0, bool bShuffle=false);
 
         response PausePlayer();
         response StopPlayer();

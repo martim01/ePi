@@ -12,6 +12,7 @@
 #include "log.h"
 #include <chrono>
 #include "utils.h"
+#include "uidutils.h"
 #include "resourcemanager.h"
 #include "sysinfomanager.h"
 

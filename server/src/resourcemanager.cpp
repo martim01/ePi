@@ -3,6 +3,7 @@
 #include <fstream>
 
 #include "utils.h"
+#include "uidutils.h"
 #include "audiofile.h"
 #include "wavfile.h"
 #include "mp3file.h"
@@ -434,12 +435,24 @@ response ResourceManager::DeleteFile(const std::string& sUid)
     }
     else
     {
-        m_mFiles.erase(sUid);
-        remove(std::string(m_sAudioFilePath+sUid).c_str());  //delete the actual file as well
+        response contains(GetSchedulesAndPlaylistsContainingFile(sUid));
+        if(contains.nHttpCode == 423)
+        {
+            theResponse.nHttpCode = 423;
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("File with uid '"+sUid+"' is referenced by one or more playlists or schedules.");
+            theResponse.jsonData["reason"].append(contains.jsonData);
+            pml::Log::Get(pml::Log::LOG_ERROR) << "failed - file '" << sUid << "' is referenced by one or more playlists or schedules" << std::endl;
+        }
+        else
+        {
+            m_mFiles.erase(sUid);
+            remove(std::string(m_sAudioFilePath+sUid).c_str());  //delete the actual file as well
 
-        SaveResources();
-        theResponse.jsonData["result"] = true;
-        pml::Log::Get() << "success" << std::endl;
+            SaveResources();
+            theResponse.jsonData["result"] = true;
+            pml::Log::Get() << "success" << std::endl;
+        }
     }
     return theResponse;
 }
@@ -1106,7 +1119,8 @@ response ResourceManager::Play(const Json::Value& jsData)
 response ResourceManager::PlayFile(const Json::Value& jsData)
 {
     pml::Log::Get(pml::Log::LOG_DEBUG) << "Launcher\tPlay: ";
-    if(FindFile(jsData["uid"].asString()) == GetFilesEnd())
+    auto itFile = FindFile(jsData["uid"].asString());
+    if(itFile == GetFilesEnd())
     {
         response theResponse(404);
         theResponse.jsonData["result"] = false;
@@ -1114,9 +1128,18 @@ response ResourceManager::PlayFile(const Json::Value& jsData)
         pml::Log::Get(pml::Log::LOG_ERROR) << "file not found" << std::endl;
         return theResponse;
     }
+    else if(jsData["loop"].isInt() == false)
+    {
+        response theResponse(400);
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("loop not set");
+        pml::Log::Get(pml::Log::LOG_ERROR) << "loop not set" << std::endl;
+        return theResponse;
+    }
     else
     {
-        return m_launcher.LaunchPlayer("f", jsData["uid"]);
+        return m_launcher.LaunchPlayer(itFile->second->GetType()=="wavfile" ? "w" : "m",
+                                        jsData["uid"], jsData["loop"].asInt());
     }
 
 }
@@ -1131,9 +1154,25 @@ response ResourceManager::PlayPlaylist(const Json::Value& jsData)
         theResponse.jsonData["reason"].append("playlist not found");
         return theResponse;
     }
+    else if(jsData["loop"].isInt() == false)
+    {
+        response theResponse(400);
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("loop not set");
+        pml::Log::Get(pml::Log::LOG_ERROR) << "loop not set" << std::endl;
+        return theResponse;
+    }
+    else if(jsData["shuffle"].isBool() == false)
+    {
+        response theResponse(400);
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("shuffle not set");
+        pml::Log::Get(pml::Log::LOG_ERROR) << "shuffle not set" << std::endl;
+        return theResponse;
+    }
     else
     {
-        return m_launcher.LaunchPlayer("p", itPlaylist->second->GetJson());
+        return m_launcher.LaunchPlayer("p", itPlaylist->second->GetJson(), jsData["loop"].asInt(), jsData["shuffle"].asBool());
     }
 }
 
@@ -1169,4 +1208,37 @@ response ResourceManager::Stop(const Json::Value& jsData)
 void ResourceManager::LockPlayingResource(bool bLock)
 {
     LockResource(m_sResourcePlaying, bLock);
+}
+
+
+response ResourceManager::GetSchedulesAndPlaylistsContainingFile(const std::string& sUid)
+{
+    response theResponse;
+    theResponse.jsonData["schedules"] = GetResourcesFileIn(sUid, m_mSchedules);
+    theResponse.jsonData["playlists"] = GetResourcesFileIn(sUid, m_mPlaylists);
+
+    if(theResponse.jsonData["schedules"].size() >0 || theResponse.jsonData["playlists"].size() >0)
+    {
+        theResponse.nHttpCode = 423;
+    }
+    return theResponse;
+}
+
+Json::Value ResourceManager::GetResourcesFileIn(const std::string& sUid, std::map<std::string, std::shared_ptr<Resource> >& mResource)
+{
+    Json::Value jsResources(Json::arrayValue);
+    for(auto pairResource : mResource)
+    {
+        for(size_t i = 0; i < pairResource.second->GetJson()["files"].size(); i++)
+        {
+            if(pairResource.second->GetJson()["files"][i]["uid"] == sUid)
+            {
+                Json::Value jsValue;
+                jsValue["uid"] = pairResource.second->GetUid();
+                jsValue["label"] = pairResource.second->GetLabel();
+                jsResources.append(jsValue);
+            }
+        }
+    }
+    return jsResources;
 }

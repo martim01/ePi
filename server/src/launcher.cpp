@@ -70,7 +70,7 @@ bool Launcher::IsPlaying() const
 
 
 
-response Launcher::LaunchPlayer(std::string sType, const Json::Value& jsData)
+response Launcher::LaunchPlayer(std::string sType, const Json::Value& jsData, int nLoop, bool bShuffle)
 {
     pml::Log::Get(pml::Log::LOG_DEBUG) << "Launcher\tLaunchPlayer: ";
 
@@ -123,7 +123,13 @@ response Launcher::LaunchPlayer(std::string sType, const Json::Value& jsData)
         ssData << jsData;
         std::string sData = ssData.str();
 
-        char* args[] = {&m_sPlayer[0], &sType[0], &sData[0], nullptr};
+        std::stringstream ssLoop;
+        ssLoop << nLoop;
+        std::string sLoop = ssLoop.str();
+
+        std::string sShuffle(bShuffle ? "1" : "0")
+
+        char* args[] = {&m_sPlayer[0], &sType[0], &sData[0], &sLoop[0], &sShuffle[0], nullptr};
         nError = execv(m_sPlayer.c_str(), args);
 
         if(nError)
