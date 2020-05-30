@@ -117,6 +117,7 @@ void Playout::OutputCallback(float* pBuffer, size_t nFrameCount, double dPlayout
             pBuffer[i] = 0.0;
         }
     }
+
     if(bUnderrun)
     {
         pml::Log::Get(pml::Log::LOG_WARN) << "Buffer underrun!" << std::endl;
@@ -176,7 +177,8 @@ size_t Playout::AddSamples(std::vector<float> vSamples)
     std::lock_guard<std::mutex> lg(m_mutex);
     for(size_t i = 0; i < vSamples.size(); i++)
     {
-        m_qBuffer.push(vSamples[i]);
+
+         m_qBuffer.push(vSamples[i]);
     }
     return m_qBuffer.size();
 }

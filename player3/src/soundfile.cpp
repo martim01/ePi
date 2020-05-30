@@ -1,6 +1,6 @@
 #include "soundfile.h"
 #include "sndfile.hh"
-
+#include <iostream>
 
 SoundFile::SoundFile(const std::string& sPath, const std::string& sUid) :
     m_sFile(sPath+sUid),
@@ -26,10 +26,11 @@ bool SoundFile::OpenToRead()
     return (m_pHandle!=nullptr);
 }
 
-int64_t SoundFile::ReadAudio(std::vector<float> vSamples, size_t& nOffset, int& nLoop)
+int64_t SoundFile::ReadAudio(std::vector<float>& vSamples, size_t& nOffset, int& nLoop)
 {
     int64_t nRead(0);
     int64_t nTotalRead(0);
+
 
     if(m_pHandle && nOffset < vSamples.size())
     {

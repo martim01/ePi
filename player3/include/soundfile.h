@@ -13,7 +13,7 @@ class SoundFile
         virtual ~SoundFile();
 
         bool OpenToRead();
-        int64_t ReadAudio(std::vector<float> vSamples, size_t& nOffset, int& nLoop);
+        int64_t ReadAudio(std::vector<float>& vSamples, size_t& nOffset, int& nLoop);
         bool Close();
 
         int	 GetFormat () const;
