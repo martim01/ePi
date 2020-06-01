@@ -12,6 +12,8 @@
 #include "utils.h"
 #include <mutex>
 #include <condition_variable>
+#include "filesource.h"
+#include "inimanager.h"
 
 
 using namespace std;
@@ -34,85 +36,14 @@ int ErrorAndExit(const std::string& sError)
 
 
 
-void PlaySoundFile(std::mutex& mainMutex, std::condition_variable& mainCV, Playout& player, const std::string& sFile, const std::string& sLoop)
-{
-    try
-    {
-        int nTimesToPlay = std::stoi(sLoop);
 
-        SoundFile sf("/var/ePi/audio/", sFile);
-        if(sf.OpenToRead() == false)
-        {
-            return;
-        }
-        //Init the resampler
-        int nSampleRate = sf.GetSampleRate();
-
-        std::unique_ptr<Resampler>pSampler(nullptr);
-        if(nSampleRate != 48000)
-        {
-            pSampler = std::unique_ptr<Resampler>(new Resampler(48000));
-            if(pSampler->Init(sf.GetChannels(), sf.GetSampleRate()) == false)
-            {
-                return;
-            }
-        }
-
-        std::chrono::time_point<std::chrono::high_resolution_clock> start(std::chrono::high_resolution_clock::now());
-
-        Json::Value jsStatus;
-        jsStatus["file"]["uid"] = sFile;
-        jsStatus["file"]["started_at"] = ConvertTimeToIsoString(start);
-        jsStatus["file"]["length"] = sf.GetLength().count();
+static const int APP=0;
+static const int TYPE=1;
+static const int UID=2;
+static const int LOOP=3;
+static const int SHUFFLE=4;
 
 
-
-        std::vector<float> vRead(8192);
-        std::vector<float> vResample;
-        size_t nOffset = 0;
-        while(nTimesToPlay != 0)
-        {
-            int64_t nRead = sf.ReadAudio(vRead,nOffset, nTimesToPlay);
-            if(pSampler != nullptr)
-            {
-                if(!pSampler->Resample(vRead, vResample))
-                {
-                    jsStatus["error"] = true;
-                }
-                else
-                {
-                    player.AddSamples(vResample);
-                }
-            }
-            else
-            {
-                player.AddSamples(vRead);
-            }
-            //wait for player to say it needs more samples
-            std::unique_lock<std::mutex> lck(mainMutex);
-            mainCV.wait(lck, [&player]{return player.GetBufferSize()< 16384;});
-
-            // output current playback time
-            auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()-start.time_since_epoch());
-            jsStatus["file"]["time"] = now.count();
-            jsStatus["file"]["times_to_play"] = nTimesToPlay;
-            epiWriter::Get().writeToStdOut(jsStatus);
-        }
-
-        //wait for player to finish playing...
-        std::unique_lock<std::mutex> lck(mainMutex);
-        mainCV.wait(lck, [&player]{return player.GetBufferSize()==0;});
-
-        auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()-start.time_since_epoch());
-        jsStatus["file"]["time"] = now.count();
-        epiWriter::Get().writeToStdOut(jsStatus);
-    }
-    catch(const std::invalid_argument& e)
-    {
-        return;
-    }
-
-}
 
 int main(int argc, char* argv[])
 {
@@ -122,40 +53,53 @@ int main(int argc, char* argv[])
         return ErrorAndExit("Not enough arguments sent.");
     }
 
+
+    iniManager iniConfig;
+    // @todo(martim01) read ini file
+
     //@todo(martim01) log needs to go to somewhere not cout
-    pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
+    //pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
 
-    std::mutex mainMutex;
-    std::condition_variable mainCv;
-    Playout player(mainMutex, mainCv, 0);
-    player.Init(0.4);
-
-    //debug stuff
-    int nDevices = Pa_GetDeviceCount();
-    for(int i = 0; i < nDevices; i++)
+    try
     {
-        const PaDeviceInfo* pInfo = Pa_GetDeviceInfo(i);
-        if(pInfo)
+        int nTimesToPlay = std::stoi(argv[LOOP]);
+
+        std::mutex mainMutex;
+        std::condition_variable mainCv;
+        Playout player(mainMutex, mainCv, 0);
+        player.Init(0.4);
+
+
+        //launch the correct player
+        switch(argv[TYPE][0])
         {
-            pml::Log::Get() << "device: " << i << "=" << pInfo->name << std::endl;
+            case 'w':
+                {
+                    FileSource fs(player, CreatePath(iniConfig.GetIniString("Paths", "Audio", "/var/ePi/audio")), argv[UID], nTimesToPlay, false);
+                    fs.Play();
+                }
+                break;
+            case 'm':
+                {
+                    FileSource fs(player, CreatePath(iniConfig.GetIniString("Paths", "Audio", "/var/ePi/audio")), argv[UID], nTimesToPlay, true);
+                    fs.Play();
+                }
+                break;
+            case 'p':
+                break;
+            case 's':
+                break;
+            default:
+                return ErrorAndExit("Type not recognised.");
         }
+
+    }
+    catch(const std::invalid_argument& e)
+    {
+        return ErrorAndExit(e.what());
     }
 
-    //launch the correct player
-    switch(argv[1][0])
-    {
-        case 'w':
-            PlaySoundFile(mainMutex, mainCv, player, argv[2], argv[3]);
-            break;
-        case 'm':
-            break;
-        case 'p':
-            break;
-        case 's':
-            break;
-        default:
-            return ErrorAndExit("Type not recognised.");
-    }
+
 
     //exit
     return 0;

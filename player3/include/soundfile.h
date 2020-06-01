@@ -2,30 +2,31 @@
 #include <chrono>
 #include <memory>
 #include <vector>
-
+#include "audiofile.h"
 
 class SndfileHandle;
 
-class SoundFile
+class SoundFile : public AudioFile
 {
     public:
         SoundFile(const std::string& sPath, const std::string& sUid);
         virtual ~SoundFile();
 
-        bool OpenToRead();
-        int64_t ReadAudio(std::vector<float>& vSamples, size_t& nOffset, int& nLoop);
-        bool Close();
+        bool OpenToRead() override;
+        int64_t ReadAudio(std::vector<float>& vSamples) override;
+        bool Close() override;
 
-        int	 GetFormat () const;
-        int	 GetChannels () const;
-        int	 GetSampleRate () const;
+        int	 GetFormat () const override;
+        int	 GetChannels () const override;
+        int	 GetSampleRate () const override;
 
-        std::chrono::milliseconds GetLength() const;
+        std::chrono::milliseconds GetLength() const override;
+
+        void GoToStart() override;
+
 
     private:
-        std::string m_sFile;
         std::unique_ptr<SndfileHandle> m_pHandle;
-
 
 };
 

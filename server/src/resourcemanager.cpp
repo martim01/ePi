@@ -656,13 +656,13 @@ response ResourceManager::ParseFiles(const Json::Value& jsData)
         theResponse.jsonData["result"] = false;
         theResponse.jsonData["reason"].append("No multipart data sent");
     }
-    if(jsData["files"].isObject() == false)
+    if(jsData["multipart"]["files"].isObject() == false)
     {
         theResponse.nHttpCode = 400;
         theResponse.jsonData["result"] = false;
         theResponse.jsonData["reason"].append("No files sent");
     }
-    else if(jsData["data"].isObject() == false)
+    else if(jsData["multipart"]["data"].isObject() == false)
     {
         theResponse.nHttpCode = 400;
         theResponse.jsonData["result"] = false;
@@ -770,8 +770,8 @@ response ResourceManager::ParsePlaylist(const Json::Value& jsData)
     /**
     {
         "files" : [
-                      { "uid" : "", "loop": n },
-                      { "uid" : "", "loop": n }
+                      { "uid" : "", "times_to_play": n },
+                      { "uid" : "", "times_to_play": n }
                       ]
     }
     **/
@@ -1128,18 +1128,17 @@ response ResourceManager::PlayFile(const Json::Value& jsData)
         pml::Log::Get(pml::Log::LOG_ERROR) << "file not found" << std::endl;
         return theResponse;
     }
-    else if(jsData["loop"].isInt() == false)
+    else if(jsData["times_to_play"].isInt() == false)
     {
         response theResponse(400);
         theResponse.jsonData["result"] = false;
-        theResponse.jsonData["reason"].append("loop not set");
-        pml::Log::Get(pml::Log::LOG_ERROR) << "loop not set" << std::endl;
+        theResponse.jsonData["reason"].append("times_to_play not set");
+        pml::Log::Get(pml::Log::LOG_ERROR) << "times_to_play not set" << std::endl;
         return theResponse;
     }
     else
     {
-        return m_launcher.LaunchPlayer(itFile->second->GetType()=="wavfile" ? "w" : "m",
-                                        jsData["uid"], jsData["loop"].asInt());
+        return m_launcher.LaunchPlayer(itFile->second->GetJson()["type"]=="wavfile" ? "w" : "m", itFile->first, jsData["times_to_play"].asInt());
     }
 
 }
@@ -1154,12 +1153,12 @@ response ResourceManager::PlayPlaylist(const Json::Value& jsData)
         theResponse.jsonData["reason"].append("playlist not found");
         return theResponse;
     }
-    else if(jsData["loop"].isInt() == false)
+    else if(jsData["times_to_play"].isInt() == false)
     {
         response theResponse(400);
         theResponse.jsonData["result"] = false;
-        theResponse.jsonData["reason"].append("loop not set");
-        pml::Log::Get(pml::Log::LOG_ERROR) << "loop not set" << std::endl;
+        theResponse.jsonData["reason"].append("times_to_play not set");
+        pml::Log::Get(pml::Log::LOG_ERROR) << "times_to_play not set" << std::endl;
         return theResponse;
     }
     else if(jsData["shuffle"].isBool() == false)
@@ -1172,7 +1171,7 @@ response ResourceManager::PlayPlaylist(const Json::Value& jsData)
     }
     else
     {
-        return m_launcher.LaunchPlayer("p", itPlaylist->second->GetJson(), jsData["loop"].asInt(), jsData["shuffle"].asBool());
+        return m_launcher.LaunchPlayer("p", itPlaylist->first, jsData["times_to_play"].asInt(), jsData["shuffle"].asBool());
     }
 }
 
@@ -1188,7 +1187,7 @@ response ResourceManager::PlaySchedule(const Json::Value& jsData)
     }
     else
     {
-        return m_launcher.LaunchPlayer("s", itSchedule->second->GetJson());
+        return m_launcher.LaunchPlayer("s", itSchedule->first);
     }
 }
 

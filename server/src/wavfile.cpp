@@ -107,10 +107,11 @@ int	WavFile::GetSampleRate () const
 
 std::chrono::milliseconds WavFile::GetLength() const
 {
-    if(m_pHandle)
+    if(m_pHandle && GetSampleRate() > 0)
     {
         auto nFrames = m_pHandle->seek(0, SEEK_END);
-        nFrames *= GetSampleRate();
+        nFrames *= 1000;
+        nFrames /= GetSampleRate();
         m_pHandle->seek(0,SEEK_SET);
         return std::chrono::milliseconds(nFrames);
     }

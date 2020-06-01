@@ -283,11 +283,11 @@ void MongooseServer::Loop()
 
             mg_mgr_poll(&m_mgr, m_nPollTimeout);
 
-            auto took = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now().time_since_epoch()-now.time_since_epoch());
+            auto took = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()-now.time_since_epoch());
 
             if(m_loopCallback)
             {
-                m_loopCallback(std::chrono::duration_cast<std::chrono::milliseconds>(took).count());
+                m_loopCallback(took.count());
             }
             SendWSQueue();
 

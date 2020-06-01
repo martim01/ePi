@@ -7,7 +7,6 @@
 #include <syslog.h>
 #include "utils.h"
 
-
 using namespace std;
 
 
@@ -193,11 +192,20 @@ bool JsonMemberExistsAndIsNotNull(const Json::Value& jsObject, const std::string
 
 Json::Value ConvertToJson(const std::string& str)
 {
-    std::stringstream ss;
-    ss.str(str);
-    Json::Value jsData;
-    ss >> jsData;
-
-    return jsData;
+    try
+    {
+        std::stringstream ss;
+        ss.str(str);
+        Json::Value jsData;
+        ss >> jsData;
+        return jsData;
+    }
+    catch(const Json::RuntimeError& e)
+    {
+        std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+        std::cout << str << std::endl;
+        std::cout << e.what() << std::endl;
+        std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+    }
 }
 

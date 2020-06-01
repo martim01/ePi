@@ -1,12 +1,11 @@
 #include "soundfile.h"
 #include "sndfile.hh"
 #include <iostream>
+#include "epiwriter.h"
 
-SoundFile::SoundFile(const std::string& sPath, const std::string& sUid) :
-    m_sFile(sPath+sUid),
+SoundFile::SoundFile(const std::string& sPath, const std::string& sUid) : AudioFile(sPath, sUid),
     m_pHandle(nullptr)
 {
-
 }
 
 
@@ -22,45 +21,35 @@ bool SoundFile::OpenToRead()
 	{
 		Close();
 	}
+
+	Json::Value jsDebug;
+	jsDebug["action"] = "Open To Read;";
+
     m_pHandle = std::unique_ptr<SndfileHandle>(new SndfileHandle(m_sFile, SFM_READ, 0,0,0));
-    return (m_pHandle!=nullptr);
+    if(!m_pHandle.get())
+    {
+        jsDebug["error"] = m_pHandle->strError();
+        epiWriter::Get().writeToStdOut(jsDebug);
+        return false;
+    }
+    jsDebug["succes"] = "true";
+    epiWriter::Get().writeToStdOut(jsDebug);
+    return true;
 }
 
-int64_t SoundFile::ReadAudio(std::vector<float>& vSamples, size_t& nOffset, int& nLoop)
+int64_t SoundFile::ReadAudio(std::vector<float>& vSamples)
 {
-    int64_t nRead(0);
-    int64_t nTotalRead(0);
-
-
-    if(m_pHandle && nOffset < vSamples.size())
+    size_t nRead(0);
+    if(m_pHandle)
     {
         float* pbuffer(vSamples.data());
 
-        size_t nToRead = vSamples.size()-nOffset;
-
         //try to fill the whole sample buffer
-        nRead = m_pHandle->read(&pbuffer[nOffset+nTotalRead], (nToRead-nTotalRead));
+        nRead = m_pHandle->read(pbuffer, vSamples.size());
 
-        nTotalRead += nRead;    //store how much read
-
-        if(nTotalRead < nToRead)
-        {
-            --nLoop;    //we've looped
-            if(nLoop != 0) //are we looping
-            {
-                while(nTotalRead < nToRead)    //not read all so got to end of file
-                {
-
-                    m_pHandle->seek(SEEK_SET, 0);   //seek back to beginning of file
-                    nRead = m_pHandle->read(&pbuffer[nOffset+nTotalRead], (nToRead-nTotalRead));
-                    nTotalRead += nRead;    //store how much read
-                }
-            }
-        }
     }
-    nOffset += nTotalRead;
-    nOffset %= vSamples.size();
-    return nTotalRead;
+    vSamples.resize(nRead);
+    return nRead;
 }
 
 bool SoundFile::Close()
@@ -103,7 +92,7 @@ int	SoundFile::GetSampleRate () const
 
 std::chrono::milliseconds SoundFile::GetLength() const
 {
-    if(m_pHandle)
+    if(m_pHandle && GetSampleRate() > 0)
     {
         auto nFrames = m_pHandle->seek(0, SEEK_END);
         nFrames *= 1000;
@@ -115,3 +104,10 @@ std::chrono::milliseconds SoundFile::GetLength() const
     return std::chrono::milliseconds(0);
 }
 
+void SoundFile::GoToStart()
+{
+    if(m_pHandle)
+    {
+        m_pHandle->seek(0, SEEK_SET);
+    }
+}

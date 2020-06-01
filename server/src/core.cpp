@@ -35,7 +35,7 @@ const url Core::EP_FILES       = url(EP_EPI.Get()+"/"+FILES);
 const url Core::EP_INFO        = url(EP_EPI.Get()+"/"+INFO);
 
 
-Core::Core() : m_manager(m_launcher)
+Core::Core() : m_manager(m_launcher), m_nTimeSinceLastCall(0)
 {
     pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
     pml::Log::Get() << "Core\tStart" << std::endl;
@@ -52,18 +52,14 @@ void Core::Run()
 
     if(m_server.Init(ini))
     {
+        //add server callbacks
         CreateEndpoints();
 
+        //add luauncher callbacks
         m_launcher.AddCallbacks(std::bind(&Core::StatusCallback, this, _1), std::bind(&Core::ExitCallback, this, _1));
 
-        m_server.Run(true,50);   //start the webserver
-
-        //loop forever
-        while(true)
-        {
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-            m_server.SendWebsocketMessage(m_info.GetInfo());
-        }
+        //start the server loop
+        m_server.Run(false,50);
     }
 }
 
@@ -121,6 +117,8 @@ bool Core::CreateEndpoints()
     }
 
 
+    //Add the loop callback function
+    m_server.SetLoopCallback(std::bind(&Core::LoopCallback, this, _1));
 
     return true;
 }
@@ -465,4 +463,16 @@ void Core::ExitCallback(int nExit)
     }
 
     m_server.SendWebsocketMessage(m_jsStatus);
+}
+
+
+void Core::LoopCallback(int nTook)
+{
+    m_nTimeSinceLastCall += nTook;
+
+    if(m_nTimeSinceLastCall > 2000)
+    {
+        m_server.SendWebsocketMessage(m_info.GetInfo());
+        m_nTimeSinceLastCall = 0;
+    }
 }

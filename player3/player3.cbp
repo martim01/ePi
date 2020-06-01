@@ -11,7 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="w 48.wav 2 0" />
+				<Option parameters='w &quot;{\&quot;uid\&quot;: \&quot;714e5e37-77bc-30ae-97d8-defdcab64d1d\&quot;}&quot; 2 0' />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
@@ -50,14 +50,24 @@
 			<Add library="samplerate" />
 		</Linker>
 		<Unit filename="../common/include/utils.h" />
+		<Unit filename="../common/src/inimanager.cpp" />
+		<Unit filename="../common/src/inisection.cpp" />
 		<Unit filename="../common/src/utils.cpp" />
 		<Unit filename="../external/jsoncpp/dist/jsoncpp.cpp" />
+		<Unit filename="include/audiofile.h" />
 		<Unit filename="include/epiwriter.h" />
+		<Unit filename="include/filesource.h" />
+		<Unit filename="include/mp3file.h" />
+		<Unit filename="include/playlist.h" />
 		<Unit filename="include/playout.h" />
 		<Unit filename="include/resampler.h" />
 		<Unit filename="include/soundfile.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="src/audiofile.cpp" />
 		<Unit filename="src/epiwriter.cpp" />
+		<Unit filename="src/filesource.cpp" />
+		<Unit filename="src/mp3file.cpp" />
+		<Unit filename="src/playlist.cpp" />
 		<Unit filename="src/playout.cpp" />
 		<Unit filename="src/resampler.cpp" />
 		<Unit filename="src/soundfile.cpp" />

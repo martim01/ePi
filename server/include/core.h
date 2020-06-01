@@ -49,6 +49,7 @@ class Core
 
         void StatusCallback(const std::string& sData);
         void ExitCallback(int nPid);
+        void LoopCallback(int nData);
 
     private:
         Launcher m_launcher;
@@ -96,4 +97,6 @@ class Core
         static const std::string INFO;
 
         std::mutex m_mutex;
+
+        unsigned int m_nTimeSinceLastCall;
 };

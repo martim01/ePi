@@ -31,6 +31,8 @@ class Playout
         double GetOutputLatency() const;
         bool IsStreamOpen() const;
         void FlushBuffer();
+        std::mutex& GetMutex() { return m_mutex;}
+        std::condition_variable& GetConditionVariable() { return m_cv; }
 
 private:
 
