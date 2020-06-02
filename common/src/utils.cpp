@@ -127,17 +127,17 @@ bool mkpath(const std::string& sPath, mode_t mode)
 
 std::string GetCurrentTimeAsString(bool bIncludeNano)
 {
-    std::chrono::time_point<std::chrono::high_resolution_clock> tp(std::chrono::high_resolution_clock::now());
+    std::chrono::time_point<std::chrono::system_clock> tp(std::chrono::system_clock::now());
     return ConvertTimeToString(tp, bIncludeNano);
 }
 
 std::string GetCurrentTimeAsIsoString()
 {
-    std::chrono::time_point<std::chrono::high_resolution_clock> tp(std::chrono::high_resolution_clock::now());
+    std::chrono::time_point<std::chrono::system_clock> tp(std::chrono::system_clock::now());
     return ConvertTimeToIsoString(tp);
 }
 
-std::string ConvertTimeToString(std::chrono::time_point<std::chrono::high_resolution_clock> tp, bool bIncludeNano)
+std::string ConvertTimeToString(std::chrono::time_point<std::chrono::system_clock> tp, bool bIncludeNano)
 {
     std::stringstream sstr;
     auto seconds = std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch());
@@ -149,7 +149,7 @@ std::string ConvertTimeToString(std::chrono::time_point<std::chrono::high_resolu
     return sstr.str();
 }
 
-std::string ConvertTimeToIsoString(std::chrono::time_point<std::chrono::high_resolution_clock> tp)
+std::string ConvertTimeToIsoString(std::chrono::time_point<std::chrono::system_clock> tp)
 {
     std::time_t  t = std::chrono::system_clock::to_time_t(tp);
     std::stringstream ss;

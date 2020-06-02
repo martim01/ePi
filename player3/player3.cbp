@@ -11,7 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters='w &quot;{\&quot;uid\&quot;: \&quot;714e5e37-77bc-30ae-97d8-defdcab64d1d\&quot;}&quot; 2 0' />
+				<Option parameters="s 0f349e3a-c622-340f-a511-0dd1c00fc531 0 0" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
@@ -42,6 +42,7 @@
 			<Add directory="../external/uuid" />
 			<Add directory="include" />
 			<Add directory="../external/log/include" />
+			<Add directory="../external/date" />
 		</Compiler>
 		<Linker>
 			<Add library="pthread" />
@@ -49,7 +50,9 @@
 			<Add library="portaudio" />
 			<Add library="samplerate" />
 		</Linker>
+		<Unit filename="../common/include/epicron.h" />
 		<Unit filename="../common/include/utils.h" />
+		<Unit filename="../common/src/epicron.cpp" />
 		<Unit filename="../common/src/inimanager.cpp" />
 		<Unit filename="../common/src/inisection.cpp" />
 		<Unit filename="../common/src/utils.cpp" />
@@ -61,6 +64,7 @@
 		<Unit filename="include/playlist.h" />
 		<Unit filename="include/playout.h" />
 		<Unit filename="include/resampler.h" />
+		<Unit filename="include/schedule.h" />
 		<Unit filename="include/soundfile.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="src/audiofile.cpp" />
@@ -70,6 +74,7 @@
 		<Unit filename="src/playlist.cpp" />
 		<Unit filename="src/playout.cpp" />
 		<Unit filename="src/resampler.cpp" />
+		<Unit filename="src/schedule.cpp" />
 		<Unit filename="src/soundfile.cpp" />
 		<Extensions>
 			<code_completion />

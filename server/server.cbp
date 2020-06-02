@@ -59,7 +59,9 @@
 			<Add library="pthread" />
 			<Add directory="../external/log/lib" />
 		</Linker>
+		<Unit filename="../common/include/epicron.h" />
 		<Unit filename="../common/include/utils.h" />
+		<Unit filename="../common/src/epicron.cpp" />
 		<Unit filename="../common/src/inimanager.cpp" />
 		<Unit filename="../common/src/inisection.cpp" />
 		<Unit filename="../common/src/utils.cpp" />

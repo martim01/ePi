@@ -3,6 +3,7 @@
 #include <memory>
 #include "json/json.h"
 #include <chrono>
+#include <atomic>
 
 class AudioFile;
 class Playout;
@@ -14,6 +15,7 @@ class FileSource
         FileSource(Playout& player, const std::string& sPath, const std::string& sUid, unsigned long nTimesToPlay, bool bMp3);
         ~FileSource();
         bool Play();
+        void Stop();
 
     private:
 
@@ -29,7 +31,9 @@ class FileSource
         std::unique_ptr<Resampler> m_pSampler;
 
         Json::Value m_jsStatus;
-        std::chrono::time_point<std::chrono::high_resolution_clock> m_start;
+        std::chrono::time_point<std::chrono::system_clock> m_start;
+
+        std::atomic<bool> m_bPlay;
 
         static const size_t BUFFER_SIZE=8192;
         static const size_t BUFFER_QUEUE_MIN=BUFFER_SIZE*2;

@@ -9,7 +9,7 @@
 #include "mp3file.h"
 #include "sndfile.hh"
 #include "log.h"
-
+#include "epicron.h"
 
 ResourceManager::ResourceManager(Launcher& launcher) : m_launcher(launcher)
 {
@@ -723,7 +723,7 @@ response ResourceManager::ParseSchedule(const Json::Value& jsData)
     /**
     {
         "files" : [
-                        { "uid" : "", "loop" : true/false, "cron" : "0 0 0 0 0 0 0" },
+                        { "uid" : "", "times_to_play" : true/false, "cron" : "0 0 0 0 0 0 0" },
                     ]
     }
     **/
@@ -742,7 +742,7 @@ response ResourceManager::ParseSchedule(const Json::Value& jsData)
     for(size_t i=0; i < jsData["files"].size(); i++)
     {
         if(jsData["files"][i].isObject() == false ||
-           jsData["files"][i]["cron"].isString() == false || jsData["files"][i]["uid"].isString() == false || jsData["files"][i]["loop"].isBool() == false)
+           jsData["files"][i]["cron"].isString() == false || jsData["files"][i]["uid"].isString() == false || jsData["files"][i]["times_to_play"].isInt() == false)
         {
             theResponse.nHttpCode = 400;
             theResponse.jsonData["result"] = false;
@@ -757,6 +757,18 @@ response ResourceManager::ParseSchedule(const Json::Value& jsData)
             theResponse.jsonData["reason"].append("File '"+jsData["files"][i]["file"].asString()+"' does not exist");
             theResponse.jsonData["data"] = jsData;
             return theResponse;
+        }
+        else
+        {
+            CronJob job;
+            if(job.SetString(jsData["files"][i]["cron"].asString()) == false)
+            {
+                theResponse.nHttpCode = 400;
+                theResponse.jsonData["result"] = false;
+                theResponse.jsonData["reason"].append("Cron '"+jsData["files"][i]["cron"].asString()+"' is invalid");
+                theResponse.jsonData["data"] = jsData;
+                return theResponse;
+            }
         }
     }
     return theResponse;
