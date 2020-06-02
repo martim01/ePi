@@ -14,7 +14,7 @@
 #include <condition_variable>
 #include "filesource.h"
 #include "inimanager.h"
-
+#include "playlist.h"
 
 using namespace std;
 
@@ -63,6 +63,7 @@ int main(int argc, char* argv[])
     try
     {
         int nTimesToPlay = std::stoi(argv[LOOP]);
+        bool bShuffle = (argv[SHUFFLE][0] == '1');
 
         std::mutex mainMutex;
         std::condition_variable mainCv;
@@ -86,6 +87,10 @@ int main(int argc, char* argv[])
                 }
                 break;
             case 'p':
+                {
+                    Playlist pl(player, iniConfig, argv[UID], nTimesToPlay, bShuffle);
+                    pl.Play();
+                }
                 break;
             case 's':
                 break;

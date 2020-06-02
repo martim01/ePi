@@ -776,11 +776,11 @@ response ResourceManager::ParsePlaylist(const Json::Value& jsData)
     }
     **/
 
-    if(jsData["playlist"].isArray() == false)
+    if(jsData["files"].isArray() == false)
     {
         theResponse.nHttpCode = 400;
         theResponse.jsonData["result"] = false;
-        theResponse.jsonData["reason"].append("No playlist sent or wrong type");
+        theResponse.jsonData["reason"].append("No files sent or wrong type");
         theResponse.jsonData["data"] = jsData;
     }
 
@@ -794,7 +794,7 @@ response ResourceManager::ParsePlaylist(const Json::Value& jsData)
         {
             theResponse.nHttpCode = 400;
             theResponse.jsonData["result"] = false;
-            theResponse.jsonData["reason"].append("Not all playlist entries are correct");
+            theResponse.jsonData["reason"].append("Not all files entries are correct");
             theResponse.jsonData["data"] = jsData;
             return theResponse;
         }
