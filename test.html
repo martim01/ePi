@@ -26,10 +26,12 @@
 				g_ws.onmessage = function(ev) 
 				{
 					var jsonObj = JSON.parse(ev.data);
+					console.log(jsonObj);
+					
 					
 					if(jsonObj["player"] !== undefined)
 					{
-						console.log(jsonObj);
+						
 						
 						document.getElementById("player").innerHTML = jsonObj["player"];
 						if(jsonObj["status"] !== undefined)
@@ -98,10 +100,32 @@
 				}
 				var schedule = { "label" : "test", "description" : "test schedule", "schedule" : [ { "offset" : 0, "file" : "4f45fced-e5c3-3bd6-b133-15fd2ce62b5c", "loop" : false } ] };
 				console.log(schedule);
-				ajax.open("POST", "http://127.0.0.1:8080/x-epi/schedules",true);
+				ajax.open("POST", "http://192.168.0.101:8080/x-epi/schedules",true);
 				ajax.setRequestHeader("Content-type", "application/json");
 				ajax.send(JSON.stringify(schedule));
 			}
+			function postPlaylist()
+			{
+				console.log("postSchedule");
+				
+				var ajax = new XMLHttpRequest();
+				ajax.onreadystatechange = function()
+				{
+					console.log(this.readyState+"="+this.responseText);
+					
+					if(this.readyState == 4)
+					{
+						var jsonObj = JSON.parse(this.responseText);
+						console.log(jsonObj);
+					}
+				}
+				var schedule = { "label" : "usher", "description" : "Usher", "files" : [ { "uid" : "1b77ce42-fa03-3ab8-8570-da65c8909a9d", "times_to_play" : 1 }, { "uid" : "3745251b-dce9-30c8-bc9c-17678ed2c001", "times_to_play" : 1 },{ "uid" : "9da24e0a-e14c-3cb0-91df-26af522c3f22", "times_to_play" : 1 }] };
+				console.log(schedule);
+				ajax.open("POST", "http://192.168.0.101:8080/x-epi/playlists",true);
+				ajax.setRequestHeader("Content-type", "application/json");
+				ajax.send(JSON.stringify(schedule));
+			}
+			
 			function upload_file()
 			{
 				var fd = new FormData(document.getElementById('upload_form'));
@@ -117,7 +141,7 @@
 						
 					}
 				}
-				ajax.open('POST','http://127.0.0.1:8080/x-epi/files');
+				ajax.open('POST','http://192.168.0.101:8080/x-epi/files');
 				ajax.send(fd);
 				
 			}
@@ -135,13 +159,35 @@
 						console.log(jsonObj);
 					}
 				}
-				var play = { "command" : "play", "type" : "file", "uid" : "0cb6ccdc-50d4-3779-bcda-b319605c691a"};
+				var play = { "command" : "play", "type" : "file", "uid" : "714e5e37-77bc-30ae-97d8-defdcab64d1d", "times_to_play" : 2};
 				
 				console.log(play);
-				ajax.open("PUT", "http://127.0.0.1:8080/x-epi/status",true);
+				ajax.open("PUT", "http://192.168.0.101:8080/x-epi/status",true);
 				ajax.setRequestHeader("Content-type", "application/json");
 				ajax.send(JSON.stringify(play));
 			}
+			function playPlaylist()
+			{
+				console.log("playPlaylist");
+				
+				var ajax = new XMLHttpRequest();
+				ajax.onreadystatechange = function()
+				{
+					
+					if(this.readyState == 4)
+					{
+						var jsonObj = JSON.parse(this.responseText);
+						console.log(jsonObj);
+					}
+				}
+				var play = { "command" : "play", "type" : "playlist", "uid" : "67338769-6ab7-3d1d-86e1-14d536207e05", "times_to_play" : 1, "shuffle": false};
+				
+				console.log(play);
+				ajax.open("PUT", "http://192.168.0.101:8080/x-epi/status",true);
+				ajax.setRequestHeader("Content-type", "application/json");
+				ajax.send(JSON.stringify(play));
+			}
+			
 			
 			function stop()
 			{
@@ -160,14 +206,15 @@
 				var play = { "command" : "stop"};
 				
 				console.log(play);
-				ajax.open("PUT", "http://127.0.0.1:8080/x-epi/status",true);
+				ajax.open("PUT", "http://192.168.0.101:8080/x-epi/status",true);
 				ajax.setRequestHeader("Content-type", "application/json");
 				ajax.send(JSON.stringify(play));
 			}
 		</script>
 	</head>
-	<body onload="ws_connect('127.0.0.1:8080')">
+	<body onload="ws_connect('192.168.0.101:8080')">
 	<button onclick="postSchedule()">Schedule</button>
+	<button onclick="postPlaylist()">Playlist</button>
 	<form method="post" enctype="multipart/form-data" style="text-align: left" onsubmit="return false;" id="upload_form">
 		<div class="grid grid_server" id="upload_grid">
 		<div class="grid grid_title" style="margin-top: 4px">Label:</div><div><input type="text" name="label_1"></div>
@@ -176,6 +223,7 @@
 		</div>
 	</form>
 	<button onclick="play()">Play</button>
+	<button onclick="playPlaylist()">Play Playlist</button>
 	<button onclick="stop()">Stop</button>
 	<div><span>Player</span> <span id="player"></span></div>
 	<div><span>Status</span> <span id="count"></span></div>
