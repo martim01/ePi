@@ -189,15 +189,45 @@ bool CronJob::JobNow(const std::chrono::time_point<std::chrono::system_clock>& t
     std::time_t t  = std::chrono::system_clock::to_time_t(tp);
     std::tm* pDate = std::localtime(&t);
 
-    std::cout << pDate->tm_sec << " " << pDate->tm_min << " " << pDate->tm_hour << " " << pDate->tm_mday << " " << pDate->tm_mon+1 << "  " << pDate->tm_wday << " "
-    << pDate->tm_year << std::endl;
-    if(m_element[SECONDS].vBits[pDate->tm_sec] &&
-       m_element[MINUTES].vBits[pDate->tm_min] &&
-       m_element[HOURS].vBits[pDate->tm_hour] &&
-       m_element[DOMS].vBits[pDate->tm_mday] &&
-       m_element[MONTHS].vBits[pDate->tm_mon+1] &&
-       m_element[DOWS].vBits[pDate->tm_wday] &&
-       MatchesYear(pDate->tm_year+900))
+    return JobNow(*pDate);
+}
+
+void CronJob::OutputElements(const std::vector<bool>& vBits, size_t nSelected)
+{
+    for(size_t i = 0; i < vBits.size(); i++)
+    {
+        if(i == nSelected)
+        {
+            std::cout << "[";
+        }
+        std::cout << vBits[i];
+        if(i == nSelected)
+        {
+            std::cout << "]";
+        }
+    }
+    std::cout << std::endl;
+}
+
+bool CronJob::JobNow(const std::tm& now)
+{
+    #ifdef TEST
+    OutputElements(m_element[SECONDS].vBits, now.tm_sec);
+    OutputElements(m_element[MINUTES].vBits, now.tm_min);
+    OutputElements(m_element[HOURS].vBits, now.tm_hour);
+    OutputElements(m_element[DOMS].vBits, now.tm_mday);
+    OutputElements(m_element[MONTHS].vBits, now.tm_mon+1);
+    OutputElements(m_element[DOWS].vBits, now.tm_wday);
+    #endif
+
+
+    if(m_element[SECONDS].vBits[now.tm_sec] &&
+       m_element[MINUTES].vBits[now.tm_min] &&
+       m_element[HOURS].vBits[now.tm_hour] &&
+       m_element[DOMS].vBits[now.tm_mday] &&
+       m_element[MONTHS].vBits[now.tm_mon+1] &&
+       m_element[DOWS].vBits[now.tm_wday] &&
+       MatchesYear(now.tm_year+900))
     {
         return true;
     }

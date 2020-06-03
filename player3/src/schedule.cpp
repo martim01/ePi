@@ -56,7 +56,7 @@ bool Schedule::Play()
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
             Json::Value jsStatus;
-            jsStatus["schedule"] = "Waiting";
+            jsStatus["action"] = "Waiting";
             jsStatus["time"] = GetCurrentTimeAsIsoString();
             epiWriter::Get().writeToStdOut(jsStatus);
         }
@@ -157,8 +157,8 @@ void Schedule::PlayItem()
     {
         m_pSource = std::unique_ptr<FileSource>(new FileSource(m_player, CreatePath(m_iniConfig.GetIniString("Paths", "Audio", "/var/ePi/audio")),
                                                                 m_vSchedule[m_nCurrentItem].sUid, m_vSchedule[m_nCurrentItem].nTimesToPlay, m_vSchedule[m_nCurrentItem].bMp3));
-        m_pSource->Play();
         m_nCurrentItem = m_vSchedule.size();
+        m_pSource->Play();
     }
 }
 

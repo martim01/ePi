@@ -16,8 +16,10 @@ FileSource::FileSource(Playout& player, const std::string& sPath, const std::str
     m_pSampler(nullptr),
     m_bPlay(true)
 {
+    m_jsStatus["action"] = "Playing";
     m_jsStatus["playing"]["uid"] = m_sUid;
     m_jsStatus["playing"]["path"] = m_pFile->GetFileName();
+    m_jsStatus["time"] = GetCurrentTimeAsIsoString();
     epiWriter::Get().writeToStdOut(m_jsStatus);
 }
 
@@ -113,6 +115,7 @@ bool FileSource::PlayOnce()
         // output current playback time
         auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()-loopStart.time_since_epoch());
         m_jsStatus["playing"]["time"] = now.count();
+        m_jsStatus["time"] = GetCurrentTimeAsIsoString();
 
         epiWriter::Get().writeToStdOut(m_jsStatus);
     }

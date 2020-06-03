@@ -17,6 +17,7 @@ class CronJob
         bool SetString(const std::string& sCron);
 
         bool JobNow(const std::chrono::time_point<std::chrono::system_clock>& tp);
+        bool JobNow(const std::tm& now);
 
         enum {SECONDS = 0, MINUTES, HOURS, DOMS, MONTHS, DOWS, YEARS, GMT};
 
@@ -39,6 +40,9 @@ class CronJob
         bool MatchesYear(unsigned long nYear);
 
         range GetRange(const std::string& sRange);
+
+
+        void OutputElements(const std::vector<bool>& vBits, size_t nSelected);
 
         std::vector<cron_element> m_element;
         std::list<range> m_listYears;
