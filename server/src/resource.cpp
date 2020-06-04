@@ -43,9 +43,9 @@ const Json::Value& Resource::GetJson() const
 }
 
 
-const std::string& Resource::GetType() const
+std::string Resource::GetType() const
 {
-    return m_sType;
+    return m_json["type"].asString();
 }
 
 std::string Resource::GetUid() const

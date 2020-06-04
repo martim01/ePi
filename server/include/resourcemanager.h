@@ -61,6 +61,7 @@ class ResourceManager
         void LockPlayingResource(bool bLock);
         const std::string& GetAudioPath() { return m_sAudioFilePath; }
 
+        std::shared_ptr<const Resource> GetPlayingResource();
 
 
     private:
@@ -93,6 +94,8 @@ class ResourceManager
         response GetSchedulesAndPlaylistsContainingFile(const std::string& sUid);
         Json::Value GetResourcesFileIn(const std::string& sUid, std::map<std::string, std::shared_ptr<Resource> >& mResource);
 
+        std::shared_ptr<const Resource> GetResource(const std::string& sUid);
+
         std::string m_sAudioFilePath;
         std::string m_sResourcePath;
         std::string m_sLogPath;
@@ -105,6 +108,7 @@ class ResourceManager
 
         Launcher& m_launcher;
         std::string m_sResourcePlaying;
+        std::shared_ptr<const Resource> m_pPlayingResource;
 
         enum {WAV=250, MP3=251};
 };

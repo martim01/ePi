@@ -11,7 +11,7 @@
 #include "log.h"
 #include "epicron.h"
 
-ResourceManager::ResourceManager(Launcher& launcher) : m_launcher(launcher)
+ResourceManager::ResourceManager(Launcher& launcher) : m_launcher(launcher) , m_pPlayingResource(nullptr)
 {
 }
 
@@ -1123,6 +1123,7 @@ response ResourceManager::Play(const Json::Value& jsData)
     if(theResponse.nHttpCode == 200)
     {
         m_sResourcePlaying = jsData["uid"].asString();
+        m_pPlayingResource = GetResource(m_sResourcePlaying);
         LockResource(m_sResourcePlaying,true);
     }
     return theResponse;
@@ -1219,6 +1220,11 @@ response ResourceManager::Stop(const Json::Value& jsData)
 void ResourceManager::LockPlayingResource(bool bLock)
 {
     LockResource(m_sResourcePlaying, bLock);
+    if(bLock == false)
+    {
+        m_sResourcePlaying = "";
+        m_pPlayingResource = nullptr;
+    }
 }
 
 
@@ -1252,4 +1258,30 @@ Json::Value ResourceManager::GetResourcesFileIn(const std::string& sUid, std::ma
         }
     }
     return jsResources;
+}
+
+std::shared_ptr<const Resource> ResourceManager::GetPlayingResource()
+{
+    return m_pPlayingResource;
+}
+std::shared_ptr<const Resource> ResourceManager::GetResource(const std::string& sUid)
+{
+    auto itFile = m_mFiles.find(sUid);
+    if(itFile != m_mFiles.end())
+    {
+        return itFile->second;
+    }
+    auto itPlaylist = m_mPlaylists.find(sUid);
+    if(itPlaylist != m_mPlaylists.end())
+    {
+        return itPlaylist->second;
+    }
+
+    auto itSchedule = m_mSchedules.find(sUid);
+    if(itSchedule != m_mSchedules.end())
+    {
+        return itSchedule->second;
+    }
+    pml::Log::Get(pml::Log::LOG_WARN) << "'" << sUid << "' had no associated resource." << std::endl;
+    return nullptr;
 }

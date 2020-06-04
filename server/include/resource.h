@@ -21,7 +21,7 @@ class Resource
 
         const Json::Value& GetJson() const;
 
-        const std::string& GetType() const;
+        std::string GetType() const;
 
         void Lock(bool bLock);
         bool IsLocked() const;
