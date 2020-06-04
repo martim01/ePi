@@ -13,84 +13,315 @@
 		<title>ePI</title>
 		<script type="text/javascript" language="javascript">
 			
-			function ws_connect(endpoint)
+			var g_endpoint = "192.168.0.101:8080";
+			var g_url = "http://"+g_endpoint+"/x-epi/";
+			
+			var g_files = [];
+			var g_schedules = [];
+			var g_playlists = [];
+			var g_ws = null;
+			
+			function setElementText(elm, key, jsonObj)
 			{
-				console.log("ws_connect: "+'ws://' + endpoint);
-				var g_ws = new WebSocket('ws://' + endpoint);
+				if(document.getElementById(elm))
+				{
+					if(jsonObj[key] !== undefined)
+					{
+						document.getElementById(elm).innerHTML = jsonObj[key];
+					}
+
+					else
+					{
+						document.getElementById(elm).innerHTML = "";
+					}
+				}
+				else
+				{
+					console.log(elm);
+				}
+			}
+			function clearElementText(elm)
+			{
+				document.getElementById(elm).innerHTML = "";
+			}
+
+			function FindResource(uid, resObj)
+			{
+				for(var i =0; i < resObj.length; i++)
+				{
+					if(resObj[i]["uid"] == uid)
+					{
+						return resObj[i];
+					}
+				}
+				return null;
+				
+			}
+			
+			function millisecondsToTime(milliseconds)
+			{
+				var seconds = Math.floor(milliseconds/1000)%60;
+				var minutes = Math.floor(milliseconds/(1000*60))%60;
+				var hours = Math.floor(milliseconds/(1000*3600));
+				
+				return toString(hours)+":"+toString(minutes)+":"+toString(seconds);
+			}
+			
+			function toString(value)
+			{
+				if(value == 0)
+				{
+					return '00';
+				}
+				else if(value < 10)
+				{
+					return '0'+value;
+				}
+				return value;
+			}
+
+
+
+			function ws_connect()
+			{
+				
+				g_ws = new WebSocket('ws://' + g_endpoint);
 				
 				g_ws.onopen = function(ev)  { console.log(ev); };
 				g_ws.onerror = function(ev) { console.log(ev); };
 				g_ws.onclose = function(ev) { console.log(ev); };
 				g_ws.filter = function(jsonObj){};
 	
+							
 				g_ws.onmessage = function(ev) 
 				{
 					var jsonObj = JSON.parse(ev.data);
-					console.log(jsonObj);
 					
+					
+					if(jsonObj["application"] !== undefined)
+					{
+						setElementText("application_start_time", "start_time", jsonObj["application"]);
+						setElementText("application_up_time", "up_time", jsonObj["application"]);
+						setElementText("application_version", "version", jsonObj["application"]);
+					}
+					if(jsonObj["cpu"] !== undefined)
+					{
+						setElementText("cpu_overall", "cpu", jsonObj["cpu"]);
+						setElementText("cpu_cpu0", "cpu0", jsonObj["cpu"]);
+						setElementText("cpu_cpu1", "cpu1", jsonObj["cpu"]);
+						setElementText("cpu_cpu2", "cpu2", jsonObj["cpu"]);
+						setElementText("cpu_cpu3", "cpu3", jsonObj["cpu"]);
+					}
+					if(jsonObj["disk"] !== undefined)
+					{
+						setElementText("disk_bytes_available", "available", jsonObj["disk"]["bytes"]);
+						setElementText("disk_bytes_total", "total", jsonObj["disk"]["bytes"]);
+						setElementText("disk_inodes_available", "available", jsonObj["disk"]["inodes"]);
+						setElementText("disk_inodes_total", "total", jsonObj["disk"]["inodes"]);
+					}
+					if(jsonObj["system"] !== undefined)
+					{
+						setElementText("system_uptime", "uptime", jsonObj["system"]);
+						setElementText("system_ram_free", "free", jsonObj["system"]["ram"]);
+						setElementText("system_load", "1", jsonObj["system"]["loads"]);
+					}
+					
+					console.log(jsonObj);
 					
 					if(jsonObj["player"] !== undefined)
 					{
-						
-						
 						document.getElementById("player").innerHTML = jsonObj["player"];
-						if(jsonObj["status"] !== undefined)
+						if(jsonObj["player"] == "Stopped" || jsonObj["status"] === undefined)
 						{
-							if(jsonObj["status"]["count"] !== undefined)
-							{
-								document.getElementById("count").innerHTML = jsonObj["status"]["count"];
-							}
-						}
-						else
-						{
-							document.getElementById("count").innerHTML = "";
-						}
+							document.getElementById("stop").style.visibility = "hidden";
+							clearElementText("playing_uid");
+							clearElementText("playing_label");
+							clearElementText("playing_started_at");
+							clearElementText("playing_length");
+							clearElementText("playing_loop");
+							clearElementText("playing_time");
+							clearElementText("status_action");
+							clearElementText("status_time");
+							clearElementText("status_type");
+							clearElementText("status_label");
 							
 						
-						if(jsonObj["exit"] !== undefined)
-						{
-							
-							if(jsonObj["exit"]["code"] !== undefined)
-							{
-								document.getElementById("exit_code").innerHTML = jsonObj["exit"]["code"];
-							}
-							else
-							{
-								document.getElementById("exit_code").innerHTML = "";
-							}
-							
-							
-							if(jsonObj["exit"]["signal"] !== undefined)
-							{
-								document.getElementById("exit_signal").innerHTML = jsonObj["exit"]["signal"]["code"];
-								document.getElementById("exit_signal_description").innerHTML = jsonObj["exit"]["signal"]["description"];
-							}
-							else
-							{
-								document.getElementById("exit_signal").innerHTML = "";
-								document.getElementById("exit_signal_description").innerHTML = "";
-							}
 						}
 						else
 						{
-							document.getElementById("exit_signal").innerHTML = "";
-							document.getElementById("exit_signal_description").innerHTML = "";
-							document.getElementById("exit_code").innerHTML = "";
+							document.getElementById("stop").style.visibility = "visible";
+							
+							if(jsonObj["resource"] !== undefined)
+							{
+								setElementText("status_type", "type", jsonObj["resource"]);
+								setElementText("status_label", "label", jsonObj["resource"]);
+							}
+							else
+							{
+								clearElementText("status_type");
+								clearElementText("status_label");
+							}
+							
+							jsonObj = jsonObj["status"];
+						
+							setElementText("status_action", "action", jsonObj);
+							setElementText("status_time", "time", jsonObj);
+							
+							
+							if(jsonObj["playing"] !== undefined)
+							{
+								setElementText("playing_uid", "uid", jsonObj["playing"]);
+								var resObj = FindResource(jsonObj["playing"]["uid"], g_files);
+								if(resObj !== null)
+								{
+									document.getElementById("playing_label").innerHTML = resObj["label"];
+								}
+								setElementText("playing_started_at", "started_at", jsonObj["playing"]);
+								setElementText("playing_loop", "loop", jsonObj["playing"]);
+								document.getElementById("playing_length").innerHTML = millisecondsToTime(jsonObj["playing"]["length"]);
+								document.getElementById("playing_time").innerHTML = millisecondsToTime(jsonObj["playing"]["time"]);
+							}
 						}
-							
-							
+					}	
+
+						
+					if(jsonObj["exit"] !== undefined)
+					{
+						
+						if(jsonObj["exit"]["code"] !== undefined)
+						{
+							setElementText("exit_code", "code", jsonObj["exit"]);
+						}
+						else
+						{
+							clearElementText("exit_code");
+						}
+						
+						if(jsonObj["exit"]["signal"] !== undefined)
+						{
+							setElementText("exit_signal", "code", jsonObj["exit"]["signal"]);
+							setElementText("exit_signal_description", "description", jsonObj["exit"]["signal"]);
+						}
+						else
+						{
+							clearElementText("exit_signal");
+							clearElementText("exit_signal_description");
+						}
 					}
+					else
+					{
+						clearElementText("exit_signal");
+						clearElementText("exit_signal_description");
+						clearElementText("exit_code");
+					}
+
 				}
 			}
+			
+			
+			
+			function startup()
+			{
+				next(0);
+			}
+			
+			function next(index, resObj)
+			{
+				switch(index)
+				{
+					case 0:
+						getResource("files","div_files", 0);
+						break;
+					case 1:
+						g_files = resObj;
+						getResource("schedules","div_schedules", 1);
+						break;
+					case 2:
+						g_schedules = resObj;
+						getResource("playlists","div_playlists", 2);
+						break;
+					case 3:
+						g_playlists = resObj;
+						if(g_ws === null)
+						{
+							ws_connect();
+						}
+				}
+			}
+			
+			function getResource(endpoint, div, index)
+			{
+				var ajax = new XMLHttpRequest();
+				ajax.onreadystatechange = function()
+				{
+					if(this.readyState == 4)
+					{
+						var resObj = JSON.parse(this.responseText);
+						listResources(resObj, div, endpoint);
+						next(index+1, resObj);
+					}
+				}
+				ajax.open("GET", g_url+endpoint,true);
+				ajax.send();
+			}
+			
+			function listResources(resObj, elm, type)
+			{
+				var div = document.getElementById(elm);
+				if(div === null)
+				{
+					return;
+				}
+				while(div.firstChild)
+				{
+					div.removeChild(div.firstChild);
+				}
+				
+				var div_label = document.createElement('div');
+				div_label.innerHTML = "Label";
+				div_label.className = "grid_title";
+				
+				var div_action = document.createElement('div');
+				div_action.innerHTML = "Action";
+				div_action.className = "grid_title";
+				
+				div.appendChild(div_label);
+				div.appendChild(div_action);
+				
+				
+				for(var i = 0; i < resObj.length; i++)
+				{
+					div_label = document.createElement('div');
+					div_label.innerHTML = resObj[i]["label"];
+					div_label.className = "grid_resource";
+					div_label.id = "label_"+type+"_"+resObj[i]["uid"];
+					div_label.addEventListener('click',details, false);
+						
+					div_action = document.createElement('div');
+					div_action.className = "grid_label";
+
+					var button_play = document.createElement('button');
+					button_play.innerHTML = "Play";
+					button_play.id = "play_"+type+"_"+resObj[i]["uid"];
+					button_play.addEventListener('click',play, false);
 					
+								
+					
+					div_action.appendChild(button_play);
+					
+					div.appendChild(div_label);
+					div.appendChild(div_action);
+				}
+			}
+
+			
 			function postSchedule()
 			{
-				console.log("postSchedule");
+				
 				
 				var ajax = new XMLHttpRequest();
 				ajax.onreadystatechange = function()
 				{
-					console.log(this.readyState+"="+this.responseText);
 					
 					if(this.readyState == 4)
 					{
@@ -98,9 +329,9 @@
 						console.log(jsonObj);
 					}
 				}
-				var schedule = { "label" : "test", "description" : "test schedule", "schedule" : [ { "offset" : 0, "file" : "4f45fced-e5c3-3bd6-b133-15fd2ce62b5c", "loop" : false } ] };
+				var schedule = { "label" : "usher2", "description" : "Usher", "files" : [ { "uid" : "1b77ce42-fa03-3ab8-8570-da65c8909a9d", "times_to_play" : 1, "cron" : "0 52 15 * * ? *"}, { "uid" : "3745251b-dce9-30c8-bc9c-17678ed2c001", "times_to_play" : 1, "cron" : "0 54 15 * * ? *" },{ "uid" : "9da24e0a-e14c-3cb0-91df-26af522c3f22", "times_to_play" : 1, "cron" : "0 55 15 * * ? *" }] };
 				console.log(schedule);
-				ajax.open("POST", "http://192.168.0.101:8080/x-epi/schedules",true);
+				ajax.open("POST", g_url+"schedules",true);
 				ajax.setRequestHeader("Content-type", "application/json");
 				ajax.send(JSON.stringify(schedule));
 			}
@@ -121,7 +352,7 @@
 				}
 				var schedule = { "label" : "usher", "description" : "Usher", "files" : [ { "uid" : "1b77ce42-fa03-3ab8-8570-da65c8909a9d", "times_to_play" : 1 }, { "uid" : "3745251b-dce9-30c8-bc9c-17678ed2c001", "times_to_play" : 1 },{ "uid" : "9da24e0a-e14c-3cb0-91df-26af522c3f22", "times_to_play" : 1 }] };
 				console.log(schedule);
-				ajax.open("POST", "http://192.168.0.101:8080/x-epi/playlists",true);
+				ajax.open("POST", g_url+"playlists",true);
 				ajax.setRequestHeader("Content-type", "application/json");
 				ajax.send(JSON.stringify(schedule));
 			}
@@ -141,13 +372,17 @@
 						
 					}
 				}
-				ajax.open('POST','http://192.168.0.101:8080/x-epi/files');
+				ajax.open('POST',g_url+"files");
 				ajax.send(fd);
 				
 			}
-			function play()
+			function play(e)
 			{
-				console.log("play");
+				var split = e.target.id.split('_');
+				var type = split[1];
+				var uid = split[2];
+				
+				type = type.substring(0, type.length-1);	//remove the s
 				
 				var ajax = new XMLHttpRequest();
 				ajax.onreadystatechange = function()
@@ -159,36 +394,235 @@
 						console.log(jsonObj);
 					}
 				}
-				var play = { "command" : "play", "type" : "file", "uid" : "714e5e37-77bc-30ae-97d8-defdcab64d1d", "times_to_play" : 2};
+				var play = { "command" : "play", "type" : type, "uid" : uid, "times_to_play" : 1, "shuffle" : false};
 				
-				console.log(play);
-				ajax.open("PUT", "http://192.168.0.101:8080/x-epi/status",true);
+				ajax.open("PUT", g_url+"status",true);
 				ajax.setRequestHeader("Content-type", "application/json");
 				ajax.send(JSON.stringify(play));
 			}
-			function playPlaylist()
+			
+			var g_details = null;
+			function details(e)
 			{
-				console.log("playPlaylist");
+				if(g_details !== null)
+				{
+					g_details.className = "grid_resource";
+				}
+				g_details = e.target;
+				g_details.className = "grid_resource_selected";
 				
+				var split = e.target.id.split('_');
+				var type = split[1];
+				var uid = split[2];
+				
+								
 				var ajax = new XMLHttpRequest();
 				ajax.onreadystatechange = function()
 				{
-					
 					if(this.readyState == 4)
 					{
 						var jsonObj = JSON.parse(this.responseText);
-						console.log(jsonObj);
+						setElementText("details_uid", "uid", jsonObj);
+						setElementText("details_label", "label", jsonObj);
+						setElementText("details_description", "description", jsonObj);
+						setElementText("details_created", "created", jsonObj);
+						setElementText("details_locked", "locked", jsonObj);
+						
+						document.getElementById("detail_action").className = "grid grid_details_files";
+						
+						if(type == "files")
+						{
+							showFileDetails(jsonObj);
+						}
+						else if(type == "schedules")
+						{
+							showScheduleDetails(jsonObj);
+						}
+						else if(type == "playlists")
+						{
+							showPlaylistDetails(jsonObj);
+						}
+						
 					}
 				}
-				var play = { "command" : "play", "type" : "playlist", "uid" : "67338769-6ab7-3d1d-86e1-14d536207e05", "times_to_play" : 1, "shuffle": false};
+				ajax.open("GET", g_url+type+"/"+uid,true);
+				ajax.send();
+			}
+			function cleardetails()
+			{
+				clearElementText("details_uid");
+				clearElementText("details_label");
+				clearElementText("details_description");
+				clearElementText("details_created");
+				clearElementText("details_locked");
+						
+				document.getElementById("detail_action").className = 'hide';
+						
+						
+				document.getElementById("details_files").className="hide";
+				document.getElementById("details_schedules").className="hide";
+				document.getElementById("details_playlists").className="hide";
+			}
+			
+			function showFileDetails(jsonObj)
+			{
+				document.getElementById("details_files").className="grid grid_details_files";
+				document.getElementById("details_schedules").className="hide";
+				document.getElementById("details_playlists").className="hide";
 				
-				console.log(play);
-				ajax.open("PUT", "http://192.168.0.101:8080/x-epi/status",true);
-				ajax.setRequestHeader("Content-type", "application/json");
-				ajax.send(JSON.stringify(play));
+				setElementText("details_files_channels", "channels", jsonObj);
+				setElementText("details_files_samplerate", "samplerate", jsonObj);
+				setElementText("details_files_format", "subtype", jsonObj["format"]);
+				setElementText("details_files_type", "type", jsonObj["format"]);
+				document.getElementById("details_files_length").innerHTML = millisecondsToTime(jsonObj["length"]);
+			}
+			
+			function showPlaylistDetails(jsonObj)
+			{
+				document.getElementById("details_files").className="hide";
+				document.getElementById("details_schedules").className="hide";
+				
+				var div = document.getElementById("details_playlists");
+				div.className="grid grid_details_playlists";
+				
+				while(div.firstChild)
+				{
+					div.removeChild(div.firstChild);
+				}
+				var divFile = document.createElement('div');
+				divFile.className = "grid_title";
+				divFile.innerHTML = "File";
+				div.appendChild(divFile);
+				
+				var divLoop = document.createElement('div');
+				divLoop.className = "grid_title";
+				divLoop.innerHTML = "Times To Play";
+				div.appendChild(divLoop);
+				
+				for(var i = 0; i < jsonObj["files"].length; i++)
+				{
+					var jsonFile = FindResource(jsonObj["files"][i]["uid"], g_files);
+					if(jsonFile !== null)
+					{
+						var divLabel = document.createElement('div');
+						divLabel.className = "grid_label";
+						divLabel.innerHTML = jsonFile["label"];
+						div.appendChild(divLabel);
+						
+						var divTimes = document.createElement('div');
+						divTimes.className = "grid_label";
+						divTimes.innerHTML = jsonObj["files"][i]["times_to_play"];
+						div.appendChild(divTimes);
+					}
+				}
+				
+			}
+			
+			function showScheduleDetails(jsonObj)
+			{
+				document.getElementById("details_files").className="hide";
+				document.getElementById("details_playlists").className="hide";
+				
+				var div = document.getElementById("details_schedules");
+				div.className="grid grid_details_schedules";
+				
+				while(div.firstChild)
+				{
+					div.removeChild(div.firstChild);
+				}
+				var divType = document.createElement('div');
+				divType.className = "grid_title";
+				divType.innerHTML = "Type";
+				div.appendChild(divType);
+				
+				var divLabel = document.createElement('div');
+				divLabel.className = "grid_title";
+				divLabel.innerHTML = "Label";
+				div.appendChild(divLabel);
+				
+				var divCron = document.createElement('div');
+				divCron.className = "grid_title";
+				divCron.innerHTML = "Cron";
+				div.appendChild(divCron);
+				
+				for(var i = 0; i < jsonObj["files"].length; i++)
+				{
+					var jsonFile = FindResource(jsonObj["files"][i]["uid"], g_files);
+					if(jsonFile !== null)
+					{
+						showScheduleEntry(jsonFile, jsonObj["files"][i]["cron"], "File", div);
+					}
+					else
+					{
+						var jsonFile = FindResource(jsonObj["files"][i]["uid"], g_playlists);
+						if(jsonFile !== null)
+						{
+							showScheduleEntry(jsonFile, jsonObj["files"][i]["cron"], "Playlist", div);
+						}
+					}
+				}			
+			}
+			
+			function showScheduleEntry(jsonObj, cron, type, divContainer)
+			{
+				divType = document.createElement('div');
+				divType.className = "grid_label";
+				divType.innerHTML = type;
+				divContainer.appendChild(divType);
+				
+				divLabel = document.createElement('div');
+				divLabel.className = "grid_label";
+				divLabel.innerHTML = jsonObj["label"];
+				divContainer.appendChild(divLabel);
+				
+				divCron = document.createElement('div');
+				divCron.className = "grid_label";
+				divCron.innerHTML = cron;
+				divContainer.appendChild(divCron);
+			}
+			
+			function update(e)
+			{
+				var split = e.target.id.split('_');
+				var type = split[1];
+				var uid = split[2];
+				
+				type = type.substring(0, type.length-1);	//remove the s
+				alert("todo");
+			}
+			
+			function deleteResource(e)
+			{
+				if(g_details)
+				{
+					var split = g_details.id.split('_');
+					var type = split[1];
+					var uid = split[2];
+					
+					var ajax = new XMLHttpRequest();
+					ajax.onreadystatechange = function()
+					{
+						
+						if(this.readyState == 4)
+						{
+							var jsonObj = JSON.parse(this.responseText);
+							console.log(jsonObj);
+							g_details = null;
+							cleardetails();
+							
+							next(0);
+						}
+					}
+					console.log(g_url+type+"/"+uid);
+					ajax.open("DELETE", g_url+type+"/"+uid,true);
+					ajax.setRequestHeader("Content-type", "application/json");
+					ajax.send();
+				}
+				
 			}
 			
 			
+						
 			function stop()
 			{
 				console.log("stop");
@@ -206,29 +640,325 @@
 				var play = { "command" : "stop"};
 				
 				console.log(play);
-				ajax.open("PUT", "http://192.168.0.101:8080/x-epi/status",true);
+				ajax.open("PUT", g_url+"status",true);
 				ajax.setRequestHeader("Content-type", "application/json");
 				ajax.send(JSON.stringify(play));
 			}
+			
+			function show(event)
+			{
+				document.getElementById('div_files').className = 'hide';
+				document.getElementById('div_playlists').className = 'hide';
+				document.getElementById('div_schedules').className = 'hide';
+				document.getElementById('div_'+event.target.id).className = 'grid_resources';
+				
+				document.getElementById('files').className = 'tab_label';
+				document.getElementById('playlists').className = 'tab_label';
+				document.getElementById('schedules').className = 'tab_label';
+				event.target.className = 'tab_label_selected';
+			}
 		</script>
+		<style>
+			button
+			{
+				padding: 3px;
+				background-color: #ffffff;
+				color: #6677ff;
+				border: 1px solid #5555aa;
+				border-radius: 3px;
+				margin-right: 5px;
+			}
+			button:hover
+			{
+				background-color: #ffaa33;
+			}
+			
+			
+			.grid
+			{
+				display: inline-grid;
+				grid-column-gap: 10px;
+				grid-row-gap: 1px;
+			}
+
+			.grid_status
+			{
+				grid-template-columns: 850px 800px	
+			}
+			
+			.grid_details
+			{
+				grid-template-columns: 100px auto	
+			}
+			.grid_details_files
+			{
+				margin-top: 5px;
+				padding-top: 5px;
+				border-top: 1px dotted #777777;
+				grid-template-columns: 100px 200px 100px 200px	
+			}
+			
+			.grid_details_playlists
+			{
+				margin-top: 5px;
+				padding-top: 5px;
+				border-top: 1px dotted #777777;
+				grid-template-columns: 300px 400px	
+			}
+			
+			.grid_details_schedules
+			{
+				margin-top: 5px;
+				padding-top: 5px;
+				border-top: 1px dotted #777777;
+				grid-template-columns: 100px 300px 300px	
+			}
+			
+			.grid_resources
+			{
+				display: inline-grid;
+				grid-column-gap: 10px;
+				grid-row-gap: 1px;
+				padding: 10px;
+				grid-template-columns: 400px 300px;	
+			}
+			
+			.grid_upload
+			{
+				width: 500px;
+				margin-top: 20px;
+				padding: 10px;
+				border: 2px solid #000088;
+				border-radius: 10px 10px 10px 10px;
+				grid-template-columns: 130px 300px	
+			}
+			.grid_player
+			{
+				padding: 10px;
+				border: 10px solid #aaabaa;
+				border-radius: 10px 10px 10px 10px;
+				grid-template-columns: 130px 300px	
+			}
+			.grid_system
+			{
+				padding: 10px;
+				border: 10px solid #abaaaa;
+				border-radius: 10px 10px 10px 10px;
+				grid-template-columns: 150px 230px 150px 150px
+			}
+			.grid_inset_more
+			{
+				padding-left: 30px;
+			}
+			.grid_title
+			{
+				font-weight: 750;
+				color: #0000aa;
+				user-select:none;
+			}
+			.grid_label
+			{
+				font-weight: 500;
+				user-select:none;
+			}
+			.grid_label_selected
+			{
+				font-weight: 500;
+				user-select:none;
+				background-color: #ffaa88;
+			}
+
+
+			.grid_resource
+			{
+				font-weight: 500;
+				user-select:none;
+			}
+		
+			.grid_resource:hover
+			{
+				background-color: #ffaa00;
+			}
+
+			.grid_resource_selected
+			{
+				font-weight: 500;
+				user-select:none;
+				background-color: #ffaa00;
+			}
+			.grid_value
+			{
+				font-weight: 600;
+				user-select:none;
+			}
+			}
+			.grid_title
+			{
+				font-weight: 700;
+				color: #000000;
+				user-select: none;
+			}
+			.panel_container
+			{
+				width: 800px;
+			}
+			.tab_label {
+				  width: auto;
+				  padding: 8px 15px;
+				  background: #555599;
+				  cursor: pointer;
+				  font-size: 14px;
+				  color: #ffffff;
+				  transition: background 0.2s, color 0.2s;
+				  border-radius: 15px 15px 0px 0px;
+				  border-top: 2px solid #444499;
+				  border-left: 2px solid #444499;
+				  border-right: 2px solid #444499;
+				  border-bottom: 2px solid #444499;
+				  margin-left: 15px;
+				  margin-top: 5px;
+				  text-decoration: none;
+				  list-style: none;
+				  display: inline;
+				}
+
+			.tab_label:hover {
+				  background: #f8f8f8;
+				  color: #7f7fff;
+				 transition: all 0.5s;
+				}
+
+			.tab_label_selected {
+				  width: auto;
+				  padding: 8px 15px;
+				  background: #ffaa00;
+				  cursor: pointer;
+				  font-size: 14px;
+				  color: #7f7fff;
+				  transition: background 0.2s, color 0.2s;
+				  border-radius: 15px 15px 0px 0px;
+				  border-top: 2px solid #444499;
+				  border-left: 2px solid #444499;
+				  border-right: 2px solid #444499;
+				  border-bottom: 2px solid #ffaa00;
+				  margin-left: 15px;
+				  margin-top: 5px;
+				  text-decoration: none;
+				  list-style: none;
+				  display: inline;
+				}
+
+			.tabs {
+				  background: #ffffff;
+				  box-shadow: 0 48px 80px -32px rgba(0,0,0,0.3);
+				  border-bottom: 2px solid #444499;
+				  padding: 8px 0;
+				  margin-bottom: 0px;
+				  width: 814px;
+				}
+
+			.tab_panel_container
+				{
+					width: 800px;
+					padding: 5px;
+					border-bottom: 2px solid #444499;
+					border-left: 2px solid #444499;
+					border-right: 2px solid #444499;
+					background: #ffffff;
+					border-radius: 0px 0px 10px 10px;
+				}
+			.hide{ display: none; };
+		</style>
 	</head>
-	<body onload="ws_connect('192.168.0.101:8080')">
-	<button onclick="postSchedule()">Schedule</button>
-	<button onclick="postPlaylist()">Playlist</button>
-	<form method="post" enctype="multipart/form-data" style="text-align: left" onsubmit="return false;" id="upload_form">
-		<div class="grid grid_server" id="upload_grid">
-		<div class="grid grid_title" style="margin-top: 4px">Label:</div><div><input type="text" name="label_1"></div>
-		<div class="grid grid_title" style="margin-top: 4px">Description:</div><div><input type="text" name="description_1"></div>
-		<div class="grid_title" style="margin-top: 4px">Action:</div><div><input type="file" name="file_1" class="a_button" accept=".wav;*.mp3"> <button onclick="upload_file()">Upload</button></div>
+	<body onload="startup()">
+		<div class="grid grid_status"> 
+			<div class="grid grid_player">
+				<div class="grid_title">Player3</div><div>&nbsp;</div>
+				<div class="grid_label grid_inset_more">Status</div><div id="player" class="grid_value"></div>				
+				<div class="grid_label grid_inset_more">Exit Code</div><div id="exit_code" class="grid_value"></div>				
+				<div class="grid_label grid_inset_more">Exit Signal Code</div><div id="exit_signal" class="grid_value"></div>				
+				<div class="grid_label grid_inset_more">Exit Signal</div><div id="exit_signal_description" class="grid_value"></div>				
+				
+				<div class="grid_label">Action</div><div id="status_action" class="grid_value"></div>
+				<div class="grid_label">Time</div><div id="status_time" class="grid_value"></div>
+				<div class="grid_label">Type</div><div id="status_type" class="grid_value"></div>
+				<div class="grid_label">Label</div><div id="status_label" class="grid_value"></div>
+				<div class="grid_title">Playout</div><div>&nbsp;</div>
+				<div class="grid_label grid_inset_more">Label</div><div id="playing_label" class="grid_value"></div>
+				<div class="grid_label grid_inset_more">Uid</div><div id="playing_uid" class="grid_value"></div>
+				<div class="grid_label grid_inset_more">Started</div><div id="playing_started_at" class="grid_value"></div>
+				<div class="grid_label grid_inset_more">Length</div><div id="playing_length" class="grid_value"></div>
+				<div class="grid_label grid_inset_more">Loop</div><div id="playing_loop" class="grid_value"></div>
+				<div class="grid_label grid_inset_more">Time</div><div id="playing_time" class="grid_value"></div>
+				<div class="grid_value">&nbsp;</div><div class="grid_label"><button id="stop" onclick="stop()" style="padding: 5px; visibility: hidden">Stop Playout</button></div>
+			</div>
+			<div class="grid grid_system">
+				<div class="grid_title">Application</div><div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>
+				<div class="grid_label grid_inset_more">Start Time</div><div id="application_start_time" class="grid_value">&nbsp;</div><div class="grid_label grid_inset_more">Up Time</div><div id="application_up_time" class="grid_value">&nbsp;</div>
+				<div class="grid_label grid_inset_more">Version</div><div id="application_version" class="grid_value">&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>
+				<div class="grid_title">CPU</div><div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>
+				<div class="grid_label grid_inset_more">Overall</div><div id="cpu_overall" class="grid_value">&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>
+				<div class="grid_label grid_inset_more">cpu0</div><div id="cpu_cpu0" class="grid_value">&nbsp;</div><div class="grid_label grid_inset_more">cpu1</div><div id="cpu_cpu1" class="grid_value">&nbsp;</div>
+				<div class="grid_label grid_inset_more">cpu2</div><div id="cpu_cpu2" class="grid_value">&nbsp;</div><div class="grid_label grid_inset_more">cpu3</div><div id="cpu_cpu3" class="grid_value">&nbsp;</div>
+				<div class="grid_title">Disk</div><div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>
+				<div class="grid_label grid_inset_more">Bytes Available</div><div id="disk_bytes_available" class="grid_value">&nbsp;</div><div class="grid_label grid_inset_more">Bytes Total</div><div id="disk_bytes_total" class="grid_value">&nbsp;</div>
+				<div class="grid_label grid_inset_more">Indodes Available</div><div id="disk_inodes_available" class="grid_value">&nbsp;</div><div class="grid_label grid_inset_more">Indodes Total</div><div id="disk_inodes_total" class="grid_value">&nbsp;</div>
+				<div class="grid_title">System</div><div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>
+				<div class="grid_label grid_inset_more">Uptime</div><div id="system_uptime" class="grid_value">&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>
+				<div class="grid_label grid_inset_more">Ram</div><div id="system_ram_free" class="grid_value">&nbsp;</div><div class="grid_label grid_inset_more">Load</div><div id="system_load" class="grid_value">&nbsp;</div>
+			</div>
+		</div>
+		<div class="grid grid_status"> 
+			<div class="panel_container">
+				<ul class="tabs">
+					<li class="tab_label_selected" id="files" onclick="show(event)">Files</li>
+					<li class="tab_label" id="playlists" onclick="show(event)">Playlists</li>
+					<li class="tab_label" id="schedules" onclick="show(event)">Schedules</li>
+				</ul>
+				<div class="tab_panel_container">
+					<div class="grid_resources" id="div_files">&nbsp;</div>
+					<div class="hide" id="div_playlists">&nbsp;</div>
+					<div class="hide" id="div_schedules">&nbsp;</div>
+					<div><button>New</button></div>
+			</div>
+		</div>
+			<div class="panel_container">
+				<ul class="tabs">
+					<li class="tab_label">Details</li>
+				</ul>
+				<div class="tab_panel_container">
+					<div class="grid grid_details">
+						<div class="grid_label">UID:</div><div id="details_uid" class="grid_value"></div>
+						<div class="grid_label">Label:</div><div id="details_label" class="grid_value"></div>
+						<div class="grid_label">Description:</div><div id="details_description" class="grid_value"></div>
+						<div class="grid_label">Created:</div><div id="details_created" class="grid_value"></div>
+						<div class="grid_label">Locked:</div><div id="details_locked" class="grid_value"></div>
+					</div>
+					<div class="hide" id="details_files">
+						<div class="grid_label">Channels:</div><div id="details_files_channels" class="grid_value"></div>
+						<div class="grid_label">Sample Rate:</div><div id="details_files_samplerate" class="grid_value"></div>
+						<div class="grid_label">Type:</div><div id="details_files_type" class="grid_value"></div>
+						<div class="grid_label">Format:</div><div id="details_files_format" class="grid_value"></div>
+						<div class="grid_label">Length:</div><div id="details_files_length" class="grid_value"></div>
+					</div>
+					<div class="hide" id="details_playlists">
+					</div>
+					<div class="hide" id="details_schedules">
+					</div>
+					<div class="hide" id="detail_action">
+						<div><button onclick="update(event)">Modify</button></div>
+						<div><button onclick="deleteResource(event)">Delete</button></div>
+					</div>
+			</div>
+	</div>
+	<form id="upload_form" enctype="multipart/form-data" onsubmit="return false;">	
+		<div class="grid grid_upload">
+			
+				<div class="grid_label">Label</div><div><input type="text" name="label_1" id="new_file_label"></div>
+				<div class="grid_label">Description</div><div><input type="text" name="description_1" id="new_file_description"></div>
+				<div class="grid_label">File</div><div><input type="file" name="file_1" id="new_file_file"></div>
+				<div class="grid_label"><button onclick="cancel()">Cancel</button></div><div><button onclick="upload_file()">Upload</button></div>
 		</div>
 	</form>
-	<button onclick="play()">Play</button>
-	<button onclick="playPlaylist()">Play Playlist</button>
-	<button onclick="stop()">Stop</button>
-	<div><span>Player</span> <span id="player"></span></div>
-	<div><span>Status</span> <span id="count"></span></div>
-	<div><span>Exit: Code</span> <span id="exit_code"></span></div>
-	<div><span>Exit: Signal</span> <span id="exit_signal"></span></div>
-	<div><span>Exit: Signal</span> <span id="exit_signal_description"></span></div>
-	</body>
-</html>
+	
+</body>
