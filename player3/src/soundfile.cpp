@@ -22,18 +22,11 @@ bool SoundFile::OpenToRead()
 		Close();
 	}
 
-	Json::Value jsDebug;
-	jsDebug["action"] = "Open To Read;";
-
     m_pHandle = std::unique_ptr<SndfileHandle>(new SndfileHandle(m_sFile, SFM_READ, 0,0,0));
     if(!m_pHandle.get())
     {
-        jsDebug["error"] = m_pHandle->strError();
-        epiWriter::Get().writeToStdOut(jsDebug);
         return false;
     }
-    jsDebug["succes"] = "true";
-    epiWriter::Get().writeToStdOut(jsDebug);
     return true;
 }
 

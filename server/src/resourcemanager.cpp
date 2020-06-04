@@ -9,9 +9,9 @@
 #include "mp3file.h"
 #include "sndfile.hh"
 #include "log.h"
+#include "epicron.h"
 
-
-ResourceManager::ResourceManager(Launcher& launcher) : m_launcher(launcher)
+ResourceManager::ResourceManager(Launcher& launcher) : m_launcher(launcher) , m_pPlayingResource(nullptr)
 {
 }
 
@@ -723,7 +723,7 @@ response ResourceManager::ParseSchedule(const Json::Value& jsData)
     /**
     {
         "files" : [
-                        { "uid" : "", "loop" : true/false, "cron" : "0 0 0 0 0 0 0" },
+                        { "uid" : "", "times_to_play" : true/false, "cron" : "0 0 0 0 0 0 0" },
                     ]
     }
     **/
@@ -742,7 +742,7 @@ response ResourceManager::ParseSchedule(const Json::Value& jsData)
     for(size_t i=0; i < jsData["files"].size(); i++)
     {
         if(jsData["files"][i].isObject() == false ||
-           jsData["files"][i]["cron"].isString() == false || jsData["files"][i]["uid"].isString() == false || jsData["files"][i]["loop"].isBool() == false)
+           jsData["files"][i]["cron"].isString() == false || jsData["files"][i]["uid"].isString() == false || jsData["files"][i]["times_to_play"].isInt() == false)
         {
             theResponse.nHttpCode = 400;
             theResponse.jsonData["result"] = false;
@@ -757,6 +757,18 @@ response ResourceManager::ParseSchedule(const Json::Value& jsData)
             theResponse.jsonData["reason"].append("File '"+jsData["files"][i]["file"].asString()+"' does not exist");
             theResponse.jsonData["data"] = jsData;
             return theResponse;
+        }
+        else
+        {
+            CronJob job;
+            if(job.SetString(jsData["files"][i]["cron"].asString()) == false)
+            {
+                theResponse.nHttpCode = 400;
+                theResponse.jsonData["result"] = false;
+                theResponse.jsonData["reason"].append("Cron '"+jsData["files"][i]["cron"].asString()+"' is invalid");
+                theResponse.jsonData["data"] = jsData;
+                return theResponse;
+            }
         }
     }
     return theResponse;
@@ -1111,6 +1123,7 @@ response ResourceManager::Play(const Json::Value& jsData)
     if(theResponse.nHttpCode == 200)
     {
         m_sResourcePlaying = jsData["uid"].asString();
+        m_pPlayingResource = GetResource(m_sResourcePlaying);
         LockResource(m_sResourcePlaying,true);
     }
     return theResponse;
@@ -1207,6 +1220,11 @@ response ResourceManager::Stop(const Json::Value& jsData)
 void ResourceManager::LockPlayingResource(bool bLock)
 {
     LockResource(m_sResourcePlaying, bLock);
+    if(bLock == false)
+    {
+        m_sResourcePlaying = "";
+        m_pPlayingResource = nullptr;
+    }
 }
 
 
@@ -1240,4 +1258,30 @@ Json::Value ResourceManager::GetResourcesFileIn(const std::string& sUid, std::ma
         }
     }
     return jsResources;
+}
+
+std::shared_ptr<const Resource> ResourceManager::GetPlayingResource()
+{
+    return m_pPlayingResource;
+}
+std::shared_ptr<const Resource> ResourceManager::GetResource(const std::string& sUid)
+{
+    auto itFile = m_mFiles.find(sUid);
+    if(itFile != m_mFiles.end())
+    {
+        return itFile->second;
+    }
+    auto itPlaylist = m_mPlaylists.find(sUid);
+    if(itPlaylist != m_mPlaylists.end())
+    {
+        return itPlaylist->second;
+    }
+
+    auto itSchedule = m_mSchedules.find(sUid);
+    if(itSchedule != m_mSchedules.end())
+    {
+        return itSchedule->second;
+    }
+    pml::Log::Get(pml::Log::LOG_WARN) << "'" << sUid << "' had no associated resource." << std::endl;
+    return nullptr;
 }

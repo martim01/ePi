@@ -10,6 +10,8 @@
 #include <spawn.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include "resource.h"
+
 
 using namespace std::placeholders;
 using namespace pml;
@@ -423,7 +425,16 @@ void Core::StatusCallback(const std::string& sData)
 
     m_jsStatus = Json::Value(Json::objectValue);    //reset
 
-    m_jsStatus["player"] ="running";
+    auto pResource = m_manager.GetPlayingResource();
+    if(pResource)
+    {
+        m_jsStatus["resource"]["type"] = pResource->GetType();
+        m_jsStatus["resource"]["uid"] = pResource->GetUid();
+        m_jsStatus["resource"]["label"] = pResource->GetLabel();
+
+    }
+
+    m_jsStatus["player"] ="Running";
     m_jsStatus["status"] = ConvertToJson(sData);
     m_server.SendWebsocketMessage(m_jsStatus);
 }
@@ -439,7 +450,7 @@ void Core::ExitCallback(int nExit)
 
     m_jsStatus = Json::Value(Json::objectValue);    //reset
 
-    m_jsStatus["player"] = "stopped";
+    m_jsStatus["player"] = "Stopped";
     if(WIFEXITED(nExit))
     {
         m_jsStatus["exit"]["code"] = WEXITSTATUS(nExit);

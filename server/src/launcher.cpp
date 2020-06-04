@@ -20,7 +20,6 @@ bool ReadFromPipe(int nFd, std::string& sBuffer, std::vector<std::string>& vLine
         size_t nLastLineBreak = sBuffer.find_last_of('\n');
         if(nLastLineBreak != std::string::npos)
         {
-            std::cout << sBuffer << std::endl;
             std::string sComplete = sBuffer.substr(0, nLastLineBreak);
             vLines = SplitString(sComplete, '\n');
 

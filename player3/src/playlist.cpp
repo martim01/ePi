@@ -33,7 +33,7 @@ bool Playlist::Play()
     {
         for(auto anItem  : m_vPlaylist)
         {
-            FileSource fs(m_player, CreatePath(m_iniConfig.GetIniString("Paths", "Audio", "/var/ePi/audio")), anItem.sUid, anItem.nTimesToPlay, false);  // @todo(martim01) mp3/wav
+            FileSource fs(m_player, CreatePath(m_iniConfig.GetIniString("Paths", "Audio", "/var/ePi/audio")), anItem.sUid, anItem.nTimesToPlay, anItem.bMp3);
             fs.Play();
         }
     }

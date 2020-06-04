@@ -15,7 +15,7 @@
 #include "filesource.h"
 #include "inimanager.h"
 #include "playlist.h"
-
+#include "schedule.h"
 using namespace std;
 
 /**
@@ -93,6 +93,10 @@ int main(int argc, char* argv[])
                 }
                 break;
             case 's':
+                {
+                    Schedule sl(player, iniConfig, argv[UID]);
+                    sl.Play();
+                }
                 break;
             default:
                 return ErrorAndExit("Type not recognised.");
