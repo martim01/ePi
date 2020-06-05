@@ -101,7 +101,8 @@
 					if(jsonObj["application"] !== undefined)
 					{
 						setElementText("application_start_time", "start_time", jsonObj["application"]);
-						setElementText("application_up_time", "up_time", jsonObj["application"]);
+						document.getElementById('application_up_time').innerHTML = millisecondsToTime(jsonObj["application"]["up_time"]*1000);
+
 						setElementText("application_version", "version", jsonObj["application"]);
 					}
 					if(jsonObj["cpu"] !== undefined)
@@ -121,7 +122,7 @@
 					}
 					if(jsonObj["system"] !== undefined)
 					{
-						setElementText("system_uptime", "uptime", jsonObj["system"]);
+						document.getElementById('system_uptime').innerHTML = millisecondsToTime(jsonObj["system"]["uptime"]*1000);
 						setElementText("system_ram_free", "free", jsonObj["system"]["ram"]);
 						setElementText("system_load", "1", jsonObj["system"]["loads"]);
 					}
@@ -288,7 +289,8 @@
 				div.appendChild(div_label);
 				div.appendChild(div_action);
 				
-				
+				if(resObj === null)
+					return;
 				for(var i = 0; i < resObj.length; i++)
 				{
 					div_label = document.createElement('div');
@@ -335,30 +337,21 @@
 				ajax.setRequestHeader("Content-type", "application/json");
 				ajax.send(JSON.stringify(schedule));
 			}
-			function postPlaylist()
-			{
-				console.log("postSchedule");
-				
-				var ajax = new XMLHttpRequest();
-				ajax.onreadystatechange = function()
-				{
-					console.log(this.readyState+"="+this.responseText);
-					
-					if(this.readyState == 4)
-					{
-						var jsonObj = JSON.parse(this.responseText);
-						console.log(jsonObj);
-					}
-				}
-				var schedule = { "label" : "usher", "description" : "Usher", "files" : [ { "uid" : "1b77ce42-fa03-3ab8-8570-da65c8909a9d", "times_to_play" : 1 }, { "uid" : "3745251b-dce9-30c8-bc9c-17678ed2c001", "times_to_play" : 1 },{ "uid" : "9da24e0a-e14c-3cb0-91df-26af522c3f22", "times_to_play" : 1 }] };
-				console.log(schedule);
-				ajax.open("POST", g_url+"playlists",true);
-				ajax.setRequestHeader("Content-type", "application/json");
-				ajax.send(JSON.stringify(schedule));
-			}
 			
 			function upload_file()
 			{
+				if(document.getElementById('new_file_label').value == '')
+				{
+					alert("You must enter a label for the file");
+					return;
+				}
+				
+				if(document.getElementById('new_file_description').value == '')
+				{
+					alert("You must enter a description for the file");
+					return;
+				}
+				
 				var fd = new FormData(document.getElementById('upload_form'));
 				
 				var ajax = new XMLHttpRequest();
@@ -368,12 +361,35 @@
 					if(this.readyState == 4)
 					{
 						var jsonObj = JSON.parse(this.responseText);
-						console.log(jsonObj);
+						document.getElementById('progress').className = 'hide';
+						document.getElementById('veil').className = 'hide';
 						
+						if(this.status != 201)
+						{
+							alert(jsonObj["reason"]);
+						}
+						
+						next(0);
 					}
 				}
+				hideNew();
+				
+				document.getElementById('progress').className = 'popup';
+				document.getElementById('progress_label').innerHTML = document.getElementById('new_file_label').value;
+				
+				show_veil();
+				
+				ajax.upload.addEventListener('progress', function(e) {
+					var percent_complete = (e.loaded/e.total)*100;
+					document.getElementById('progress_percentage').innerHTML = percent_complete+'%';
+					console.log(percent_complete);
+					});
+					
+					
+				
 				ajax.open('POST',g_url+"files");
 				ajax.send(fd);
+				
 				
 			}
 			function play(e)
@@ -391,7 +407,11 @@
 					if(this.readyState == 4)
 					{
 						var jsonObj = JSON.parse(this.responseText);
-						console.log(jsonObj);
+						
+						if(this.status != 200)
+						{
+							alert(jsonObj["reason"]);
+						}
 					}
 				}
 				var play = { "command" : "play", "type" : type, "uid" : uid, "times_to_play" : 1, "shuffle" : false};
@@ -609,7 +629,10 @@
 							console.log(jsonObj);
 							g_details = null;
 							cleardetails();
-							
+							if(this.status != 200)
+							{
+								alert(jsonObj["reason"]);
+							}
 							next(0);
 						}
 					}
@@ -645,8 +668,10 @@
 				ajax.send(JSON.stringify(play));
 			}
 			
+			var g_show = 'files';
 			function show(event)
 			{
+				g_show = event.target.id;
 				document.getElementById('div_files').className = 'hide';
 				document.getElementById('div_playlists').className = 'hide';
 				document.getElementById('div_schedules').className = 'hide';
@@ -657,8 +682,182 @@
 				document.getElementById('schedules').className = 'tab_label';
 				event.target.className = 'tab_label_selected';
 			}
+			function update_popups()
+			{
+				document.getElementById('new_file_file').value = '';
+				document.getElementById('new_file_label').value = '';
+				document.getElementById('new_file_description').value = '';
+				document.getElementById('new_playlist_label_label').value = '';
+				document.getElementById('new_playlist_description').value = '';
+				
+				var sel = document.getElementById('possible_playlist_files');
+				while(sel.options.length > 0)
+				{
+					sel.remove(0);
+				}
+				for(var i = 0; i < g_files.length; i++)
+				{
+					var opt = document.createElement('option');
+					opt.value = g_files[i].uid;
+					opt.text = g_files[i].label;
+					sel.add(opt);
+				}
+			}
+			var g_jsonPost = {};
+			function showNew()
+			{
+				g_jsonPost = {};
+				
+				document.getElementById('upload_'+g_show).className = 'popup';
+				show_veil();
+				
+				update_popups();
+			}
+			function show_veil()
+			{	
+				var veil = document.getElementById('veil');
+				
+				veil.className = 'veil';
+				veil.style.width = Math.max(document.documentElement.clientWidth, document.documentElement.offsetWidth, document.documentElement.scrollWidth, document.body.clientWidth, document.body.offsetWidth, document.body.scrollWidth,1200)+'px';
+				veil.style.height = Math.max(document.documentElement.clientHeight, document.documentElement.offsetHeight, document.documentElement.scrollHeight, document.body.clientHeight, document.body.offsetHeight, document.body.scrollHeight,900)+'px';
+											
+				console.log(veil.style.width+','+veil.style.height);
+			}
+			
+			function hideNew()
+			{
+				document.getElementById('upload_'+g_show).className = 'hide';
+				document.getElementById('veil').className = 'hide';
+			}
+			
+			
+			
+			
+			function add_playlist_file()
+			{
+				
+				var div  = document.getElementById('new_playlist_files');
+				var sel =  document.getElementById('possible_playlist_files');
+				
+				var divRemove = document.createElement('div');
+				divRemove.className = 'grid_value';
+				divRemove.id = 'remove_'+sel.options[sel.selectedIndex].value;
+				
+				var buttonRemove = document.createElement('button');
+				buttonRemove.innerHTML = 'Remove';
+				buttonRemove.id = 'button_'+sel.options[sel.selectedIndex].value;
+				buttonRemove.addEventListener('click',remove_playlist_file,false);
+				divRemove.appendChild(buttonRemove);
+				
+				var divTimes = document.createElement('div');
+				divTimes.className = 'grid_value';
+				divTimes.id = 'times_'+sel.options[sel.selectedIndex].value;
+				divTimes.innerHTML = document.getElementById('possible_times_to_play').value;
+								
+				var divFile = document.createElement('div');
+				divFile.className = 'grid_value';
+				divFile.innerHTML = sel.options[sel.selectedIndex].text;
+				divFile.id = 'uid_'+sel.options[sel.selectedIndex].value;
+				
+				div.insertBefore(divRemove, document.getElementById('playlist_file_input'));
+				div.insertBefore(divTimes, divRemove);
+				div.insertBefore(divFile, divTimes);
+				
+				document.getElementById('possible_times_to_play').value = 1;
+				
+				console.log(g_jsonPost["files"]);
+				if(g_jsonPost["files"] === undefined)
+				{
+					g_jsonPost["files"] = [];
+				}
+				console.log(g_jsonPost["files"]);
+				g_jsonPost["files"].push({"uid" : sel.options[sel.selectedIndex].value, "times_to_play" : document.getElementById('possible_times_to_play').value});
+			}
+			function remove_playlist_file(event)
+			{
+				var id = event.target.id.split('_')[1];
+				var div  = document.getElementById('new_playlist_files');
+				div.removeChild(document.getElementById('uid_'+id));
+				div.removeChild(document.getElementById('times_'+id));
+				div.removeChild(document.getElementById('remove_'+id));
+				
+				for(var i = 0; i < g_jsonPost["files"].length; i++)
+				{
+					if(g_jsonPost["files"][i]["uid"] == id)
+					{
+						g_jsonPost["files"].splice(i,1);
+					}
+				}
+			}
+			
+			function upload_playlist()
+			{
+				if(document.getElementById('new_playlist_label').value == '')
+				{
+					alert("You must enter a label for the playlist");
+					return;
+				}
+				g_jsonPost["label"] = document.getElementById('new_playlist_label').value;
+				
+				if(document.getElementById('new_playlist_description').value == '')
+				{
+					alert("You must enter a description for the playlist");
+					return;
+				}
+				g_jsonPost["description"] = document.getElementById('new_playlist_description').value;
+				
+				if(g_jsonPost["files"] === undefined || g_jsonPost["files"].length == 0)
+				{
+					alert("You must enter some files for the playlist");
+					return;
+				}
+				
+				var ajax = new XMLHttpRequest();
+				ajax.onreadystatechange = function()
+				{
+					console.log(this.readyState+"="+this.responseText);
+					
+					if(this.readyState == 4)
+					{
+						var jsonObj = JSON.parse(this.responseText);
+						if(this.status != 201)
+						{
+							alert(jsonObj["reason"]);
+						}
+						
+						next(0);
+					}
+				}
+				ajax.open("POST", g_url+"playlists",true);
+				ajax.setRequestHeader("Content-type", "application/json");
+				ajax.send(JSON.stringify(g_jsonPost));
+				hide_new();
+			}	
+			function file_chosen()
+			{
+				var label = document.getElementById('new_file_label');
+				label.value = document.getElementById('new_file_file').files[0].name;
+			}
+			
 		</script>
 		<style>
+			.veil {position: absolute; left: 0px; top: 0px; z-index: 995; opacity: 0.15; background: #778877}
+			.popup
+			{
+				margin-left: -300px;
+				margin-top: -200px;
+				top: 50%;
+				left: 50%;
+				width: 600px;
+				max-height: 400px;
+				position: fixed;
+				z-index: 999;
+				border: 2px solid #0000aa;
+				border-radius: 5px;
+				background-color: #ffffff;
+				padding: 10px;
+			}
+			
 			button
 			{
 				padding: 3px;
@@ -726,11 +925,21 @@
 			.grid_upload
 			{
 				width: 500px;
-				margin-top: 20px;
 				padding: 10px;
+				margin-top: -2px;
 				border: 2px solid #000088;
-				border-radius: 10px 10px 10px 10px;
+				border-radius: 0px 0px 10px 10px;
 				grid-template-columns: 130px 300px	
+			}
+			.grid_upload_files
+			{
+				grid-column: 1/3;
+				width: 480px;
+				padding: 10px;
+				margin-bottom: 5px;
+				border-top: 1px dotted #777777;
+				border-bottom: 1px dotted #777777;
+				grid-template-columns: 130px 100px 100px	
 			}
 			.grid_player
 			{
@@ -831,16 +1040,16 @@
 			.tab_label_selected {
 				  width: auto;
 				  padding: 8px 15px;
-				  background: #ffaa00;
+				  background: #ee9900;
 				  cursor: pointer;
 				  font-size: 14px;
-				  color: #7f7fff;
+				  color: #ffffff;
 				  transition: background 0.2s, color 0.2s;
 				  border-radius: 15px 15px 0px 0px;
 				  border-top: 2px solid #444499;
 				  border-left: 2px solid #444499;
 				  border-right: 2px solid #444499;
-				  border-bottom: 2px solid #ffaa00;
+				  border-bottom: 2px solid #ee9900;
 				  margin-left: 15px;
 				  margin-top: 5px;
 				  text-decoration: none;
@@ -893,7 +1102,7 @@
 				<div class="grid_value">&nbsp;</div><div class="grid_label"><button id="stop" onclick="stop()" style="padding: 5px; visibility: hidden">Stop Playout</button></div>
 			</div>
 			<div class="grid grid_system">
-				<div class="grid_title">Application</div><div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>
+				<div class="grid_title">Server</div><div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>
 				<div class="grid_label grid_inset_more">Start Time</div><div id="application_start_time" class="grid_value">&nbsp;</div><div class="grid_label grid_inset_more">Up Time</div><div id="application_up_time" class="grid_value">&nbsp;</div>
 				<div class="grid_label grid_inset_more">Version</div><div id="application_version" class="grid_value">&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>
 				<div class="grid_title">CPU</div><div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>
@@ -919,9 +1128,9 @@
 					<div class="grid_resources" id="div_files">&nbsp;</div>
 					<div class="hide" id="div_playlists">&nbsp;</div>
 					<div class="hide" id="div_schedules">&nbsp;</div>
-					<div><button>New</button></div>
+					<div><button onclick="showNew()">New</button></div>
+				</div>
 			</div>
-		</div>
 			<div class="panel_container">
 				<ul class="tabs">
 					<li class="tab_label">Details</li>
@@ -949,16 +1158,51 @@
 						<div><button onclick="update(event)">Modify</button></div>
 						<div><button onclick="deleteResource(event)">Delete</button></div>
 					</div>
+				</div>
 			</div>
 	</div>
-	<form id="upload_form" enctype="multipart/form-data" onsubmit="return false;">	
+	<div id="upload_files" class="hide">
+		<form id="upload_form" enctype="multipart/form-data" onsubmit="return false;">	
+			<ul class="tabs" style="width: 500px">
+					<li class="tab_label" id="title">New File</li>
+			</ul>
+			<div class="grid grid_upload">
+					<div class="grid_label">File</div><div><input type="file" name="file_1" id="new_file_file" onchange="file_chosen()"></div>
+					<div class="grid_label">Label</div><div><input type="text" name="label_1" id="new_file_label"></div>
+					<div class="grid_label">Description</div><div><input type="text" name="description_1" id="new_file_description"></div>
+					
+					<div class="grid_label"><button onclick="hideNew()">Cancel</button></div><div><button onclick="upload_file()">Upload</button></div>
+			</div>
+		</form>
+	</div>
+	<div id="upload_playlists" class="hide">
+		<ul class="tabs" style="width: 500px">
+			<li class="tab_label" id="title">New Playlist</li>
+		</ul>
 		<div class="grid grid_upload">
-			
-				<div class="grid_label">Label</div><div><input type="text" name="label_1" id="new_file_label"></div>
-				<div class="grid_label">Description</div><div><input type="text" name="description_1" id="new_file_description"></div>
-				<div class="grid_label">File</div><div><input type="file" name="file_1" id="new_file_file"></div>
-				<div class="grid_label"><button onclick="cancel()">Cancel</button></div><div><button onclick="upload_file()">Upload</button></div>
+			<div class="grid_label">Label</div><div><input type="text" id="new_playlist_label"></div>
+			<div class="grid_label">Description</div><div><input type="text" id="new_playlist_description"></div>
+			<div class="grid grid_upload_files" id="new_playlist_files">
+				<div class="grid_title">File</div>
+				<div class="grid_title">Play</div>
+				<div>&nbsp;</div>
+				<div id="playlist_file_input" class="grid_label">
+					<select id="possible_playlist_files"></select>
+				</div>
+				<div><input type="number" id="possible_times_to_play" style="width: 75px" value="1"></div>
+				<div><button onclick="add_playlist_file()">Add</button></div>
+			</div>
+			<div class="grid_label"><button onclick="hideNew()">Cancel</button></div><div><button onclick="upload_playlist()">Upload</button></div>
 		</div>
-	</form>
-	
+	</div>
+	<div id="progress" class="hide">
+		<ul class="tabs" style="width: 500px">
+			<li class="tab_label" id="title">Uploading</li>
+		</ul>
+		<div class="grid grid_upload">
+			<div class="grid_label">Label:</div><div class="grid_value" id="progress_label"></div>
+			<div class="grid_label">Uploaded:</div><div class="grid_value" id="progress_percentage"></div>
+		</div>
+	</div>
+	<div id="veil"></div>
 </body>
