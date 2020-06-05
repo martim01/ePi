@@ -6,14 +6,16 @@
 #include "inimanager.h"
 #include "utils.h"
 #include "log.h"
-
+#include "resources.h"
 
 Playlist::Playlist(Playout& player, const iniManager& iniConfig, const std::string& sUid, unsigned long nTimesToPlay, bool bShuffle) :
   m_player(player),
   m_iniConfig(iniConfig),
   m_sUid(sUid),
   m_nTimesToPlay(nTimesToPlay),
-  m_bShuffle(bShuffle)
+  m_bShuffle(bShuffle),
+  m_pSource(nullptr),
+  m_bPlay(true)
 {
 
 }
@@ -33,8 +35,13 @@ bool Playlist::Play()
     {
         for(auto anItem  : m_vPlaylist)
         {
-            FileSource fs(m_player, CreatePath(m_iniConfig.GetIniString("Paths", "Audio", "/var/ePi/audio")), anItem.sUid, anItem.nTimesToPlay, anItem.bMp3);
-            fs.Play();
+            m_pSource = std::unique_ptr<FileSource>(new FileSource(m_player, CreatePath(m_iniConfig.GetIniString("Paths", "Audio", "/var/ePi/audio")), anItem.sUid, anItem.nTimesToPlay, anItem.bMp3));
+            m_pSource->Play();
+
+            if(m_bPlay == false)
+            {
+                return true;
+            }
         }
     }
     return true;
@@ -43,34 +50,19 @@ bool Playlist::Play()
 
 bool Playlist::LoadPlaylist()
 {
-    std::ifstream ifs;
-    ifs.open(CreatePath(m_iniConfig.GetIniString("Paths", "Resources", "/var/ePi/resources"))+"resources.json", std::ifstream::in);
-    if(!ifs.is_open())
+    if(Resources::Get().IsValid())
     {
-        pml::Log::Get(pml::Log::LOG_CRITICAL) << "Playlist\tCould not open resources file!" << std::endl;
-		return false;
-	}
-	try
-	{
-        Json::Value jsResources;
-        ifs >> jsResources;
-
-        if(jsResources["playlists"].isArray() && jsResources["files"].isArray())
+        for(size_t i = 0; i < Resources::Get().GetJson()["playlists"].size(); i++)
         {
-            for(size_t i = 0; i < jsResources["playlists"].size(); i++)
+            if(Resources::Get().GetJson()["playlists"][i]["uid"].asString() == m_sUid)
             {
-                if(jsResources["playlists"][i]["uid"].asString() == m_sUid)
-                {
-                    return CreatePlaylist(jsResources["files"], jsResources["playlists"][i]);
-                }
+                return CreatePlaylist(Resources::Get().GetJson()["files"], Resources::Get().GetJson()["playlists"][i]);
             }
         }
         return true;
     }
-    catch(const Json::RuntimeError& e)
-    {
-        return false;
-    }
+    return false;
+
 }
 
 bool Playlist::CreatePlaylist(const Json::Value& jsFiles, const Json::Value& jsPlaylist)
@@ -131,3 +123,11 @@ void Playlist::ShufflePlaylist()
     std::shuffle(m_vPlaylist.begin(), m_vPlaylist.end(), g);
 }
 
+
+void Playlist::Stop()
+{
+    if(m_pSource)
+    {
+        m_pSource->Stop();
+    }
+}

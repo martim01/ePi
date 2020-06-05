@@ -6,12 +6,16 @@
 
 class Playout;
 class iniManager;
+class FileSource;
+
 
 class Playlist
 {
     public:
         Playlist(Playout& player, const iniManager& iniConfig, const std::string& sUid, unsigned long nTimesToPlay, bool bShuffle);
         bool Play();
+
+        void Stop();
 
     private:
         struct item
@@ -39,4 +43,6 @@ class Playlist
         unsigned long m_nTimesToPlay;
         bool m_bShuffle;
 
+        std::unique_ptr<FileSource> m_pSource;
+        bool m_bPlay;
 };

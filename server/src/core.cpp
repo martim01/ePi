@@ -323,11 +323,11 @@ response Core::DeleteFile(mg_connection* pConnection, const query& theQuery, con
     response theResponse(m_manager.DeleteFile(vSplit.back()));
     if(theResponse.nHttpCode == 200)
     {
-        url theUrl(url(EP_FILES.Get()+"/"+vSplit.back()));
+        url aUrl(url(EP_FILES.Get()+"/"+vSplit.back()));
 
-        m_server.DeleteEndpoint(endpoint(MongooseServer::GET, theUrl));
-        m_server.DeleteEndpoint(endpoint(MongooseServer::PUT, theUrl));
-        m_server.DeleteEndpoint(endpoint(MongooseServer::DELETE, theUrl));
+        m_server.DeleteEndpoint(endpoint(MongooseServer::GET, aUrl));
+        m_server.DeleteEndpoint(endpoint(MongooseServer::PUT, aUrl));
+        m_server.DeleteEndpoint(endpoint(MongooseServer::DELETE, aUrl));
     }
     return theResponse;
 }
@@ -341,11 +341,11 @@ response Core::DeletePlaylist(mg_connection* pConnection, const query& theQuery,
 
     if(theResponse.nHttpCode == 200)
     {
-        url theUrl(url(EP_PLAYLISTS.Get()+"/"+vSplit.back()));
+        url aUrl(url(EP_PLAYLISTS.Get()+"/"+vSplit.back()));
 
-        m_server.DeleteEndpoint(endpoint(MongooseServer::GET, theUrl));
-        m_server.DeleteEndpoint(endpoint(MongooseServer::PUT, theUrl));
-        m_server.DeleteEndpoint(endpoint(MongooseServer::DELETE, theUrl));
+        m_server.DeleteEndpoint(endpoint(MongooseServer::GET, aUrl));
+        m_server.DeleteEndpoint(endpoint(MongooseServer::PUT, aUrl));
+        m_server.DeleteEndpoint(endpoint(MongooseServer::DELETE, aUrl));
     }
     return theResponse;
 }
@@ -359,11 +359,11 @@ response Core::DeleteSchedule(mg_connection* pConnection, const query& theQuery,
 
     if(theResponse.nHttpCode == 200)
     {
-        url theUrl(url(EP_SCHEDULES.Get()+"/"+vSplit.back()));
+        url aUrl(url(EP_SCHEDULES.Get()+"/"+vSplit.back()));
 
-        m_server.DeleteEndpoint(endpoint(MongooseServer::GET, theUrl));
-        m_server.DeleteEndpoint(endpoint(MongooseServer::PUT, theUrl));
-        m_server.DeleteEndpoint(endpoint(MongooseServer::DELETE, theUrl));
+        m_server.DeleteEndpoint(endpoint(MongooseServer::GET, aUrl));
+        m_server.DeleteEndpoint(endpoint(MongooseServer::PUT, aUrl));
+        m_server.DeleteEndpoint(endpoint(MongooseServer::DELETE, aUrl));
     }
     return theResponse;
 }
@@ -375,15 +375,21 @@ response Core::PostFile(mg_connection* pConnection, const query& theQuery, const
     Json::Value jsonData(ConvertToJson(theData.Get()));
 
     response theResponse(m_manager.AddFiles(jsonData));
+    Log::Get() << theResponse.jsonData << std::endl;
+    Log::Get() << theResponse.nHttpCode << std::endl;
+
+
     if(theResponse.nHttpCode == 201)
     {
-        url theUrl(url(EP_FILES.Get()+"/"+theResponse.jsonData["uid"].asString()));
+        for(size_t i = 0; i < theResponse.jsonData["files"].size(); i++)
+        {
+            url theUrl(url(EP_FILES.Get()+"/"+theResponse.jsonData["files"][i]["uid"].asString()));
 
-        m_server.AddEndpoint(endpoint(MongooseServer::GET, theUrl), std::bind(&Core::GetFile, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::PUT, theUrl), std::bind(&Core::PutFile, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::DELETE, theUrl), std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
+            m_server.AddEndpoint(endpoint(MongooseServer::GET, theUrl), std::bind(&Core::GetFile, this, _1,_2,_3,_4));
+            m_server.AddEndpoint(endpoint(MongooseServer::PUT, theUrl), std::bind(&Core::PutFile, this, _1,_2,_3,_4));
+            m_server.AddEndpoint(endpoint(MongooseServer::DELETE, theUrl), std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
+        }
     }
-
 
     return theResponse;
 }

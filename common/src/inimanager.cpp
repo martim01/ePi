@@ -222,7 +222,7 @@ void iniManager::SetSectionValue(const string& sSectionName, const string& sKey,
 
 size_t iniManager::GetNumberOfSectionEntries(const string& sSectionName)
 {
-	itSection it = m_mSections.find(sSectionName);
+	auto it = m_mSections.find(sSectionName);
 	if(it== m_mSections.end())
         return 0;
     return it->second->GetNumberOfEntries();

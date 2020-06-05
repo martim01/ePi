@@ -26,8 +26,6 @@ class CronJob
         struct cron_element
         {
             std::vector<bool> vBits;
-            size_t nFirst;
-            size_t nSize;
 
         };
 
@@ -44,7 +42,7 @@ class CronJob
 
         void OutputElements(const std::vector<bool>& vBits, size_t nSelected);
 
-        std::vector<cron_element> m_element;
+        std::vector<cron_element> m_vElement;
         std::list<range> m_listYears;
         bool m_bGMT;
 

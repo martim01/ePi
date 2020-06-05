@@ -28,8 +28,7 @@
 
 class iniSection;
 
-typedef std::map<std::string,iniSection*> mapSection;
-typedef std::map<std::string,iniSection*>::iterator itSection;
+
 /**
 *   @brief simple class to read and write ini files
 *   @author Matthew Martin

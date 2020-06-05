@@ -7,6 +7,7 @@
 #include "inimanager.h"
 #include "response.h"
 #include "launcher.h"
+#include <functional>
 
 
 class AudioFile;
@@ -77,6 +78,8 @@ class ResourceManager
         response ParseResource(const Json::Value& jsData);
         response ParseFile(const std::string& sUploadName, const std::string& sLabel, const std::string& sDescription);
         response ParseSchedule(const Json::Value& jsData);
+
+        response ParseScheduleItems(const Json::Value& jsItems, std::function<response(const std::string&)> pFind);
         response ParsePlaylist(const Json::Value& jsData);
 
         bool FileExists(const std::string& sLabel);

@@ -10,6 +10,9 @@
 #include "sndfile.hh"
 #include "log.h"
 #include "epicron.h"
+#include <functional>
+
+using namespace std::placeholders;
 
 ResourceManager::ResourceManager(Launcher& launcher) : m_launcher(launcher) , m_pPlayingResource(nullptr)
 {
@@ -44,13 +47,15 @@ response ResourceManager::AddFiles(const Json::Value& jsData)
     }
     else
     {
+        theResponse.nHttpCode = 201;
         theResponse.jsonData["files"] = Json::Value(Json::arrayValue);
         //check we have metadata for each of the uploaded files..
         for(auto const& name : jsData["multipart"]["files"].getMemberNames())
         {
             std::vector<std::string> vSplit(SplitString(name, '_'));
 
-            if(vSplit.size() != 2 || jsData["multipart"]["data"]["label_"+vSplit[1]].isString() == false || jsData["multipart"]["data"]["description_"+vSplit[1]].isString() == false)
+            if(vSplit.size() != 2 || jsData["multipart"]["data"]["label_"+vSplit[1]].isString() == false ||
+               jsData["multipart"]["data"]["description_"+vSplit[1]].isString() == false)
             {
                 theResponse.nHttpCode = 400;
                 theResponse.jsonData["result"] = false;
@@ -711,6 +716,10 @@ response ResourceManager::ParseFile(const std::string& sUploadName, const std::s
             theResponse.jsonData["result"] = false;
             theResponse.jsonData["reason"].append("Unsupported encoding");
             break;
+        default:
+            theResponse.nHttpCode = 500;
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("Unknown error");
     }
     return theResponse;
 
@@ -723,51 +732,73 @@ response ResourceManager::ParseSchedule(const Json::Value& jsData)
     /**
     {
         "files" : [
-                        { "uid" : "", "times_to_play" : true/false, "cron" : "0 0 0 0 0 0 0" },
-                    ]
+                        { "uid" : "", "times_to_play" : -1,....n, "cron" : "0 0 0 0 0 0 0" },
+                    ],
+
+        "playlists" : [
+                        { "uid" : "", "times_to_play" : -1,....n, "cron" : "0 0 0 0 0 0 0", shuffle: true/false},
+                    ],
+
     }
     **/
-    if(jsData["files"].isArray() == false)
+    if(jsData["files"].isArray() == false || jsData["playlists"].isArray() == false)
     {
         theResponse.nHttpCode = 400;
         theResponse.jsonData["result"] = false;
         theResponse.jsonData["reason"].append("No schedule sent or wrong type");
         theResponse.jsonData["data"] = jsData;
+        return theResponse;
+    }
+
+
+    if(jsData["files"].isArray())
+    {
+        theResponse = ParseScheduleItems(jsData["files"], std::bind(&ResourceManager::GetFile, this, _1));
+    }
+    if(theResponse.nHttpCode != 400 && jsData["playlists"].isArray())
+    {
+        theResponse = ParseScheduleItems(jsData["playlists"], std::bind(&ResourceManager::GetPlaylist, this, _1));
     }
 
     if(theResponse.nHttpCode == 400)    //got here and not okay
-        return theResponse;
-
-    //now check the schedule is valid
-    for(size_t i=0; i < jsData["files"].size(); i++)
     {
-        if(jsData["files"][i].isObject() == false ||
-           jsData["files"][i]["cron"].isString() == false || jsData["files"][i]["uid"].isString() == false || jsData["files"][i]["times_to_play"].isInt() == false)
+        theResponse.jsonData["data"] = jsData;
+    }
+
+    return theResponse;
+}
+
+response ResourceManager::ParseScheduleItems(const Json::Value& jsItems, std::function<response(const std::string&)> pFind)
+{
+    response theResponse;
+    //now check the schedule is valid
+    for(size_t i=0; i < jsItems.size(); i++)
+    {
+        if(jsItems[i].isObject() == false ||
+           jsItems[i]["cron"].isString() == false || jsItems[i]["uid"].isString() == false || jsItems[i]["times_to_play"].isInt() == false)
         {
             theResponse.nHttpCode = 400;
             theResponse.jsonData["result"] = false;
             theResponse.jsonData["reason"].append("Not all schedule entries are correct");
-            theResponse.jsonData["data"] = jsData;
-            return theResponse;
+
+            break;
         }
-        else if(m_mFiles.find(jsData["files"][i]["uid"].asString()) == m_mFiles.end())
+        else if(pFind(jsItems[i]["uid"].asString()).nHttpCode == 400)
         {
             theResponse.nHttpCode = 400;
             theResponse.jsonData["result"] = false;
-            theResponse.jsonData["reason"].append("File '"+jsData["files"][i]["file"].asString()+"' does not exist");
-            theResponse.jsonData["data"] = jsData;
-            return theResponse;
+            theResponse.jsonData["reason"].append("Resource '"+jsItems[i]["uid"].asString()+"' does not exist");
+            break;
         }
         else
         {
             CronJob job;
-            if(job.SetString(jsData["files"][i]["cron"].asString()) == false)
+            if(job.SetString(jsItems[i]["cron"].asString()) == false)
             {
                 theResponse.nHttpCode = 400;
                 theResponse.jsonData["result"] = false;
-                theResponse.jsonData["reason"].append("Cron '"+jsData["files"][i]["cron"].asString()+"' is invalid");
-                theResponse.jsonData["data"] = jsData;
-                return theResponse;
+                theResponse.jsonData["reason"].append("Cron '"+jsItems[i]["cron"].asString()+"' is invalid");
+                break;
             }
         }
     }

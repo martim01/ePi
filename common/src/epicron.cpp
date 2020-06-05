@@ -2,30 +2,29 @@
 #include "utils.h"
 #include "log.h"
 
-CronJob::CronJob(const std::string& sCron) : m_bGMT(false), m_bLast(true), m_bNext(true)
+CronJob::CronJob(const std::string& sCron) : m_vElement(6), m_bGMT(false), m_bLast(true), m_bNext(true)
 {
-    m_element.resize(6);
-    m_element[SECONDS].vBits.resize(60);
-    m_element[MINUTES].vBits.resize(60);
-    m_element[HOURS].vBits.resize(24);
-    m_element[DOMS].vBits.resize(32);
-    m_element[MONTHS].vBits.resize(13); //one greater as month string is 1-12
-    m_element[DOWS].vBits.resize(7); //dows is 0=Sunday, 6 = Saturday
+    m_vElement[SECONDS].vBits.resize(60);
+    m_vElement[MINUTES].vBits.resize(60);
+    m_vElement[HOURS].vBits.resize(24);
+    m_vElement[DOMS].vBits.resize(32);
+    m_vElement[MONTHS].vBits.resize(13); //one greater as month string is 1-12
+    m_vElement[DOWS].vBits.resize(7); //dows is 0=Sunday, 6 = Saturday
 
 
     ParseString(sCron);
 
 }
 
-CronJob::CronJob() : m_bGMT(false), m_bLast(true), m_bNext(true)
+CronJob::CronJob() : m_vElement(6), m_bGMT(false), m_bLast(true), m_bNext(true)
 {
-    m_element.resize(6);
-    m_element[SECONDS].vBits.resize(60);
-    m_element[MINUTES].vBits.resize(60);
-    m_element[HOURS].vBits.resize(24);
-    m_element[DOMS].vBits.resize(35);
-    m_element[MONTHS].vBits.resize(13);
-    m_element[DOWS].vBits.resize(8);
+
+    m_vElement[SECONDS].vBits.resize(60);
+    m_vElement[MINUTES].vBits.resize(60);
+    m_vElement[HOURS].vBits.resize(24);
+    m_vElement[DOMS].vBits.resize(35);
+    m_vElement[MONTHS].vBits.resize(13);
+    m_vElement[DOWS].vBits.resize(8);
 }
 
 bool CronJob::SetString(const std::string& sCron)
@@ -55,11 +54,11 @@ bool CronJob::ParseString(const std::string& sCron)
         {
             if(vCron[nElement] == "*" || vCron[nElement] == "?")
             {
-                FillVector(m_element[nElement]);
+                FillVector(m_vElement[nElement]);
             }
             else
             {
-                if(GetList(vCron[nElement], m_element[nElement]) == false)
+                if(GetList(vCron[nElement], m_vElement[nElement]) == false)
                 {
                     pml::Log::Get(pml::Log::LOG_ERROR) << nElement << ": " << vCron[nElement] << " is incorrect";
                     return false;
@@ -77,16 +76,16 @@ bool CronJob::ParseString(const std::string& sCron)
     m_bGMT = false;//(vCron.size() > GMT && vCron[GMT] == "Z");
 
     #ifndef NDEBUG
-    for(size_t i = 0; i < m_element.size(); i++)
+    for(size_t i = 0; i < m_vElement.size(); i++)
     {
 
-        for(size_t j = 0; j < m_element[i].vBits.size(); j++)
+        for(size_t j = 0; j < m_vElement[i].vBits.size(); j++)
         {
             if(i == DOMS && j == 31)
             {
                 pml::Log::Get(pml::Log::LOG_DEBUG) << "[";
             }
-            pml::Log::Get(pml::Log::LOG_DEBUG) << m_element[i].vBits[j];
+            pml::Log::Get(pml::Log::LOG_DEBUG) << m_vElement[i].vBits[j];
             if(i == DOMS && j == 31)
             {
                 pml::Log::Get(pml::Log::LOG_DEBUG) << "]";
@@ -106,7 +105,6 @@ void CronJob::FillVector(cron_element& element)
     {
         element.vBits[i] = true;
     }
-    element.nFirst = 0;
 }
 
 
@@ -149,8 +147,8 @@ bool CronJob::GetList(const std::string& sElement, cron_element& element)
             return false;
         }
 
-        for(size_t i = std::min(std::get<MIN>(rnge), static_cast<unsigned long>(element.vBits.size()));
-            i <= std::min(std::get<MAX>(rnge),  static_cast<unsigned long>(element.vBits.size())); i++)
+        for(size_t j = std::min(std::get<MIN>(rnge), static_cast<unsigned long>(element.vBits.size()));
+            j <= std::min(std::get<MAX>(rnge),  static_cast<unsigned long>(element.vBits.size())); j++)
         {
             element.vBits[i] = true;
         }
@@ -212,21 +210,21 @@ void CronJob::OutputElements(const std::vector<bool>& vBits, size_t nSelected)
 bool CronJob::JobNow(const std::tm& now)
 {
     #ifdef TEST
-    OutputElements(m_element[SECONDS].vBits, now.tm_sec);
-    OutputElements(m_element[MINUTES].vBits, now.tm_min);
-    OutputElements(m_element[HOURS].vBits, now.tm_hour);
-    OutputElements(m_element[DOMS].vBits, now.tm_mday);
-    OutputElements(m_element[MONTHS].vBits, now.tm_mon+1);
-    OutputElements(m_element[DOWS].vBits, now.tm_wday);
+    OutputElements(m_vElement[SECONDS].vBits, now.tm_sec);
+    OutputElements(m_vElement[MINUTES].vBits, now.tm_min);
+    OutputElements(m_vElement[HOURS].vBits, now.tm_hour);
+    OutputElements(m_vElement[DOMS].vBits, now.tm_mday);
+    OutputElements(m_vElement[MONTHS].vBits, now.tm_mon+1);
+    OutputElements(m_vElement[DOWS].vBits, now.tm_wday);
     #endif
 
 
-    if(m_element[SECONDS].vBits[now.tm_sec] &&
-       m_element[MINUTES].vBits[now.tm_min] &&
-       m_element[HOURS].vBits[now.tm_hour] &&
-       m_element[DOMS].vBits[now.tm_mday] &&
-       m_element[MONTHS].vBits[now.tm_mon+1] &&
-       m_element[DOWS].vBits[now.tm_wday] &&
+    if(m_vElement[SECONDS].vBits[now.tm_sec] &&
+       m_vElement[MINUTES].vBits[now.tm_min] &&
+       m_vElement[HOURS].vBits[now.tm_hour] &&
+       m_vElement[DOMS].vBits[now.tm_mday] &&
+       m_vElement[MONTHS].vBits[now.tm_mon+1] &&
+       m_vElement[DOWS].vBits[now.tm_wday] &&
        MatchesYear(now.tm_year+900))
     {
         return true;

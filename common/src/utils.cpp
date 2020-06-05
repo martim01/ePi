@@ -192,13 +192,14 @@ bool JsonMemberExistsAndIsNotNull(const Json::Value& jsObject, const std::string
 
 Json::Value ConvertToJson(const std::string& str)
 {
+    Json::Value jsData;
     try
     {
         std::stringstream ss;
         ss.str(str);
-        Json::Value jsData;
+
         ss >> jsData;
-        return jsData;
+
     }
     catch(const Json::RuntimeError& e)
     {
@@ -207,5 +208,7 @@ Json::Value ConvertToJson(const std::string& str)
         std::cout << e.what() << std::endl;
         std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
     }
+
+    return jsData;
 }
 

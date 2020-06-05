@@ -11,7 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="s 0f349e3a-c622-340f-a511-0dd1c00fc531 0 0" />
+				<Option parameters="p 0f349e3a-c622-340f-a511-0dd1c00fc531 1 0" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
@@ -64,6 +64,7 @@
 		<Unit filename="include/playlist.h" />
 		<Unit filename="include/playout.h" />
 		<Unit filename="include/resampler.h" />
+		<Unit filename="include/resources.h" />
 		<Unit filename="include/schedule.h" />
 		<Unit filename="include/soundfile.h" />
 		<Unit filename="main.cpp" />
@@ -74,6 +75,7 @@
 		<Unit filename="src/playlist.cpp" />
 		<Unit filename="src/playout.cpp" />
 		<Unit filename="src/resampler.cpp" />
+		<Unit filename="src/resources.cpp" />
 		<Unit filename="src/schedule.cpp" />
 		<Unit filename="src/soundfile.cpp" />
 		<Extensions>

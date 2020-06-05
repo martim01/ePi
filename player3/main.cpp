@@ -16,6 +16,8 @@
 #include "inimanager.h"
 #include "playlist.h"
 #include "schedule.h"
+#include "resources.h"
+
 using namespace std;
 
 /**
@@ -55,10 +57,12 @@ int main(int argc, char* argv[])
 
 
     iniManager iniConfig;
+    Resources::Get().Load(iniConfig);
+
     // @todo(martim01) read ini file
 
     //@todo(martim01) log needs to go to somewhere not cout
-    //pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
+   // pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
 
     try
     {

@@ -8,12 +8,15 @@
 #include "log.h"
 #include <thread>
 #include "epiwriter.h"
+#include "resources.h"
+#include "playlist.h"
 
 Schedule::Schedule(Playout& player, const iniManager& iniConfig, const std::string& sUid) :
   m_player(player),
   m_iniConfig(iniConfig),
   m_sUid(sUid),
-  m_pSource(nullptr)
+  m_pSource(nullptr),
+  m_pPlaylist(nullptr)
 {
 
 }
@@ -68,63 +71,64 @@ bool Schedule::Play()
 
 bool Schedule::LoadSchedule()
 {
-    std::ifstream ifs;
-    ifs.open(CreatePath(m_iniConfig.GetIniString("Paths", "Resources", "/var/ePi/resources"))+"resources.json", std::ifstream::in);
-    if(!ifs.is_open())
-    {
-        pml::Log::Get(pml::Log::LOG_CRITICAL) << "Schedule\tCould not open resources file!" << std::endl;
-		return false;
-	}
-	try
-	{
-        Json::Value jsResources;
-        ifs >> jsResources;
 
-        if(jsResources["schedules"].isArray() && jsResources["files"].isArray())
+    if(Resources::Get().IsValid())
+    {
+        for(size_t i = 0; i < Resources::Get().GetJson()["schedules"].size(); i++)
         {
-            for(size_t i = 0; i < jsResources["schedules"].size(); i++)
+            if(Resources::Get().GetJson()["schedules"][i]["uid"].asString() == m_sUid)
             {
-                if(jsResources["schedules"][i]["uid"].asString() == m_sUid)
+                return CreateSchedule(Resources::Get().GetJson()["files"], Resources::Get().GetJson()["playlists"], Resources::Get().GetJson()["schedules"][i]);
+            }
+        }
+    }
+    return false;
+}
+
+
+
+bool Schedule::CreateSchedule(const Json::Value& jsFiles, const Json::Value& jsPlaylists, const Json::Value& jsSchedule)
+{
+    m_vSchedule.reserve(100);
+
+    if(jsSchedule["files"].isArray())
+    {
+        for(size_t i = 0; i < jsSchedule["files"].size(); i++)
+        {
+            if(jsSchedule["files"][i]["uid"].isString() && jsSchedule["files"][i]["times_to_play"].isInt() && jsSchedule["files"][i]["cron"].isString())
+            {
+                switch(GetFile(jsFiles, jsSchedule["files"][i]["uid"].asString()))
                 {
-                    return CreateSchedule(jsResources["files"], jsResources["schedules"][i]);
+                    case FILE_SOUND:
+                        m_vSchedule.push_back(item(jsSchedule["files"][i]["uid"].asString(), jsSchedule["files"][i]["times_to_play"].asInt(), item::SND_FILE));
+                        m_vSchedule.back().job.SetString(jsSchedule["files"][i]["cron"].asString());
+                        break;
+                    case FILE_MP3:
+                        m_vSchedule.push_back(item(jsSchedule["files"][i]["uid"].asString(), jsSchedule["files"][i]["times_to_play"].asInt(), item::MP3_FILE));
+                        m_vSchedule.back().job.SetString(jsSchedule["files"][i]["cron"].asString());
+                        break;
                 }
             }
         }
-        return true;
     }
-    catch(const Json::RuntimeError& e)
+    if(jsSchedule["playlists"].isArray())
     {
-        return false;
-    }
-}
-
-bool Schedule::CreateSchedule(const Json::Value& jsFiles, const Json::Value& jsSchedule)
-{
-    if(jsSchedule["files"].isArray() == false)
-    {
-        return false;
-    }
-
-    m_vSchedule.reserve(jsSchedule["files"].size());
-
-    for(size_t i = 0; i < jsSchedule["files"].size(); i++)
-    {
-        if(jsSchedule["files"][i]["uid"].isString() && jsSchedule["files"][i]["times_to_play"].isInt() && jsSchedule["files"][i]["cron"].isString())
+        for(size_t i = 0; i < jsSchedule["playlists"].size(); i++)
         {
-            switch(GetFile(jsFiles, jsSchedule["files"][i]["uid"].asString()))
+            if(jsSchedule["playlists"][i]["uid"].isString() && jsSchedule["playlists"][i]["times_to_play"].isInt() && jsSchedule["playlists"][i]["cron"].isString() && jsSchedule["playlists"][i]["shuffle"].isBool())
             {
-                case FILE_SOUND:
-                    m_vSchedule.push_back(item(jsSchedule["files"][i]["uid"].asString(), jsSchedule["files"][i]["times_to_play"].asInt(), false));
-                    m_vSchedule.back().job.SetString(jsSchedule["files"][i]["cron"].asString());
-                    break;
-                case FILE_MP3:
-                    m_vSchedule.push_back(item(jsSchedule["files"][i]["uid"].asString(), jsSchedule["files"][i]["times_to_play"].asInt(), true));
-                    m_vSchedule.back().job.SetString(jsSchedule["files"][i]["cron"].asString());
-                    break;
+                if(GetPlaylist(jsPlaylists, jsSchedule["playlists"][i]["uid"].asString()))
+                {
+                    m_vSchedule.push_back(item(jsSchedule["playlists"][i]["uid"].asString(), jsSchedule["playlists"][i]["times_to_play"].asInt(), item::PLAYLIST, jsSchedule["playlists"][i]["shuffle"].asBool()));
+                    m_vSchedule.back().job.SetString(jsSchedule["playlists"][i]["cron"].asString());
+                }
             }
+
         }
     }
-    return true;
+
+
+    return (m_vSchedule.empty() == false);
 }
 
 int Schedule::GetFile(const Json::Value& jsFiles, const std::string& sUid)
@@ -150,15 +154,48 @@ int Schedule::GetFile(const Json::Value& jsFiles, const std::string& sUid)
     return FILE_NOT_FOUND;
 }
 
+bool Schedule::GetPlaylist(const Json::Value& jsPlaylists, const std::string& sUid)
+{
+    for(size_t i = 0; i < jsPlaylists.size(); i++)
+    {
+        if(jsPlaylists[i]["uid"].isString() && jsPlaylists[i]["uid"].asString() == sUid)
+        {
+            return true;
+        }
+    }
+    return false;
+}
 
 void Schedule::PlayItem()
 {
     if(m_nCurrentItem < m_vSchedule.size())
     {
-        m_pSource = std::unique_ptr<FileSource>(new FileSource(m_player, CreatePath(m_iniConfig.GetIniString("Paths", "Audio", "/var/ePi/audio")),
-                                                                m_vSchedule[m_nCurrentItem].sUid, m_vSchedule[m_nCurrentItem].nTimesToPlay, m_vSchedule[m_nCurrentItem].bMp3));
+        m_pPlaylist = nullptr;
+        m_pSource = nullptr;
+        switch(m_vSchedule[m_nCurrentItem].eType)
+        {
+            case item::MP3_FILE:
+                m_pSource = std::unique_ptr<FileSource>(new FileSource(m_player, CreatePath(m_iniConfig.GetIniString("Paths", "Audio", "/var/ePi/audio")),
+                                                                m_vSchedule[m_nCurrentItem].sUid, m_vSchedule[m_nCurrentItem].nTimesToPlay, true));
+                break;
+            case item::SND_FILE:
+                m_pSource = std::unique_ptr<FileSource>(new FileSource(m_player, CreatePath(m_iniConfig.GetIniString("Paths", "Audio", "/var/ePi/audio")),
+                                                                m_vSchedule[m_nCurrentItem].sUid, m_vSchedule[m_nCurrentItem].nTimesToPlay, false));
+                break;
+            case item::PLAYLIST:
+                m_pPlaylist = std::unique_ptr<Playlist>(new Playlist(m_player, m_iniConfig, m_vSchedule[m_nCurrentItem].sUid, m_vSchedule[m_nCurrentItem].nTimesToPlay, m_vSchedule[m_nCurrentItem].bShuffle));
+        }
+
         m_nCurrentItem = m_vSchedule.size();
-        m_pSource->Play();
+
+        if(m_pSource)
+        {
+            m_pSource->Play();
+        }
+        else if(m_pPlaylist)
+        {
+            m_pPlaylist->Play();
+        }
     }
 }
 
@@ -169,5 +206,9 @@ void Schedule::SetItem(size_t nItem)
     if(m_pSource)
     {
         m_pSource->Stop();
+    }
+    else if(m_pPlaylist)
+    {
+        m_pPlaylist->Stop();
     }
 }

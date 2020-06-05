@@ -8,6 +8,8 @@
 class Playout;
 class iniManager;
 class FileSource;
+class Playlist;
+
 class Schedule
 {
     public:
@@ -15,12 +17,17 @@ class Schedule
         bool Play();
 
     private:
+
         struct item
         {
-            item(const std::string& si, unsigned long nT, bool bM) : sUid(si), nTimesToPlay(nT), bMp3(bM){}
+            enum eType{SND_FILE, MP3_FILE, PLAYLIST};
+
+            item(const std::string& si, unsigned long nT, eType eM, bool bS=false) : sUid(si), nTimesToPlay(nT), eType(eM), bShuffle(bS){}
             std::string sUid;
             unsigned long nTimesToPlay;
-            bool bMp3;
+            eType eType;
+            bool bShuffle;
+
             CronJob job;
         };
 
@@ -29,9 +36,10 @@ class Schedule
 
 
         bool LoadSchedule();
-        bool CreateSchedule(const Json::Value& jsFiles, const Json::Value& jsSchedule);
+        bool CreateSchedule(const Json::Value& jsFiles, const Json::Value& jsPlaylists, const Json::Value& jsSchedule);
 
         int GetFile(const Json::Value& jsFiles, const std::string& sUid);
+        bool GetPlaylist(const Json::Value& jsFiles, const std::string& sUid);
         enum {FILE_NOT_FOUND, FILE_SOUND, FILE_MP3};
 
         std::vector<item> m_vSchedule;
@@ -45,5 +53,6 @@ class Schedule
         std::atomic<size_t> m_nCurrentItem;
 
         std::unique_ptr<FileSource> m_pSource;
+        std::unique_ptr<Playlist> m_pPlaylist;
 };
 
