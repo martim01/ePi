@@ -12,7 +12,7 @@ m_nChannelsOut(2)
 }
 
 
-bool Playout::Init(double dLatency)
+bool Playout::Init(double dLatency, unsigned long nSampleRate)
 {
     PaError err = Pa_Initialize();
     if(err != paNoError)
@@ -20,10 +20,10 @@ bool Playout::Init(double dLatency)
         return false;
     }
 
-    return OpenStream(dLatency, paCallback);
+    return OpenStream(dLatency, nSampleRate, paCallback);
 }
 
-bool Playout::OpenStream(double dLatency, PaStreamCallback *streamCallback)
+bool Playout::OpenStream(double dLatency, unsigned long nSampleRate, PaStreamCallback *streamCallback)
 {
     pml::Log::Get() << "Audio\tAttempt to open device " << m_nDevice << std::endl;
 
@@ -56,7 +56,7 @@ bool Playout::OpenStream(double dLatency, PaStreamCallback *streamCallback)
 
     pml::Log::Get() << "Audio\tAttempt to open " << m_nChannelsOut << " channel OUTPUT stream on device " <<  m_nDevice << std::endl;
 
-    err = Pa_OpenStream(&m_pStream, 0, &outputParameters, 48000, 0, paNoFlag, streamCallback, reinterpret_cast<void*>(this) );
+    err = Pa_OpenStream(&m_pStream, 0, &outputParameters, nSampleRate, 0, paNoFlag, streamCallback, reinterpret_cast<void*>(this) );
 
     if(err == paNoError)
     {
@@ -76,7 +76,7 @@ bool Playout::OpenStream(double dLatency, PaStreamCallback *streamCallback)
     }
     m_pStream = 0;
     pml::Log::Get(pml::Log::LOG_ERROR) << "Audio\tFailed to open device " << m_nDevice << " " << Pa_GetErrorText(err)
-                                       << " with sample rate=48000 and output channels=" << m_nChannelsOut << std::endl;
+                                       << " with sample rate="<<nSampleRate <<" and output channels=" << m_nChannelsOut << std::endl;
 
 
 

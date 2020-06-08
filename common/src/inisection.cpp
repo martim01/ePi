@@ -21,9 +21,17 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <algorithm>
+
 #include "log.h"
 
 using namespace std;
+
+string getlower(string str)
+{
+    transform(str.begin(), str.end(), str.begin(), ::tolower);
+    return str;
+}
 
 iniSection::iniSection(const string& sSection)
 : m_sSectionName(sSection)
@@ -70,7 +78,7 @@ string iniSection::ReadSection(std::ifstream* pif)
 		if(nCommentPos == std::string::npos)
 			nCommentPos = sLine.size();
 
-		string sKey = sLine.substr(0,nEqualPos);
+		string sKey = getlower(sLine.substr(0,nEqualPos));
 		m_mSectionData[sKey] = sLine.substr(nEqualPos+1, nCommentPos-(nEqualPos+1));
 	}
 	return sLine;
@@ -101,7 +109,7 @@ std::map<string,string>::const_iterator iniSection::GetDataEnd() const
 const string& iniSection::GetString(const string& sKey, const string& sDefault)
 {
   	//does the key exist
-  	itIniData it = m_mSectionData.find(sKey);
+  	itIniData it = m_mSectionData.find(getlower(sKey));
 	if(it==m_mSectionData.end())
 		return sDefault;
 	return it->second;
@@ -113,7 +121,7 @@ const string& iniSection::GetString(const string& sKey, const string& sDefault)
 int iniSection::GetInt(const string& sKey, int nDefault)
 {
   	//does the key exist
-  	itIniData it = m_mSectionData.find(sKey);
+  	itIniData it = m_mSectionData.find(getlower(sKey));
 	if(it==m_mSectionData.end())
 		return nDefault;
     long n = nDefault;
@@ -128,7 +136,7 @@ int iniSection::GetInt(const string& sKey, int nDefault)
 double iniSection::GetDouble(const string& sKey, double dDefault)
 {
   	//does the key exist
-	itIniData it = m_mSectionData.find(sKey);
+	itIniData it = m_mSectionData.find(getlower(sKey));
 	if(it==m_mSectionData.end())
 		return dDefault;
     double d = dDefault;
@@ -156,7 +164,7 @@ void iniSection::WriteSection(std::ofstream* pof)
 
 void iniSection::SetValue(const string& sKey, const string& sValue)
 {
-	m_mSectionData[sKey] = sValue;
+	m_mSectionData[getlower(sKey)] = sValue;
 }
 
 size_t iniSection::GetNumberOfEntries()

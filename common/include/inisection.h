@@ -35,6 +35,8 @@
 typedef std::map<std::string,std::string> mapIniData;
 typedef std::map<std::string,std::string>::iterator itIniData;
 
+extern std::string getlower(std::string str);
+
 class iniSection{
     friend class iniManager;
 

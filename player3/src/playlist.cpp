@@ -35,7 +35,7 @@ bool Playlist::Play()
     {
         for(auto anItem  : m_vPlaylist)
         {
-            m_pSource = std::unique_ptr<FileSource>(new FileSource(m_player, CreatePath(m_iniConfig.GetIniString("Paths", "Audio", "/var/ePi/audio")), anItem.sUid, anItem.nTimesToPlay, anItem.bMp3));
+            m_pSource = std::unique_ptr<FileSource>(new FileSource(m_player, m_iniConfig, anItem.sUid, anItem.nTimesToPlay, anItem.bMp3));
             m_pSource->Play();
 
             if(m_bPlay == false)
@@ -59,7 +59,7 @@ bool Playlist::LoadPlaylist()
                 return CreatePlaylist(Resources::Get().GetJson()["files"], Resources::Get().GetJson()["playlists"][i]);
             }
         }
-        return true;
+        return false;
     }
     return false;
 

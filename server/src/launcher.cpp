@@ -50,11 +50,17 @@ bool ReadFromPipe(int nFd, std::string& sBuffer, std::vector<std::string>& vLine
 
 Launcher::Launcher()
 : m_pid(0),
-m_sPlayer("/home/pi/ePi/player3/bin/Debug/player3"),
+m_sPlayer(""),
 m_statusCallback(nullptr),
 m_exitCallback(nullptr)
 {
 
+}
+
+void Launcher::SetPlayer(const std::string& sPlayer, const std::string& sConfigPath)
+{
+    m_sPlayer = sPlayer;
+    m_sConfigPath = sConfigPath;
 }
 
 void Launcher::AddCallbacks(std::function<void(const std::string&)> statusCallback, std::function<void(int)> exitCallback)
@@ -125,7 +131,7 @@ response Launcher::LaunchPlayer(std::string sType, std::string sUid, int nLoop, 
 
         std::string sShuffle(bShuffle ? "1" : "0");
 
-        char* args[] = {&m_sPlayer[0], &sType[0], &sUid[0], &sLoop[0], &sShuffle[0], nullptr};
+        char* args[] = {&m_sPlayer[0], &m_sConfigPath[0], &sType[0], &sUid[0], &sLoop[0], &sShuffle[0], nullptr};
         nError = execv(m_sPlayer.c_str(), args);
 
         if(nError)

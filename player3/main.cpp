@@ -40,29 +40,36 @@ int ErrorAndExit(const std::string& sError)
 
 
 static const int APP=0;
-static const int TYPE=1;
-static const int UID=2;
-static const int LOOP=3;
-static const int SHUFFLE=4;
+static const int CONFIG=1;
+static const int TYPE=2;
+static const int UID=3;
+static const int LOOP=4;
+static const int SHUFFLE=5;
+static const int DEBUG=6;
 
 
 
 int main(int argc, char* argv[])
 {
     //make sure got all the arguments
-    if(argc < 5)
+    if(argc < DEBUG)
     {
         return ErrorAndExit("Not enough arguments sent.");
     }
 
 
     iniManager iniConfig;
+    iniConfig.ReadIniFile(argv[1]);
+
     Resources::Get().Load(iniConfig);
 
     // @todo(martim01) read ini file
 
     //@todo(martim01) log needs to go to somewhere not cout
-   // pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
+    if(argc == DEBUG+1)
+    {
+        pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
+    }
 
     try
     {
@@ -71,8 +78,8 @@ int main(int argc, char* argv[])
 
         std::mutex mainMutex;
         std::condition_variable mainCv;
-        Playout player(mainMutex, mainCv, 0);
-        player.Init(0.4);
+        Playout player(mainMutex, mainCv, iniConfig.GetIniInt("player3", "output",0));
+        player.Init(iniConfig.GetIniDouble("player3", "latency",0.4), iniConfig.GetIniInt("player3", "samplerate", 48000));
 
 
         //launch the correct player
@@ -80,13 +87,13 @@ int main(int argc, char* argv[])
         {
             case 'w':
                 {
-                    FileSource fs(player, CreatePath(iniConfig.GetIniString("Paths", "Audio", "/var/ePi/audio")), argv[UID], nTimesToPlay, false);
+                    FileSource fs(player, iniConfig, argv[UID], nTimesToPlay, false);
                     fs.Play();
                 }
                 break;
             case 'm':
                 {
-                    FileSource fs(player, CreatePath(iniConfig.GetIniString("Paths", "Audio", "/var/ePi/audio")), argv[UID], nTimesToPlay, true);
+                    FileSource fs(player, iniConfig, argv[UID], nTimesToPlay, true);
                     fs.Play();
                 }
                 break;

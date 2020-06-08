@@ -5,14 +5,15 @@
 #include "soundfile.h"
 #include "epiwriter.h"
 #include "utils.h"
+#include "inimanager.h"
 
-
-FileSource::FileSource(Playout& player, const std::string& sPath, const std::string& sUid, unsigned long nTimesToPlay, bool bMp3) :
+FileSource::FileSource(Playout& player, const iniManager& iniConfig, const std::string& sUid, unsigned long nTimesToPlay, bool bMp3) :
     m_player(player),
-    m_sPath(sPath),
+    m_iniConfig(iniConfig),
     m_sUid(sUid),
     m_nTimesToPlay(nTimesToPlay),
-    m_pFile(bMp3 ? std::unique_ptr<AudioFile>(new Mp3File(sPath, m_sUid)) : std::unique_ptr<AudioFile>(new SoundFile(sPath, m_sUid))),
+    m_pFile(bMp3 ? std::unique_ptr<AudioFile>(new Mp3File(CreatePath(m_iniConfig.GetIniString("paths", "audio", "/var/ePi/audio")), m_sUid)) :
+                   std::unique_ptr<AudioFile>(new SoundFile(CreatePath(m_iniConfig.GetIniString("paths", "audio", "/var/ePi/audio")), m_sUid))),
     m_pSampler(nullptr),
     m_bPlay(true)
 {
@@ -42,9 +43,10 @@ bool FileSource::Play()
         m_jsStatus["playing"]["length"] = m_pFile->GetLength().count();
 
         //Init the resampler
-        if(m_pFile->GetSampleRate() != 48000)
+        unsigned long nSampleRate(m_iniConfig.GetIniInt("player3", "samplerate", 48000));
+        if(m_pFile->GetSampleRate() != nSampleRate)
         {
-            m_pSampler = std::unique_ptr<Resampler>(new Resampler(48000));
+            m_pSampler = std::unique_ptr<Resampler>(new Resampler(nSampleRate));
             if(m_pSampler->Init(m_pFile->GetChannels(), m_pFile->GetSampleRate()) == false)
             {
                 m_jsStatus["playing"]["error"] = true;

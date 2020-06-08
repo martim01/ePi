@@ -12,12 +12,16 @@
 
 using namespace std;
 
-int main()
+int main(int argc, char* argv[])
 {
-
+    if(argc < 2)
+    {
+        std::cout << "Usage: episerver [config file full path]" << std::endl;
+        return -1;
+    }
 
     Core theApp;  //Create the endpoints
-    theApp.Run();
+    theApp.Run(argv[1]);
 
 
     return 0;

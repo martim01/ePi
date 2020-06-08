@@ -11,7 +11,8 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include "resource.h"
-
+#include "inimanager.h"
+#include "inisection.h"
 
 using namespace std::placeholders;
 using namespace pml;
@@ -41,25 +42,26 @@ Core::Core() : m_manager(m_launcher), m_nTimeSinceLastCall(0)
 {
     pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
     pml::Log::Get() << "Core\tStart" << std::endl;
+
+    m_jsStatus["player"] ="Stopped";
 }
 
-void Core::Run()
+void Core::Run(const std::string& sConfigFile)
 {
-    iniManager ini;
-    // @todo(martim01) load the config file properly
 
+    m_iniConfig.ReadIniFile(sConfigFile);
 
-    m_manager.Init(ini);
+    m_manager.Init(m_iniConfig);
     m_info.SetDiskPath(m_manager.GetAudioPath());
 
-    if(m_server.Init(ini))
+    if(m_server.Init(m_iniConfig))
     {
         //add server callbacks
         CreateEndpoints();
 
         //add luauncher callbacks
         m_launcher.AddCallbacks(std::bind(&Core::StatusCallback, this, _1), std::bind(&Core::ExitCallback, this, _1));
-
+        m_launcher.SetPlayer(m_iniConfig.GetIniString("playout", "app", "/home/pi/ePi/player3/bin/Debug/player3"),sConfigFile);
         //start the server loop
         m_server.Run(false,50);
     }
@@ -170,7 +172,14 @@ response Core::GetConfig(mg_connection* pConnection, const query& theQuery, cons
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetConfig" << std::endl;
     response theResponse;
 
-    // @todo(martim01) GetConfig
+    for(auto itSection = m_iniConfig.GetSectionBegin(); itSection != m_iniConfig.GetSectionEnd(); ++itSection)
+    {
+        theResponse.jsonData[itSection->first] = Json::Value(Json::objectValue);
+        for(auto itData = itSection->second->GetDataBegin(); itData != itSection->second->GetDataEnd(); ++itData)
+        {
+            theResponse.jsonData[itSection->first][itData->first] = itData->second;
+        }
+    }
 
     return theResponse;
 }
@@ -381,14 +390,11 @@ response Core::PostFile(mg_connection* pConnection, const query& theQuery, const
 
     if(theResponse.nHttpCode == 201)
     {
-        for(size_t i = 0; i < theResponse.jsonData["files"].size(); i++)
-        {
-            url theUrl(url(EP_FILES.Get()+"/"+theResponse.jsonData["files"][i]["uid"].asString()));
+        url aUrl(url(EP_FILES.Get()+"/"+theResponse.jsonData["uid"].asString()));
 
-            m_server.AddEndpoint(endpoint(MongooseServer::GET, theUrl), std::bind(&Core::GetFile, this, _1,_2,_3,_4));
-            m_server.AddEndpoint(endpoint(MongooseServer::PUT, theUrl), std::bind(&Core::PutFile, this, _1,_2,_3,_4));
-            m_server.AddEndpoint(endpoint(MongooseServer::DELETE, theUrl), std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
-        }
+        m_server.AddEndpoint(endpoint(MongooseServer::GET, aUrl), std::bind(&Core::GetFile, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(endpoint(MongooseServer::PUT, aUrl), std::bind(&Core::PutFile, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(endpoint(MongooseServer::DELETE, aUrl), std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
     }
 
     return theResponse;
@@ -400,11 +406,11 @@ response Core::PostPlaylist(mg_connection* pConnection, const query& theQuery, c
     response theResponse(m_manager.AddPlaylist(ConvertToJson(theData.Get())));
     if(theResponse.nHttpCode == 201)
     {
-        url theUrl(url(EP_PLAYLISTS.Get()+"/"+theResponse.jsonData["uid"].asString()));
+        url aUrl(url(EP_PLAYLISTS.Get()+"/"+theResponse.jsonData["uid"].asString()));
 
-        m_server.AddEndpoint(endpoint(MongooseServer::GET, theUrl), std::bind(&Core::GetPlaylist, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::PUT, theUrl), std::bind(&Core::PutPlaylist, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::DELETE, theUrl), std::bind(&Core::DeletePlaylist, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(endpoint(MongooseServer::GET, aUrl), std::bind(&Core::GetPlaylist, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(endpoint(MongooseServer::PUT, aUrl), std::bind(&Core::PutPlaylist, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(endpoint(MongooseServer::DELETE, aUrl), std::bind(&Core::DeletePlaylist, this, _1,_2,_3,_4));
     }
     return theResponse;
 }
@@ -415,10 +421,10 @@ response Core::PostSchedule(mg_connection* pConnection, const query& theQuery, c
     response theResponse(m_manager.AddSchedule(ConvertToJson(theData.Get())));
     if(theResponse.nHttpCode == 201)
     {
-        url theUrl(url(EP_SCHEDULES.Get()+"/"+theResponse.jsonData["uid"].asString()));
-        m_server.AddEndpoint(endpoint(MongooseServer::GET, theUrl), std::bind(&Core::GetSchedule, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::PUT, theUrl), std::bind(&Core::PutSchedule, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::DELETE,theUrl), std::bind(&Core::DeleteSchedule, this, _1,_2,_3,_4));
+        url aUrl(url(EP_SCHEDULES.Get()+"/"+theResponse.jsonData["uid"].asString()));
+        m_server.AddEndpoint(endpoint(MongooseServer::GET, aUrl), std::bind(&Core::GetSchedule, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(endpoint(MongooseServer::PUT, aUrl), std::bind(&Core::PutSchedule, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(endpoint(MongooseServer::DELETE,aUrl), std::bind(&Core::DeleteSchedule, this, _1,_2,_3,_4));
     }
     return theResponse;
 }

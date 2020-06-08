@@ -8,11 +8,13 @@
 class AudioFile;
 class Playout;
 class Resampler;
+class iniManager;
+
 
 class FileSource
 {
     public:
-        FileSource(Playout& player, const std::string& sPath, const std::string& sUid, unsigned long nTimesToPlay, bool bMp3);
+        FileSource(Playout& player, const iniManager& iniConfig, const std::string& sUid, unsigned long nTimesToPlay, bool bMp3);
         ~FileSource();
         bool Play();
         void Stop();
@@ -22,8 +24,8 @@ class FileSource
         bool PlayOnce();
 
         Playout& m_player;
+        const iniManager& m_iniConfig;
 
-        std::string m_sPath;
         std::string m_sUid;
         unsigned long m_nTimesToPlay;
 

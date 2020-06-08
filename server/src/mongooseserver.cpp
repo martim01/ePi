@@ -153,7 +153,7 @@ void MongooseServer::HandleEvent(mg_connection *pConnection, int nEvent, void* p
             Log::Get(Log::LOG_DEBUG) << "MongooseServer\tEvent Close" << endl;
             if (is_websocket(pConnection))
             {
-                pConnection->user_data = 0;
+                pConnection->user_data = nullptr;
             }
             Log::Get(Log::LOG_DEBUG) << "MongooseServer\tDone" << endl;
             break;
@@ -194,8 +194,8 @@ MongooseServer::MongooseServer() :
 bool MongooseServer::Init(const iniManager& iniConfig)
 {
     //check for ssl
-    string sCert = iniConfig.GetIniString("ssl", "cert", "");
-    string sKey = iniConfig.GetIniString("ssl", "key", "");
+    string sCert = iniConfig.GetIniString("api", "sslCert", "");
+    string sKey = iniConfig.GetIniString("api", "ssKey", "");
 
 
     char hostname[HOST_NAME_MAX];
@@ -203,15 +203,15 @@ bool MongooseServer::Init(const iniManager& iniConfig)
     stringstream ssRewrite;
     ssRewrite << "%80=https://" << hostname;
 
-    s_ServerOpts.document_root = iniConfig.GetIniString("paths", "webpages","html").c_str();
-    s_ServerOpts.enable_directory_listing = "yes";
+    s_ServerOpts.document_root = ".";
+    s_ServerOpts.enable_directory_listing = "no";
     s_ServerOpts.url_rewrites=ssRewrite.str().c_str();
     s_ServerOpts.extra_headers="X-Frame-Options: sameorigin\r\nCache-Control: no-cache\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains\r\nX-Content-Type-Options: nosniff\r\nReferrer-Policy: no-referrer\r\nServer: unknown";
 
     mg_mgr_init(&m_mgr, NULL);
 
     stringstream ss;
-    ss << iniConfig.GetIniInt("webserver", "port", 8080);
+    ss << iniConfig.GetIniInt("api", "port", 8080);
 
     if(!sCert.empty() && !sKey.empty())
     {

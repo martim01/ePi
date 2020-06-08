@@ -20,8 +20,8 @@ ResourceManager::ResourceManager(Launcher& launcher) : m_launcher(launcher) , m_
 
 void ResourceManager::Init(const iniManager& iniConfig)
 {
-    m_sAudioFilePath = CreatePath(iniConfig.GetIniString("Paths", "Audio", "/var/ePi/audio"));
-    m_sResourcePath = CreatePath(iniConfig.GetIniString("Paths", "Resources", "/var/ePi/resources"));
+    m_sAudioFilePath = CreatePath(iniConfig.GetIniString("paths", "audio", "/var/ePi/audio"));
+    m_sResourcePath = CreatePath(iniConfig.GetIniString("paths", "resources", "/var/ePi/resources"));
 
     mkpath(m_sAudioFilePath, 0755);
     mkpath(m_sResourcePath, 0755);
@@ -38,7 +38,7 @@ ResourceManager::~ResourceManager()
 response ResourceManager::AddFiles(const Json::Value& jsData)
 {
     std::lock_guard<std::mutex> lg(m_mutex);
-    pml::Log::Get() << "ResourceManager\tAddFiles: " << jsData << " ";
+    pml::Log::Get() << "ResourceManager\tAddFile: " << jsData << " ";
 
     response theResponse(ParseFiles(jsData));
     if(theResponse.nHttpCode ==400)
@@ -48,28 +48,20 @@ response ResourceManager::AddFiles(const Json::Value& jsData)
     else
     {
         theResponse.nHttpCode = 201;
-        theResponse.jsonData["files"] = Json::Value(Json::arrayValue);
         //check we have metadata for each of the uploaded files..
-        for(auto const& name : jsData["multipart"]["files"].getMemberNames())
+        if(jsData["multipart"]["files"]["file"].isString() == false || jsData["multipart"]["data"]["label"].isString() == false || jsData["multipart"]["data"]["description"].isString() == false)
         {
-            std::vector<std::string> vSplit(SplitString(name, '_'));
+            theResponse.nHttpCode = 400;
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("No metadata set for file: ");
+            pml::Log::Get(pml::Log::LOG_WARN) << " file has no metadata.";
+            remove(jsData["multipart"]["files"]["file"].asString().c_str());
+        }
+        else
+        {
+            theResponse = AddFile(jsData["multipart"]["files"]["file"].asString(), jsData["multipart"]["data"]["label"].asString(),
+            jsData["multipart"]["data"]["description"].asString());
 
-            if(vSplit.size() != 2 || jsData["multipart"]["data"]["label_"+vSplit[1]].isString() == false ||
-               jsData["multipart"]["data"]["description_"+vSplit[1]].isString() == false)
-            {
-                theResponse.nHttpCode = 400;
-                theResponse.jsonData["result"] = false;
-                theResponse.jsonData["reason"].append("No metadata set for file: "+name);
-                pml::Log::Get(pml::Log::LOG_WARN) << " file '" << name << "' has no metadata.";
-                remove(jsData["multipart"]["files"][name].asString().c_str());
-            }
-            else
-            {
-                pml::Log::Get() << " ---- " << std::endl;
-                pml::Log::Get() << " ---- " << jsData["multipart"]["files"][name] << " ----";
-                response aResponse(AddFile(jsData["multipart"]["files"][name].asString(), jsData["multipart"]["data"]["label_"+vSplit[1]].asString(), jsData["multipart"]["data"]["description_"+vSplit[1]].asString()));
-                theResponse.jsonData["files"].append(aResponse.jsonData);
-            }
         }
     }
     pml::Log::Get(pml::Log::LOG_DEBUG) << std::endl;
@@ -944,7 +936,7 @@ bool ResourceManager::LoadResources()
     {
         for(size_t i = 0; i < jsResources["playlists"].size(); i++)
         {
-            m_mPlaylists.insert(std::make_pair(jsResources["playlists"][i]["uid"].asString(), std::make_shared<Resource>(jsResources["schedules"][i])));
+            m_mPlaylists.insert(std::make_pair(jsResources["playlists"][i]["uid"].asString(), std::make_shared<Resource>(jsResources["playlists"][i])));
         }
     }
 

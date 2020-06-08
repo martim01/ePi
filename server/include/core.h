@@ -12,7 +12,7 @@ class Core
     public:
         Core();
 
-        void Run();
+        void Run(const std::string& sConfigFile);
 
 
 
@@ -56,7 +56,7 @@ class Core
         ResourceManager m_manager;
         MongooseServer m_server;
         SysInfoManager m_info;
-
+        iniManager m_iniConfig;
 
         bool CreateEndpoints();
 

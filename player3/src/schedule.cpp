@@ -175,11 +175,11 @@ void Schedule::PlayItem()
         switch(m_vSchedule[m_nCurrentItem].eType)
         {
             case item::MP3_FILE:
-                m_pSource = std::unique_ptr<FileSource>(new FileSource(m_player, CreatePath(m_iniConfig.GetIniString("Paths", "Audio", "/var/ePi/audio")),
+                m_pSource = std::unique_ptr<FileSource>(new FileSource(m_player, m_iniConfig,
                                                                 m_vSchedule[m_nCurrentItem].sUid, m_vSchedule[m_nCurrentItem].nTimesToPlay, true));
                 break;
             case item::SND_FILE:
-                m_pSource = std::unique_ptr<FileSource>(new FileSource(m_player, CreatePath(m_iniConfig.GetIniString("Paths", "Audio", "/var/ePi/audio")),
+                m_pSource = std::unique_ptr<FileSource>(new FileSource(m_player, m_iniConfig,
                                                                 m_vSchedule[m_nCurrentItem].sUid, m_vSchedule[m_nCurrentItem].nTimesToPlay, false));
                 break;
             case item::PLAYLIST:

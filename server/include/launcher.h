@@ -7,6 +7,7 @@ class Launcher
 {
     public:
         Launcher();
+        void SetPlayer(const std::string& sPlayer, const std::string& sConfigPath);
 
         void AddCallbacks(std::function<void(const std::string&)> statusCallback, std::function<void(int)> m_exitCallback);
 
@@ -28,6 +29,7 @@ class Launcher
         int m_nExitCode;
 
         std::string m_sPlayer;
+        std::string m_sConfigPath;
 
         std::function<void(const std::string&)> m_statusCallback;
         std::function<void(int)> m_exitCallback;

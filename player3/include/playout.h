@@ -18,7 +18,7 @@ class Playout
 
         /** Initializes portaudio
         **/
-        bool Init(double dLatencey);
+        bool Init(double dLatencey, unsigned long nSampleRate);
 
         void OutputCallback(float* pBuffer, size_t nFrameCount, double dLatency, int nFlags);
 
@@ -36,7 +36,7 @@ class Playout
 
 private:
 
-    bool OpenStream(double dLatencey, PaStreamCallback *streamCallback);
+    bool OpenStream(double dLatencey, unsigned long nSampleRate, PaStreamCallback *streamCallback);
 
     void CloseFile();
 

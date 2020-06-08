@@ -11,6 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option parameters="/var/ePi/config.ini" />
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-D__GNU__" />
@@ -76,6 +77,8 @@
 			<Add directory="../external/log/lib" />
 		</Linker>
 		<Unit filename="../common/include/epicron.h" />
+		<Unit filename="../common/include/inimanager.h" />
+		<Unit filename="../common/include/inisection.h" />
 		<Unit filename="../common/include/utils.h" />
 		<Unit filename="../common/src/epicron.cpp" />
 		<Unit filename="../common/src/inimanager.cpp" />

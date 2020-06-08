@@ -82,7 +82,7 @@ bool iniManager::ReadIniFile(const string& sFilename)
                 pml::Log::Get(pml::Log::LOG_ERROR) << "IniManager file '" << sFilename << "' invalid section" << endl;
                 return false;
             }
-			string sSection(sLine.substr(1,nClosePos-1));
+			string sSection(getlower(sLine.substr(1,nClosePos-1)));
 			m_mSections[sSection] = new iniSection(sSection);
 			sLine = m_mSections[sSection]->ReadSection(&m_if);
 		}
@@ -119,7 +119,7 @@ std::map<string,iniSection*>::iterator iniManager::GetSectionEnd()
 
 iniSection* iniManager::GetSection(const string& sSectionName)
 {
-    std::map<string,iniSection*>::iterator it = m_mSections.find(sSectionName);
+    std::map<string,iniSection*>::iterator it = m_mSections.find(getlower(sSectionName));
     if(it == m_mSections.end())
         return NULL;
     return it->second;
@@ -131,7 +131,7 @@ iniSection* iniManager::GetSection(const string& sSectionName)
 const string& iniManager::GetIniString(const string& sSection, const string& sKey, const string& sDefault) const
 {
     //does the section exist?
-    auto it = m_mSections.find(sSection);
+    auto it = m_mSections.find(getlower(sSection));
 	if(it==m_mSections.end())
 		return sDefault;
 
@@ -145,7 +145,7 @@ const string& iniManager::GetIniString(const string& sSection, const string& sKe
 int iniManager::GetIniInt(const string& sSection, const string& sKey, int nDefault) const
 {
     //does the section exist?
-	auto it = m_mSections.find(sSection);
+	auto it = m_mSections.find(getlower(sSection));
 	if(it==m_mSections.end())
 		return nDefault;
 
@@ -158,7 +158,7 @@ int iniManager::GetIniInt(const string& sSection, const string& sKey, int nDefau
 double iniManager::GetIniDouble(const string& sSection, const string& sKey, double dDefault) const
 {
     //does the section exist?
-	auto it = m_mSections.find(sSection);
+	auto it = m_mSections.find(getlower(sSection));
 	if(it==m_mSections.end())
 		return dDefault;
 
@@ -198,10 +198,10 @@ bool iniManager::WriteIniFile(const string& sFilename)
 
 iniSection* iniManager::CreateSection(const string& sSectionName)
 {
-    map<string, iniSection*>::iterator itSection =m_mSections.find(sSectionName);
+    map<string, iniSection*>::iterator itSection =m_mSections.find(getlower(sSectionName));
     if(itSection == m_mSections.end())
     {
-        itSection  = m_mSections.insert(make_pair(sSectionName,new iniSection(sSectionName))).first;
+        itSection  = m_mSections.insert(make_pair(getlower(sSectionName),new iniSection(getlower(sSectionName)))).first;
     }
     return itSection->second;
 }
@@ -222,7 +222,7 @@ void iniManager::SetSectionValue(const string& sSectionName, const string& sKey,
 
 size_t iniManager::GetNumberOfSectionEntries(const string& sSectionName)
 {
-	auto it = m_mSections.find(sSectionName);
+	auto it = m_mSections.find(getlower(sSectionName));
 	if(it== m_mSections.end())
         return 0;
     return it->second->GetNumberOfEntries();
@@ -230,7 +230,7 @@ size_t iniManager::GetNumberOfSectionEntries(const string& sSectionName)
 
 bool iniManager::DeleteSection(const std::string& sSectionName)
 {
-    iniSection* pSection = GetSection(sSectionName);
+    iniSection* pSection = GetSection(getlower(sSectionName));
     if(pSection)
     {
         delete pSection;
