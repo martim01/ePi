@@ -1,7 +1,8 @@
 #include "resourcemanager.h"
 #include <iostream>
 #include <fstream>
-
+#include "inimanager.h"
+#include "inisection.h"
 #include "utils.h"
 #include "uidutils.h"
 #include "audiofile.h"
@@ -11,29 +12,45 @@
 #include "log.h"
 #include "epicron.h"
 #include <functional>
+#include "proccheck.h"
+
 
 using namespace std::placeholders;
 
-ResourceManager::ResourceManager(Launcher& launcher) : m_launcher(launcher) , m_pPlayingResource(nullptr)
+ResourceManager::ResourceManager(Launcher& launcher, iniManager& iniConfig) :
+   m_launcher(launcher),
+   m_iniConfig(iniConfig),
+   m_pPlayingResource(nullptr)
 {
 }
 
-void ResourceManager::Init(const iniManager& iniConfig)
+void ResourceManager::Init()
 {
-    m_sAudioFilePath = CreatePath(iniConfig.GetIniString("paths", "audio", "/var/ePi/audio"));
-    m_sResourcePath = CreatePath(iniConfig.GetIniString("paths", "resources", "/var/ePi/resources"));
+    m_sAudioFilePath = CreatePath(m_iniConfig.GetIniString("paths", "audio", "/var/ePi/audio"));
+    m_sResourcePath = CreatePath(m_iniConfig.GetIniString("paths", "resources", "/var/ePi/resources"));
 
     mkpath(m_sAudioFilePath, 0755);
     mkpath(m_sResourcePath, 0755);
 
     LoadResources();
+
+    //remove any old application files
+    iniSection* pSection = m_iniConfig.GetSection("remove");
+    if(pSection)
+    {
+        for(auto itData = pSection->GetDataBegin(); itData != pSection->GetDataEnd(); ++itData)
+        {
+            remove(itData->second.c_str());
+        }
+        m_iniConfig.DeleteSection("remove");
+        m_iniConfig.WriteIniFile();
+    }
 }
 
 ResourceManager::~ResourceManager()
 {
     SaveResources();
 }
-
 
 response ResourceManager::AddFiles(const Json::Value& jsData)
 {
@@ -287,7 +304,7 @@ response ResourceManager::ModifyFileMeta(const std::map<std::string, std::shared
 
     if(theResponse.nHttpCode == 200)
     {
-        if(FileExists(jsData["label"].asString()))
+        if(FileExists(jsData["label"].asString(), jsData["uid"].asString()))
         {
             theResponse.nHttpCode = 409;
             theResponse.jsonData["result"] = false;
@@ -335,7 +352,7 @@ response ResourceManager::ModifySchedule(const std::string& sUid, const Json::Va
         theResponse = ParseSchedule(jsData);
         if(theResponse.nHttpCode == 200)
         {
-            if(ResourceExists(jsData["label"].asString(), m_mSchedules))
+            if(ResourceExists(jsData["label"].asString(), m_mSchedules, jsData["uid"].asString()))
             {
                 theResponse.nHttpCode = 409;
                 theResponse.jsonData["result"] = false;
@@ -384,7 +401,7 @@ response ResourceManager::ModifyPlaylist(const std::string& sUid, const Json::Va
         theResponse = ParsePlaylist(jsData);
         if(theResponse.nHttpCode == 200)
         {
-            if(ResourceExists(jsData["label"].asString(), m_mPlaylists))
+            if(ResourceExists(jsData["label"].asString(), m_mPlaylists, jsData["uid"].asString()))
             {
                 theResponse.nHttpCode = 409;
                 theResponse.jsonData["result"] = false;
@@ -944,25 +961,25 @@ bool ResourceManager::LoadResources()
 }
 
 
-bool ResourceManager::FileExists(const std::string& sLabel)
+bool ResourceManager::FileExists(const std::string& sLabel, const std::string& sUid)
 {
     for(auto pairResource : m_mFiles)
     {
         if(CmpNoCase(pairResource.second->GetLabel(), sLabel))
         {
-            return true;
+            return (sUid != pairResource.second->GetUid());
         }
     }
     return false;
 }
 
-bool ResourceManager::ResourceExists(const std::string& sLabel, const std::map<std::string, std::shared_ptr<Resource> >& mResource)
+bool ResourceManager::ResourceExists(const std::string& sLabel, const std::map<std::string, std::shared_ptr<Resource> >& mResource, const std::string& sUid)
 {
     for(auto pairResource : mResource)
     {
         if(CmpNoCase(pairResource.second->GetLabel(), sLabel))
         {
-            return true;
+            return (pairResource.second->GetUid() != sUid);
         }
     }
     return false;
@@ -1067,17 +1084,40 @@ response ResourceManager::ModifyStatus(const Json::Value& jsData)
     if(CmpNoCase(jsData["command"].asString(), "play"))
     {
         pml::Log::Get(pml::Log::LOG_INFO) << "play " << std::endl;
+        response tr(IsLocked());
+        if(tr.nHttpCode == 423)
+        {
+            return tr;
+        }
+
         return Play(jsData);
     }
     else if(CmpNoCase(jsData["command"].asString(), "pause"))
     {
         pml::Log::Get(pml::Log::LOG_INFO) << "pause" << std::endl;
+                response tr(IsLocked());
+        if(tr.nHttpCode == 423)
+        {
+            return tr;
+        }
+
         return Pause(jsData);
     }
     else if(CmpNoCase(jsData["command"].asString(), "stop"))
     {
         pml::Log::Get(pml::Log::LOG_INFO) << "stop" << std::endl;
+        response tr(IsLocked());
+        if(tr.nHttpCode == 423)
+        {
+            return tr;
+        }
+
         return  Stop(jsData);
+    }
+    else if(CmpNoCase(jsData["command"].asString(), "lock"))
+    {
+        pml::Log::Get(pml::Log::LOG_INFO) << "lock" << std::endl;
+        return  Lock(jsData);
     }
     else
     {
@@ -1239,6 +1279,54 @@ response ResourceManager::Stop(const Json::Value& jsData)
 
 }
 
+response ResourceManager::Lock(const Json::Value& jsData)
+{
+    response theResponse(400);
+    if(jsData["lock"].isBool() == false)
+    {
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("lock not set");
+    }
+    if(jsData["password"].isString() == false)
+    {
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("password not set");
+    }
+    bool bAlreadyLocked = (m_iniConfig.GetIniInt("restricted", "locked", 0)==1);
+    if(jsData["lock"].asBool() == bAlreadyLocked)
+    {
+        theResponse.nHttpCode = 202;
+        theResponse.jsonData["result"] = true;
+        theResponse.jsonData["reason"].append("already in this state");
+    }
+    else if(jsData["lock"].asBool() == false)
+    {
+        if(jsData["password"].asString() != m_iniConfig.GetIniString("restricted", "password", ""))
+        {
+            theResponse.nHttpCode = 403;
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("password is incorrect");
+        }
+        else
+        {
+            m_iniConfig.SetSectionValue("restricted", "locked", 0);
+            m_iniConfig.SetSectionValue("restricted", "password", "");
+            m_iniConfig.WriteIniFile();
+            theResponse.nHttpCode = 200;
+            theResponse.jsonData["result"] = true;
+        }
+    }
+    else
+    {
+        m_iniConfig.SetSectionValue("restricted", "locked", 1);
+        m_iniConfig.SetSectionValue("restricted", "password", jsData["password"].asString());
+        m_iniConfig.WriteIniFile();
+        theResponse.nHttpCode = 200;
+        theResponse.jsonData["result"] = true;
+    }
+    return theResponse;
+
+}
 
 void ResourceManager::LockPlayingResource(bool bLock)
 {
@@ -1307,4 +1395,126 @@ std::shared_ptr<const Resource> ResourceManager::GetResource(const std::string& 
     }
     pml::Log::Get(pml::Log::LOG_WARN) << "'" << sUid << "' had no associated resource." << std::endl;
     return nullptr;
+}
+
+response ResourceManager::UpdateApplication(const Json::Value& jsData)
+{
+    std::lock_guard<std::mutex> lg(m_mutex);
+    pml::Log::Get() << "ResourceManager\tUpdateApplication: " << jsData << " ";
+
+    response theResponse(ParseFiles(jsData));
+    if(theResponse.nHttpCode ==400)
+    {
+        pml::Log::Get(pml::Log::LOG_ERROR) << "failed - incorrect JSON" << std::endl;
+    }
+    else
+    {
+        theResponse.nHttpCode = 200;
+        //check we have metadata for each of the uploaded files..
+        if(jsData["multipart"]["files"]["file"].isString() == false)
+        {
+            theResponse.nHttpCode = 400;
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("No file sent ");
+            pml::Log::Get(pml::Log::LOG_WARN) << " file not sent.";
+        }
+        if(jsData["multipart"]["data"]["application"].isString() == false)
+        {
+            theResponse.nHttpCode = 400;
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("No metadata set for file: ");
+            pml::Log::Get(pml::Log::LOG_WARN) << " file has no metadata.";
+            remove(jsData["multipart"]["files"]["file"].asString().c_str());
+        }
+        else if(jsData["multipart"]["data"]["application"].asString() == "episerver")
+        {
+            return Update("episerver", ".", jsData["multipart"]["files"]["file"].asString());
+        }
+        else if(jsData["multipart"]["data"]["application"].asString() == "player3" || jsData["multipart"]["data"]["application"].asString() == "player67")
+        {
+            return Update(jsData["multipart"]["data"]["application"].asString(),
+                          CreatePath(m_iniConfig.GetIniString("playout", "path",".")), jsData["multipart"]["files"]["file"].asString());
+        }
+        else
+        {
+            theResponse.nHttpCode = 404;
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("Application not found ");
+            pml::Log::Get(pml::Log::LOG_WARN) << " application does not exist.";
+            remove(jsData["multipart"]["files"]["file"].asString().c_str());
+        }
+    }
+    pml::Log::Get(pml::Log::LOG_DEBUG) << std::endl;
+    return theResponse;
+}
+
+response ResourceManager::Update(const std::string& sApplication, const std::string& sPath, const std::string& sUpdateFile)
+{
+    response theResponse;
+
+    std::stringstream ssApp;
+    ssApp << sPath << sApplication;
+
+    //is the application running?
+    if(IsProcRunning(sApplication))
+    {   //if so rename the application
+        std::stringstream ssOld;
+
+        ssOld << sPath << sApplication << ".old";
+
+        if(rename(ssApp.str().c_str(), ssOld.str().c_str()) != 0)
+        {
+            theResponse.nHttpCode = 500;
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append(strerror(errno));
+        }
+        else
+        {
+            m_iniConfig.SetSectionValue("remove", sApplication, ssOld.str());
+            m_iniConfig.WriteIniFile();
+            theResponse.jsonData["restart"] = true;
+        }
+    }
+
+    if(theResponse.nHttpCode == 200)
+    {
+        //copy the update file across
+        std::ifstream temp(sUpdateFile, std::ios::binary);
+        std::ofstream app(ssApp.str(), std::ios::binary);
+        if(!temp)
+        {
+            theResponse.nHttpCode = 500;
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("Could not open update file for reading");
+        }
+        else if(!app)
+        {
+            theResponse.nHttpCode = 500;
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("Could not open application file for writing");
+        }
+        else
+        {
+            app << temp.rdbuf();
+            app.close();
+            temp.close();
+            theResponse.jsonData["result"] = true;
+        }
+    }
+
+    remove(sUpdateFile.c_str());
+
+    return theResponse;
+}
+
+response ResourceManager::IsLocked()
+{
+    response theResponse(200);
+    if(m_iniConfig.GetIniInt("restricted", "locked",0) == 1)
+    {
+        theResponse.nHttpCode = 423;
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("The system has been locked");
+    }
+    return theResponse;
 }

@@ -17,10 +17,10 @@ class Resource;
 class ResourceManager
 {
     public:
-        ResourceManager(Launcher& launcher);
+        ResourceManager(Launcher& launcher, iniManager& iniConfig);
         ~ResourceManager();
 
-        void Init(const iniManager& iniConfig);
+        void Init();
 
         response AddFiles(const Json::Value& jsData);
         response AddSchedule(const Json::Value& jsData);
@@ -45,6 +45,7 @@ class ResourceManager
 
         response ModifyStatus(const Json::Value& jsData);
 
+        response UpdateApplication(const Json::Value& jsData);
 
 
         std::map<std::string, std::shared_ptr<AudioFile> >::const_iterator GetFilesBegin() const;
@@ -64,6 +65,7 @@ class ResourceManager
 
         std::shared_ptr<const Resource> GetPlayingResource();
 
+        response IsLocked();
 
     private:
         bool LoadResources();
@@ -82,13 +84,15 @@ class ResourceManager
         response ParseScheduleItems(const Json::Value& jsItems, std::function<response(const std::string&)> pFind);
         response ParsePlaylist(const Json::Value& jsData);
 
-        bool FileExists(const std::string& sLabel);
-        bool ResourceExists(const std::string& sLabel, const std::map<std::string, std::shared_ptr<Resource> >& mResource);
+
+        bool FileExists(const std::string& sLabel, const std::string& sUid="");
+        bool ResourceExists(const std::string& sLabel, const std::map<std::string, std::shared_ptr<Resource> >& mResource, const std::string& sUid="");
 
 
         response Play(const Json::Value& jsData);
         response Pause(const Json::Value& jsData);
         response Stop(const Json::Value& jsData);
+        response Lock(const Json::Value& jsData);
 
         response PlayFile(const Json::Value& jsData);
         response PlayPlaylist(const Json::Value& jsData);
@@ -96,6 +100,10 @@ class ResourceManager
 
         response GetSchedulesAndPlaylistsContainingFile(const std::string& sUid);
         Json::Value GetResourcesFileIn(const std::string& sUid, std::map<std::string, std::shared_ptr<Resource> >& mResource);
+
+        response Update(const std::string& sApplication, const std::string& sPath, const std::string& sUpdateFile);
+
+
 
         std::shared_ptr<const Resource> GetResource(const std::string& sUid);
 
@@ -110,6 +118,7 @@ class ResourceManager
         std::mutex m_mutex;
 
         Launcher& m_launcher;
+        iniManager& m_iniConfig;
         std::string m_sResourcePlaying;
         std::shared_ptr<const Resource> m_pPlayingResource;
 

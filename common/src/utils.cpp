@@ -6,6 +6,11 @@
 #include <string.h>
 #include <syslog.h>
 #include "utils.h"
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
+#include <netinet/ip.h>
+#include <arpa/inet.h>
 
 using namespace std;
 
@@ -212,3 +217,16 @@ Json::Value ConvertToJson(const std::string& str)
     return jsData;
 }
 
+
+std::string GetIpAddress(const std::string& sInterface)
+{
+    int fd = socket(AF_INET, SOCK_DGRAM,0);
+    ifreq ifr;
+    ifr.ifr_addr.sa_family = AF_INET;
+    strncpy((char*)ifr.ifr_ifrn.ifrn_name, sInterface.c_str(), IFNAMSIZ-1);
+    ioctl(fd, SIOCGIFADDR, &ifr);
+    close(fd);
+
+    return inet_ntoa((((sockaddr_in*)&ifr.ifr_addr)->sin_addr));
+
+}

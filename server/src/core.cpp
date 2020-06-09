@@ -13,6 +13,7 @@
 #include "resource.h"
 #include "inimanager.h"
 #include "inisection.h"
+#include "version.h"
 
 using namespace std::placeholders;
 using namespace pml;
@@ -26,6 +27,7 @@ const std::string Core::SCHEDULES   = "schedules";      //GET
 const std::string Core::PLAYLISTS   = "playlists";      //GET
 const std::string Core::FILES       = "files";          //GET
 const std::string Core::INFO        = "info";        //GET
+const std::string Core::UPDATE      = "update";        //GET PUT
 
 const url Core::EP_ROOT        = url(ROOT);
 const url Core::EP_EPI         = url(ROOT+EPI);
@@ -36,9 +38,10 @@ const url Core::EP_SCHEDULES   = url(EP_EPI.Get()+"/"+SCHEDULES);
 const url Core::EP_PLAYLISTS   = url(EP_EPI.Get()+"/"+PLAYLISTS);
 const url Core::EP_FILES       = url(EP_EPI.Get()+"/"+FILES);
 const url Core::EP_INFO        = url(EP_EPI.Get()+"/"+INFO);
+const url Core::EP_UPDATE      = url(EP_EPI.Get()+"/"+UPDATE);
 
 
-Core::Core() : m_manager(m_launcher), m_nTimeSinceLastCall(0)
+Core::Core() : m_manager(m_launcher, m_iniConfig), m_nTimeSinceLastCall(0)
 {
     pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
     pml::Log::Get() << "Core\tStart" << std::endl;
@@ -51,7 +54,7 @@ void Core::Run(const std::string& sConfigFile)
 
     m_iniConfig.ReadIniFile(sConfigFile);
 
-    m_manager.Init(m_iniConfig);
+    m_manager.Init();
     m_info.SetDiskPath(m_manager.GetAudioPath());
 
     if(m_server.Init(m_iniConfig))
@@ -61,7 +64,7 @@ void Core::Run(const std::string& sConfigFile)
 
         //add luauncher callbacks
         m_launcher.AddCallbacks(std::bind(&Core::StatusCallback, this, _1), std::bind(&Core::ExitCallback, this, _1));
-        m_launcher.SetPlayer(m_iniConfig.GetIniString("playout", "app", "/home/pi/ePi/player3/bin/Debug/player3"),sConfigFile);
+        m_launcher.SetPlayer(CreatePath(m_iniConfig.GetIniString("playout", "path", "/home/pi/ePi/bin")), m_iniConfig.GetIniString("playout", "app", "player3"),sConfigFile);
         //start the server loop
         m_server.Run(false,50);
     }
@@ -81,10 +84,12 @@ bool Core::CreateEndpoints()
     m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_PLAYLISTS), std::bind(&Core::GetPlaylists, this, _1,_2,_3,_4));
     m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_FILES), std::bind(&Core::GetFiles, this, _1,_2,_3,_4));
     m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_INFO), std::bind(&Core::GetInfo, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_UPDATE), std::bind(&Core::GetUpdate, this, _1,_2,_3,_4));
 
     m_server.AddEndpoint(endpoint(MongooseServer::PUT, EP_STATUS), std::bind(&Core::PutStatus, this, _1,_2,_3,_4));
     m_server.AddEndpoint(endpoint(MongooseServer::PUT, EP_POWER), std::bind(&Core::PutPower, this, _1,_2,_3,_4));
     m_server.AddEndpoint(endpoint(MongooseServer::PUT, EP_CONFIG), std::bind(&Core::PutConfig, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(endpoint(MongooseServer::PUT, EP_UPDATE), std::bind(&Core::PutUpdate, this, _1,_2,_3,_4));
 
     m_server.AddEndpoint(endpoint(MongooseServer::POST, EP_SCHEDULES), std::bind(&Core::PostSchedule, this, _1,_2,_3,_4));
     m_server.AddEndpoint(endpoint(MongooseServer::POST, EP_PLAYLISTS), std::bind(&Core::PostPlaylist, this, _1,_2,_3,_4));
@@ -146,6 +151,7 @@ response Core::GetEpi(mg_connection* pConnection, const query& theQuery, const p
     theResponse.jsonData.append(CONFIG);
     theResponse.jsonData.append(INFO);
     theResponse.jsonData.append(STATUS);
+    theResponse.jsonData.append(UPDATE);
     return theResponse;
 }
 
@@ -172,24 +178,47 @@ response Core::GetConfig(mg_connection* pConnection, const query& theQuery, cons
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetConfig" << std::endl;
     response theResponse;
 
+    char host[256];
+    gethostname(host, 256);
+    theResponse.jsonData["server"]["hostname"] = host;
+    theResponse.jsonData["server"]["ip_address"]["eth0"] = GetIpAddress("eth0");
+    theResponse.jsonData["server"]["ip_address"]["wlan0"] = GetIpAddress("wlan0");
+
     for(auto itSection = m_iniConfig.GetSectionBegin(); itSection != m_iniConfig.GetSectionEnd(); ++itSection)
     {
-        theResponse.jsonData[itSection->first] = Json::Value(Json::objectValue);
-        for(auto itData = itSection->second->GetDataBegin(); itData != itSection->second->GetDataEnd(); ++itData)
+        if(itSection->first != "restricted")
         {
-            theResponse.jsonData[itSection->first][itData->first] = itData->second;
+            theResponse.jsonData[itSection->first] = Json::Value(Json::objectValue);
+            for(auto itData = itSection->second->GetDataBegin(); itData != itSection->second->GetDataEnd(); ++itData)
+            {
+                theResponse.jsonData[itSection->first][itData->first] = itData->second;
+            }
         }
     }
 
     return theResponse;
 }
 
+response Core::GetUpdate(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+{
+    //get all the version numbers...
+    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetUpdate" << std::endl;
+    response theResponse;
+    std::stringstream ssVersion;
+    ssVersion << version::MAJOR << "." << version::MINOR << "." << version::PATCH;
+    theResponse.jsonData["server"] = ssVersion.str();
+
+    //get versions of other applications...
+    return theResponse;
+}
 response Core::GetStatus(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
     //lock as jsStatus can be called by pipe thread and server thread
     std::lock_guard<std::mutex> lg(m_mutex);
 
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetStatus" << std::endl;
+    m_jsStatus["locked"] = (m_iniConfig.GetIniInt("restricted", "locked", 0)==1);
+
     response theResponse;
     theResponse.jsonData = m_jsStatus;
     return theResponse;
@@ -243,15 +272,22 @@ response Core::GetSchedule(mg_connection* pConnection, const query& theQuery, co
 response Core::PutStatus(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutStatus" << std::endl;
-    Json::Value jsData(ConvertToJson(theData.Get()));
 
+
+    Json::Value jsData(ConvertToJson(theData.Get()));
     return m_manager.ModifyStatus(jsData);
 }
 
 response Core::PutPower(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutPower" << std::endl;
-    response theResponse;
+
+    response theResponse(m_manager.IsLocked());
+    if(theResponse.nHttpCode == 423)
+    {
+        return theResponse;
+    }
+
 
     Json::Value jsData(ConvertToJson(theData.Get()));
     if(jsData["command"].isString() == false)
@@ -291,7 +327,11 @@ response Core::PutPower(mg_connection* pConnection, const query& theQuery, const
 response Core::PutConfig(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutConfig" << std::endl;
-    response theResponse(501);
+    response theResponse(m_manager.IsLocked());
+    if(theResponse.nHttpCode == 423)
+    {
+        return theResponse;
+    }
     // @todo(martim01) PutConfig
     // not sure yet
 
@@ -301,6 +341,13 @@ response Core::PutConfig(mg_connection* pConnection, const query& theQuery, cons
 response Core::PutFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutFile" << std::endl;
+
+    response theResponse(m_manager.IsLocked());
+    if(theResponse.nHttpCode == 423)
+    {
+        return theResponse;
+    }
+
     std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
 
     return m_manager.ModifyFile(vSplit.back(), ConvertToJson(theData.Get()));
@@ -310,6 +357,13 @@ response Core::PutFile(mg_connection* pConnection, const query& theQuery, const 
 response Core::PutPlaylist(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutPlaylist" << std::endl;
+
+    response theResponse(m_manager.IsLocked());
+    if(theResponse.nHttpCode == 423)
+    {
+        return theResponse;
+    }
+
     std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
 
     return m_manager.ModifyPlaylist(vSplit.back(), ConvertToJson(theData.Get()));
@@ -318,6 +372,13 @@ response Core::PutPlaylist(mg_connection* pConnection, const query& theQuery, co
 response Core::PutSchedule(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutSchedule" << std::endl;
+
+    response theResponse(m_manager.IsLocked());
+    if(theResponse.nHttpCode == 423)
+    {
+        return theResponse;
+    }
+
     std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
 
     return m_manager.ModifySchedule(vSplit.back(), ConvertToJson(theData.Get()));
@@ -327,9 +388,16 @@ response Core::PutSchedule(mg_connection* pConnection, const query& theQuery, co
 response Core::DeleteFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "DeleteFile" << std::endl;
+
+    response theResponse(m_manager.IsLocked());
+    if(theResponse.nHttpCode == 423)
+    {
+        return theResponse;
+    }
+
     std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
 
-    response theResponse(m_manager.DeleteFile(vSplit.back()));
+    theResponse = m_manager.DeleteFile(vSplit.back());
     if(theResponse.nHttpCode == 200)
     {
         url aUrl(url(EP_FILES.Get()+"/"+vSplit.back()));
@@ -344,9 +412,16 @@ response Core::DeleteFile(mg_connection* pConnection, const query& theQuery, con
 response Core::DeletePlaylist(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "DeletePlaylist" << std::endl;
+    response theResponse(m_manager.IsLocked());
+    if(theResponse.nHttpCode == 423)
+    {
+        return theResponse;
+    }
+
+
     std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
 
-    response theResponse(m_manager.DeletePlaylist(vSplit.back()));
+    theResponse = m_manager.DeletePlaylist(vSplit.back());
 
     if(theResponse.nHttpCode == 200)
     {
@@ -364,7 +439,13 @@ response Core::DeleteSchedule(mg_connection* pConnection, const query& theQuery,
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "DeleteSchedule" << std::endl;
     std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
 
-    response theResponse(m_manager.DeleteSchedule(vSplit.back()));
+    response theResponse(m_manager.IsLocked());
+    if(theResponse.nHttpCode == 423)
+    {
+        return theResponse;
+    }
+
+    theResponse = m_manager.DeleteSchedule(vSplit.back());
 
     if(theResponse.nHttpCode == 200)
     {
@@ -383,7 +464,13 @@ response Core::PostFile(mg_connection* pConnection, const query& theQuery, const
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PostFile" << std::endl;
     Json::Value jsonData(ConvertToJson(theData.Get()));
 
-    response theResponse(m_manager.AddFiles(jsonData));
+    response theResponse(m_manager.IsLocked());
+    if(theResponse.nHttpCode == 423)
+    {
+        return theResponse;
+    }
+
+    theResponse = m_manager.AddFiles(jsonData);
     Log::Get() << theResponse.jsonData << std::endl;
     Log::Get() << theResponse.nHttpCode << std::endl;
 
@@ -403,7 +490,15 @@ response Core::PostFile(mg_connection* pConnection, const query& theQuery, const
 response Core::PostPlaylist(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PostPlaylist" << std::endl;
-    response theResponse(m_manager.AddPlaylist(ConvertToJson(theData.Get())));
+
+    response theResponse(m_manager.IsLocked());
+    if(theResponse.nHttpCode == 423)
+    {
+        return theResponse;
+    }
+
+
+    theResponse = m_manager.AddPlaylist(ConvertToJson(theData.Get()));
     if(theResponse.nHttpCode == 201)
     {
         url aUrl(url(EP_PLAYLISTS.Get()+"/"+theResponse.jsonData["uid"].asString()));
@@ -418,7 +513,14 @@ response Core::PostPlaylist(mg_connection* pConnection, const query& theQuery, c
 response Core::PostSchedule(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PostSchedule" << std::endl;
-    response theResponse(m_manager.AddSchedule(ConvertToJson(theData.Get())));
+    response theResponse(m_manager.IsLocked());
+    if(theResponse.nHttpCode == 423)
+    {
+        return theResponse;
+    }
+
+
+    theResponse = m_manager.AddSchedule(ConvertToJson(theData.Get()));
     if(theResponse.nHttpCode == 201)
     {
         url aUrl(url(EP_SCHEDULES.Get()+"/"+theResponse.jsonData["uid"].asString()));
@@ -436,6 +538,7 @@ void Core::StatusCallback(const std::string& sData)
     std::lock_guard<std::mutex> lg(m_mutex);
 
     m_jsStatus = Json::Value(Json::objectValue);    //reset
+    m_jsStatus["locked"] = (m_iniConfig.GetIniInt("restricted", "locked", 0)==1);
 
     auto pResource = m_manager.GetPlayingResource();
     if(pResource)
@@ -499,3 +602,22 @@ void Core::LoopCallback(int nTook)
         m_nTimeSinceLastCall = 0;
     }
 }
+
+
+response Core::PutUpdate(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+{
+    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutUpdate" << std::endl;
+    response theResponse(m_manager.IsLocked());
+    if(theResponse.nHttpCode == 423)
+    {
+        return theResponse;
+    }
+
+
+    Json::Value jsonData(ConvertToJson(theData.Get()));
+    return m_manager.UpdateApplication(jsonData);
+
+}
+
+
+

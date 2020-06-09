@@ -3,6 +3,7 @@
 #include <sys/statvfs.h>
 #include <fstream>
 #include "utils.h"
+#include "version.h"
 
 SysInfoManager::SysInfoManager() :
  m_sPath("/"),
@@ -159,7 +160,9 @@ Json::Value SysInfoManager::GetApplicationInfo()
 {
     Json::Value jsInfo;
     //@todo(martim01) Get version number of this app and also the player
-    jsInfo["version"] = "?";
+    std::stringstream ssVersion;
+    ssVersion << version::MAJOR << "." << version::MINOR << "." << version::PATCH;
+    jsInfo["version"] = ssVersion.str();
     jsInfo["start_time"] = ConvertTimeToIsoString(m_startTime);
 
     std::chrono::time_point<std::chrono::high_resolution_clock> tp(std::chrono::high_resolution_clock::now());

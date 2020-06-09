@@ -50,6 +50,8 @@ void iniManager::DeleteSections()
  */
 bool iniManager::ReadIniFile(const string& sFilename)
 {
+    m_sFilename = sFilename;
+
 	//unsigned int errno;
 	DeleteSections();
 
@@ -163,6 +165,11 @@ double iniManager::GetIniDouble(const string& sSection, const string& sKey, doub
 		return dDefault;
 
 	return it->second->GetDouble(sKey,dDefault);
+}
+
+bool iniManager::WriteIniFile()
+{
+    return WriteIniFile(m_sFilename);
 }
 
 bool iniManager::WriteIniFile(const string& sFilename)

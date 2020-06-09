@@ -57,9 +57,9 @@ m_exitCallback(nullptr)
 
 }
 
-void Launcher::SetPlayer(const std::string& sPlayer, const std::string& sConfigPath)
+void Launcher::SetPlayer(const std::string& sPath, const std::string& sPlayer, const std::string& sConfigPath)
 {
-    m_sPlayer = sPlayer;
+    m_sPlayer = sPath+sPlayer;
     m_sConfigPath = sConfigPath;
 }
 
@@ -140,6 +140,7 @@ response Launcher::LaunchPlayer(std::string sType, std::string sUid, int nLoop, 
             exit(-1);
         }
     }
+    return response(200);
 }
 
 

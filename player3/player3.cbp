@@ -67,6 +67,7 @@
 		<Unit filename="include/resources.h" />
 		<Unit filename="include/schedule.h" />
 		<Unit filename="include/soundfile.h" />
+		<Unit filename="include/version.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="src/audiofile.cpp" />
 		<Unit filename="src/epiwriter.cpp" />

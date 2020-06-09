@@ -96,11 +96,13 @@
 		<Unit filename="include/mongooseserver.h" />
 		<Unit filename="include/mp3file.h" />
 		<Unit filename="include/namedtype.h" />
+		<Unit filename="include/proccheck.h" />
 		<Unit filename="include/resource.h" />
 		<Unit filename="include/resourcemanager.h" />
 		<Unit filename="include/response.h" />
 		<Unit filename="include/sysinfomanager.h" />
 		<Unit filename="include/uidutils.h" />
+		<Unit filename="include/version.h" />
 		<Unit filename="include/wavfile.h" />
 		<Unit filename="src/audiofile.cpp" />
 		<Unit filename="src/core.cpp" />
@@ -111,6 +113,7 @@
 		</Unit>
 		<Unit filename="src/mongooseserver.cpp" />
 		<Unit filename="src/mp3file.cpp" />
+		<Unit filename="src/proccheck.cpp" />
 		<Unit filename="src/resource.cpp" />
 		<Unit filename="src/resourcemanager.cpp" />
 		<Unit filename="src/sysinfomanager.cpp" />

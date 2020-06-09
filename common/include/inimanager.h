@@ -83,6 +83,8 @@ public:
     **/
     bool WriteIniFile(const std::string& sFilename);
 
+    bool WriteIniFile();
+
     /** @brief  Creates or returns a section to store keys and values in
     *   @param sSectionName the name of the sectino
     *   @return <i>iniSection*</i> pointer to the created section.
@@ -137,7 +139,7 @@ protected:
     std::map<std::string,iniSection*> m_mSections;
 	std::ifstream m_if;
 	std::ofstream m_of;
-
+    std::string m_sFilename;
 
     void DeleteSections();
 public:

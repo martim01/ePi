@@ -17,6 +17,8 @@
 #include "playlist.h"
 #include "schedule.h"
 #include "resources.h"
+#include <sstream>
+#include "version.h"
 
 using namespace std;
 
@@ -51,10 +53,22 @@ static const int DEBUG=6;
 
 int main(int argc, char* argv[])
 {
+
     //make sure got all the arguments
-    if(argc < DEBUG)
+    if(argc < DEBUG && argc != 2)
     {
         return ErrorAndExit("Not enough arguments sent.");
+    }
+    if(argc == 2)
+    {
+
+        if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "--version")==0)
+        {
+            std::stringstream ssVersion;
+            ssVersion << version::MAJOR << "." << version::MINOR << "." << version::PATCH;
+            std::cout << ssVersion.str() << std::endl;
+        }
+        return 0;
     }
 
 

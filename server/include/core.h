@@ -29,6 +29,7 @@ class Core
         response GetPlaylist(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
         response GetSchedule(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
         response GetStatus(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response GetUpdate(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
 
         response PutStatus(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
         response PutPower(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
@@ -36,6 +37,7 @@ class Core
         response PutFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
         response PutPlaylist(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
         response PutSchedule(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response PutUpdate(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
 
 
         response DeleteFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
@@ -59,6 +61,7 @@ class Core
         iniManager m_iniConfig;
 
         bool CreateEndpoints();
+
 
         Json::Value m_jsStatus;
 
@@ -85,6 +88,7 @@ class Core
         static const url EP_PLAYLISTS;
         static const url EP_FILES;
         static const url EP_INFO;
+        static const url EP_UPDATE;
 
         static const std::string ROOT;
         static const std::string EPI;
@@ -95,6 +99,7 @@ class Core
         static const std::string PLAYLISTS;
         static const std::string FILES;
         static const std::string INFO;
+        static const std::string UPDATE;
 
         std::mutex m_mutex;
 

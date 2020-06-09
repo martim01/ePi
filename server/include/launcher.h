@@ -7,7 +7,7 @@ class Launcher
 {
     public:
         Launcher();
-        void SetPlayer(const std::string& sPlayer, const std::string& sConfigPath);
+        void SetPlayer(const std::string& sPath, const std::string& sPlayer, const std::string& sConfigPath);
 
         void AddCallbacks(std::function<void(const std::string&)> statusCallback, std::function<void(int)> m_exitCallback);
 
