@@ -5,9 +5,7 @@
 #include <time.h>
 #include "guid.h"
 #include "md5.h"
-#ifdef __GNU__
 #include <arpa/inet.h>
-#endif // __GNU__
 
 
 ///* uuid_create_md5_from_name -- create a version 3 (MD5) UUID using a

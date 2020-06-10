@@ -32,7 +32,9 @@
 *.app
 server/bin
 player3/bin
-
+player3/build
+server/build
+build/
 
 # Codeblocks
 *.depend

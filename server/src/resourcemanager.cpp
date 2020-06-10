@@ -352,7 +352,7 @@ response ResourceManager::ModifySchedule(const std::string& sUid, const Json::Va
         theResponse = ParseSchedule(jsData);
         if(theResponse.nHttpCode == 200)
         {
-            if(ResourceExists(jsData["label"].asString(), m_mSchedules, jsData["uid"].asString()))
+            if(ResourceExists(jsData["label"].asString(), m_mSchedules, sUid))
             {
                 theResponse.nHttpCode = 409;
                 theResponse.jsonData["result"] = false;
@@ -401,7 +401,7 @@ response ResourceManager::ModifyPlaylist(const std::string& sUid, const Json::Va
         theResponse = ParsePlaylist(jsData);
         if(theResponse.nHttpCode == 200)
         {
-            if(ResourceExists(jsData["label"].asString(), m_mPlaylists, jsData["uid"].asString()))
+            if(ResourceExists(jsData["label"].asString(), m_mPlaylists, sUid))
             {
                 theResponse.nHttpCode = 409;
                 theResponse.jsonData["result"] = false;
@@ -965,9 +965,9 @@ bool ResourceManager::FileExists(const std::string& sLabel, const std::string& s
 {
     for(auto pairResource : m_mFiles)
     {
-        if(CmpNoCase(pairResource.second->GetLabel(), sLabel))
+        if(sUid != pairResource.second->GetUid() && CmpNoCase(pairResource.second->GetLabel(), sLabel))
         {
-            return (sUid != pairResource.second->GetUid());
+            return true;
         }
     }
     return false;
@@ -977,9 +977,9 @@ bool ResourceManager::ResourceExists(const std::string& sLabel, const std::map<s
 {
     for(auto pairResource : mResource)
     {
-        if(CmpNoCase(pairResource.second->GetLabel(), sLabel))
+        if(pairResource.second->GetUid() != sUid && CmpNoCase(pairResource.second->GetLabel(), sLabel))
         {
-            return (pairResource.second->GetUid() != sUid);
+            return true;
         }
     }
     return false;
