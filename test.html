@@ -131,58 +131,7 @@
 					
 					if(jsonObj["player"] !== undefined)
 					{
-						document.getElementById("player").innerHTML = jsonObj["player"];
-						if(jsonObj["player"] == "Stopped" || jsonObj["status"] === undefined)
-						{
-							document.getElementById("stop").style.visibility = "hidden";
-							clearElementText("playing_uid");
-							clearElementText("playing_label");
-							clearElementText("playing_started_at");
-							clearElementText("playing_length");
-							clearElementText("playing_loop");
-							clearElementText("playing_time");
-							clearElementText("status_action");
-							clearElementText("status_time");
-							clearElementText("status_type");
-							clearElementText("status_label");
-							
-						
-						}
-						else
-						{
-							document.getElementById("stop").style.visibility = "visible";
-							
-							if(jsonObj["resource"] !== undefined)
-							{
-								setElementText("status_type", "type", jsonObj["resource"]);
-								setElementText("status_label", "label", jsonObj["resource"]);
-							}
-							else
-							{
-								clearElementText("status_type");
-								clearElementText("status_label");
-							}
-							
-							jsonObj = jsonObj["status"];
-						
-							setElementText("status_action", "action", jsonObj);
-							setElementText("status_time", "time", jsonObj);
-							
-							
-							if(jsonObj["playing"] !== undefined)
-							{
-								setElementText("playing_uid", "uid", jsonObj["playing"]);
-								var resObj = FindResource(jsonObj["playing"]["uid"], g_files);
-								if(resObj !== null)
-								{
-									document.getElementById("playing_label").innerHTML = resObj["label"];
-								}
-								setElementText("playing_started_at", "started_at", jsonObj["playing"]);
-								setElementText("playing_loop", "loop", jsonObj["playing"]);
-								document.getElementById("playing_length").innerHTML = millisecondsToTime(jsonObj["playing"]["length"]);
-								document.getElementById("playing_time").innerHTML = millisecondsToTime(jsonObj["playing"]["time"]);
-							}
-						}
+						updateStatus(jsonObj);
 					}	
 
 						
@@ -219,6 +168,70 @@
 				}
 			}
 			
+			function updateStatus(jsonObj)
+			{
+				document.getElementById("player").innerHTML = jsonObj["player"];
+				
+				if(jsonObj["locked"] == false)
+				{
+					document.getElementById("lock").innerHTML = "Lock System";
+				}
+				else
+				{
+					document.getElementById("lock").innerHTML = "Unlock System";
+				}
+				
+				if(jsonObj["player"] == "Stopped" || jsonObj["status"] === undefined)
+				{
+					document.getElementById("stop").style.visibility = "hidden";
+					clearElementText("playing_uid");
+					clearElementText("playing_label");
+					clearElementText("playing_started_at");
+					clearElementText("playing_length");
+					clearElementText("playing_loop");
+					clearElementText("playing_time");
+					clearElementText("status_action");
+					clearElementText("status_time");
+					clearElementText("status_type");
+					clearElementText("status_label");
+				
+				}
+				else
+				{
+					document.getElementById("stop").style.visibility = "visible";
+					
+					if(jsonObj["resource"] !== undefined)
+					{
+						setElementText("status_type", "type", jsonObj["resource"]);
+						setElementText("status_label", "label", jsonObj["resource"]);
+					}
+					else
+					{
+						clearElementText("status_type");
+						clearElementText("status_label");
+					}
+					
+					jsonObj = jsonObj["status"];
+				
+					setElementText("status_action", "action", jsonObj);
+					setElementText("status_time", "time", jsonObj);
+					
+					
+					if(jsonObj["playing"] !== undefined)
+					{
+						setElementText("playing_uid", "uid", jsonObj["playing"]);
+						var resObj = FindResource(jsonObj["playing"]["uid"], g_files);
+						if(resObj !== null)
+						{
+							document.getElementById("playing_label").innerHTML = resObj["label"];
+						}
+						setElementText("playing_started_at", "started_at", jsonObj["playing"]);
+						setElementText("playing_loop", "loop", jsonObj["playing"]);
+						document.getElementById("playing_length").innerHTML = millisecondsToTime(jsonObj["playing"]["length"]);
+						document.getElementById("playing_time").innerHTML = millisecondsToTime(jsonObj["playing"]["time"]);
+					}
+				}
+			}
 			
 			
 			function startup()
@@ -231,25 +244,49 @@
 				switch(index)
 				{
 					case 0:
-						getResource("files","div_files", 0);
-						break;
+						getStatus();
 					case 1:
-						g_files = resObj;
-						getResource("schedules","div_schedules", 1);
+						getResource("files","div_files", 1);
 						break;
 					case 2:
-						g_schedules = resObj;
-						getResource("playlists","div_playlists", 2);
+						g_files = resObj;
+						getResource("schedules","div_schedules", 2);
 						break;
 					case 3:
+						g_schedules = resObj;
+						getResource("playlists","div_playlists", 3);
+						break;
+					case 4:
 						g_playlists = resObj;
 						if(g_ws === null)
 						{
 							ws_connect();
 						}
+						if(g_details !== null)
+						{
+							showdetails();
+						}
 				}
 			}
 			
+			function getStatus()
+			{
+				var ajax = new XMLHttpRequest();
+				ajax.onreadystatechange = function()
+				{
+					if(this.readyState == 4)
+					{
+						var resObj = JSON.parse(this.responseText);
+						if(resObj !== null)
+						{
+							updateStatus(resObj);
+						}
+						next(1);
+					}
+				}
+				ajax.open("GET", g_url+"status",true);
+				ajax.send();
+			}
 			
 			function getResource(endpoint, div, index)
 			{
@@ -431,7 +468,7 @@
 				}
 				var play = { "command" : "play", "type" : type, "uid" : uid, "times_to_play" : 1, "shuffle" : false};
 				
-				ajax.open("PUT", g_url+"status",true);
+				ajax.open("PATCH", g_url+"status",true);
 				ajax.setRequestHeader("Content-type", "application/json");
 				ajax.send(JSON.stringify(play));
 			}
@@ -446,7 +483,12 @@
 				g_details = e.target;
 				g_details.className = "grid_resource_selected";
 				
-				var split = e.target.id.split('_');
+				showdetails();
+			}
+			
+			function showdetails()
+			{
+				var split = g_details.id.split('_');
 				var type = split[1];
 				var uid = split[2];
 				
@@ -483,6 +525,8 @@
 				ajax.open("GET", g_url+type+"/"+uid,true);
 				ajax.send();
 			}
+			
+			
 			function cleardetails()
 			{
 				clearElementText("details_uid");
@@ -507,8 +551,11 @@
 				
 				setElementText("details_files_channels", "channels", jsonObj);
 				setElementText("details_files_samplerate", "samplerate", jsonObj);
-				setElementText("details_files_format", "subtype", jsonObj["format"]);
-				setElementText("details_files_type", "type", jsonObj["format"]);
+				if(jsonObj["format"] !== undefined)
+				{
+					setElementText("details_files_format", "subtype", jsonObj["format"]);
+					setElementText("details_files_type", "type", jsonObj["format"]);
+				}
 				document.getElementById("details_files_length").innerHTML = millisecondsToTime(jsonObj["length"]);
 			}
 			
@@ -575,55 +622,207 @@
 				divLabel.innerHTML = "Label";
 				div.appendChild(divLabel);
 				
+				var divTimes = document.createElement('div');
+				divTimes.className = "grid_title";
+				divTimes.innerHTML = "Times To Play";
+				div.appendChild(divTimes);
+				
 				var divCron = document.createElement('div');
 				divCron.className = "grid_title";
 				divCron.innerHTML = "Cron";
 				div.appendChild(divCron);
 				
-				for(var i = 0; i < jsonObj["files"].length; i++)
+				if(jsonObj["files"] !== undefined)
 				{
-					var jsonFile = FindResource(jsonObj["files"][i]["uid"], g_files);
-					if(jsonFile !== null)
+					for(var i = 0; i < jsonObj["files"].length; i++)
 					{
-						showScheduleEntry(jsonFile, jsonObj["files"][i]["cron"], "File", div);
-					}
-					else
-					{
-						var jsonFile = FindResource(jsonObj["files"][i]["uid"], g_playlists);
+						var jsonFile = FindResource(jsonObj["files"][i]["uid"], g_files);
 						if(jsonFile !== null)
 						{
-							showScheduleEntry(jsonFile, jsonObj["files"][i]["cron"], "Playlist", div);
+							showScheduleEntry(jsonFile, jsonObj["files"][i]["cron"], "File", div);
 						}
-					}
-				}			
+						else
+						{
+							var jsonFile = FindResource(jsonObj["files"][i]["uid"], g_playlists);
+							if(jsonFile !== null)
+							{
+								showScheduleEntry(jsonFile, jsonObj["files"][i]["times_to_play"], jsonObj["files"][i]["cron"], "File", div);
+							}
+						}
+					}	
+				}
+				if(jsonObj["playlists"] !== undefined)
+			    {
+					for(var i = 0; i < jsonObj["playlists"].length; i++)
+					{
+						var jsonFile = FindResource(jsonObj["playlists"][i]["uid"], g_files);
+						if(jsonFile !== null)
+						{
+							showScheduleEntry(jsonFile, jsonObj["playlists"][i]["cron"], "File", div);
+						}
+						else
+						{
+							var jsonFile = FindResource(jsonObj["playlists"][i]["uid"], g_playlists);
+							if(jsonFile !== null)
+							{
+								showScheduleEntry(jsonFile, jsonObj["playlists"][i]["times_to_play"],  jsonObj["playlists"][i]["cron"], "Playlist", div);
+							}
+						}
+					}					
+				}
 			}
 			
-			function showScheduleEntry(jsonObj, cron, type, divContainer)
+			function showScheduleEntry(jsonObj, times_to_play, cron, type, divContainer)
 			{
-				divType = document.createElement('div');
+				var divType = document.createElement('div');
 				divType.className = "grid_label";
 				divType.innerHTML = type;
 				divContainer.appendChild(divType);
 				
-				divLabel = document.createElement('div');
+				var divLabel = document.createElement('div');
 				divLabel.className = "grid_label";
 				divLabel.innerHTML = jsonObj["label"];
 				divContainer.appendChild(divLabel);
 				
-				divCron = document.createElement('div');
+				var divTimes = document.createElement('div');
+				divTimes.className = "grid_label";
+				divTimes.innerHTML = times_to_play;
+				divContainer.appendChild(divTimes);
+				
+				var divCron = document.createElement('div');
 				divCron.className = "grid_label";
 				divCron.innerHTML = cron;
 				divContainer.appendChild(divCron);
 			}
 			
+			g_uid = "";
 			function update(e)
 			{
-				var split = e.target.id.split('_');
-				var type = split[1];
-				var uid = split[2];
+				if(g_details)
+				{
+					var split = g_details.id.split('_');
+					var type = split[1];
+					g_uid = split[2];
 				
-				type = type.substring(0, type.length-1);	//remove the s
-				alert("todo");
+					var ajax = new XMLHttpRequest();
+					ajax.onreadystatechange = function()
+					{
+						if(this.readyState == 4)
+						{
+							var jsonObj = JSON.parse(this.responseText);
+							
+							if(type == "files")
+							{
+								showUpdateFile(jsonObj);
+							}
+							else if(type == "schedules")
+							{
+								showUpdateSchedule(jsonObj);
+							}
+							else if(type == "playlists")
+							{
+								showUpdatePlaylist(jsonObj);
+							}
+							
+						}
+					}
+					ajax.open("GET", g_url+type+"/"+g_uid,true);
+					ajax.send();
+				}
+			}
+			
+			function showUpdatePlaylist(jsonObj)
+			{
+				console.log(jsonObj);
+				showNew();
+				document.getElementById('playlist_title').innerHTML="Modify Playlist";
+						
+				document.getElementById('new_playlist_label').value = jsonObj['label'];
+				document.getElementById('new_playlist_description').value = jsonObj['description'];
+				for(var i = 0; i < jsonObj['files'].length; i++)
+				{
+					var fileObj = FindResource(jsonObj['files'][i]['uid'], g_files);
+					addPlaylistFile(jsonObj['files'][i]['uid'], fileObj['label'], jsonObj['files'][i]['times_to_play']);
+				}
+			}
+			
+			function showUpdateSchedule(jsonObj)
+			{
+				console.log(jsonObj);
+				showNew();
+				document.getElementById('schedule_title').innerHTML="Modify Schedule";
+						
+				document.getElementById('new_schedule_label').value = jsonObj['label'];
+				document.getElementById('new_schedule_description').value = jsonObj['description'];
+				
+				if(jsonObj["files"] !== undefined)
+				{
+					for(var i = 0; i < jsonObj['files'].length; i++)
+					{
+						var fileObj = FindResource(jsonObj['files'][i]['uid'], g_files);
+						addScheduleFile(jsonObj['files'][i]['uid'], '[file] '+fileObj['label'], jsonObj['files'][i]['times_to_play'], jsonObj['files'][i]['cron']);
+					}
+				}
+				if(jsonObj["playlists"] !== undefined)
+				{
+					for(var i = 0; i < jsonObj['playlists'].length; i++)
+					{
+						var fileObj = FindResource(jsonObj['playlists'][i]['uid'], g_playlists);
+						addScheduleFile(jsonObj['playlists'][i]['uid'], '[playlist] '+fileObj['label'], jsonObj['playlists'][i]['times_to_play'], jsonObj['playlists'][i]['cron']);
+					}
+				}
+			}
+			
+			function showUpdateFile(jsonObj)
+			{
+				console.log(jsonObj);
+				g_jsonPost = {};
+				
+				document.getElementById('update_files').className = 'popup';
+				show_veil();
+				
+				document.getElementById('update_file_label').value = jsonObj['label'];
+				document.getElementById('update_file_description').value = jsonObj['description'];
+				
+			}
+			
+			function hideUpdateFile()
+			{
+				document.getElementById('update_files').className = 'hide';
+				document.getElementById('veil').className = 'hide';
+			}
+			
+			function update_fileMeta()
+			{
+				if(g_uid)
+				{
+					g_jsonPost['label'] = document.getElementById('update_file_label').value;
+					g_jsonPost['description'] = document.getElementById('update_file_description').value;
+					
+					var ajax = new XMLHttpRequest();
+					ajax.onreadystatechange = function()
+					{
+						
+						if(this.readyState == 4)
+						{
+							var jsonObj = JSON.parse(this.responseText);
+							if(this.status != 200)
+							{
+								alert(jsonObj["reason"]);
+							}
+							else
+							{
+								next(0);
+							}
+						}
+					}
+					hideUpdateFile();
+					ajax.open("PATCH", g_url+"files/"+g_uid,true);
+					ajax.setRequestHeader("Content-type", "application/json");
+					ajax.send(JSON.stringify(g_jsonPost));
+					
+					
+				}
 			}
 			
 			function deleteResource(e)
@@ -678,7 +877,7 @@
 				var play = { "command" : "stop"};
 				
 				console.log(play);
-				ajax.open("PUT", g_url+"status",true);
+				ajax.open("PATCH", g_url+"status",true);
 				ajax.setRequestHeader("Content-type", "application/json");
 				ajax.send(JSON.stringify(play));
 			}
@@ -704,27 +903,65 @@
 				document.getElementById('new_file_description').value = '';
 				document.getElementById('new_playlist_label').value = '';
 				document.getElementById('new_playlist_description').value = '';
+				document.getElementById('playlist_title').innerHTML="New Playlist";
+				document.getElementById('file_title').innerHTML="New File";
+				document.getElementById('schedule_title').innerHTML="New Schedule";
 				
-				var sel = document.getElementById('possible_playlist_files');
-				while(sel.options.length > 0)
+				var div = document.getElementById('new_playlist_files')
+				while(div.firstChild)
 				{
-					sel.remove(0);
+					div.removeChild(div.firstChild);
+				}
+				div = document.getElementById('new_schedule_files')
+				while(div.firstChild)
+				{
+					div.removeChild(div.firstChild);
+				}
+				
+			
+				var selP = document.getElementById('possible_playlist_files');
+				var selS = document.getElementById('possible_schedule_files');
+				while(selP.options.length > 0)
+				{
+					selP.remove(0);
+				}
+				while(selS.options.length > 0)
+				{
+					selS.remove(0);
 				}
 				for(var i = 0; i < g_files.length; i++)
 				{
 					var opt = document.createElement('option');
 					opt.value = g_files[i].uid;
 					opt.text = g_files[i].label;
-					sel.add(opt);
+					selP.add(opt);
 				}
+				for(var i = 0; i < g_files.length; i++)
+				{
+					var opt = document.createElement('option');
+					opt.value = g_files[i].uid;
+					opt.text = '[file] '+g_files[i].label;
+					selS.add(opt);
+				}
+				for(var i = 0; i < g_playlists.length; i++)
+				{
+					var opt = document.createElement('option');
+					opt.value = g_playlists[i].uid;
+					opt.text = '[playlist] '+g_playlists[i].label;
+					selS.add(opt);
+				}
+				
+				
+				
 			}
 			var g_jsonPost = {};
-			function showNew()
+			function showNew(newResource)
 			{
 				g_jsonPost = {};
 				
 				document.getElementById('upload_'+g_show).className = 'popup';
 				show_veil();
+				
 				
 				update_popups();
 			}
@@ -745,48 +982,98 @@
 				document.getElementById('veil').className = 'hide';
 			}
 			
+			function showLock()
+			{
+				document.getElementById('lock_title').innerHTML = document.getElementById('lock').innerHTML;
+				document.getElementById('lock_password').value = '';
+				document.getElementById('lock_popup').className = 'popup';
+				show_veil();
+				
+			}
 			
+			function hideLock()
+			{
+				document.getElementById('lock_popup').className = 'hide';
+				document.getElementById('veil').className = 'hide';
+			}
 			
+			function doLock()
+			{
+				var ajax = new XMLHttpRequest();
+				ajax.onreadystatechange = function()
+				{
+					
+					if(this.readyState == 4)
+					{
+						var jsonObj = JSON.parse(this.responseText);
+						
+						if(this.status != 200)
+						{
+							alert(jsonObj["reason"]);
+						}
+						else
+						{
+							getStatus();
+						}
+					}
+				}
+				var lock = false;
+				if(document.getElementById('lock_title').innerHTML == "Lock System")
+				{
+					lock = true;
+				}
+				hideLock();
+				var play = { "command" : "lock", "lock" : lock, "password" :document.getElementById('lock_password').value};
+				
+				ajax.open("PATCH", g_url+"status",true);
+				ajax.setRequestHeader("Content-type", "application/json");
+				ajax.send(JSON.stringify(play));
+			}
 			
 			function add_playlist_file()
 			{
-				
-				var div  = document.getElementById('new_playlist_files');
 				var sel =  document.getElementById('possible_playlist_files');
+				addPlaylistFile(sel.options[sel.selectedIndex].value, sel.options[sel.selectedIndex].text, document.getElementById('possible_times_to_play').value);
+			}
+			
+			function addPlaylistFile(uid, label, times_to_play)
+			{
+				var div  = document.getElementById('new_playlist_files');
+				
 				
 				var divRemove = document.createElement('div');
 				divRemove.className = 'grid_value';
-				divRemove.id = 'remove_'+sel.options[sel.selectedIndex].value;
+				divRemove.id = 'remove_'+uid;
 				
 				var buttonRemove = document.createElement('button');
 				buttonRemove.innerHTML = 'Remove';
-				buttonRemove.id = 'button_'+sel.options[sel.selectedIndex].value;
+				buttonRemove.id = 'button_'+uid;
 				buttonRemove.addEventListener('click',remove_playlist_file,false);
 				divRemove.appendChild(buttonRemove);
 				
 				var divTimes = document.createElement('div');
 				divTimes.className = 'grid_value';
-				divTimes.id = 'times_'+sel.options[sel.selectedIndex].value;
-				divTimes.innerHTML = document.getElementById('possible_times_to_play').value;
+				divTimes.id = 'times_'+uid;
+				divTimes.innerHTML = times_to_play;
 								
 				var divFile = document.createElement('div');
 				divFile.className = 'grid_value';
-				divFile.innerHTML = sel.options[sel.selectedIndex].text;
-				divFile.id = 'uid_'+sel.options[sel.selectedIndex].value;
+				divFile.innerHTML = label;
+				divFile.id = 'uid_'+uid;
 				
-				div.insertBefore(divRemove, document.getElementById('playlist_file_input'));
-				div.insertBefore(divTimes, divRemove);
-				div.insertBefore(divFile, divTimes);
+				div.appendChild(divFile);
+				div.appendChild(divTimes);
+				div.appendChild(divRemove);
+				
+				
 				
 				document.getElementById('possible_times_to_play').value = 1;
 				
-				console.log(g_jsonPost["files"]);
 				if(g_jsonPost["files"] === undefined)
 				{
 					g_jsonPost["files"] = [];
 				}
-				console.log(g_jsonPost["files"]);
-				g_jsonPost["files"].push({"uid" : sel.options[sel.selectedIndex].value, "times_to_play" : parseInt(document.getElementById('possible_times_to_play').value)});
+				g_jsonPost["files"].push({"uid" : uid, "times_to_play" : parseInt(times_to_play)});
 			}
 			function remove_playlist_file(event)
 			{
@@ -827,6 +1114,7 @@
 					return;
 				}
 				
+				
 				var ajax = new XMLHttpRequest();
 				ajax.onreadystatechange = function()
 				{
@@ -835,17 +1123,35 @@
 					if(this.readyState == 4)
 					{
 						var jsonObj = JSON.parse(this.responseText);
-						if(this.status != 201)
+						if(g_uid == "")
 						{
-							alert(jsonObj["reason"]);
+							if(this.status != 201)
+							{
+								alert(jsonObj["reason"]);
+							}
+						}
+						else
+						{
+							if(this.status != 200)
+							{
+								alert(jsonObj["reason"]);
+							}
+							g_uid = "";
 						}
 						
 						next(0);
 					}
 				}
-				console.log(g_jsonPost);
 				
-				ajax.open("POST", g_url+"playlists",true);
+				if(g_uid == "")
+				{
+					ajax.open("POST", g_url+"playlists",true);
+				}
+				else
+				{
+					console.log(g_jsonPost);
+					ajax.open("PUT", g_url+"playlists/"+g_uid,true);
+				}
 				ajax.setRequestHeader("Content-type", "application/json");
 				ajax.send(JSON.stringify(g_jsonPost));
 				hideNew();
@@ -854,6 +1160,181 @@
 			{
 				var label = document.getElementById('new_file_label');
 				label.value = document.getElementById('new_file_file').files[0].name;
+			}
+			
+			
+			
+			function add_schedule_file()
+			{
+				var sel =  document.getElementById('possible_schedule_files');
+				var cron = document.getElementById('cron_seconds').value + " " +
+						   document.getElementById('cron_minutes').value + " " +
+						   document.getElementById('cron_hours').value + " " +
+						   document.getElementById('cron_dom').value + " " +
+						   document.getElementById('cron_month').value + " " +
+						   document.getElementById('cron_dow').value + " " +
+						   document.getElementById('cron_year').value;
+						   
+				
+				addScheduleFile(sel.options[sel.selectedIndex].value, sel.options[sel.selectedIndex].text, document.getElementById('possible_schedule_times_to_play').value, cron);
+			}
+			
+			function addScheduleFile(uid, label, times_to_play, cron)
+			{
+				var div  = document.getElementById('new_schedule_files');
+				
+				
+				var divRemove = document.createElement('div');
+				divRemove.className = 'grid_value';
+				divRemove.id = 'remove_'+uid;
+				
+				var buttonRemove = document.createElement('button');
+				buttonRemove.innerHTML = 'Remove';
+				buttonRemove.id = 'button_'+uid;
+				buttonRemove.addEventListener('click',remove_schedule_file,false);
+				divRemove.appendChild(buttonRemove);
+				
+				var divCron = document.createElement('div');
+				divCron.className = 'grid_value';
+				divCron.id = 'cron_'+uid;
+				divCron.innerHTML = cron;
+				
+				var divTimes = document.createElement('div');
+				divTimes.className = 'grid_value';
+				divTimes.id = 'times_'+uid;
+				divTimes.innerHTML = times_to_play;
+								
+				var divFile = document.createElement('div');
+				divFile.className = 'grid_value';
+				divFile.innerHTML = label;
+				divFile.id = 'uid_'+uid;
+				
+				div.appendChild(divFile);
+				div.appendChild(divTimes);
+				div.appendChild(divCron);
+				div.appendChild(divRemove);
+				
+							
+				document.getElementById('possible_schedule_times_to_play').value = 1;
+				document.getElementById('cron_seconds').value = "*";
+				document.getElementById('cron_minutes').value = "*";
+				document.getElementById('cron_hours').value = "*";
+				document.getElementById('cron_dom').value =" *";
+				document.getElementById('cron_month').value = "*";
+				document.getElementById('cron_dow').value = "*";
+				document.getElementById('cron_year').value = "*";
+		
+				if(label.substr(0,2) == '[f')
+				{
+					if(g_jsonPost["files"] === undefined)
+					{
+						g_jsonPost["files"] = [];
+					}
+					g_jsonPost["files"].push({"uid" : uid, "times_to_play" : parseInt(times_to_play), "cron" : cron});
+				}
+				else
+				{
+					if(g_jsonPost["playlists"] === undefined)
+					{
+						g_jsonPost["playlists"] = [];
+					}
+					g_jsonPost["playlists"].push({"uid" : uid, "times_to_play" : parseInt(times_to_play), "cron" : cron});
+				}
+			}
+			function remove_schedule_file(event)
+			{
+				var id = event.target.id.split('_')[1];
+				var div  = document.getElementById('new_schedule_files');
+				div.removeChild(document.getElementById('uid_'+id));
+				div.removeChild(document.getElementById('times_'+id));
+				div.removeChild(document.getElementById('cron_'+id));
+				div.removeChild(document.getElementById('remove_'+id));
+				
+				if(g_jsonPost["files"] !== undefined)
+				{
+					for(var i = 0; i < g_jsonPost["files"].length; i++)
+					{
+						if(g_jsonPost["files"][i]["uid"] == id)
+						{
+							g_jsonPost["files"].splice(i,1);
+						}
+					}
+				}
+				if(g_jsonPost["playlists"] !== undefined)
+				{
+					for(var i = 0; i < g_jsonPost["playlists"].length; i++)
+					{
+						if(g_jsonPost["playlists"][i]["uid"] == id)
+						{
+							g_jsonPost["playlists"].splice(i,1);
+						}
+					}
+				}
+			}
+
+			function upload_schedule()
+			{
+				if(document.getElementById('new_schedule_label').value == '')
+				{
+					alert("You must enter a label for the schedule");
+					return;
+				}
+				g_jsonPost["label"] = document.getElementById('new_schedule_label').value;
+				
+				if(document.getElementById('new_schedule_description').value == '')
+				{
+					alert("You must enter a description for the schedule");
+					return;
+				}
+				g_jsonPost["description"] = document.getElementById('new_schedule_description').value;
+				
+				if((g_jsonPost["files"] === undefined || g_jsonPost["files"].length == 0) && (g_jsonPost["playlists"] === undefined || g_jsonPost["playlists"].length == 0))
+				{
+					alert("You must enter some items for the schedule");
+					return;
+				}
+				
+				
+				var ajax = new XMLHttpRequest();
+				ajax.onreadystatechange = function()
+				{
+					console.log(this.readyState+"="+this.responseText);
+					
+					if(this.readyState == 4)
+					{
+						var jsonObj = JSON.parse(this.responseText);
+						if(g_uid == "")
+						{
+							if(this.status != 201)
+							{
+								alert(jsonObj["reason"]);
+							}
+						}
+						else
+						{
+							if(this.status != 200)
+							{
+								alert(jsonObj["reason"]);
+							}
+							g_uid = "";
+						}
+						
+						next(0);
+					}
+				}
+				
+				if(g_uid == "")
+				{
+					ajax.open("POST", g_url+"schedules",true);
+				}
+				else
+				{
+					console.log(g_jsonPost);
+					ajax.open("PUT", g_url+"schedules/"+g_uid,true);
+				}
+				ajax.setRequestHeader("Content-type", "application/json");
+				ajax.send(JSON.stringify(g_jsonPost));
+				hideNew();
 			}
 			
 		</script>
@@ -927,7 +1408,7 @@
 				margin-top: 5px;
 				padding-top: 5px;
 				border-top: 1px dotted #777777;
-				grid-template-columns: 100px 300px 300px	
+				grid-template-columns: 100px 300px 100px 250px	
 			}
 			
 			.grid_resources
@@ -958,7 +1439,27 @@
 				border-bottom: 1px dotted #777777;
 				grid-template-columns: 430px 100px 100px	
 			}
+			.grid_upload_schedule_files
+			{
+				grid-column: 1/3;
+				width: 830px;
+				padding: 10px;
+				margin-bottom: 5px;
+				border-top: 1px dotted #777777;
+				border-bottom: 1px dotted #777777;
+				grid-template-columns: 330px 100px 250px 90px	
+			}
 			.grid_upload_playlist
+			{
+				width: 880px;
+				padding: 10px;
+				margin-top: -2px;
+				border: 2px solid #000088;
+				border-radius: 0px 0px 10px 10px;
+				grid-template-columns: 130px 300px	
+			}
+			
+			.grid_upload_schedule
 			{
 				width: 880px;
 				padding: 10px;
@@ -1125,7 +1626,7 @@
 				<div class="grid_label grid_inset_more">Length</div><div id="playing_length" class="grid_value"></div>
 				<div class="grid_label grid_inset_more">Loop</div><div id="playing_loop" class="grid_value"></div>
 				<div class="grid_label grid_inset_more">Time</div><div id="playing_time" class="grid_value"></div>
-				<div class="grid_value">&nbsp;</div><div class="grid_label"><button id="stop" onclick="stop()" style="padding: 5px; visibility: hidden">Stop Playout</button></div>
+				<div class="grid_value"><button id="lock" onclick="showLock()" style="padding: 5px;">Lock System</button></div><div class="grid_label"><button id="stop" onclick="stop()" style="padding: 5px; visibility: hidden">Stop Playout</button></div>
 			</div>
 			<div class="grid grid_system">
 				<div class="grid_title">Server</div><div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>
@@ -1154,7 +1655,7 @@
 					<div class="grid_resources" id="div_files">&nbsp;</div>
 					<div class="hide" id="div_playlists">&nbsp;</div>
 					<div class="hide" id="div_schedules">&nbsp;</div>
-					<div><button onclick="showNew()">New</button></div>
+					<div><button onclick="showNew(true)">New</button></div>
 				</div>
 			</div>
 			<div class="panel_container">
@@ -1190,7 +1691,7 @@
 	<div id="upload_files" class="hide">
 		<form id="upload_form" enctype="multipart/form-data" onsubmit="return false;">	
 			<ul class="tabs" style="width: 500px">
-					<li class="tab_label" id="title">New File</li>
+					<li class="tab_label" id="file_title">New File</li>
 			</ul>
 			<div class="grid grid_upload">
 					<div class="grid_label">File</div><div><input type="file" name="file" id="new_file_file" onchange="file_chosen()"></div>
@@ -1203,16 +1704,20 @@
 	</div>
 	<div id="upload_playlists" class="hide">
 		<ul class="tabs" style="width: 900px">
-			<li class="tab_label" id="title">New Playlist</li>
+			<li class="tab_label" id="playlist_title">New Playlist</li>
 		</ul>
 		<div class="grid grid_upload_playlist">
 			<div class="grid_label">Label</div><div><input type="text" id="new_playlist_label"></div>
 			<div class="grid_label">Description</div><div><input type="text" id="new_playlist_description"></div>
-			<div class="grid grid_upload_files" id="new_playlist_files">
+			<div class="grid grid_upload_files">
 				<div class="grid_title">File</div>
 				<div class="grid_title">Play</div>
 				<div>&nbsp;</div>
-				<div id="playlist_file_input" class="grid_label">
+			</div>
+			<div class="grid grid_upload_files" id="new_playlist_files">
+			</div>
+			<div class="grid grid_upload_files">
+			<div id="playlist_file_input" class="grid_label">
 					<select id="possible_playlist_files"></select>
 				</div>
 				<div><input type="number" id="possible_times_to_play" style="width: 75px" value="1"></div>
@@ -1221,6 +1726,58 @@
 			<div class="grid_label"><button onclick="hideNew()">Cancel</button></div><div><button onclick="upload_playlist()">Upload</button></div>
 		</div>
 	</div>
+	
+	<div id="upload_schedules" class="hide">
+		<ul class="tabs" style="width: 900px">
+			<li class="tab_label" id="schedule_title">New Schedule</li>
+		</ul>
+		<div class="grid grid_upload_schedule">
+			<div class="grid_label">Label</div><div><input type="text" id="new_schedule_label"></div>
+			<div class="grid_label">Description</div><div><input type="text" id="new_schedule_description"></div>
+			<div class="grid grid_upload_schedule_files">
+				<div class="grid_title">File</div>
+				<div class="grid_title">Play</div>
+				<div class="grid_title">Cron</div>
+				<div>&nbsp;</div>
+			</div>
+			<div class="grid grid_upload_schedule_files" id="new_schedule_files">
+			</div>
+			<div class="grid grid_upload_schedule_files">
+			<div id="schedule_file_input" class="grid_label">
+					<select id="possible_schedule_files"></select>
+				</div>
+				<div><input type="number" id="possible_schedule_times_to_play" style="width: 75px" value="1"></div>
+				<div><input type="text" id="cron_seconds" style="width: 20px" value="*">
+					 <input type="text" id="cron_minutes" style="width: 20px" value="*">
+					 <input type="text" id="cron_hours" style="width: 20px" value="*">
+					 <input type="text" id="cron_dom" style="width: 20px" value="*">
+					 <input type="text" id="cron_month" style="width: 20px" value="*">
+					 <input type="text" id="cron_dow" style="width: 20px" value="*">
+					 <input type="text" id="cron_year" style="width: 20px" value="*"></div>
+				<div><button onclick="add_schedule_file()">Add</button></div>
+			</div>
+			<div class="grid_label"><button onclick="hideNew()">Cancel</button></div><div><button onclick="upload_schedule()">Upload</button></div>
+		</div>
+	</div>
+	
+	<div id="update_files" class="hide">
+		<form id="upload_form" enctype="multipart/form-data" onsubmit="return false;">	
+			<ul class="tabs" style="width: 500px">
+				<li class="tab_label" id="file_title">Update File</li>
+			</ul>
+			<div class="grid grid_upload">
+				<div class="grid_label">File</div><div><input type="file" name="file" id="update_file_file" onchange="file_chosen()"></div>
+				<div class="grid_label">&nbsp;</div><div><button onclick="update_file()">Upload</button></div>
+			</div>
+		</form>
+			<div class="grid grid_upload">
+				<div class="grid_label">Label</div><div><input type="text" name="label" id="update_file_label"></div>
+				<div class="grid_label">Description</div><div><input type="text" name="description" id="update_file_description"></div>
+					
+				<div class="grid_label"><button onclick="hideUpdateFile()">Cancel</button></div><div><button onclick="update_fileMeta()">Update</button></div>
+			</div>
+	</div>
+	
 	<div id="progress" class="hide">
 		<ul class="tabs" style="width: 500px">
 			<li class="tab_label" id="title">Uploading</li>
@@ -1228,6 +1785,15 @@
 		<div class="grid grid_upload">
 			<div class="grid_label">Label:</div><div class="grid_value" id="progress_label"></div>
 			<div class="grid_label">Uploaded:</div><div class="grid_value" id="progress_percentage"></div>
+		</div>
+	</div>
+	<div id="lock_popup" class="hide">
+		<ul class="tabs" style="width: 500px">
+			<li class="tab_label" id="lock_title">Lock</li>
+		</ul>
+		<div class="grid grid_upload">
+			<div class="grid_label">Password:</div><div class="grid_value"><input type="password" id="lock_password"></div>
+			<div class="grid_label"><button onclick="hideLock()">Cancel</button></div><div><button onclick="doLock()">Ok</button></div>
 		</div>
 	</div>
 	<div id="veil"></div>
