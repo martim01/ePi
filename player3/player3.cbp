@@ -68,10 +68,10 @@
 		<Unit filename="include/schedule.h" />
 		<Unit filename="include/soundfile.h" />
 		<Unit filename="include/version.h" />
-		<Unit filename="main.cpp" />
 		<Unit filename="src/audiofile.cpp" />
 		<Unit filename="src/epiwriter.cpp" />
 		<Unit filename="src/filesource.cpp" />
+		<Unit filename="src/main.cpp" />
 		<Unit filename="src/mp3file.cpp" />
 		<Unit filename="src/playlist.cpp" />
 		<Unit filename="src/playout.cpp" />

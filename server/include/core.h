@@ -31,12 +31,15 @@ class Core
         response GetStatus(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
         response GetUpdate(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
 
-        response PutStatus(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response PutPower(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response PutConfig(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response PatchStatus(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response PatchConfig(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response PatchFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+
         response PutFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+
         response PutPlaylist(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
         response PutSchedule(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response PutPower(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
         response PutUpdate(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
 
 

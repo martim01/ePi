@@ -77,8 +77,6 @@ int main(int argc, char* argv[])
 
     Resources::Get().Load(iniConfig);
 
-    // @todo(martim01) read ini file
-
     //@todo(martim01) log needs to go to somewhere not cout
     if(argc == DEBUG+1)
     {

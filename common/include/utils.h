@@ -29,4 +29,6 @@ extern std::string GetCurrentTimeAsIsoString();
 extern Json::Value ConvertToJson(const std::string& str);
 
 extern std::string GetIpAddress(const std::string& sInterface);
+extern std::string exec(const std::string& sCmd);
 
+extern void UpdateJsonObject(Json::Value& dest, const Json::Value& source);

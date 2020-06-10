@@ -11,6 +11,8 @@
 #include <net/if.h>
 #include <netinet/ip.h>
 #include <arpa/inet.h>
+#include <algorithm>
+
 
 using namespace std;
 
@@ -229,4 +231,42 @@ std::string GetIpAddress(const std::string& sInterface)
 
     return inet_ntoa((((sockaddr_in*)&ifr.ifr_addr)->sin_addr));
 
+}
+
+
+std::string exec(const std::string& sCmd)
+{
+    std::array<char, 128> buffer;
+    std::string sResult;
+    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(sCmd.c_str(), "r"), pclose);
+    if(!pipe)
+    {
+        return "";
+    }
+    while(fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
+    {
+        sResult += buffer.data();
+    }
+    sResult.erase(std::find_if(sResult.rbegin(), sResult.rend(), std::not1(std::ptr_fun<int,int>(std::isspace))).base(), sResult.end());
+    return sResult;
+}
+
+
+void UpdateJsonObject(Json::Value& dest, const Json::Value& source)
+{
+    if(!dest.isObject() || !source.isObject())
+    {
+        return;
+    }
+    for(const auto& key : source.getMemberNames())
+    {
+        if(dest[key].type() == Json::objectValue && source[key].type() == Json::objectValue)
+        {
+            UpdateJsonObject(dest[key], source[key]);
+        }
+        else
+        {
+            dest[key] = source[key];
+        }
+    }
 }

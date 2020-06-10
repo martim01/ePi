@@ -27,6 +27,7 @@ class ResourceManager
         response AddPlaylist(const Json::Value& jsData);
 
         response ModifyFile(const std::string& sUid, const Json::Value& jsData);
+        response ModifyFileMeta(const std::string& sUid, const Json::Value& jsData);
 
         response ModifySchedule(const std::string& sUid, const Json::Value& jsData);
         response ModifyPlaylist(const std::string& sUid, const Json::Value& jsData);
@@ -74,7 +75,8 @@ class ResourceManager
         void LockResource(const std::string& sUid, bool bLock);
 
         response AddFile(const std::string& sUploadName, const std::string& sLabel, const std::string& sDescription);
-        response ModifyFileMeta(const std::map<std::string, std::shared_ptr<AudioFile> >::iterator& itFile, const Json::Value& jsData);
+
+
 
         response ParseFiles(const Json::Value& jsData);
         response ParseResource(const Json::Value& jsData);

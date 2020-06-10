@@ -5,6 +5,8 @@
 #include "utils.h"
 #include "version.h"
 
+
+
 SysInfoManager::SysInfoManager() :
  m_sPath("/"),
  m_startTime(std::chrono::high_resolution_clock::now())
@@ -39,10 +41,12 @@ Json::Value SysInfoManager::GetSysInfo()
         jsHigh["total"] = static_cast<Json::UInt64>(info.totalhigh);
         jsHigh["free"] = static_cast<Json::UInt64>(info.freehigh);
 
+        float fload = 1.f/(1 << SI_LOAD_SHIFT);
+        fload *=100/get_nprocs();
         Json::Value jsLoads;
-        jsLoads["1"] = static_cast<Json::UInt64>(info.loads[0]);
-        jsLoads["5"] = static_cast<Json::UInt64>(info.loads[1]);
-        jsLoads["15"] = static_cast<Json::UInt64>(info.loads[2]);
+        jsLoads["1"] = (info.loads[0]*fload);
+        jsLoads["5"] = (info.loads[1]*fload);
+        jsLoads["15"] = (info.loads[2]*fload);
 
         jsInfo["uptime"] = static_cast<Json::UInt64>(info.uptime);
         jsInfo["procs"] = static_cast<Json::UInt64>(info.procs);
@@ -159,11 +163,13 @@ void SysInfoManager::ExtractTicks(const std::string& sLine)
 Json::Value SysInfoManager::GetApplicationInfo()
 {
     Json::Value jsInfo;
+
     //@todo(martim01) Get version number of this app and also the player
     std::stringstream ssVersion;
     ssVersion << version::MAJOR << "." << version::MINOR << "." << version::PATCH;
     jsInfo["version"] = ssVersion.str();
     jsInfo["start_time"] = ConvertTimeToIsoString(m_startTime);
+
 
     std::chrono::time_point<std::chrono::high_resolution_clock> tp(std::chrono::high_resolution_clock::now());
 
@@ -172,3 +178,4 @@ Json::Value SysInfoManager::GetApplicationInfo()
     jsInfo["up_time"] = uptime.count();
     return jsInfo;
 }
+

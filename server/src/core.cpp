@@ -86,9 +86,10 @@ bool Core::CreateEndpoints()
     m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_INFO), std::bind(&Core::GetInfo, this, _1,_2,_3,_4));
     m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_UPDATE), std::bind(&Core::GetUpdate, this, _1,_2,_3,_4));
 
-    m_server.AddEndpoint(endpoint(MongooseServer::PUT, EP_STATUS), std::bind(&Core::PutStatus, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(endpoint(MongooseServer::PATCH, EP_STATUS), std::bind(&Core::PatchStatus, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(endpoint(MongooseServer::PATCH, EP_CONFIG), std::bind(&Core::PatchConfig, this, _1,_2,_3,_4));
+
     m_server.AddEndpoint(endpoint(MongooseServer::PUT, EP_POWER), std::bind(&Core::PutPower, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(endpoint(MongooseServer::PUT, EP_CONFIG), std::bind(&Core::PutConfig, this, _1,_2,_3,_4));
     m_server.AddEndpoint(endpoint(MongooseServer::PUT, EP_UPDATE), std::bind(&Core::PutUpdate, this, _1,_2,_3,_4));
 
     m_server.AddEndpoint(endpoint(MongooseServer::POST, EP_SCHEDULES), std::bind(&Core::PostSchedule, this, _1,_2,_3,_4));
@@ -102,6 +103,7 @@ bool Core::CreateEndpoints()
         url theUrl(url(EP_FILES.Get()+"/"+itFile->first));
 
         m_server.AddEndpoint(endpoint(MongooseServer::GET, theUrl), std::bind(&Core::GetFile, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(endpoint(MongooseServer::PATCH, theUrl), std::bind(&Core::PatchFile, this, _1,_2,_3,_4));
         m_server.AddEndpoint(endpoint(MongooseServer::PUT, theUrl), std::bind(&Core::PutFile, this, _1,_2,_3,_4));
         m_server.AddEndpoint(endpoint(MongooseServer::DELETE, theUrl), std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
     }
@@ -208,6 +210,9 @@ response Core::GetUpdate(mg_connection* pConnection, const query& theQuery, cons
     ssVersion << version::MAJOR << "." << version::MINOR << "." << version::PATCH;
     theResponse.jsonData["server"] = ssVersion.str();
 
+    theResponse.jsonData["player3"] = exec(CreatePath(m_iniConfig.GetIniString("playout", "path","."))+"player3 -v");
+
+
     //get versions of other applications...
     return theResponse;
 }
@@ -269,9 +274,9 @@ response Core::GetSchedule(mg_connection* pConnection, const query& theQuery, co
 }
 
 
-response Core::PutStatus(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::PatchStatus(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutStatus" << std::endl;
+    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PatchStatus" << std::endl;
 
 
     Json::Value jsData(ConvertToJson(theData.Get()));
@@ -324,9 +329,9 @@ response Core::PutPower(mg_connection* pConnection, const query& theQuery, const
     return theResponse;
 }
 
-response Core::PutConfig(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::PatchConfig(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutConfig" << std::endl;
+    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PatchConfig" << std::endl;
     response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode == 423)
     {
@@ -338,9 +343,25 @@ response Core::PutConfig(mg_connection* pConnection, const query& theQuery, cons
     return theResponse;
 }
 
+response Core::PatchFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+{
+    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PatchFile" << std::endl;
+
+    response theResponse(m_manager.IsLocked());
+    if(theResponse.nHttpCode == 423)
+    {
+        return theResponse;
+    }
+
+    std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
+
+    return m_manager.ModifyFileMeta(vSplit.back(), ConvertToJson(theData.Get()));
+
+}
+
 response Core::PutFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutFile" << std::endl;
+    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PatchFile" << std::endl;
 
     response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode == 423)
@@ -403,7 +424,7 @@ response Core::DeleteFile(mg_connection* pConnection, const query& theQuery, con
         url aUrl(url(EP_FILES.Get()+"/"+vSplit.back()));
 
         m_server.DeleteEndpoint(endpoint(MongooseServer::GET, aUrl));
-        m_server.DeleteEndpoint(endpoint(MongooseServer::PUT, aUrl));
+        m_server.DeleteEndpoint(endpoint(MongooseServer::PATCH, aUrl));
         m_server.DeleteEndpoint(endpoint(MongooseServer::DELETE, aUrl));
     }
     return theResponse;
@@ -428,7 +449,7 @@ response Core::DeletePlaylist(mg_connection* pConnection, const query& theQuery,
         url aUrl(url(EP_PLAYLISTS.Get()+"/"+vSplit.back()));
 
         m_server.DeleteEndpoint(endpoint(MongooseServer::GET, aUrl));
-        m_server.DeleteEndpoint(endpoint(MongooseServer::PUT, aUrl));
+        m_server.DeleteEndpoint(endpoint(MongooseServer::PATCH, aUrl));
         m_server.DeleteEndpoint(endpoint(MongooseServer::DELETE, aUrl));
     }
     return theResponse;
@@ -452,7 +473,7 @@ response Core::DeleteSchedule(mg_connection* pConnection, const query& theQuery,
         url aUrl(url(EP_SCHEDULES.Get()+"/"+vSplit.back()));
 
         m_server.DeleteEndpoint(endpoint(MongooseServer::GET, aUrl));
-        m_server.DeleteEndpoint(endpoint(MongooseServer::PUT, aUrl));
+        m_server.DeleteEndpoint(endpoint(MongooseServer::PATCH, aUrl));
         m_server.DeleteEndpoint(endpoint(MongooseServer::DELETE, aUrl));
     }
     return theResponse;
@@ -480,7 +501,7 @@ response Core::PostFile(mg_connection* pConnection, const query& theQuery, const
         url aUrl(url(EP_FILES.Get()+"/"+theResponse.jsonData["uid"].asString()));
 
         m_server.AddEndpoint(endpoint(MongooseServer::GET, aUrl), std::bind(&Core::GetFile, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::PUT, aUrl), std::bind(&Core::PutFile, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(endpoint(MongooseServer::PATCH, aUrl), std::bind(&Core::PatchFile, this, _1,_2,_3,_4));
         m_server.AddEndpoint(endpoint(MongooseServer::DELETE, aUrl), std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
     }
 
@@ -504,7 +525,7 @@ response Core::PostPlaylist(mg_connection* pConnection, const query& theQuery, c
         url aUrl(url(EP_PLAYLISTS.Get()+"/"+theResponse.jsonData["uid"].asString()));
 
         m_server.AddEndpoint(endpoint(MongooseServer::GET, aUrl), std::bind(&Core::GetPlaylist, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::PUT, aUrl), std::bind(&Core::PutPlaylist, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(endpoint(MongooseServer::PATCH, aUrl), std::bind(&Core::PutPlaylist, this, _1,_2,_3,_4));
         m_server.AddEndpoint(endpoint(MongooseServer::DELETE, aUrl), std::bind(&Core::DeletePlaylist, this, _1,_2,_3,_4));
     }
     return theResponse;

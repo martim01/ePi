@@ -54,7 +54,6 @@ ResourceManager::~ResourceManager()
 
 response ResourceManager::AddFiles(const Json::Value& jsData)
 {
-    std::lock_guard<std::mutex> lg(m_mutex);
     pml::Log::Get() << "ResourceManager\tAddFile: " << jsData << " ";
 
     response theResponse(ParseFiles(jsData));
@@ -152,7 +151,6 @@ response ResourceManager::AddFile( const std::string& sUploadName, const std::st
 
 response ResourceManager::AddSchedule(const Json::Value& jsData)
 {
-    std::lock_guard<std::mutex> lg(m_mutex);
     pml::Log::Get() << "ResourceManager\tAddSchedule: ";
 
     response theResponse(ParseSchedule(jsData));
@@ -196,7 +194,6 @@ response ResourceManager::AddSchedule(const Json::Value& jsData)
 
 response ResourceManager::AddPlaylist(const Json::Value& jsData)
 {
-    std::lock_guard<std::mutex> lg(m_mutex);
 
     pml::Log::Get() << "ResourceManager\tAddPlaylist: ";
 
@@ -241,7 +238,6 @@ response ResourceManager::AddPlaylist(const Json::Value& jsData)
 
 response ResourceManager::ModifyFile(const std::string& sUid, const Json::Value& jsData)
 {
-    std::lock_guard<std::mutex> lg(m_mutex);
 
     pml::Log::Get() << "ResourceManager\tModifyFile: ";
     response theResponse;
@@ -288,47 +284,71 @@ response ResourceManager::ModifyFile(const std::string& sUid, const Json::Value&
             }
         }
         else
-        {   //modifying the label and description
-            theResponse = ModifyFileMeta(itFile, jsData);
+        {
+            theResponse.nHttpCode = 404;
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("No file sent .");
+            pml::Log::Get(pml::Log::LOG_ERROR) << "failed - no file sent" << std::endl;
         }
+
     }
     return theResponse;
 }
 
-response ResourceManager::ModifyFileMeta(const std::map<std::string, std::shared_ptr<AudioFile> >::iterator& itFile, const Json::Value& jsData)
+response ResourceManager::ModifyFileMeta(const std::string& sUid, const Json::Value& jsData)
 {
 
     pml::Log::Get() << "ResourceManager\tModifyFileMeta: ";
 
-    response theResponse(ParseResource(jsData));
-
-    if(theResponse.nHttpCode == 200)
+    response theResponse;
+    auto itFile = m_mFiles.find(sUid);
+    if(itFile == m_mFiles.end())
     {
-        if(FileExists(jsData["label"].asString(), jsData["uid"].asString()))
-        {
-            theResponse.nHttpCode = 409;
-            theResponse.jsonData["result"] = false;
-            theResponse.jsonData["reason"].append("File already exists with the given label.");
-            pml::Log::Get(pml::Log::LOG_ERROR) << "failed - label already in use" << std::endl;
-        }
-        else
-        {
-            itFile->second->UpdateJson(jsData);
-            theResponse.jsonData["result"] = true;
-            pml::Log::Get() << "success" << std::endl;
-            SaveResources();
-        }
+        theResponse.nHttpCode = 404;
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("File with uid '"+sUid+"' not found.");
+        pml::Log::Get(pml::Log::LOG_ERROR) << "failed - file '" << sUid << "'not found" << std::endl;
+    }
+    else if(itFile->second->IsLocked())
+    {
+        theResponse.nHttpCode = 423;
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("File with uid '"+sUid+"' is locked.");
+        pml::Log::Get(pml::Log::LOG_ERROR) << "failed - file '" << sUid << "'is locked" << std::endl;
     }
     else
     {
-        pml::Log::Get(pml::Log::LOG_ERROR) << "failed - incorrect JSON" << std::endl;
+
+        theResponse = ParseResource(jsData);
+
+        if(theResponse.nHttpCode == 200)
+        {
+            if(FileExists(jsData["label"].asString(), jsData["uid"].asString()))
+            {
+                theResponse.nHttpCode = 409;
+                theResponse.jsonData["result"] = false;
+                theResponse.jsonData["reason"].append("File already exists with the given label.");
+                pml::Log::Get(pml::Log::LOG_ERROR) << "failed - label already in use" << std::endl;
+            }
+            else
+            {
+                itFile->second->UpdateJson(jsData);
+                itFile->second->InitJson();
+                theResponse.jsonData["result"] = true;
+                pml::Log::Get() << "success" << std::endl;
+                SaveResources();
+            }
+        }
+        else
+        {
+            pml::Log::Get(pml::Log::LOG_ERROR) << "failed - incorrect JSON" << std::endl;
+        }
     }
     return theResponse;
 }
 
 response ResourceManager::ModifySchedule(const std::string& sUid, const Json::Value& jsData)
 {
-    std::lock_guard<std::mutex> lg(m_mutex);
 
     pml::Log::Get() << "ResourceManager\tModifySchedule: ";
 
@@ -377,7 +397,6 @@ response ResourceManager::ModifySchedule(const std::string& sUid, const Json::Va
 
 response ResourceManager::ModifyPlaylist(const std::string& sUid, const Json::Value& jsData)
 {
-    std::lock_guard<std::mutex> lg(m_mutex);
 
     pml::Log::Get() << "ResourceManager\tModifyPlaylist: ";
 
@@ -410,6 +429,7 @@ response ResourceManager::ModifyPlaylist(const std::string& sUid, const Json::Va
             }
             else
             {
+                pml::Log::Get(pml::Log::LOG_DEBUG) << jsData << std::endl;
                 itPlaylist->second->UpdateJson(jsData);
                 theResponse.jsonData["result"] = true;
                 pml::Log::Get() << "success" << std::endl;
@@ -426,7 +446,6 @@ response ResourceManager::ModifyPlaylist(const std::string& sUid, const Json::Va
 
 response ResourceManager::DeleteFile(const std::string& sUid)
 {
-    std::lock_guard<std::mutex> lg(m_mutex);
 
     pml::Log::Get() << "ResourceManager\tDeleteFile: ";
 
@@ -473,7 +492,6 @@ response ResourceManager::DeleteFile(const std::string& sUid)
 
 response ResourceManager::DeleteSchedule(const std::string& sUid)
 {
-    std::lock_guard<std::mutex> lg(m_mutex);
 
     pml::Log::Get() << "ResourceManager\tDeleteSchedule: ";
 
@@ -506,7 +524,6 @@ response ResourceManager::DeleteSchedule(const std::string& sUid)
 
 response ResourceManager::DeletePlaylist(const std::string& sUid)
 {
-    std::lock_guard<std::mutex> lg(m_mutex);
 
     pml::Log::Get() << "ResourceManager\tDeletePlaylist: ";
 
@@ -538,7 +555,6 @@ response ResourceManager::DeletePlaylist(const std::string& sUid)
 
 response ResourceManager::GetFiles()
 {
-    std::lock_guard<std::mutex> lg(m_mutex);
 
     response theResponse;
     for(auto pairFile : m_mFiles)
@@ -553,7 +569,6 @@ response ResourceManager::GetFiles()
 
 response ResourceManager::GetSchedules()
 {
-    std::lock_guard<std::mutex> lg(m_mutex);
 
     response theResponse;
     for(auto pairSchedule : m_mSchedules)
@@ -568,7 +583,6 @@ response ResourceManager::GetSchedules()
 
 response ResourceManager::GetPlaylists()
 {
-    std::lock_guard<std::mutex> lg(m_mutex);
 
     response theResponse;
     for(auto pairPlaylist : m_mPlaylists)
@@ -583,7 +597,6 @@ response ResourceManager::GetPlaylists()
 
 response ResourceManager::GetFile(const std::string& sUid)
 {
-    std::lock_guard<std::mutex> lg(m_mutex);
 
     response theResponse;
 
@@ -603,8 +616,6 @@ response ResourceManager::GetFile(const std::string& sUid)
 
 response ResourceManager::GetSchedule(const std::string& sUid)
 {
-    std::lock_guard<std::mutex> lg(m_mutex);
-
     response theResponse;
 
     auto itSchedule = m_mSchedules.find(sUid);
@@ -623,8 +634,6 @@ response ResourceManager::GetSchedule(const std::string& sUid)
 
 response ResourceManager::GetPlaylist(const std::string& sUid)
 {
-    std::lock_guard<std::mutex> lg(m_mutex);
-
     response theResponse;
 
     auto itPlaylist = m_mPlaylists.find(sUid);
@@ -750,7 +759,7 @@ response ResourceManager::ParseSchedule(const Json::Value& jsData)
 
     }
     **/
-    if(jsData["files"].isArray() == false || jsData["playlists"].isArray() == false)
+    if(jsData["files"].isArray() == false && jsData["playlists"].isArray() == false)
     {
         theResponse.nHttpCode = 400;
         theResponse.jsonData["result"] = false;
@@ -1399,7 +1408,6 @@ std::shared_ptr<const Resource> ResourceManager::GetResource(const std::string& 
 
 response ResourceManager::UpdateApplication(const Json::Value& jsData)
 {
-    std::lock_guard<std::mutex> lg(m_mutex);
     pml::Log::Get() << "ResourceManager\tUpdateApplication: " << jsData << " ";
 
     response theResponse(ParseFiles(jsData));

@@ -61,7 +61,25 @@ std::string Resource::GetLabel() const
 
 void Resource::UpdateJson(const Json::Value& jsData)
 {
+    UpdateJsonObject(m_json, jsData);
+
+    /*
+    //store the bits that aren't updated
+    std::string sUid = m_json["uid"].asString();
+    std::string sCreated = m_json["created"].asString();
+    std::string sType = m_json["type"].asString();
+    bool bLocked = m_json["locked"].asBool();
+
+    //store the new json data
     m_json = jsData;
+
+    //now put them back
+    m_json["uid"] = sUid;
+    m_json["created"] = sCreated;
+    m_json["type"] = sType;
+    m_json["locked"] = bLocked;
+    m_json["modified"] = GetCurrentTimeAsIsoString();
+    */
 }
 
 void Resource::Lock(bool bLock)

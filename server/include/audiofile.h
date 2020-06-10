@@ -10,6 +10,7 @@ class AudioFile : public Resource
         AudioFile(const Json::Value& jsData);
 
         void InitJson() override;
+        void UpdateJson(const Json::Value& jsData) override;
 
         virtual bool OpenToRead()=0;
         virtual int64_t ReadAudio(float* pBuffer, int nSize, unsigned int nLoop)=0;

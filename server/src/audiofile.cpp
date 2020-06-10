@@ -32,3 +32,10 @@ void AudioFile::InitJson()
     }
 }
 
+void AudioFile::UpdateJson(const Json::Value& jsData)
+{
+    //std::string sPath = m_json["path"].asString();
+    Resource::UpdateJson(jsData);
+    //m_json["path"] = sPath;
+    //InitJson();
+}
