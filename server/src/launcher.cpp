@@ -7,6 +7,7 @@
 #include <thread>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <fcntl.h>
 
 bool ReadFromPipe(int nFd, std::string& sBuffer, std::vector<std::string>& vLines)
 {
@@ -124,6 +125,14 @@ response Launcher::LaunchPlayer(std::string sType, std::string sUid, int nLoop, 
     {   //child
         close(m_nPipe[READ]);
         dup2(m_nPipe[WRITE],STDOUT_FILENO);
+
+        int fderr = open("/dev/null", O_WRONLY);
+        if(fderr >= 0)
+        {
+            dup2(fderr, STDERR_FILENO);
+        }
+
+
 
         std::stringstream ssLoop;
         ssLoop << nLoop;

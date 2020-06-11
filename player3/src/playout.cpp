@@ -108,7 +108,7 @@ void Playout::OutputCallback(float* pBuffer, size_t nFrameCount, double dPlayout
 {
 
     std::lock_guard<std::mutex> lg(m_mutex);
-    bool bUnderrun(false);
+    size_t nUnderrun(0);
     for(size_t i = 0; i < nFrameCount*m_nChannelsOut; i++)
     {
         if(m_qBuffer.empty() == false)
@@ -118,14 +118,14 @@ void Playout::OutputCallback(float* pBuffer, size_t nFrameCount, double dPlayout
         }
         else
         {
-            bUnderrun = true;
+            nUnderrun++;
             pBuffer[i] = 0.0;
         }
     }
 
-    if(bUnderrun)
+    if(nUnderrun)
     {
-        pml::Log::Get(pml::Log::LOG_WARN) << "Buffer underrun!" << std::endl;
+        pml::Log::Get(pml::Log::LOG_WARN) << "Buffer underrun: " << nUnderrun << std::endl;
     }
 
     if(m_qBuffer.size() < 16384)
