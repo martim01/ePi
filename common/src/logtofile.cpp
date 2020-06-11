@@ -24,7 +24,7 @@ void LogToFile::OpenFile(const std::string& sFilePath, const std::string& sFileN
         ss << "Unable to create log file "  << sFilePath;
         syslog(LOG_WARNING, ss.str().c_str());
     }
-    std::string sFile(m_sFilePath+"/"+m_sFileName);
+    std::string sFile(m_sFilePath+m_sFileName);
     m_ofLog.open(sFile, std::fstream::app);
     //chande the permissions
     chmod(sFile.c_str(), 0664);
