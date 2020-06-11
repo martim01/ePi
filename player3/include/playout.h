@@ -13,6 +13,7 @@ class Playout
     public:
         Playout(std::mutex& mut, std::condition_variable& cv, unsigned int nDevice);
 
+
         ///< Destructor
         ~Playout();
 

@@ -12,6 +12,8 @@ m_nChannelsOut(2)
 }
 
 
+
+
 bool Playout::Init(double dLatency, unsigned long nSampleRate)
 {
     PaError err = Pa_Initialize();
@@ -64,12 +66,15 @@ bool Playout::OpenStream(double dLatency, unsigned long nSampleRate, PaStreamCal
         if(err == paNoError)
         {
 //            PaAlsa_EnableRealtimeScheduling(m_pStream,1);
-
-
             const PaStreamInfo* pStreamInfo = Pa_GetStreamInfo(m_pStream);
             if(pStreamInfo)
             {
                 pml::Log::Get() << "Audio\tStreamInfo:  Output Latency " << pStreamInfo->outputLatency << " Sample Rate " << pStreamInfo->sampleRate << std::endl;
+            }
+            else
+            {
+                pml::Log::Get(pml::Log::LOG_ERROR) << "Audio\tOpened but no stream info." << std::endl;
+                return false;
             }
             return true;
         }

@@ -38,8 +38,44 @@ int ErrorAndExit(const std::string& sError)
     return -1;
 }
 
+void ShowDevices()
+{
+    PaError err = Pa_Initialize();
+    if(err != paNoError)
+    {
+        ErrorAndExit("Could not init PortAudio");
+    }
+    int nDevices = Pa_GetDeviceCount();
+    if(nDevices < 0)
+    {
+        ErrorAndExit("Could not get device count");
+    }
 
-
+    Json::Value jsValue(Json::arrayValue);
+    for(int i = 0; i < nDevices; i++)
+    {
+        Json::Value jsDevice;
+        const PaDeviceInfo* pInfo(Pa_GetDeviceInfo(i));
+        if(pInfo)
+        {
+            jsDevice["version"] = pInfo->structVersion;
+            jsDevice["name"] = pInfo->name;
+            jsDevice["samplerate"] = pInfo->defaultSampleRate;
+            jsDevice["input"]["channels"] = pInfo->maxInputChannels;
+            jsDevice["input"]["latency"]["low"] = pInfo->defaultLowInputLatency;
+            jsDevice["input"]["latency"]["high"] = pInfo->defaultHighInputLatency;
+            jsDevice["ouput"]["channels"] = pInfo->maxOutputChannels;
+            jsDevice["ouput"]["latency"]["low"] = pInfo->defaultLowOutputLatency;
+            jsDevice["ouput"]["latency"]["high"] = pInfo->defaultHighOutputLatency;
+        }
+        else
+        {
+            jsDevice["error"] = true;
+        }
+        jsValue.append(jsDevice);
+    }
+    epiWriter::Get().writeToStdOut(jsValue);
+}
 
 static const int APP=0;
 static const int CONFIG=1;
@@ -67,6 +103,10 @@ int main(int argc, char* argv[])
             std::stringstream ssVersion;
             ssVersion << version::MAJOR << "." << version::MINOR << "." << version::PATCH;
             std::cout << ssVersion.str() << std::endl;
+        }
+        else if(strcmp(argv[1], "-d")==0 || strcmp(argv[1], "--devices")==0)
+        {
+            ShowDevices();
         }
         return 0;
     }
