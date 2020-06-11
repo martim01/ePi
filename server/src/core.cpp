@@ -43,8 +43,7 @@ const url Core::EP_UPDATE      = url(EP_EPI.Get()+"/"+UPDATE);
 
 Core::Core() : m_manager(m_launcher, m_iniConfig), m_nTimeSinceLastCall(0)
 {
-    pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
-    pml::Log::Get() << "Core\tStart" << std::endl;
+
 
     m_jsStatus["player"] ="Stopped";
 }
@@ -57,6 +56,17 @@ void Core::Run(const std::string& sConfigFile)
         pml::Log::Get(pml::Log::LOG_CRITICAL) << "Could not open '" << sConfigFile << "' exiting.";
         return;
     }
+
+    if(m_iniConfig.GetIniInt("logging", "console",0) == 1)
+    {
+        pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
+    }
+    if(m_iniConfig.GetIniInt("logging", "file",0) == 1)
+    {
+        //@todo(martim01) add file logging
+    }
+
+    pml::Log::Get() << "Core\tStart" << std::endl;
 
     m_manager.Init();
     m_info.SetDiskPath(m_manager.GetAudioPath());
