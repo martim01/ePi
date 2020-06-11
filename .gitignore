@@ -30,12 +30,8 @@
 *.exe
 *.out
 *.app
-server/bin
-player3/bin
-player3/build
-server/build
-build/
-bin/
+**/bin
+**/build
 
 # Codeblocks
 *.depend
