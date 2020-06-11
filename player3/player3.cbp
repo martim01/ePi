@@ -11,7 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="p 05b3d878-2697-3983-98e8-7109ca40e2c2 1 0 1" />
+				<Option parameters="-d" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
@@ -49,10 +49,12 @@
 			<Add library="samplerate" />
 		</Linker>
 		<Unit filename="../common/include/epicron.h" />
+		<Unit filename="../common/include/logtofile.h" />
 		<Unit filename="../common/include/utils.h" />
 		<Unit filename="../common/src/epicron.cpp" />
 		<Unit filename="../common/src/inimanager.cpp" />
 		<Unit filename="../common/src/inisection.cpp" />
+		<Unit filename="../common/src/logtofile.cpp" />
 		<Unit filename="../common/src/utils.cpp" />
 		<Unit filename="../external/jsoncpp/dist/jsoncpp.cpp" />
 		<Unit filename="../external/log/src/log.cpp" />

@@ -9,7 +9,8 @@ add_executable(player3 "../common/src/epicron.cpp"
 					   "../common/src/inimanager.cpp"
 						"../common/src/inisection.cpp"
 						"../common/src/utils.cpp"
-                                                "../external/log/src/log.cpp"
+						"../common/src/logtofile.cpp"
+                        "../external/log/src/log.cpp"
 						"../external/jsoncpp/dist/jsoncpp.cpp"
 						"src/main.cpp"
 						"src/audiofile.cpp"
@@ -46,7 +47,7 @@ if(TARGET PkgConfig::samplerate)
 	message(STATUS "Found libsamplerate")
 	target_link_libraries(player3 PkgConfig::samplerate)
 endif()
-	
+
 pkg_search_module(portaudio REQUIRED portaudio-2.0 IMPORTED_TARGET)
 if(TARGET PkgConfig::portaudio)
 	message(STATUS "Found portaudio")

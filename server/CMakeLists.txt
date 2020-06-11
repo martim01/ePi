@@ -3,9 +3,9 @@ project(episerver LANGUAGES CXX C)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-add_executable(episerver "../common/src/epicron.cpp" "../common/src/inimanager.cpp" "../common/src/inisection.cpp" "../common/src/utils.cpp" "../external/jsoncpp/dist/jsoncpp.cpp" "../external/uuid/guid.cpp" 
- "../external/uuid/md5.cpp" "src/audiofile.cpp" "src/core.cpp" "src/launcher.cpp" "src/main.cpp" "src/mongoose.c" "src/mongooseserver.cpp" "src/mp3file.cpp" "src/proccheck.cpp" "src/resource.cpp" 
- "src/resourcemanager.cpp" "src/sysinfomanager.cpp" "src/uidutils.cpp" "src/wavfile.cpp" "../external/log/src/log.cpp")
+add_executable(episerver "../common/src/epicron.cpp" "../common/src/inimanager.cpp" "../common/src/inisection.cpp" "../common/src/utils.cpp" "../external/jsoncpp/dist/jsoncpp.cpp" "../external/uuid/guid.cpp"
+ "../external/uuid/md5.cpp" "src/audiofile.cpp" "src/core.cpp" "src/launcher.cpp" "src/main.cpp" "src/mongoose.c" "src/mongooseserver.cpp" "src/mp3file.cpp" "src/proccheck.cpp" "src/resource.cpp"
+ "src/resourcemanager.cpp" "src/sysinfomanager.cpp" "src/uidutils.cpp" "src/wavfile.cpp" "../external/log/src/log.cpp" "../common/src/logtofile.cpp")
 
 
 list(APPEND flags "-fPIC" "-Wall" "-fpermissive" "-O3" "-pthread")

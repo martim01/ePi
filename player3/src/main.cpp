@@ -19,6 +19,7 @@
 #include "resources.h"
 #include <sstream>
 #include "version.h"
+#include "logtofile.h"
 
 using namespace std;
 
@@ -117,10 +118,14 @@ int main(int argc, char* argv[])
 
     Resources::Get().Load(iniConfig);
 
-    //@todo(martim01) log needs to go to somewhere not cout
+
     if(argc == DEBUG+1)
     {
         pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
+    }
+    if(iniConfig.GetIniInt("logging", "file", 0) == 1)
+    {
+        pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new LogToFile(CreatePath(iniConfig.GetIniString("paths","logs","."))+"player3")));
     }
 
     try

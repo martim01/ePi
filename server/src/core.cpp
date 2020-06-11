@@ -14,6 +14,7 @@
 #include "inimanager.h"
 #include "inisection.h"
 #include "version.h"
+#include "logtofile.h"
 
 using namespace std::placeholders;
 using namespace pml;
@@ -63,7 +64,7 @@ void Core::Run(const std::string& sConfigFile)
     }
     if(m_iniConfig.GetIniInt("logging", "file",0) == 1)
     {
-        //@todo(martim01) add file logging
+        pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new LogToFile(CreatePath(m_iniConfig.GetIniString("paths","logs","."))+"episerver")));
     }
 
     pml::Log::Get() << "Core\tStart" << std::endl;

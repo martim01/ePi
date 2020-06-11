@@ -77,10 +77,12 @@
 		<Unit filename="../common/include/epicron.h" />
 		<Unit filename="../common/include/inimanager.h" />
 		<Unit filename="../common/include/inisection.h" />
+		<Unit filename="../common/include/logtofile.h" />
 		<Unit filename="../common/include/utils.h" />
 		<Unit filename="../common/src/epicron.cpp" />
 		<Unit filename="../common/src/inimanager.cpp" />
 		<Unit filename="../common/src/inisection.cpp" />
+		<Unit filename="../common/src/logtofile.cpp" />
 		<Unit filename="../common/src/utils.cpp" />
 		<Unit filename="../external/jsoncpp/dist/jsoncpp.cpp" />
 		<Unit filename="../external/log/src/log.cpp" />
