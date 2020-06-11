@@ -5,7 +5,7 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 add_executable(episerver "../common/src/epicron.cpp" "../common/src/inimanager.cpp" "../common/src/inisection.cpp" "../common/src/utils.cpp" "../external/jsoncpp/dist/jsoncpp.cpp" "../external/uuid/guid.cpp" 
  "../external/uuid/md5.cpp" "src/audiofile.cpp" "src/core.cpp" "src/launcher.cpp" "src/main.cpp" "src/mongoose.c" "src/mongooseserver.cpp" "src/mp3file.cpp" "src/proccheck.cpp" "src/resource.cpp" 
- "src/resourcemanager.cpp" "src/sysinfomanager.cpp" "src/uidutils.cpp" "src/wavfile.cpp")
+ "src/resourcemanager.cpp" "src/sysinfomanager.cpp" "src/uidutils.cpp" "src/wavfile.cpp" "../external/log/src/log.cpp")
 
 
 list(APPEND flags "-fPIC" "-Wall" "-fpermissive" "-O3" "-pthread")
@@ -25,7 +25,7 @@ include_directories(${PROJECT_SOURCE_DIR}/../external/uuid)
 include_directories(${PROJECT_SOURCE_DIR}/../common/include)
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-target_link_libraries(episerver pthread pml_log sndfile ssl crypto)
+target_link_libraries(episerver pthread sndfile ssl crypto)
 
 set_target_properties(episerver PROPERTIES RUNTIME_OUTPUT_DIRECTORY "../../bin/")
 

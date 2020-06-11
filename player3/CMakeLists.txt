@@ -9,6 +9,7 @@ add_executable(player3 "../common/src/epicron.cpp"
 					   "../common/src/inimanager.cpp"
 						"../common/src/inisection.cpp"
 						"../common/src/utils.cpp"
+                                                "../external/log/src/log.cpp"
 						"../external/jsoncpp/dist/jsoncpp.cpp"
 						"src/main.cpp"
 						"src/audiofile.cpp"
@@ -58,9 +59,9 @@ if(TARGET PkgConfig::sndfile)
 	target_link_libraries(player3 PkgConfig::sndfile)
 endif()
 
-target_link_libraries(player3 pthread pml_log sndfile portaudio samplerate)
+target_link_libraries(player3 pthread sndfile portaudio samplerate)
 
-set_target_properties(player3 PROPERTIES RUNTIME_OUTPUT_DIRECTORY "../bin/")
+set_target_properties(player3 PROPERTIES RUNTIME_OUTPUT_DIRECTORY "../../bin/")
 
 #install
 install(TARGETS player3 RUNTIME DESTINATION /usr/local/bin)
