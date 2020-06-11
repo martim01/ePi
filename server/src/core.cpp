@@ -52,7 +52,11 @@ Core::Core() : m_manager(m_launcher, m_iniConfig), m_nTimeSinceLastCall(0)
 void Core::Run(const std::string& sConfigFile)
 {
 
-    m_iniConfig.ReadIniFile(sConfigFile);
+    if(m_iniConfig.ReadIniFile(sConfigFile) == false)
+    {
+        pml::Log::Get(pml::Log::LOG_CRITICAL) << "Could not open '" << sConfigFile << "' exiting.";
+        return;
+    }
 
     m_manager.Init();
     m_info.SetDiskPath(m_manager.GetAudioPath());
