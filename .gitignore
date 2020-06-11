@@ -35,6 +35,7 @@ player3/bin
 player3/build
 server/build
 build/
+bin/
 
 # Codeblocks
 *.depend

@@ -1,0 +1,20 @@
+[Unit]
+Description=LSB: Start ePi Server daemon
+Before=graphical.target
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=epi_service
+Type=simple
+Restart=always
+RestartSec=1
+TimeoutSec=5min
+IgnoreSIGPIPE=no
+KillMode=process
+GuessMainPID=no
+SuccessExitStatus=5 6
+ExecStart=/usr/local/bin/episerver /var/ePi/config.ini
+
+[Install]
+WantedBy=multi-user.target
