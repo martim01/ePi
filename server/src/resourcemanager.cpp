@@ -557,6 +557,7 @@ response ResourceManager::GetFiles()
 {
 
     response theResponse;
+    theResponse.jsonData = Json::Value(Json::arrayValue);
     for(auto pairFile : m_mFiles)
     {
         Json::Value jsFile;
@@ -571,6 +572,7 @@ response ResourceManager::GetSchedules()
 {
 
     response theResponse;
+    theResponse.jsonData = Json::Value(Json::arrayValue);
     for(auto pairSchedule : m_mSchedules)
     {
         Json::Value jsSchedule;
@@ -585,6 +587,7 @@ response ResourceManager::GetPlaylists()
 {
 
     response theResponse;
+    theResponse.jsonData = Json::Value(Json::arrayValue);
     for(auto pairPlaylist : m_mPlaylists)
     {
         Json::Value jsPlaylist;

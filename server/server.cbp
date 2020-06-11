@@ -19,7 +19,6 @@
 				<Linker>
 					<Add library="portaudio" />
 					<Add library="sndfile" />
-					<Add library="pml_logd" />
 					<Add library="ssl" />
 					<Add library="crypto" />
 				</Linker>
@@ -38,7 +37,6 @@
 					<Add option="-s" />
 					<Add library="portaudio" />
 					<Add library="sndfile" />
-					<Add library="pml_log" />
 					<Add library="ssl" />
 					<Add library="crypto" />
 				</Linker>
@@ -85,6 +83,7 @@
 		<Unit filename="../common/src/inisection.cpp" />
 		<Unit filename="../common/src/utils.cpp" />
 		<Unit filename="../external/jsoncpp/dist/jsoncpp.cpp" />
+		<Unit filename="../external/log/src/log.cpp" />
 		<Unit filename="../external/uuid/guid.cpp" />
 		<Unit filename="../external/uuid/guid.h" />
 		<Unit filename="../external/uuid/md5.cpp" />

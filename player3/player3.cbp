@@ -16,7 +16,6 @@
 					<Add option="-g" />
 				</Compiler>
 				<Linker>
-					<Add library="pml_logd" />
 					<Add directory="../external/log/lib" />
 				</Linker>
 			</Target>
@@ -30,7 +29,6 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add library="pml_log" />
 				</Linker>
 			</Target>
 		</Build>
@@ -57,6 +55,7 @@
 		<Unit filename="../common/src/inisection.cpp" />
 		<Unit filename="../common/src/utils.cpp" />
 		<Unit filename="../external/jsoncpp/dist/jsoncpp.cpp" />
+		<Unit filename="../external/log/src/log.cpp" />
 		<Unit filename="include/audiofile.h" />
 		<Unit filename="include/epiwriter.h" />
 		<Unit filename="include/filesource.h" />
