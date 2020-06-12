@@ -17,3 +17,49 @@ The same as Player3 but will produce an AES67 bitstream.
 
 ### Controller
 An application designed for a Raspberry Pi 7" touchscreen that will allow full control of the ePi via the Server API.
+
+
+## Prerequisites
+
+### Core libraries required
+
+* [PortAudio](http://www.portaudio.com/download.html)
+* [libsndfile]http://www.mega-nerd.com/libsndfile/)
+* [Secret Rabit Code]http://www.mega-nerd.com/SRC/)
+* OpenSSL
+
+##### To install these libraries on Raspbian
+```
+sudo apt-get update
+sudo apt-get install portaudio19-dev libsndfile1-dev libsamplerate0-dev libssl-dev
+```
+
+### Other libraries included in the project
+
+* [Mongoose](https://github.com/cesanta/mongoose) - source code included in the Server project
+* [JsonCPP](https://github.com/open-source-parsers/jsoncpp) - included as a Git submodule
+* [pml_log](https://github.com/martim01/log) - included as a Git submodule
+
+
+## Building ePi
+
+* Workspace and project files are supplied for [Code::Blocks IDE](http://www.codeblocks.org/). There are Debug and Release builds for Linux.
+* There are also CMakeLists.txt files.
+
+### To build in Code::Blocks
+* Make sure all the Git submodules are up to date
+* Open epi.workspace in Code::Blocks
+* Build the workspace.
+* All the applications will end up in ```{epi directory}/bin```
+
+### To build using CMake
+```
+mkdir {epi directory}/build
+cd {epi directory}/build
+cmake ..
+cmake --build .
+```
+This will initialise and update the Git submodules and build all the applications - they will end up in ```{epi directory}/bin```
+
+## Creating an ePi Server
+Instructions can be found in the [wiki](https://github.com/martim01/ePi/wiki/building)
