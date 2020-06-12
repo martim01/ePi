@@ -102,8 +102,11 @@ int main(int argc, char* argv[])
         if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "--version")==0)
         {
             std::stringstream ssVersion;
-            ssVersion << version::MAJOR << "." << version::MINOR << "." << version::PATCH;
-            std::cout << ssVersion.str() << std::endl;
+            ssVersion << version::MAJOR << "." << version::MINOR << "." << version::PATCH << "." << version::BUILD;
+            Json::Value jsValue;
+            jsValue["version"] = ssVersion.str();
+            jsValue["date"] = ConvertTimeToIsoString(std::time_t(version::DATE));
+            epiWriter::Get().writeToStdOut(jsValue);
         }
         else if(strcmp(argv[1], "-d")==0 || strcmp(argv[1], "--devices")==0)
         {
