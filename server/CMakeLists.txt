@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(episerver LANGUAGES CXX C)
 
+add_custom_command(TARGET episerver PRE_BUILD COMMAND ${PROJECT_SOURCE_DIR}/../autoversion ARGS ${PROJECT_SOURCE_DIR}/include/version.h)
+
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 add_executable(episerver "../common/src/epicron.cpp" "../common/src/inimanager.cpp" "../common/src/inisection.cpp" "../common/src/utils.cpp" "../external/jsoncpp/dist/jsoncpp.cpp" "../external/uuid/guid.cpp"
