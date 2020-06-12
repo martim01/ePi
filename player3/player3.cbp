@@ -48,6 +48,9 @@
 			<Add library="portaudio" />
 			<Add library="samplerate" />
 		</Linker>
+		<ExtraCommands>
+			<Add before="../autoversion include/version.h" />
+		</ExtraCommands>
 		<Unit filename="../common/include/epicron.h" />
 		<Unit filename="../common/include/logtofile.h" />
 		<Unit filename="../common/include/utils.h" />
