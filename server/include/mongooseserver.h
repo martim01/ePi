@@ -15,7 +15,7 @@
 #include "namedtype.h"
 #include <map>
 #include <list>
-
+#include <atomic>
 
 using method = NamedType<std::string, struct MethodParameter>;
 using url = NamedType<std::string, struct UrlParameter>;
@@ -49,6 +49,10 @@ class MongooseServer
         *   @param nTimeoutms the time in milliseconds to wait for a mongoose event to happen
         **/
         void Run(bool bThread, unsigned int nTimeoutMs=100);
+
+
+        ///< @brief Stops the server
+        void Stop();
 
 
         /** Handles an event
@@ -149,4 +153,6 @@ class MongooseServer
 
         std::mutex m_mutex;
         bool m_bThreaded;
+
+        std::atomic<bool> m_bLoop;
 };

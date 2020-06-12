@@ -6,6 +6,5 @@
 			<Depends filename="player3/player3.cbp" />
 		</Project>
 		<Project filename="tests/cron/cron.cbp" />
-		<Project filename="../rdswebserver/rdswebserver.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>

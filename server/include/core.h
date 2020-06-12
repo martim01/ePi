@@ -30,6 +30,8 @@ class Core
         response GetSchedule(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
         response GetStatus(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
         response GetUpdate(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response GetOutputs(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+
 
         response PatchStatus(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
         response PatchConfig(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
@@ -56,6 +58,7 @@ class Core
         void ExitCallback(int nPid);
         void LoopCallback(int nData);
 
+
     private:
         Launcher m_launcher;
         ResourceManager m_manager;
@@ -64,6 +67,8 @@ class Core
         iniManager m_iniConfig;
 
         bool CreateEndpoints();
+
+        response Reboot(int nCommand);
 
 
         Json::Value m_jsStatus;
@@ -92,6 +97,7 @@ class Core
         static const url EP_FILES;
         static const url EP_INFO;
         static const url EP_UPDATE;
+        static const url EP_OUTPUTS;
 
         static const std::string ROOT;
         static const std::string EPI;
@@ -103,6 +109,7 @@ class Core
         static const std::string FILES;
         static const std::string INFO;
         static const std::string UPDATE;
+        static const std::string OUTPUTS;
 
         std::mutex m_mutex;
 

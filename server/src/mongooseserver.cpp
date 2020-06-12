@@ -183,7 +183,8 @@ void MongooseServer::HandleEvent(mg_connection *pConnection, int nEvent, void* p
 MongooseServer::MongooseServer() :
     m_pConnection(nullptr),
     m_nPollTimeout(100),
-    m_loopCallback(nullptr)
+    m_loopCallback(nullptr),
+    m_bLoop(true)
 {
 
     m_multipartData.itEndpoint = m_mEndpoints.end();
@@ -277,7 +278,7 @@ void MongooseServer::Loop()
     {
         mg_set_protocol_http_websocket(m_pConnection);
         int nCount = 0;
-        while (true)
+        while (m_bLoop)
         {
             auto now = std::chrono::high_resolution_clock::now();
 
@@ -297,6 +298,10 @@ void MongooseServer::Loop()
     }
 }
 
+void MongooseServer::Stop()
+{
+    m_bLoop = false;
+}
 
 bool MongooseServer::AddEndpoint(const endpoint& theEndpoint, std::function<response(mg_connection*, const query&, const postData&, const url& )> func)
 {

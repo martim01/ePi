@@ -15,6 +15,9 @@
 #include "inisection.h"
 #include "version.h"
 #include "logtofile.h"
+#include <unistd.h>
+#include <linux/reboot.h>
+#include <sys/reboot.h>
 
 using namespace std::placeholders;
 using namespace pml;
@@ -29,6 +32,7 @@ const std::string Core::PLAYLISTS   = "playlists";      //GET
 const std::string Core::FILES       = "files";          //GET
 const std::string Core::INFO        = "info";        //GET
 const std::string Core::UPDATE      = "update";        //GET PUT
+const std::string Core::OUTPUTS     = "outputs";        //GET PUT
 
 const url Core::EP_ROOT        = url(ROOT);
 const url Core::EP_EPI         = url(ROOT+EPI);
@@ -40,6 +44,7 @@ const url Core::EP_PLAYLISTS   = url(EP_EPI.Get()+"/"+PLAYLISTS);
 const url Core::EP_FILES       = url(EP_EPI.Get()+"/"+FILES);
 const url Core::EP_INFO        = url(EP_EPI.Get()+"/"+INFO);
 const url Core::EP_UPDATE      = url(EP_EPI.Get()+"/"+UPDATE);
+const url Core::EP_OUTPUTS     = url(EP_EPI.Get()+"/"+OUTPUTS);
 
 
 Core::Core() : m_manager(m_launcher, m_iniConfig), m_nTimeSinceLastCall(0)
@@ -100,6 +105,7 @@ bool Core::CreateEndpoints()
     m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_FILES), std::bind(&Core::GetFiles, this, _1,_2,_3,_4));
     m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_INFO), std::bind(&Core::GetInfo, this, _1,_2,_3,_4));
     m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_UPDATE), std::bind(&Core::GetUpdate, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_OUTPUTS), std::bind(&Core::GetOutputs, this, _1,_2,_3,_4));
 
     m_server.AddEndpoint(endpoint(MongooseServer::PATCH, EP_STATUS), std::bind(&Core::PatchStatus, this, _1,_2,_3,_4));
     m_server.AddEndpoint(endpoint(MongooseServer::PATCH, EP_CONFIG), std::bind(&Core::PatchConfig, this, _1,_2,_3,_4));
@@ -169,6 +175,7 @@ response Core::GetEpi(mg_connection* pConnection, const query& theQuery, const p
     theResponse.jsonData.append(INFO);
     theResponse.jsonData.append(STATUS);
     theResponse.jsonData.append(UPDATE);
+    theResponse.jsonData.append(OUTPUTS);
     return theResponse;
 }
 
@@ -231,6 +238,22 @@ response Core::GetUpdate(mg_connection* pConnection, const query& theQuery, cons
     //get versions of other applications...
     return theResponse;
 }
+
+response Core::GetOutputs(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+{
+    //get all the version numbers...
+    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetOutputs" << std::endl;
+    response theResponse;
+    std::stringstream ssVersion;
+    ssVersion << version::MAJOR << "." << version::MINOR << "." << version::PATCH;
+    //Log::Get(Log::LOG_DEBUG) << "
+    theResponse.jsonData = ConvertToJson(exec(CreatePath(m_iniConfig.GetIniString("playout", "path","."))+"player3 -d"));
+
+
+    //get versions of other applications...
+    return theResponse;
+}
+
 response Core::GetStatus(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
     //lock as jsStatus can be called by pipe thread and server thread
@@ -300,7 +323,7 @@ response Core::PatchStatus(mg_connection* pConnection, const query& theQuery, co
 
 response Core::PutPower(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutPower" << std::endl;
+    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutPower: " << theData.Get() << std::endl;
 
     response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode == 423)
@@ -318,21 +341,22 @@ response Core::PutPower(mg_connection* pConnection, const query& theQuery, const
     }
     else if(CmpNoCase(jsData["command"].asString(), "restart server"))
     {
-        // @todo(martim01) restart the server
         // send a message to "main" to exit the loop
         Log::Get(Log::LOG_INFO) << " restart server" << std::endl;
+        m_server.Stop();
     }
     else if(CmpNoCase(jsData["command"].asString(), "restart os"))
     {
-        // @todo(martim01) restart the os
-        // send a message to main to exit the loop and restart the os
         Log::Get(Log::LOG_INFO) << " restart os" << std::endl;
+
+        theResponse = Reboot(LINUX_REBOOT_CMD_RESTART);
+
     }
     else if(CmpNoCase(jsData["command"].asString(), "shutdown"))
     {
-        // @todo(martim01) shutdown
-        // send a message to main to exit the loop and shutdown the os
         Log::Get(Log::LOG_INFO) << " shutdown" << std::endl;
+
+        theResponse = Reboot(LINUX_REBOOT_CMD_POWER_OFF);
     }
     else
     {
@@ -657,3 +681,21 @@ response Core::PutUpdate(mg_connection* pConnection, const query& theQuery, cons
 
 
 
+response Core::Reboot(int nCommand)
+{
+    response theResponse;
+    sync(); //make sure filesystem is synced
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    int nError = reboot(nCommand);
+    if(nError == -1)
+    {
+        theResponse.nHttpCode = 500;
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append(strerror(errno));
+    }
+    else
+    {
+        theResponse.jsonData["result"] = true;
+    }
+    return theResponse;
+}
