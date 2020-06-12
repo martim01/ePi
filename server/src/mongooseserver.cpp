@@ -329,7 +329,8 @@ bool MongooseServer::DeleteEndpoint(const endpoint& theEndpoint)
 void MongooseServer::SendError(mg_connection* pConnection, const string& sError, int nCode)
 {
     response theResponse(nCode);
-    theResponse.jsonData["error"] = sError;
+    theResponse.jsonData["result"] = false;
+    theResponse.jsonData["reason"].append(sError);
     theResponse.jsonData["code"] = nCode;
 
     DoReply(pConnection, theResponse);

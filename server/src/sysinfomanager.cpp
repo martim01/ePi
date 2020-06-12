@@ -166,8 +166,9 @@ Json::Value SysInfoManager::GetApplicationInfo()
 
     //@todo(martim01) Get version number of this app and also the player
     std::stringstream ssVersion;
-    ssVersion << version::MAJOR << "." << version::MINOR << "." << version::PATCH;
+    ssVersion << version::MAJOR << "." << version::MINOR << "." << version::PATCH << "." << version::BUILD;
     jsInfo["version"] = ssVersion.str();
+    jsInfo["date"] = ConvertTimeToIsoString(std::time_t(version::DATE));
     jsInfo["start_time"] = ConvertTimeToIsoString(m_startTime);
 
 

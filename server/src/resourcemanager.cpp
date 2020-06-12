@@ -1478,6 +1478,8 @@ response ResourceManager::Update(const std::string& sApplication, const std::str
             theResponse.nHttpCode = 500;
             theResponse.jsonData["result"] = false;
             theResponse.jsonData["reason"].append(strerror(errno));
+            theResponse.jsonData["reason"].append(ssApp.str());
+            theResponse.jsonData["reason"].append(ssOld.str());
         }
         else
         {

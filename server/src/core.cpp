@@ -229,10 +229,12 @@ response Core::GetUpdate(mg_connection* pConnection, const query& theQuery, cons
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetUpdate" << std::endl;
     response theResponse;
     std::stringstream ssVersion;
-    ssVersion << version::MAJOR << "." << version::MINOR << "." << version::PATCH;
-    theResponse.jsonData["server"] = ssVersion.str();
+    ssVersion << version::MAJOR << "." << version::MINOR << "." << version::PATCH << "." << version::BUILD;
+    theResponse.jsonData["server"]["version"] = ssVersion.str();
+    theResponse.jsonData["server"]["date"] = ConvertTimeToIsoString(std::time_t(version::DATE));
 
-    theResponse.jsonData["player3"] = exec(CreatePath(m_iniConfig.GetIniString("playout", "path","."))+"player3 -v");
+
+    theResponse.jsonData["player3"] = ConvertToJson(exec(CreatePath(m_iniConfig.GetIniString("playout", "path","."))+"player3 -v"));
 
 
     //get versions of other applications...
@@ -244,8 +246,7 @@ response Core::GetOutputs(mg_connection* pConnection, const query& theQuery, con
     //get all the version numbers...
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetOutputs" << std::endl;
     response theResponse;
-    std::stringstream ssVersion;
-    ssVersion << version::MAJOR << "." << version::MINOR << "." << version::PATCH;
+
     //Log::Get(Log::LOG_DEBUG) << "
     theResponse.jsonData = ConvertToJson(exec(CreatePath(m_iniConfig.GetIniString("playout", "path","."))+"player3 -d"));
 
