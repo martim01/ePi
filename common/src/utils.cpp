@@ -159,6 +159,11 @@ std::string ConvertTimeToString(std::chrono::time_point<std::chrono::system_cloc
 std::string ConvertTimeToIsoString(std::chrono::time_point<std::chrono::system_clock> tp)
 {
     std::time_t  t = std::chrono::system_clock::to_time_t(tp);
+    return ConvertTimeToIsoString(t);
+}
+
+std::string ConvertTimeToIsoString(std::time_t t)
+{
     std::stringstream ss;
 
     ss << std::put_time(std::localtime(&t), "%FT%T%z");

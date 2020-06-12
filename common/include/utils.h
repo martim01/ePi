@@ -21,6 +21,7 @@ extern bool CheckJson(const Json::Value& jsObject, std::initializer_list<std::st
 extern bool JsonMemberExistsAndIsNull(const Json::Value& jsObject, const std::string& sMember);
 extern bool JsonMemberExistsAndIsNotNull(const Json::Value& jsObject, const std::string& sMember);
 
+extern std::string ConvertTimeToIsoString(std::time_t theTime);
 extern std::string ConvertTimeToString(std::chrono::time_point<std::chrono::system_clock> tp, bool bIncludeNano=true);
 extern std::string ConvertTimeToIsoString(std::chrono::time_point<std::chrono::system_clock> tp);
 extern std::string GetCurrentTimeAsString(bool bIncludeNano=true);
