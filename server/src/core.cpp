@@ -234,7 +234,7 @@ response Core::GetUpdate(mg_connection* pConnection, const query& theQuery, cons
     theResponse.jsonData["server"]["date"] = ConvertTimeToIsoString(std::time_t(version::DATE));
 
 
-    theResponse.jsonData["player3"] = ConvertToJson(exec(CreatePath(m_iniConfig.GetIniString("playout", "path","."))+"player3 -v"));
+    theResponse.jsonData["player3"] = ConvertToJson(exec(CreatePath(m_iniConfig.GetIniString("paths", "player","."))+"player3 -v"));
 
 
     //get versions of other applications...
@@ -248,7 +248,7 @@ response Core::GetOutputs(mg_connection* pConnection, const query& theQuery, con
     response theResponse;
 
     //Log::Get(Log::LOG_DEBUG) << "
-    theResponse.jsonData = ConvertToJson(exec(CreatePath(m_iniConfig.GetIniString("playout", "path","."))+"player3 -d"));
+    theResponse.jsonData = ConvertToJson(exec(CreatePath(m_iniConfig.GetIniString("paths", "player","."))+"player3 -d"));
 
 
     //get versions of other applications...

@@ -1439,12 +1439,12 @@ response ResourceManager::UpdateApplication(const Json::Value& jsData)
         }
         else if(jsData["multipart"]["data"]["application"].asString() == "episerver")
         {
-            return Update("episerver", ".", jsData["multipart"]["files"]["file"].asString());
+            return Update("episerver", CreatePath(m_iniConfig.GetIniString("paths", "episerver",".")), jsData["multipart"]["files"]["file"].asString());
         }
         else if(jsData["multipart"]["data"]["application"].asString() == "player3" || jsData["multipart"]["data"]["application"].asString() == "player67")
         {
             return Update(jsData["multipart"]["data"]["application"].asString(),
-                          CreatePath(m_iniConfig.GetIniString("playout", "path",".")), jsData["multipart"]["files"]["file"].asString());
+                          CreatePath(m_iniConfig.GetIniString("paths", "player",".")), jsData["multipart"]["files"]["file"].asString());
         }
         else
         {
