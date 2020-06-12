@@ -54,15 +54,8 @@ Core::Core() : m_manager(m_launcher, m_iniConfig), m_nTimeSinceLastCall(0)
     m_jsStatus["player"] ="Stopped";
 }
 
-void Core::Run(const std::string& sConfigFile)
+void Core::InitLogging()
 {
-
-    if(m_iniConfig.ReadIniFile(sConfigFile) == false)
-    {
-        pml::Log::Get(pml::Log::LOG_CRITICAL) << "Could not open '" << sConfigFile << "' exiting.";
-        return;
-    }
-
     if(m_iniConfig.GetIniInt("logging", "console",0) == 1)
     {
         pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
@@ -71,6 +64,19 @@ void Core::Run(const std::string& sConfigFile)
     {
         pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new LogToFile(CreatePath(m_iniConfig.GetIniString("paths","logs","."))+"episerver")));
     }
+}
+
+void Core::Run(const std::string& sConfigFile)
+{
+
+    if(m_iniConfig.ReadIniFile(sConfigFile) == false)
+    {
+        pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
+        pml::Log::Get(pml::Log::LOG_CRITICAL) << "Could not open '" << sConfigFile << "' exiting.";
+        return;
+    }
+
+    InitLogging();
 
     pml::Log::Get() << "Core\tStart" << std::endl;
 

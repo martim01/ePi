@@ -66,6 +66,7 @@ class Core
         SysInfoManager m_info;
         iniManager m_iniConfig;
 
+        void InitLogging();
         bool CreateEndpoints();
 
         response Reboot(int nCommand);
