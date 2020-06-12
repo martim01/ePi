@@ -1392,9 +1392,17 @@
 						document.getElementById('progress').className = 'hide';
 						document.getElementById('veil').className = 'hide';
 						
-						if(this.status != 201)
+						if(this.status != 200)
 						{
 							alert(jsonObj["reason"]);
+						}
+						else if(jsonObj["restart"] == true)
+						{
+							alert(document.getElementById('update_application').value+" has been updated but needs restarting.");
+						}
+						else
+						{
+							alert(document.getElementById('update_application').value+" has been updated");
 						}
 						
 						next(0);
