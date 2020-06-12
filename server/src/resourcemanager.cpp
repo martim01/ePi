@@ -1512,6 +1512,7 @@ response ResourceManager::Update(const std::string& sApplication, const std::str
             app.close();
             temp.close();
             theResponse.jsonData["result"] = true;
+            chmod(ssApp.str().c_str(), 0755);
         }
     }
 
