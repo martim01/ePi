@@ -477,20 +477,26 @@ void MongooseServer::DoReply(mg_connection* pConnection,const response& theRespo
     Log::Get() << "MongooseServer::DoReply " << theResponse.nHttpCode << endl;
     Log::Get() << "MongooseServer::DoReply " << theResponse.jsonData << endl;
 
+    std::stringstream ssJson;
+    ssJson << theResponse.jsonData;
+
     stringstream ssHeaders;
-    ssHeaders << "HTTP/1.1 " << theResponse.nHttpCode << "\r\n"
-              << "Transfer-Encoding: chunked\r\n"
+    ssHeaders << "HTTP/1.1 " << theResponse.nHttpCode << " \r\n"
               << "Content-Type: " << "application/json" << "\r\n"
+              << "Content-Length: " << ssJson.str().length() << "\r\n"
               << "Access-Control-Allow-Origin:*\r\n"
               << "Access-Control-Allow-Methods:GET, PUT, POST, HEAD, OPTIONS, DELETE\r\n"
               << "Access-Control-Allow-Headers:Content-Type, Accept\r\n"
               << "Access-Control-Max-AgeL3600\r\n\r\n";
-    mg_printf(pConnection, "%s", ssHeaders.str().c_str());
 
-    std::stringstream ssJson;
-    ssJson << theResponse.jsonData;
-    mg_printf_http_chunk(pConnection, ssJson.str().c_str());
-    mg_send_http_chunk(pConnection, "", 0); //send empty chunk to inidicate end
+    mg_send(pConnection, ssHeaders.str().c_str(), ssHeaders.str().length());
+    mg_send(pConnection, ssJson.str().c_str(), ssJson.str().length());
+
+    pConnection->flags |= MG_F_SEND_AND_CLOSE;
+
+    //mg_send_http_chunk(pConnection, ssJson.str().c_str(), ssJson.str().length());
+    //mg_send_http_chunk(pConnection, "", 0); //send empty chunk to inidicate end
+
 }
 
 
