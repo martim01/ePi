@@ -295,8 +295,10 @@
 				var ajax = new XMLHttpRequest();
 				ajax.onreadystatechange = function()
 				{
+					console.log(this.readyState);
 					if(this.readyState == 4)
 					{
+						console.log(this.responseText);
 						var resObj = JSON.parse(this.responseText);
 						if(resObj !== null)
 						{

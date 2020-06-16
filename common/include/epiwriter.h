@@ -7,6 +7,7 @@ class epiWriter
     public:
         static epiWriter&  Get();
         void writeToStdOut(const Json::Value& jsValue);
+        void writeToSStream(const Json::Value& jsValue, std::stringstream& ss);
 
     private:
         epiWriter();

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<wxsmith>
+	<object class="wxDialog" name="controllerDialog">
+		<title>wxWidgets app</title>
+		<size>200,160</size>
+		<font>
+			<size>20</size>
+			<style>normal</style>
+			<weight>normal</weight>
+			<underlined>0</underlined>
+			<family>swiss</family>
+			<face>Arial</face>
+		</font>
+		<style>wxSIMPLE_BORDER</style>
+		<handler function="OnPaint" entry="EVT_PAINT" />
+		<handler function="OnLeftDown" entry="EVT_LEFT_DOWN" />
+		<handler function="OnLeftUp" entry="EVT_LEFT_UP" />
+		<object class="wxTimer" name="ID_TIMER_CONNECTION" variable="m_timerConnection" member="yes">
+			<handler function="OntimerConnectionTrigger" entry="EVT_TIMER" />
+		</object>
+		<object class="wxTimer" name="ID_TIMER_HOLD" variable="m_timerStop" member="yes">
+			<handler function="OntimerStopTrigger" entry="EVT_TIMER" />
+		</object>
+		<object class="wxTimer" name="ID_TIMER_MENU" variable="m_timerMenu" member="yes">
+			<handler function="OntimerMenuTrigger" entry="EVT_TIMER" />
+		</object>
+	</object>
+</wxsmith>

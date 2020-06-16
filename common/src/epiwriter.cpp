@@ -22,3 +22,9 @@ epiWriter::epiWriter()
     builder["indentation"] = "";
     m_pWriter = std::unique_ptr<Json::StreamWriter>(builder.newStreamWriter());
 }
+
+
+void epiWriter::writeToSStream(const Json::Value& jsValue, std::stringstream& ss)
+{
+    m_pWriter->write(jsValue, &ss);
+}

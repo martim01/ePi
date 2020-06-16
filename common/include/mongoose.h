@@ -228,7 +228,7 @@
 #include <windows.h>
 #include <process.h>
 
-#if _MSC_VER < 1700
+#if defined(_MSC_VER) && _MSC_VER < 1700
 typedef int bool;
 #else
 #include <stdbool.h>
@@ -5761,6 +5761,12 @@ struct mg_connection *mg_connect_http_opt(
     struct mg_mgr *mgr, MG_CB(mg_event_handler_t ev_handler, void *user_data),
     struct mg_connect_opts opts, const char *url, const char *extra_headers,
     const char *post_data);
+
+struct mg_connection *mg_connect_http_base(
+    struct mg_mgr *mgr, MG_CB(mg_event_handler_t ev_handler, void *user_data),
+    struct mg_connect_opts opts, const char *scheme1, const char *scheme2,
+    const char *scheme_ssl1, const char *scheme_ssl2, const char *url,
+    struct mg_str *path, struct mg_str *user_info, struct mg_str *host);
 
 /* Creates digest authentication header for a client request. */
 int mg_http_create_digest_auth_header(char *buf, size_t buf_len,

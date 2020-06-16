@@ -17,9 +17,7 @@ extern bool do_mkdir(const std::string& sPath, mode_t mode);
 extern bool mkpath(const std::string& sPath, mode_t mode);
 
 
-extern bool CheckJson(const Json::Value& jsObject, std::initializer_list<std::string> lstAllowed);
-extern bool JsonMemberExistsAndIsNull(const Json::Value& jsObject, const std::string& sMember);
-extern bool JsonMemberExistsAndIsNotNull(const Json::Value& jsObject, const std::string& sMember);
+
 
 extern std::string ConvertTimeToIsoString(std::time_t theTime);
 extern std::string ConvertTimeToString(std::chrono::time_point<std::chrono::system_clock> tp, bool bIncludeNano=true);
@@ -27,9 +25,9 @@ extern std::string ConvertTimeToIsoString(std::chrono::time_point<std::chrono::s
 extern std::string GetCurrentTimeAsString(bool bIncludeNano=true);
 extern std::string GetCurrentTimeAsIsoString();
 
-extern Json::Value ConvertToJson(const std::string& str);
+
 
 extern std::string GetIpAddress(const std::string& sInterface);
 extern std::string exec(const std::string& sCmd);
 
-extern void UpdateJsonObject(Json::Value& dest, const Json::Value& source);
+
