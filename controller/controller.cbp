@@ -43,6 +43,7 @@
 				<Linker>
 					<Add option="-s" />
 					<Add library="libwxmsw30u.a" />
+					<Add library="ws2_32" />
 					<Add directory="$(#wx)/lib/gcc_dll" />
 				</Linker>
 			</Target>
@@ -62,6 +63,7 @@
 			<Add directory="include" />
 			<Add directory="../external/log/include" />
 			<Add directory="../external/jsoncpp/dist" />
+			<Add directory="icons" />
 		</Compiler>
 		<ResourceCompiler>
 			<Add directory="$(#wx)/include" />
@@ -85,20 +87,37 @@
 		<Unit filename="../external/jsoncpp/dist/jsoncpp.cpp" />
 		<Unit filename="../external/log/include/log.h" />
 		<Unit filename="../external/log/src/log.cpp" />
-		<Unit filename="controllerApp.cpp" />
-		<Unit filename="controllerApp.h" />
-		<Unit filename="controllerMain.cpp" />
-		<Unit filename="controllerMain.h" />
+		<Unit filename="include/constants.h" />
+		<Unit filename="include/controllerApp.h" />
+		<Unit filename="include/controllerMain.h" />
+		<Unit filename="include/dlgEdit.h" />
+		<Unit filename="include/dlgOptions.h" />
+		<Unit filename="include/dlgUsb.h" />
 		<Unit filename="include/restfulclient.h" />
 		<Unit filename="include/uirect.h" />
+		<Unit filename="include/version.h" />
 		<Unit filename="include/websocketclient.h" />
+		<Unit filename="include/wmbuttonfactory.h" />
+		<Unit filename="include/wmkeyboard.h" />
+		<Unit filename="include/wmlist.h" />
 		<Unit filename="resource.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>
+		<Unit filename="src/constants.cpp" />
+		<Unit filename="src/controllerApp.cpp" />
+		<Unit filename="src/controllerMain.cpp" />
+		<Unit filename="src/dlgEdit.cpp" />
+		<Unit filename="src/dlgOptions.cpp" />
+		<Unit filename="src/dlgUsb.cpp" />
 		<Unit filename="src/restfulclient.cpp" />
 		<Unit filename="src/uirect.cpp" />
 		<Unit filename="src/websocketclient.cpp" />
+		<Unit filename="src/wmkeyboard.cpp" />
+		<Unit filename="src/wmlist.cpp" />
 		<Unit filename="wxsmith/controllerdialog.wxs" />
+		<Unit filename="wxsmith/dlgEdit.wxs" />
+		<Unit filename="wxsmith/dlgOptions.wxs" />
+		<Unit filename="wxsmith/dlgUsb.wxs" />
 		<Extensions>
 			<code_completion />
 			<envvars />
@@ -107,7 +126,10 @@
 			<wxsmith version="1">
 				<gui name="wxWidgets" src="controllerApp.cpp" main="controllerDialog" init_handlers="necessary" language="CPP" />
 				<resources>
-					<wxDialog wxs="wxsmith/controllerdialog.wxs" src="controllerMain.cpp" hdr="controllerMain.h" fwddecl="0" i18n="1" name="controllerDialog" language="CPP" />
+					<wxDialog wxs="wxsmith/controllerdialog.wxs" src="src/controllerMain.cpp" hdr="include/controllerMain.h" fwddecl="0" i18n="1" name="controllerDialog" language="CPP" />
+					<wxDialog wxs="wxsmith/dlgOptions.wxs" src="src/dlgOptions.cpp" hdr="include/dlgOptions.h" fwddecl="0" i18n="1" name="dlgOptions" language="CPP" />
+					<wxDialog wxs="wxsmith/dlgEdit.wxs" src="src/dlgEdit.cpp" hdr="include/dlgEdit.h" fwddecl="0" i18n="1" name="dlgEdit" language="CPP" />
+					<wxDialog wxs="wxsmith/dlgUsb.wxs" src="src/dlgUsb.cpp" hdr="include/dlgUsb.h" fwddecl="0" i18n="1" name="dlgUsb" language="CPP" />
 				</resources>
 			</wxsmith>
 		</Extensions>

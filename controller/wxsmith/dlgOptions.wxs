@@ -1,0 +1,609 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<wxsmith>
+	<object class="wxDialog" name="dlgOptions">
+		<bg>#000000</bg>
+		<font>
+			<size>12</size>
+			<style>normal</style>
+			<weight>normal</weight>
+			<underlined>0</underlined>
+			<family>swiss</family>
+			<face>Arial</face>
+		</font>
+		<minsize>800,480</minsize>
+		<pos_arg>1</pos_arg>
+		<size_arg>1</size_arg>
+		<style>wxNO_BORDER</style>
+		<object class="wxBoxSizer" variable="BoxSizer0" member="no">
+			<orient>wxVERTICAL</orient>
+			<object class="sizeritem">
+				<object class="wxStaticText" name="ID_STATICTEXT30" variable="m_pstHostname" member="yes">
+					<label>Label</label>
+					<fg>#FFFFFF</fg>
+					<bg>#008040</bg>
+					<font>
+						<size>24</size>
+						<style>normal</style>
+						<weight>bold</weight>
+						<underlined>0</underlined>
+						<family>swiss</family>
+						<face>Arial</face>
+					</font>
+					<minsize>800,40</minsize>
+					<style>wxST_NO_AUTORESIZE</style>
+				</object>
+				<flag>wxALL|wxEXPAND</flag>
+				<border>2</border>
+			</object>
+			<object class="sizeritem">
+				<object class="wxBoxSizer" variable="BoxSizer3" member="no">
+					<object class="sizeritem">
+						<object class="wxBoxSizer" variable="BoxSizer1" member="no">
+							<orient>wxVERTICAL</orient>
+							<object class="sizeritem">
+								<object class="wxStaticBoxSizer" variable="StaticBoxSizer1" member="no">
+									<orient>wxVERTICAL</orient>
+									<object class="sizeritem">
+										<object class="wxGridBagSizer" variable="GridBagSizer1" member="no">
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT1" variable="StaticText1" member="yes">
+													<label>UID:</label>
+													<fg>#FFFFFF</fg>
+												</object>
+												<col>0</col>
+												<row>0</row>
+												<flag>wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT2" variable="m_pstUid" member="yes">
+													<label></label>
+													<fg>wxSYS_COLOUR_BACKGROUND</fg>
+													<bg>#FFFFFF</bg>
+													<minsize>400,-1</minsize>
+													<style>wxST_NO_AUTORESIZE|wxSTATIC_BORDER</style>
+												</object>
+												<col>1</col>
+												<row>0</row>
+												<flag>wxALL|wxEXPAND</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT3" variable="StaticText2" member="yes">
+													<label>Label:</label>
+													<fg>#FFFFFF</fg>
+												</object>
+												<col>0</col>
+												<row>1</row>
+												<flag>wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT4" variable="m_pstLabel" member="yes">
+													<label></label>
+													<fg>#000000</fg>
+													<bg>#FFFFFF</bg>
+													<style>wxST_NO_AUTORESIZE|wxSTATIC_BORDER</style>
+												</object>
+												<col>1</col>
+												<row>1</row>
+												<flag>wxALL|wxEXPAND</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT5" variable="StaticText3" member="yes">
+													<label>Description:</label>
+													<fg>#FFFFFF</fg>
+												</object>
+												<col>0</col>
+												<row>2</row>
+												<flag>wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT6" variable="m_pstDescription" member="yes">
+													<label></label>
+													<fg>#000000</fg>
+													<bg>#FFFFFF</bg>
+													<style>wxST_NO_AUTORESIZE|wxSTATIC_BORDER</style>
+												</object>
+												<col>1</col>
+												<row>2</row>
+												<flag>wxALL|wxEXPAND</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxButton" name="ID_BUTTON_UPDATE" variable="m_pbtnUpdate" member="yes">
+													<label>Update</label>
+													<handler function="OnbtnFileUpdateClick" entry="EVT_BUTTON" />
+												</object>
+												<rowspan>2</rowspan>
+												<col>2</col>
+												<row>1</row>
+												<flag>wxALL</flag>
+												<border>2</border>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT7" variable="StaticText5" member="yes">
+													<label>Created:</label>
+													<fg>#FFFFFF</fg>
+												</object>
+												<col>0</col>
+												<row>3</row>
+												<flag>wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT8" variable="m_pstCreated" member="yes">
+													<label></label>
+													<fg>#000000</fg>
+													<bg>#FFFFFF</bg>
+													<style>wxST_NO_AUTORESIZE|wxSTATIC_BORDER</style>
+												</object>
+												<col>1</col>
+												<row>3</row>
+												<flag>wxALL|wxEXPAND</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT9" variable="StaticText7" member="yes">
+													<label>Modified:</label>
+													<fg>#FFFFFF</fg>
+												</object>
+												<col>0</col>
+												<row>4</row>
+												<flag>wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT10" variable="m_pstModified" member="yes">
+													<label></label>
+													<fg>#000000</fg>
+													<bg>#FFFFFF</bg>
+													<style>wxST_NO_AUTORESIZE|wxSTATIC_BORDER</style>
+												</object>
+												<col>1</col>
+												<row>4</row>
+												<flag>wxALL|wxEXPAND</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+										</object>
+										<flag>wxALL|wxEXPAND</flag>
+										<border>2</border>
+										<option>1</option>
+									</object>
+									<object class="sizeritem">
+										<object class="wxStaticLine" name="ID_STATICLINE1" variable="StaticLine1" member="yes">
+											<size>10,-1</size>
+										</object>
+										<flag>wxALL|wxEXPAND</flag>
+										<border>1</border>
+									</object>
+									<object class="sizeritem">
+										<object class="wxGridBagSizer" variable="GridBagSizer2" member="no">
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT11" variable="StaticText4" member="yes">
+													<label>Channels:</label>
+													<fg>#00A4A4</fg>
+												</object>
+												<col>0</col>
+												<row>0</row>
+												<flag>wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT12" variable="m_pstChannels" member="yes">
+													<label></label>
+													<fg>#FFFFFF</fg>
+													<minsize>25,-1</minsize>
+												</object>
+												<col>1</col>
+												<row>0</row>
+												<flag>wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT13" variable="StaticText10" member="yes">
+													<label>Sample Rate:</label>
+													<fg>#00A4A4</fg>
+												</object>
+												<col>2</col>
+												<row>0</row>
+												<flag>wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT17" variable="m_pstSampleRate" member="yes">
+													<label></label>
+													<fg>#FFFFFF</fg>
+													<minsize>50,-1</minsize>
+												</object>
+												<col>3</col>
+												<row>0</row>
+												<flag>wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT14" variable="StaticText11" member="yes">
+													<label>Format:</label>
+													<fg>#00A4A4</fg>
+												</object>
+												<col>0</col>
+												<row>1</row>
+												<flag>wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT18" variable="m_pstType" member="yes">
+													<label></label>
+													<fg>#FFFFFF</fg>
+													<minsize>50,-1</minsize>
+												</object>
+												<col>1</col>
+												<row>1</row>
+												<flag>wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT15" variable="StaticText12" member="yes">
+													<label>Length:</label>
+													<fg>#00A4A4</fg>
+												</object>
+												<col>4</col>
+												<row>0</row>
+												<flag>wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT19" variable="m_pstSubType" member="yes">
+													<label></label>
+													<fg>#FFFFFF</fg>
+													<minsize>150,-1</minsize>
+												</object>
+												<colspan>3</colspan>
+												<col>2</col>
+												<row>1</row>
+												<flag>wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT20" variable="m_pstLength" member="yes">
+													<label></label>
+													<fg>#FFFFFF</fg>
+													<minsize>75,-1</minsize>
+												</object>
+												<col>5</col>
+												<row>0</row>
+												<flag>wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+										</object>
+										<flag>wxALL|wxEXPAND</flag>
+										<border>2</border>
+									</object>
+									<object class="sizeritem">
+										<object class="wxStaticLine" name="ID_STATICLINE2" variable="StaticLine2" member="yes">
+											<size>10,-1</size>
+										</object>
+										<flag>wxALL|wxEXPAND</flag>
+										<border>2</border>
+									</object>
+									<object class="sizeritem">
+										<object class="wxBoxSizer" variable="BoxSizer2" member="no">
+											<object class="sizeritem">
+												<object class="wxButton" name="ID_BUTTON_REPLACE" variable="m_pbtnReplace" member="yes">
+													<label>Replace</label>
+													<handler function="OnbtnReplaceClick" entry="EVT_BUTTON" />
+												</object>
+												<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="spacer">
+												<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxButton" name="ID_BUTTON_DELETE" variable="m_pbtnDelete" member="yes">
+													<label>Delete</label>
+													<handler function="OnbtnDeleteClick" entry="EVT_BUTTON" />
+												</object>
+												<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+										</object>
+										<flag>wxALL|wxALIGN_CENTER_HORIZONTAL</flag>
+									</object>
+								</object>
+								<flag>wxLEFT|wxEXPAND</flag>
+								<border>5</border>
+								<option>1</option>
+							</object>
+							<object class="sizeritem">
+								<object class="wxStaticBoxSizer" variable="StaticBoxSizer2" member="no">
+									<object class="sizeritem">
+										<object class="wxGridBagSizer" variable="GridBagSizer3" member="no">
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT16" variable="StaticText9" member="yes">
+													<label>episerver:</label>
+													<fg>#FF0080</fg>
+												</object>
+												<col>0</col>
+												<row>0</row>
+												<flag>wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT25" variable="m_pstVersionEpiServer" member="yes">
+													<label></label>
+													<fg>#000000</fg>
+													<bg>#FFFFFF</bg>
+													<minsize>100,-1</minsize>
+													<style>wxST_NO_AUTORESIZE|wxSTATIC_BORDER</style>
+												</object>
+												<col>1</col>
+												<row>0</row>
+												<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxButton" name="ID_BUTTON_UPDATE_EPISERVER" variable="m_pbtnUpdateEpiServer" member="yes">
+													<label>Update</label>
+													<handler function="OnbtnUpdateEpiServerClick" entry="EVT_BUTTON" />
+												</object>
+												<col>2</col>
+												<row>0</row>
+												<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT21" variable="StaticText13" member="yes">
+													<label>player3:</label>
+													<fg>#FF0080</fg>
+												</object>
+												<col>0</col>
+												<row>1</row>
+												<flag>wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT26" variable="m_pstVersionPlayer3" member="yes">
+													<label></label>
+													<fg>#000000</fg>
+													<bg>#FFFFFF</bg>
+													<minsize>100,-1</minsize>
+													<style>wxST_NO_AUTORESIZE|wxSTATIC_BORDER</style>
+												</object>
+												<col>1</col>
+												<row>1</row>
+												<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxButton" name="ID_BUTTON_UPDATE_PLAYER3" variable="m_pbtnUpdatePlayer3" member="yes">
+													<label>Update</label>
+													<handler function="OnbtnUpdatePlayer3Click" entry="EVT_BUTTON" />
+												</object>
+												<col>2</col>
+												<row>1</row>
+												<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT22" variable="StaticText14" member="yes">
+													<label>player67:</label>
+													<fg>#FF0080</fg>
+												</object>
+												<col>3</col>
+												<row>1</row>
+												<flag>wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT27" variable="m_pstVersionPlayer67" member="yes">
+													<label></label>
+													<fg>#000000</fg>
+													<bg>#FFFFFF</bg>
+													<minsize>100,-1</minsize>
+													<style>wxST_NO_AUTORESIZE|wxSTATIC_BORDER</style>
+												</object>
+												<col>4</col>
+												<row>1</row>
+												<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxButton" name="ID_BUTTON_UPDATE_PLAYER67" variable="m_pbtnUpdatePlayer67" member="yes">
+													<label>Update</label>
+													<handler function="OnbtnUpdatePlayer67Click" entry="EVT_BUTTON" />
+												</object>
+												<col>5</col>
+												<row>1</row>
+												<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT23" variable="StaticText15" member="yes">
+													<label>controller:</label>
+													<fg>#FF0080</fg>
+												</object>
+												<col>0</col>
+												<row>2</row>
+												<flag>wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT28" variable="m_pstVersionController" member="yes">
+													<label></label>
+													<fg>#000000</fg>
+													<bg>#FFFFFF</bg>
+													<minsize>100,-1</minsize>
+													<style>wxST_NO_AUTORESIZE|wxSTATIC_BORDER</style>
+												</object>
+												<col>1</col>
+												<row>2</row>
+												<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxButton" name="ID_BUTTON_UPDATE_CONTROLLER" variable="m_pbtnUpdateController" member="yes">
+													<label>Update</label>
+													<handler function="OnbtnUpdateControllerClick" entry="EVT_BUTTON" />
+												</object>
+												<col>2</col>
+												<row>2</row>
+												<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT24" variable="StaticText16" member="yes">
+													<label>launcher:</label>
+													<fg>#FF0080</fg>
+												</object>
+												<col>3</col>
+												<row>2</row>
+												<flag>wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxStaticText" name="ID_STATICTEXT29" variable="m_pstVersionLauncher" member="yes">
+													<label></label>
+													<fg>#000000</fg>
+													<bg>#FFFFFF</bg>
+													<minsize>100,-1</minsize>
+													<style>wxST_NO_AUTORESIZE|wxSTATIC_BORDER</style>
+												</object>
+												<col>4</col>
+												<row>2</row>
+												<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+												<border>2</border>
+												<option>1</option>
+											</object>
+											<object class="sizeritem">
+												<object class="wxButton" name="ID_BUTTON_UPDATE_LAUNCHER" variable="m_pbtnUpdateLauncher" member="yes">
+													<label>Update</label>
+													<handler function="OnbtnUpdateLauncherClick" entry="EVT_BUTTON" />
+												</object>
+												<col>5</col>
+												<row>2</row>
+												<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+												<option>1</option>
+											</object>
+										</object>
+										<flag>wxALL|wxEXPAND</flag>
+										<option>1</option>
+									</object>
+								</object>
+								<flag>wxBOTTOM|wxLEFT|wxEXPAND</flag>
+								<border>5</border>
+							</object>
+						</object>
+						<flag>wxALL|wxEXPAND</flag>
+						<option>1</option>
+					</object>
+					<object class="sizeritem">
+						<object class="wxStaticBoxSizer" variable="StaticBoxSizer3" member="no">
+							<orient>wxVERTICAL</orient>
+							<object class="sizeritem">
+								<object class="wxButton" name="ID_BUTTON_RESTART_SERVER" variable="m_pbtnRestartServer" member="yes">
+									<label>Restart Server</label>
+									<fg>#FFFFFF</fg>
+									<bg>#800000</bg>
+									<handler function="OnbtnRestartServerClick" entry="EVT_BUTTON" />
+								</object>
+								<flag>wxALL|wxEXPAND</flag>
+								<border>5</border>
+								<option>1</option>
+							</object>
+							<object class="sizeritem">
+								<object class="wxButton" name="ID_BUTTON_RESTART_OS" variable="m_pbtnRestartOS" member="yes">
+									<label>Restart OS</label>
+									<fg>#FFFFFF</fg>
+									<bg>#800000</bg>
+									<handler function="OnbtnRestartOSClick" entry="EVT_BUTTON" />
+								</object>
+								<flag>wxALL|wxEXPAND</flag>
+								<border>5</border>
+								<option>1</option>
+							</object>
+							<object class="sizeritem">
+								<object class="wxButton" name="ID_BUTTON_SHUTDOWN_OS" variable="m_pbtnShutdownOS" member="yes">
+									<label>Shutdown OS</label>
+									<fg>#FFFFFF</fg>
+									<bg>#800000</bg>
+									<handler function="OnbtnShutdownOSClick" entry="EVT_BUTTON" />
+								</object>
+								<flag>wxALL|wxEXPAND</flag>
+								<border>5</border>
+								<option>1</option>
+							</object>
+							<object class="spacer">
+								<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+								<border>5</border>
+								<option>2</option>
+							</object>
+							<object class="sizeritem">
+								<object class="wxButton" name="ID_BUTTON_SSH" variable="m_pbtnSSH" member="yes">
+									<label>SSH</label>
+									<fg>#FFFFFF</fg>
+									<bg>#44019E</bg>
+									<handler function="OnbtnSSHClick" entry="EVT_BUTTON" />
+								</object>
+								<flag>wxALL|wxEXPAND</flag>
+								<border>5</border>
+								<option>1</option>
+							</object>
+							<object class="spacer">
+								<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+								<border>5</border>
+								<option>1</option>
+							</object>
+							<object class="sizeritem">
+								<object class="wxButton" name="ID_BUTTON_BACK" variable="m_pbtnBack" member="yes">
+									<label>Back</label>
+									<fg>#FFFFFF</fg>
+									<bg>#008000</bg>
+									<handler function="OnbtnBackClick" entry="EVT_BUTTON" />
+								</object>
+								<flag>wxALL|wxEXPAND</flag>
+								<border>5</border>
+								<option>1</option>
+							</object>
+						</object>
+						<flag>wxBOTTOM|wxRIGHT|wxEXPAND</flag>
+						<border>5</border>
+					</object>
+				</object>
+				<flag>wxALL|wxEXPAND</flag>
+				<option>1</option>
+			</object>
+		</object>
+	</object>
+</wxsmith>

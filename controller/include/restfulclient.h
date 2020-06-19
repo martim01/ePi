@@ -3,6 +3,7 @@
 #include <atomic>
 #include <queue>
 #include <string>
+#include <wx/timer.h>
 
 struct mg_mgr;
 struct mg_connection;
@@ -13,10 +14,10 @@ class RestfulClient : public wxEvtHandler
     public:
         RestfulClient(wxEvtHandler* pHandler);
         bool Get(const std::string& sEndpoint, int nUserId);
-//        bool Post(const std::string& sEndpoint, const char* pPostData);
+        bool Post(const std::string& sEndpoint, const char* pPostData, int nUserId);
         bool Patch(const std::string& sEndpoint, const char* pPostData, int nUserId);
-//        bool Put(const std::string& sEndpoint, const char* pPostData);
-//        bool Delete(const std::string& sEndpoint);
+        bool Put(const std::string& sEndpoint, const char* pPostData, int nUserId);
+        bool Delete(const std::string& sEndpoint, int nUserId);
 
         /** Handles an event
         *   @param pConnection the mg_connection that caused the event
@@ -33,6 +34,7 @@ class RestfulClient : public wxEvtHandler
         void OnFinishedEvent(wxCommandEvent& event);
         void DoNextTask();
 
+        void OnTimerTask(const wxTimerEvent& event);
 
         void ConnectionEvent(int nStatus);
         void ReplyEvent(http_message* pMessage);
@@ -55,6 +57,7 @@ class RestfulClient : public wxEvtHandler
         };
 
         std::queue<task> m_qTasks;
+        wxTimer m_timerTask;
 
 };
 

@@ -39,3 +39,4 @@
 
 /controller/obj/Debug/controller
 /controller/obj/Debug/*.res
+/controller/obj/Release/controller/*.res

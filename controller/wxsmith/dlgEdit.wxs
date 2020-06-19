@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<wxsmith>
+	<object class="wxDialog" name="dlgEdit">
+		<bg>#000000</bg>
+		<font>
+			<size>12</size>
+			<style>normal</style>
+			<weight>normal</weight>
+			<underlined>0</underlined>
+			<family>swiss</family>
+			<face>Arial</face>
+		</font>
+		<pos_arg>1</pos_arg>
+		<size_arg>1</size_arg>
+		<style>wxNO_BORDER</style>
+		<object class="wxBoxSizer" variable="BoxSizer1" member="no">
+			<orient>wxVERTICAL</orient>
+			<object class="sizeritem">
+				<object class="wxStaticText" name="ID_STATICTEXT30" variable="m_pstHostname" member="yes">
+					<label>Label</label>
+					<fg>#FFFFFF</fg>
+					<bg>#008040</bg>
+					<font>
+						<size>24</size>
+						<style>normal</style>
+						<weight>bold</weight>
+						<underlined>0</underlined>
+						<family>swiss</family>
+						<face>Arial</face>
+					</font>
+					<minsize>800,40</minsize>
+					<style>wxST_NO_AUTORESIZE</style>
+				</object>
+				<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+				<border>2</border>
+			</object>
+			<object class="sizeritem">
+				<object class="wxGridBagSizer" variable="GridBagSizer1" member="no">
+					<object class="sizeritem">
+						<object class="wxStaticText" name="ID_STATICTEXT1" variable="StaticText1" member="yes">
+							<label>Label:</label>
+							<fg>#FFFFFF</fg>
+						</object>
+						<col>0</col>
+						<row>0</row>
+						<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+						<border>2</border>
+					</object>
+					<object class="sizeritem">
+						<object class="wxTextCtrl" name="ID_TEXTCTRL1" variable="m_pedtLabel" member="yes" />
+						<col>1</col>
+						<row>0</row>
+						<flag>wxALL|wxEXPAND</flag>
+						<border>2</border>
+						<option>1</option>
+					</object>
+					<object class="sizeritem">
+						<object class="wxStaticText" name="ID_STATICTEXT2" variable="StaticText2" member="yes">
+							<label>Description:</label>
+							<fg>#FFFFFF</fg>
+						</object>
+						<col>0</col>
+						<row>1</row>
+						<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+						<border>2</border>
+					</object>
+					<object class="sizeritem">
+						<object class="wxTextCtrl" name="ID_TEXTCTRL2" variable="m_pedtDescription" member="yes">
+							<style>wxTE_PROCESS_ENTER|wxTE_MULTILINE</style>
+						</object>
+						<col>1</col>
+						<row>1</row>
+						<flag>wxALL|wxEXPAND</flag>
+						<border>2</border>
+						<option>1</option>
+					</object>
+					<object class="sizeritem">
+						<object class="wmKeyboard" name="ID_M_PKBD1" variable="m_pKbd1" member="yes">
+							<fg>#FFFFFF</fg>
+						</object>
+						<colspan>2</colspan>
+						<rowspan>3</rowspan>
+						<col>0</col>
+						<row>2</row>
+						<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+						<border>5</border>
+						<option>1</option>
+					</object>
+					<object class="sizeritem">
+						<object class="wxButton" name="ID_BUTTON_EDIT_UPDATE" variable="m_pbtnEditUpdate" member="yes">
+							<label>Update</label>
+							<handler function="OnbtnEditUpdateClick" entry="EVT_BUTTON" />
+						</object>
+						<col>2</col>
+						<row>2</row>
+						<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+						<border>5</border>
+						<option>1</option>
+					</object>
+					<object class="sizeritem">
+						<object class="wxButton" name="ID_BUTTON_EDIT_CANCEL" variable="m_pbtnEditCancel" member="yes">
+							<label>Cancel</label>
+							<handler function="OnbtnEditCancelClick" entry="EVT_BUTTON" />
+						</object>
+						<col>2</col>
+						<row>3</row>
+						<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+						<border>5</border>
+						<option>1</option>
+					</object>
+				</object>
+				<flag>wxALL|wxEXPAND</flag>
+				<border>2</border>
+			</object>
+		</object>
+	</object>
+</wxsmith>

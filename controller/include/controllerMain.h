@@ -26,6 +26,9 @@ class controllerDialog: public wxDialog
         controllerDialog(wxWindow* parent, const wxPoint pntLayout, unsigned int nController, const wxString& sIpAddress, unsigned short nPort, wxWindowID id = -1);
         virtual ~controllerDialog();
 
+
+
+
     private:
 
         //(*Handlers(controllerDialog)
@@ -98,8 +101,7 @@ class controllerDialog: public wxDialog
         static const wxColour CLR_ERROR;
         static const wxColour CLR_NO_FILE;
 
-        static const wxString STR_ENDPOINTS[9];
-        enum {CONFIG, FILES, FILE, PLAYLISTS, PLAYLIST, SCHEDULES, SCHEDULE, INFO, STATUS};
+
 };
 
 #endif // CONTROLLERMAIN_H

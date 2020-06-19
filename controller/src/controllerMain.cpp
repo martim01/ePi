@@ -16,6 +16,8 @@
 #include <sstream>
 #include <wx/dcbuffer.h>
 #include <wx/display.h>
+#include "dlgOptions.h"
+#include "constants.h"
 
 const wxColour controllerDialog::CLR_PLAYING = wxColour(146,208,80);
 const wxColour controllerDialog::CLR_IDLE = wxColour(141,180,226);
@@ -23,7 +25,7 @@ const wxColour controllerDialog::CLR_ERROR =  wxColour(255,0,0);
 const wxColour controllerDialog::CLR_NO_FILE = wxColour(160,160,160);
 const wxColour controllerDialog::CLR_CONNECTING = wxColour(255,255,0);
 
-const wxString controllerDialog::STR_ENDPOINTS[9] = {"config", "files", "file", "playlists", "playlist", "schedules", "schedule", "info", "status"};
+
 
 //(*InternalHeaders(controllerDialog)
 #include <wx/font.h>
@@ -264,7 +266,6 @@ void controllerDialog::ReplyFiles(const Json::Value& jsData)
     {
         m_sDefaultFileLabel = wxString::FromUTF8(jsData[0]["label"].asString().c_str());
         m_sDefaultFileUid = jsData[0]["uid"].asString();
-
    }
    else
    {
@@ -428,4 +429,9 @@ void controllerDialog::OntimerMenuTrigger(wxTimerEvent& event)
     m_bIgnoreUp = true;
     m_bDown = false;
     UpdateLabels();
+
+    dlgOptions aDlg(this, m_uiName.GetLabel(), m_sUrl, m_sDefaultFileUid, wxNewId(), wxPoint(0,0), wxSize(800,480));
+    aDlg.ShowModal();
+
+    m_rClient.Get((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString(), FILES);
 }

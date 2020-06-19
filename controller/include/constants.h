@@ -1,0 +1,7 @@
+#pragma once
+#include <wx/string.h>
+
+
+enum {CONFIG, FILES, PLAYLISTS, SCHEDULES, INFO, STATUS, POWER, UPDATE, FILE_GET, FILE_UPDATE, FILE_REPLACE, FILE_DELETE};
+
+extern const wxString STR_ENDPOINTS[8];

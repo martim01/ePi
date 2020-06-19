@@ -69,6 +69,9 @@ m_bLoop(false)
 {
     Connect(wxID_ANY, wxEVT_R_CONNECTION, (wxObjectEventFunction)&RestfulClient::OnConnectionEvent);
     Connect(wxID_ANY, wxEVT_R_FINISHED, (wxObjectEventFunction)&RestfulClient::OnFinishedEvent);
+
+    m_timerTask.SetOwner(this, wxNewId());
+    Connect(m_timerTask.GetId(), wxEVT_TIMER, (wxObjectEventFunction)&RestfulClient::OnTimerTask);
 }
 
 
@@ -86,6 +89,39 @@ bool RestfulClient::Get(const std::string& sEndpoint, int nUserId)
 bool RestfulClient::Patch(const std::string& sEndpoint, const char* pPostData, int nUserId)
 {
     m_qTasks.push({sEndpoint, pPostData, METHOD_PATCH, nUserId});
+
+    if(m_qTasks.size() == 1)
+    {
+        DoNextTask();
+    }
+    return true;
+}
+
+bool RestfulClient::Post(const std::string& sEndpoint, const char* pPostData, int nUserId)
+{
+    m_qTasks.push({sEndpoint, pPostData, METHOD_POST, nUserId});
+
+    if(m_qTasks.size() == 1)
+    {
+        DoNextTask();
+    }
+    return true;
+}
+
+bool RestfulClient::Put(const std::string& sEndpoint, const char* pPostData, int nUserId)
+{
+    m_qTasks.push({sEndpoint, pPostData, METHOD_PUT, nUserId});
+
+    if(m_qTasks.size() == 1)
+    {
+        DoNextTask();
+    }
+    return true;
+}
+
+bool RestfulClient::Delete(const std::string& sEndpoint,int nUserId)
+{
+    m_qTasks.push({sEndpoint, nullptr, METHOD_DELETE, nUserId});
 
     if(m_qTasks.size() == 1)
     {
@@ -122,6 +158,7 @@ void RestfulClient::DoNextTask()
 
 void RestfulClient::HandleEvent(mg_connection *pConnection, int nEvent, void* pData)
 {
+    wxLogDebug("RestfulClinet::Event: #%d", nEvent);
     switch(nEvent)
     {
         case MG_EV_CONNECT:
@@ -139,6 +176,7 @@ void RestfulClient::HandleEvent(mg_connection *pConnection, int nEvent, void* pD
 
 void RestfulClient::ConnectionEvent(int nStatus)
 {
+    wxLogDebug("ConnectionEvent: %d", nStatus);
     if(m_pHandler)
     {
         wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_R_CONNECTION);
@@ -149,10 +187,12 @@ void RestfulClient::ConnectionEvent(int nStatus)
 
 void RestfulClient::ReplyEvent(http_message* pMessage)
 {
+    wxLogDebug("ReplyEvent: %d", m_qTasks.front().nId);
+
     if(m_pHandler)
     {
         wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_R_REPLY);
-        pEvent->SetString(wxString::FromUTF8(pMessage->body.p));
+        pEvent->SetString(wxString::FromUTF8(pMessage->body.p, pMessage->body.len));
         pEvent->SetInt(m_qTasks.front().nId);
         wxQueueEvent(m_pHandler, pEvent);
     }
@@ -180,9 +220,14 @@ void RestfulClient::OnFinishedEvent(wxCommandEvent& event)
 {
     wxLogDebug("Finished");
     m_qTasks.pop();
+    m_timerTask.Start(250, true);
+}
+
+
+void RestfulClient::OnTimerTask(const wxTimerEvent& event)
+{
     if(m_qTasks.empty() == false)
     {
-        wxMilliSleep(100);
         DoNextTask();
     }
 }
