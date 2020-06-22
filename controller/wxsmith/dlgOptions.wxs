@@ -605,5 +605,9 @@
 				<option>1</option>
 			</object>
 		</object>
+		<object class="wxProgressDialog" name="ID_PROGRESSDIALOG1" variable="m_pdlgProgress" member="yes">
+			<title>ePi Controller</title>
+			<message></message>
+		</object>
 	</object>
 </wxsmith>

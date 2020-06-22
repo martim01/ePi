@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<wxsmith>
+	<object class="wxDialog" name="dlgUpload">
+		<bg>#000000</bg>
+		<pos_arg>1</pos_arg>
+		<size_arg>1</size_arg>
+		<style>wxNO_BORDER</style>
+		<object class="wxBoxSizer" variable="BoxSizer1" member="no">
+			<orient>wxVERTICAL</orient>
+			<object class="sizeritem">
+				<object class="wxStaticText" name="ID_STATICTEXT30" variable="m_pstHostname" member="yes">
+					<label></label>
+					<fg>#FFFFFF</fg>
+					<bg>#008040</bg>
+					<font>
+						<size>24</size>
+						<style>normal</style>
+						<weight>bold</weight>
+						<underlined>0</underlined>
+						<family>swiss</family>
+						<face>Arial</face>
+					</font>
+					<minsize>800,40</minsize>
+					<style>wxST_NO_AUTORESIZE</style>
+				</object>
+				<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+				<border>2</border>
+			</object>
+			<object class="spacer">
+				<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+				<border>5</border>
+				<option>1</option>
+			</object>
+			<object class="sizeritem">
+				<object class="wxStaticText" name="ID_STATICTEXT1" variable="m_pstDetails" member="yes">
+					<label></label>
+					<fg>#FFFFFF</fg>
+					<font>
+						<size>24</size>
+						<style>normal</style>
+						<weight>bold</weight>
+						<underlined>0</underlined>
+						<family>swiss</family>
+						<face>Arial</face>
+					</font>
+					<minsize>800,40</minsize>
+					<style>wxST_NO_AUTORESIZE</style>
+				</object>
+				<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+				<border>2</border>
+			</object>
+			<object class="sizeritem">
+				<object class="wxGauge" name="ID_GAUGE1" variable="m_pGuage" member="yes">
+					<size>-1,40</size>
+					<fg>#0080C0</fg>
+					<bg>#000000</bg>
+					<style>wxGA_SMOOTH</style>
+				</object>
+				<flag>wxLEFT|wxRIGHT|wxEXPAND</flag>
+				<border>20</border>
+			</object>
+			<object class="spacer">
+				<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+				<border>5</border>
+				<option>1</option>
+			</object>
+			<object class="sizeritem">
+				<object class="wxButton" name="ID_BUTTON_CANCEL" variable="m_pbtnCancel" member="yes">
+					<label>Cancel</label>
+				</object>
+				<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+				<border>5</border>
+			</object>
+		</object>
+	</object>
+</wxsmith>

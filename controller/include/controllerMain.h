@@ -79,6 +79,7 @@ class controllerDialog: public wxDialog
 
         wxString m_sWSEndpoint;
         wxString m_sUrl;
+        wxString m_sIpAddress;
 
         std::string m_sDefaultFileUid;
         wxString m_sDefaultFileLabel;

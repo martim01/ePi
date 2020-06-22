@@ -35,7 +35,7 @@ dlgEdit::dlgEdit(wxWindow* parent, const wxString& sHostname, const wxString& sL
 	wxFont thisFont(12,wxFONTFAMILY_SWISS,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL,false,_T("Arial"),wxFONTENCODING_DEFAULT);
 	SetFont(thisFont);
 	BoxSizer1 = new wxBoxSizer(wxVERTICAL);
-	m_pstHostname = new wxStaticText(this, ID_STATICTEXT30, _("Label"), wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxALIGN_CENTER, _T("ID_STATICTEXT30"));
+	m_pstHostname = new wxStaticText(this, ID_STATICTEXT30, _("Label"), wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE, _T("ID_STATICTEXT30"));
 	m_pstHostname->SetMinSize(wxSize(800,40));
 	m_pstHostname->SetForegroundColour(wxColour(255,255,255));
 	m_pstHostname->SetBackgroundColour(wxColour(0,128,64));

@@ -71,6 +71,7 @@ BEGIN_EVENT_TABLE(controllerDialog,wxDialog)
 END_EVENT_TABLE()
 
 controllerDialog::controllerDialog(wxWindow* parent,  const wxPoint pntLayout, unsigned int nController, const wxString& sIpAddress, unsigned short nPort, wxWindowID id) : m_wsClient(this), m_rClient(this),
+m_sIpAddress(sIpAddress),
 m_nConnected(DISCONNECTED),
 m_bPlaying(false),
 m_bCountUp(true),
@@ -122,9 +123,10 @@ m_bDown(false)
     SetBackgroundColour(wxColour(50,50,80));
     UpdateLabels();
 
+    m_sIpAddress.Printf("%s:%u", sIpAddress.c_str(), nPort);
 
-    m_sWSEndpoint.Printf("ws://%s:%u", sIpAddress.c_str(), nPort);
-    m_sUrl.Printf("http://%s:%u/x-epi/", sIpAddress.c_str(), nPort);
+    m_sWSEndpoint.Printf("ws://%s", m_sIpAddress.c_str());
+    m_sUrl.Printf("http://%s/x-epi/", m_sIpAddress.c_str());
 
     m_rClient.Get((m_sUrl+STR_ENDPOINTS[CONFIG]).ToStdString(), CONFIG);
     m_rClient.Get((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString(), FILES);
@@ -430,7 +432,7 @@ void controllerDialog::OntimerMenuTrigger(wxTimerEvent& event)
     m_bDown = false;
     UpdateLabels();
 
-    dlgOptions aDlg(this, m_uiName.GetLabel(), m_sUrl, m_sDefaultFileUid, wxNewId(), wxPoint(0,0), wxSize(800,480));
+    dlgOptions aDlg(this, m_uiName.GetLabel(), m_sIpAddress, m_sUrl, m_sDefaultFileUid, wxNewId(), wxPoint(0,0), wxSize(800,480));
     aDlg.ShowModal();
 
     m_rClient.Get((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString(), FILES);

@@ -10,6 +10,8 @@
 #include "epiwriter.h"
 #include <wx/msgdlg.h>
 #include "dlgUsb.h"
+#include <map>
+#include "dlgupload.h"
 
 //(*InternalHeaders(dlgOptions)
 #include <wx/font.h>
@@ -64,6 +66,7 @@ const long dlgOptions::ID_BUTTON_RESTART_OS = wxNewId();
 const long dlgOptions::ID_BUTTON_SHUTDOWN_OS = wxNewId();
 const long dlgOptions::ID_BUTTON_SSH = wxNewId();
 const long dlgOptions::ID_BUTTON_BACK = wxNewId();
+const long dlgOptions::ID_PROGRESSDIALOG1 = wxNewId();
 //*)
 
 BEGIN_EVENT_TABLE(dlgOptions,wxDialog)
@@ -71,10 +74,12 @@ BEGIN_EVENT_TABLE(dlgOptions,wxDialog)
 	//*)
 END_EVENT_TABLE()
 
-dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxString& sUrl, const std::string& sUid, wxWindowID id,const wxPoint& pos,const wxSize& size) :
+dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxString& sIpAddress, const wxString& sUrl, const std::string& sUid, wxWindowID id,const wxPoint& pos,const wxSize& size) :
+    m_sIpAddress(sIpAddress),
     m_sUrl(sUrl),
     m_sUid(sUid),
     m_client(this)
+
 {
 	//(*Initialize(dlgOptions)
 	wxBoxSizer* BoxSizer0;
@@ -353,8 +358,21 @@ void dlgOptions::OnbtnFileUpdateClick(wxCommandEvent& event)
 void dlgOptions::OnbtnReplaceClick(wxCommandEvent& event)
 {
     //@todo(martim01) Replace File
-    dlgUsb aDlg(this);
+    //dlgUsb aDlg(this);
+    //aDlg.ShowModal();
+
+
+    wxString sEndpoint("/x-epi/"+STR_ENDPOINTS[FILES]+"/");
+    sEndpoint += wxString::FromUTF8(m_sUid.c_str());
+
+
+    wxString sFilename="palace.wav";
+    wxString sFilepath = "C:\\Users\\marti\\Desktop\\Peter Hammill\\";
+
+    dlgUpload aDlg(this, m_sIpAddress, sEndpoint, sFilename, sFilepath);
     aDlg.ShowModal();
+    FileUpdateReply(aDlg.m_jsReply);
+
 }
 
 void dlgOptions::OnbtnDeleteClick(wxCommandEvent& event)
@@ -446,7 +464,7 @@ void dlgOptions::OnRestfulReply(const wxCommandEvent &event)
         case FILE_UPDATE:
             FileUpdateReply(jsValue);
         case FILE_REPLACE:
-            //@todo(martim01)
+            FileUpdateReply(jsValue);
             break;
         case FILE_DELETE:
             FileDeleteReply(jsValue);
@@ -622,3 +640,5 @@ void dlgOptions::PowerReply(const Json::Value& jsData)
         ShowError("Power command failed!", jsData);
     }
 }
+
+

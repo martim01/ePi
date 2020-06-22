@@ -5,6 +5,7 @@
 #include <wx/button.h>
 #include <wx/dialog.h>
 #include <wx/gbsizer.h>
+#include <wx/progdlg.h>
 #include <wx/sizer.h>
 #include <wx/statline.h>
 #include <wx/stattext.h>
@@ -12,12 +13,13 @@
 #include <string>
 #include "json/json.h"
 #include "restfulclient.h"
+#include "multipartupload.h"
 
 class dlgOptions: public wxDialog
 {
 	public:
 
-		dlgOptions(wxWindow* parent, const wxString& sHostname, const wxString& sUrl, const std::string& sUid, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
+		dlgOptions(wxWindow* parent, const wxString& sHostname, const wxString& sIpAddress, const wxString& sUrl, const std::string& sUid, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
 		virtual ~dlgOptions();
 
 		//(*Declarations(dlgOptions)
@@ -34,6 +36,7 @@ class dlgOptions: public wxDialog
 		wxButton* m_pbtnUpdateLauncher;
 		wxButton* m_pbtnUpdatePlayer3;
 		wxButton* m_pbtnUpdatePlayer67;
+		wxProgressDialog* m_pdlgProgress;
 		wxStaticLine* StaticLine1;
 		wxStaticLine* StaticLine2;
 		wxStaticText* StaticText10;
@@ -116,6 +119,7 @@ class dlgOptions: public wxDialog
 		static const long ID_BUTTON_SHUTDOWN_OS;
 		static const long ID_BUTTON_SSH;
 		static const long ID_BUTTON_BACK;
+		static const long ID_PROGRESSDIALOG1;
 		//*)
 
 	private:
@@ -152,9 +156,11 @@ class dlgOptions: public wxDialog
 
         void ShowError(wxString sMessage, const Json::Value& jsData);
 
+        wxString m_sIpAddress;
         wxString m_sUrl;
         std::string m_sUid;
         RestfulClient m_client;
+
 		DECLARE_EVENT_TABLE()
 };
 
