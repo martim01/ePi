@@ -1,4 +1,4 @@
-#include "RestfulClient.h"
+#include "restfulclient.h"
 #include <thread>
 #include <wx/log.h>
 #include "mongoose.h"
