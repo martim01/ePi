@@ -1,9 +1,11 @@
 #include "audiofile.h"
+#include "utils.h"
 
 AudioFile::AudioFile(const std::string& sType, const std::string& sPath, const std::string& sUid, const std::string& sLabel, const std::string& sDescription) :
 Resource(sType, sUid, sLabel, sDescription)
 {
     m_json["path"] = sPath;
+    m_json["file_modified"] = GetCurrentTimeAsIsoString();
 }
 
 AudioFile::AudioFile(const std::string& sType) : Resource(sType)
@@ -34,8 +36,11 @@ void AudioFile::InitJson()
 
 void AudioFile::UpdateJson(const Json::Value& jsData)
 {
-    //std::string sPath = m_json["path"].asString();
     Resource::UpdateJson(jsData);
-    //m_json["path"] = sPath;
-    //InitJson();
+}
+
+void AudioFile::FileModified()
+{
+    m_json["file_modified"] = GetCurrentTimeAsIsoString();
+    InitJson();
 }

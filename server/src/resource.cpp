@@ -1,5 +1,6 @@
 #include "resource.h"
 #include "utils.h"
+#include "jsonutils.h"
 
 Resource::Resource(const std::string& sType, const std::string& sUid, const std::string& sLabel, const std::string& sDescription) :
     m_sType(sType)
@@ -8,6 +9,7 @@ Resource::Resource(const std::string& sType, const std::string& sUid, const std:
     m_json["description"] = sDescription;
     m_json["uid"] = sUid;
     m_json["created"] = GetCurrentTimeAsIsoString();
+    m_json["modified"] = GetCurrentTimeAsIsoString();
     m_json["type"] = sType;
     m_json["locked"] = false;
 }
@@ -19,6 +21,7 @@ Resource::Resource(const std::string& sType) :
     m_json["description"] = "";
     m_json["uid"] = "";
     m_json["created"] = GetCurrentTimeAsIsoString();
+    m_json["modified"] = GetCurrentTimeAsIsoString();
     m_json["type"] = "";
     m_json["locked"] = false;
 }
@@ -28,6 +31,7 @@ m_json(jsData)
 {
     m_json["uid"] = sUid;
     m_json["created"] = GetCurrentTimeAsIsoString();
+    m_json["modified"] = GetCurrentTimeAsIsoString();
     m_json["type"] = sType;
     m_json["locked"] = false;
 }
@@ -62,24 +66,7 @@ std::string Resource::GetLabel() const
 void Resource::UpdateJson(const Json::Value& jsData)
 {
     UpdateJsonObject(m_json, jsData);
-
-    /*
-    //store the bits that aren't updated
-    std::string sUid = m_json["uid"].asString();
-    std::string sCreated = m_json["created"].asString();
-    std::string sType = m_json["type"].asString();
-    bool bLocked = m_json["locked"].asBool();
-
-    //store the new json data
-    m_json = jsData;
-
-    //now put them back
-    m_json["uid"] = sUid;
-    m_json["created"] = sCreated;
-    m_json["type"] = sType;
-    m_json["locked"] = bLocked;
     m_json["modified"] = GetCurrentTimeAsIsoString();
-    */
 }
 
 void Resource::Lock(bool bLock)

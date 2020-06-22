@@ -276,10 +276,12 @@ response ResourceManager::ModifyFile(const std::string& sUid, const Json::Value&
                 src.close();
                 remove(jsData["multipart"]["files"]["file"].asString().c_str());
 
-                itFile->second->InitJson();
+
+                itFile->second->FileModified();
                 theResponse.nHttpCode = 200;
                 theResponse.jsonData = itFile->second->GetJson();
                 theResponse.jsonData["result"] = true;
+
                 SaveResources();
             }
         }
@@ -323,7 +325,7 @@ response ResourceManager::ModifyFileMeta(const std::string& sUid, const Json::Va
 
         if(theResponse.nHttpCode == 200)
         {
-            if(FileExists(jsData["label"].asString(), jsData["uid"].asString()))
+            if(FileExists(jsData["label"].asString(), sUid))
             {
                 theResponse.nHttpCode = 409;
                 theResponse.jsonData["result"] = false;
@@ -334,7 +336,9 @@ response ResourceManager::ModifyFileMeta(const std::string& sUid, const Json::Va
             {
                 itFile->second->UpdateJson(jsData);
                 itFile->second->InitJson();
+                theResponse.jsonData = itFile->second->GetJson();
                 theResponse.jsonData["result"] = true;
+
                 pml::Log::Get() << "success" << std::endl;
                 SaveResources();
             }
@@ -382,7 +386,9 @@ response ResourceManager::ModifySchedule(const std::string& sUid, const Json::Va
             else
             {
                 itSchedule->second->UpdateJson(jsData);
+                theResponse.jsonData= itSchedule->second->GetJson();
                 theResponse.jsonData["result"] = true;
+
                 pml::Log::Get() << "success" << std::endl;
                 SaveResources();
             }
@@ -431,7 +437,9 @@ response ResourceManager::ModifyPlaylist(const std::string& sUid, const Json::Va
             {
                 pml::Log::Get(pml::Log::LOG_DEBUG) << jsData << std::endl;
                 itPlaylist->second->UpdateJson(jsData);
+                theResponse.jsonData = itPlaylist->second->GetJson();
                 theResponse.jsonData["result"] = true;
+
                 pml::Log::Get() << "success" << std::endl;
                 SaveResources();
             }
@@ -474,7 +482,7 @@ response ResourceManager::DeleteFile(const std::string& sUid)
             theResponse.nHttpCode = 423;
             theResponse.jsonData["result"] = false;
             theResponse.jsonData["reason"].append("File with uid '"+sUid+"' is referenced by one or more playlists or schedules.");
-            theResponse.jsonData["reason"].append(contains.jsonData);
+            theResponse.jsonData["details"].append(contains.jsonData);
             pml::Log::Get(pml::Log::LOG_ERROR) << "failed - file '" << sUid << "' is referenced by one or more playlists or schedules" << std::endl;
         }
         else

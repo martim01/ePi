@@ -18,6 +18,7 @@
 #include <unistd.h>
 #include <linux/reboot.h>
 #include <sys/reboot.h>
+#include "jsonutils.h"
 
 using namespace std::placeholders;
 using namespace pml;

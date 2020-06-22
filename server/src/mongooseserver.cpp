@@ -350,6 +350,12 @@ void MongooseServer::ClearMultipartData()
 bool MongooseServer::MultipartBegin(mg_connection* pConnection, http_message* pMessage)
 {
     Log::Get(Log::LOG_INFO) << "Starting upload" << endl;
+
+    if(pMessage->message.len > 0)
+    {
+        Log::Get() << string(pMessage->message.p) << endl;
+    }
+
     string sUri;
     sUri.assign(pMessage->uri.p, pMessage->uri.len);
     string sMethod(pMessage->method.p);
@@ -376,6 +382,7 @@ bool MongooseServer::MultipartBegin(mg_connection* pConnection, http_message* pM
 bool MongooseServer::PartBegin(mg_connection* pConnection, mg_http_multipart_part* pPart)
 {
     Log::Get() << "MongooseServer\tPartBegin: '" << pPart->file_name << "' '" << pPart->var_name << "' " << std::endl;
+
     if(std::string(pPart->file_name) != "")
     {
         auto pairFile = m_multipartData.mFiles.insert(std::make_pair(std::string(pPart->var_name), "/tmp/"+CreateGuid()));
