@@ -80,6 +80,7 @@
 		<Unit filename="../common/include/epicron.h" />
 		<Unit filename="../common/include/inimanager.h" />
 		<Unit filename="../common/include/inisection.h" />
+		<Unit filename="../common/include/jsonutils.h" />
 		<Unit filename="../common/include/logtofile.h" />
 		<Unit filename="../common/include/mongoose.h" />
 		<Unit filename="../common/include/namedtype.h" />
@@ -87,6 +88,7 @@
 		<Unit filename="../common/src/epicron.cpp" />
 		<Unit filename="../common/src/inimanager.cpp" />
 		<Unit filename="../common/src/inisection.cpp" />
+		<Unit filename="../common/src/jsonutils.cpp" />
 		<Unit filename="../common/src/logtofile.cpp" />
 		<Unit filename="../common/src/mongoose.c">
 			<Option compilerVar="CC" />
