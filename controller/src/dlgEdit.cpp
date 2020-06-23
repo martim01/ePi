@@ -46,19 +46,23 @@ dlgEdit::dlgEdit(wxWindow* parent, const wxString& sHostname, const wxString& sL
 	StaticText1 = new wxStaticText(this, ID_STATICTEXT1, _("Label:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT1"));
 	StaticText1->SetForegroundColour(wxColour(255,255,255));
 	GridBagSizer1->Add(StaticText1, wxGBPosition(0, 0), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
-	m_pedtLabel = new wxTextCtrl(this, ID_TEXTCTRL1, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_TEXTCTRL1"));
+	m_pedtLabel = new wmEdit(this, ID_TEXTCTRL1, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_TEXTCTRL1"));
+	m_pedtLabel->SetValidation(0);
+	m_pedtLabel->SetBorderStyle(0,0);
 	GridBagSizer1->Add(m_pedtLabel, wxGBPosition(0, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
 	StaticText2 = new wxStaticText(this, ID_STATICTEXT2, _("Description:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT2"));
 	StaticText2->SetForegroundColour(wxColour(255,255,255));
 	GridBagSizer1->Add(StaticText2, wxGBPosition(1, 0), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
-	m_pedtDescription = new wxTextCtrl(this, ID_TEXTCTRL2, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER|wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL2"));
+	m_pedtDescription = new wmEdit(this, ID_TEXTCTRL2, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator, _T("ID_TEXTCTRL2"));
+	m_pedtDescription->SetValidation(0);
+	m_pedtDescription->SetBorderStyle(0,0);
 	GridBagSizer1->Add(m_pedtDescription, wxGBPosition(1, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
 	m_pKbd1 = new wmKeyboard(this, ID_M_PKBD1, wxDefaultPosition, wxDefaultSize, 0, 0);
 	m_pKbd1->SetForegroundColour(wxColour(255,255,255));
 	GridBagSizer1->Add(m_pKbd1, wxGBPosition(2, 0), wxGBSpan(3, 2), wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-	m_pbtnEditUpdate = new wxButton(this, ID_BUTTON_EDIT_UPDATE, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_EDIT_UPDATE"));
+	m_pbtnEditUpdate = new wmButton(this, ID_BUTTON_EDIT_UPDATE, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_EDIT_UPDATE"));
 	GridBagSizer1->Add(m_pbtnEditUpdate, wxGBPosition(2, 2), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-	m_pbtnEditCancel = new wxButton(this, ID_BUTTON_EDIT_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_EDIT_CANCEL"));
+	m_pbtnEditCancel = new wmButton(this, ID_BUTTON_EDIT_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_EDIT_CANCEL"));
 	GridBagSizer1->Add(m_pbtnEditCancel, wxGBPosition(3, 2), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
 	BoxSizer1->Add(GridBagSizer1, 0, wxALL|wxEXPAND, 2);
 	SetSizer(BoxSizer1);
@@ -79,6 +83,7 @@ dlgEdit::dlgEdit(wxWindow* parent, const wxString& sHostname, const wxString& sL
     m_pbtnEditUpdate->Enable((m_pedtLabel->GetValue().empty() == false && m_pedtDescription->GetValue().empty() == false));
 
     m_pedtLabel->SetFocus();
+
 }
 
 dlgEdit::~dlgEdit()

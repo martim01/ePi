@@ -13,7 +13,8 @@
 //(*IdInit(dlgUpload)
 const long dlgUpload::ID_STATICTEXT30 = wxNewId();
 const long dlgUpload::ID_STATICTEXT1 = wxNewId();
-const long dlgUpload::ID_GAUGE1 = wxNewId();
+const long dlgUpload::ID_CUSTOM1 = wxNewId();
+const long dlgUpload::ID_STATICTEXT2 = wxNewId();
 const long dlgUpload::ID_BUTTON_CANCEL = wxNewId();
 //*)
 
@@ -22,7 +23,7 @@ BEGIN_EVENT_TABLE(dlgUpload,wxDialog)
 	//*)
 END_EVENT_TABLE()
 
-dlgUpload::dlgUpload(wxWindow* parent, const wxString& sIpAddress, const wxString& sEndpoint, const wxString& sFilename, const wxString& sFilepath, wxWindowID id,const wxPoint& pos,const wxSize& size) : m_upload(this),
+dlgUpload::dlgUpload(wxWindow* parent, const wxString& sHostname, const wxString& sIpAddress, const wxString& sEndpoint, const wxString& sFilename, const wxString& sFilepath, wxWindowID id,const wxPoint& pos,const wxSize& size) : m_upload(this),
     m_sIpAddress(sIpAddress),
     m_sEndpoint(sEndpoint),
     m_sFilename(sFilename),
@@ -43,31 +44,44 @@ dlgUpload::dlgUpload(wxWindow* parent, const wxString& sIpAddress, const wxStrin
 	wxFont m_pstHostnameFont(24,wxFONTFAMILY_SWISS,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_BOLD,false,_T("Arial"),wxFONTENCODING_DEFAULT);
 	m_pstHostname->SetFont(m_pstHostnameFont);
 	BoxSizer1->Add(m_pstHostname, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
-	BoxSizer1->Add(0,0,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+	BoxSizer1->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
 	m_pstDetails = new wxStaticText(this, ID_STATICTEXT1, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxALIGN_CENTER, _T("ID_STATICTEXT1"));
 	m_pstDetails->SetMinSize(wxSize(800,40));
 	m_pstDetails->SetForegroundColour(wxColour(255,255,255));
 	wxFont m_pstDetailsFont(24,wxFONTFAMILY_SWISS,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_BOLD,false,_T("Arial"),wxFONTENCODING_DEFAULT);
 	m_pstDetails->SetFont(m_pstDetailsFont);
 	BoxSizer1->Add(m_pstDetails, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
-	m_pGuage = new wxGauge(this, ID_GAUGE1, 100, wxDefaultPosition, wxSize(-1,40), wxGA_SMOOTH, wxDefaultValidator, _T("ID_GAUGE1"));
-	m_pGuage->SetForegroundColour(wxColour(0,128,192));
-	m_pGuage->SetBackgroundColour(wxColour(0,0,0));
+	m_pGuage = new Progress(this,ID_CUSTOM1,wxDefaultPosition,wxDefaultSize,0);
 	BoxSizer1->Add(m_pGuage, 0, wxLEFT|wxRIGHT|wxEXPAND, 20);
-	BoxSizer1->Add(0,0,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-	m_pbtnCancel = new wxButton(this, ID_BUTTON_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_CANCEL"));
+	m_pstProgress = new wxStaticText(this, ID_STATICTEXT2, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxALIGN_CENTER, _T("ID_STATICTEXT2"));
+	m_pstProgress->SetMinSize(wxSize(800,40));
+	m_pstProgress->SetForegroundColour(wxColour(0,152,230));
+	wxFont m_pstProgressFont(14,wxFONTFAMILY_SWISS,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL,false,_T("Arial"),wxFONTENCODING_DEFAULT);
+	m_pstProgress->SetFont(m_pstProgressFont);
+	BoxSizer1->Add(m_pstProgress, 0, wxALL|wxEXPAND, 0);
+	BoxSizer1->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+	m_pbtnCancel = new wmButton(this, ID_BUTTON_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_CANCEL"));
 	BoxSizer1->Add(m_pbtnCancel, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
 	SetSizer(BoxSizer1);
 	BoxSizer1->Fit(this);
 	BoxSizer1->SetSizeHints(this);
+
+	Connect(ID_BUTTON_CANCEL,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgUpload::OnbtnCancelClick);
 	//*)
+	//Connect(ID_BUTTON_CANCEL,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgUpload::OnbtnCancelClick);
+
+    m_pstHostname->SetLabel(sHostname);
+    m_pstDetails->SetForegroundColour(wxColour(0,152,230));
+	m_pGuage->SetBackgroundColour(*wxBLACK);
+	m_pGuage->SetForegroundColour(wxColour(0,152,230));
+
 	SetSize(800,480);
 	SetPosition(wxPoint(0,0));
 
 	Connect(wxID_ANY, wxEVT_R_REPLY, (wxObjectEventFunction)&dlgUpload::OnReply);
 	Connect(wxID_ANY, wxEVT_R_PROGRESS, (wxObjectEventFunction)&dlgUpload::OnProgress);
 
-	m_pstDetails->SetLabel(wxString::Format("Uploading %s...", m_sFilename.c_str()));
+	m_pstDetails->SetLabel(wxString::Format("Uploading '%s'...", m_sFilename.c_str()));
 }
 
 int dlgUpload::ShowModal()
@@ -78,7 +92,7 @@ int dlgUpload::ShowModal()
 
     m_upload.Put(m_sIpAddress.ToStdString(), m_sEndpoint.ToStdString(), mData, mFiles, 0);
 
-    wxDialog::ShowModal();
+    return wxDialog::ShowModal();
 }
 
 dlgUpload::~dlgUpload()
@@ -110,4 +124,5 @@ void dlgUpload::OnReply(const wxCommandEvent& event)
 void dlgUpload::OnProgress(const wxCommandEvent& event)
 {
     m_pGuage->SetValue(event.GetInt());
+    m_pstProgress->SetLabel(wxString::Format("%03d%%", event.GetInt()));
 }

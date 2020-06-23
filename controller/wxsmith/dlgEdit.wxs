@@ -47,7 +47,7 @@
 						<border>2</border>
 					</object>
 					<object class="sizeritem">
-						<object class="wxTextCtrl" name="ID_TEXTCTRL1" variable="m_pedtLabel" member="yes" />
+						<object class="wmEdit" name="ID_TEXTCTRL1" variable="m_pedtLabel" member="yes" />
 						<col>1</col>
 						<row>0</row>
 						<flag>wxALL|wxEXPAND</flag>
@@ -65,7 +65,7 @@
 						<border>2</border>
 					</object>
 					<object class="sizeritem">
-						<object class="wxTextCtrl" name="ID_TEXTCTRL2" variable="m_pedtDescription" member="yes">
+						<object class="wmEdit" name="ID_TEXTCTRL2" variable="m_pedtDescription" member="yes">
 							<style>wxTE_PROCESS_ENTER|wxTE_MULTILINE</style>
 						</object>
 						<col>1</col>
@@ -87,7 +87,7 @@
 						<option>1</option>
 					</object>
 					<object class="sizeritem">
-						<object class="wxButton" name="ID_BUTTON_EDIT_UPDATE" variable="m_pbtnEditUpdate" member="yes">
+						<object class="wmButton" name="ID_BUTTON_EDIT_UPDATE" variable="m_pbtnEditUpdate" member="yes">
 							<label>Update</label>
 							<handler function="OnbtnEditUpdateClick" entry="EVT_BUTTON" />
 						</object>
@@ -98,7 +98,7 @@
 						<option>1</option>
 					</object>
 					<object class="sizeritem">
-						<object class="wxButton" name="ID_BUTTON_EDIT_CANCEL" variable="m_pbtnEditCancel" member="yes">
+						<object class="wmButton" name="ID_BUTTON_EDIT_CANCEL" variable="m_pbtnEditCancel" member="yes">
 							<label>Cancel</label>
 							<handler function="OnbtnEditCancelClick" entry="EVT_BUTTON" />
 						</object>

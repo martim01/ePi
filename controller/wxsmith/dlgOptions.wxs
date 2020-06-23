@@ -116,7 +116,7 @@
 												<option>1</option>
 											</object>
 											<object class="sizeritem">
-												<object class="wxButton" name="ID_BUTTON_UPDATE" variable="m_pbtnUpdate" member="yes">
+												<object class="wmButton" name="ID_BUTTON_UPDATE" variable="m_pbtnUpdate" member="yes">
 													<label>Update</label>
 													<handler function="OnbtnFileUpdateClick" entry="EVT_BUTTON" />
 												</object>
@@ -305,7 +305,7 @@
 									<object class="sizeritem">
 										<object class="wxBoxSizer" variable="BoxSizer2" member="no">
 											<object class="sizeritem">
-												<object class="wxButton" name="ID_BUTTON_REPLACE" variable="m_pbtnReplace" member="yes">
+												<object class="wmButton" name="ID_BUTTON_REPLACE" variable="m_pbtnReplace" member="yes">
 													<label>Replace</label>
 													<handler function="OnbtnReplaceClick" entry="EVT_BUTTON" />
 												</object>
@@ -319,7 +319,7 @@
 												<option>1</option>
 											</object>
 											<object class="sizeritem">
-												<object class="wxButton" name="ID_BUTTON_DELETE" variable="m_pbtnDelete" member="yes">
+												<object class="wmButton" name="ID_BUTTON_DELETE" variable="m_pbtnDelete" member="yes">
 													<label>Delete</label>
 													<handler function="OnbtnDeleteClick" entry="EVT_BUTTON" />
 												</object>
@@ -365,7 +365,7 @@
 												<option>1</option>
 											</object>
 											<object class="sizeritem">
-												<object class="wxButton" name="ID_BUTTON_UPDATE_EPISERVER" variable="m_pbtnUpdateEpiServer" member="yes">
+												<object class="wmButton" name="ID_BUTTON_UPDATE_EPISERVER" variable="m_pbtnUpdateEpiServer" member="yes">
 													<label>Update</label>
 													<handler function="OnbtnUpdateEpiServerClick" entry="EVT_BUTTON" />
 												</object>
@@ -400,7 +400,7 @@
 												<option>1</option>
 											</object>
 											<object class="sizeritem">
-												<object class="wxButton" name="ID_BUTTON_UPDATE_PLAYER3" variable="m_pbtnUpdatePlayer3" member="yes">
+												<object class="wmButton" name="ID_BUTTON_UPDATE_PLAYER3" variable="m_pbtnUpdatePlayer3" member="yes">
 													<label>Update</label>
 													<handler function="OnbtnUpdatePlayer3Click" entry="EVT_BUTTON" />
 												</object>
@@ -436,7 +436,7 @@
 												<option>1</option>
 											</object>
 											<object class="sizeritem">
-												<object class="wxButton" name="ID_BUTTON_UPDATE_PLAYER67" variable="m_pbtnUpdatePlayer67" member="yes">
+												<object class="wmButton" name="ID_BUTTON_UPDATE_PLAYER67" variable="m_pbtnUpdatePlayer67" member="yes">
 													<label>Update</label>
 													<handler function="OnbtnUpdatePlayer67Click" entry="EVT_BUTTON" />
 												</object>
@@ -471,7 +471,7 @@
 												<option>1</option>
 											</object>
 											<object class="sizeritem">
-												<object class="wxButton" name="ID_BUTTON_UPDATE_CONTROLLER" variable="m_pbtnUpdateController" member="yes">
+												<object class="wmButton" name="ID_BUTTON_UPDATE_CONTROLLER" variable="m_pbtnUpdateController" member="yes">
 													<label>Update</label>
 													<handler function="OnbtnUpdateControllerClick" entry="EVT_BUTTON" />
 												</object>
@@ -507,7 +507,7 @@
 												<option>1</option>
 											</object>
 											<object class="sizeritem">
-												<object class="wxButton" name="ID_BUTTON_UPDATE_LAUNCHER" variable="m_pbtnUpdateLauncher" member="yes">
+												<object class="wmButton" name="ID_BUTTON_UPDATE_LAUNCHER" variable="m_pbtnUpdateLauncher" member="yes">
 													<label>Update</label>
 													<handler function="OnbtnUpdateLauncherClick" entry="EVT_BUTTON" />
 												</object>
@@ -532,7 +532,7 @@
 						<object class="wxStaticBoxSizer" variable="StaticBoxSizer3" member="no">
 							<orient>wxVERTICAL</orient>
 							<object class="sizeritem">
-								<object class="wxButton" name="ID_BUTTON_RESTART_SERVER" variable="m_pbtnRestartServer" member="yes">
+								<object class="wmButton" name="ID_BUTTON_RESTART_SERVER" variable="m_pbtnRestartServer" member="yes">
 									<label>Restart Server</label>
 									<fg>#FFFFFF</fg>
 									<bg>#800000</bg>
@@ -543,7 +543,7 @@
 								<option>1</option>
 							</object>
 							<object class="sizeritem">
-								<object class="wxButton" name="ID_BUTTON_RESTART_OS" variable="m_pbtnRestartOS" member="yes">
+								<object class="wmButton" name="ID_BUTTON_RESTART_OS" variable="m_pbtnRestartOS" member="yes">
 									<label>Restart OS</label>
 									<fg>#FFFFFF</fg>
 									<bg>#800000</bg>
@@ -554,7 +554,7 @@
 								<option>1</option>
 							</object>
 							<object class="sizeritem">
-								<object class="wxButton" name="ID_BUTTON_SHUTDOWN_OS" variable="m_pbtnShutdownOS" member="yes">
+								<object class="wmButton" name="ID_BUTTON_SHUTDOWN_OS" variable="m_pbtnShutdownOS" member="yes">
 									<label>Shutdown OS</label>
 									<fg>#FFFFFF</fg>
 									<bg>#800000</bg>
@@ -570,7 +570,7 @@
 								<option>2</option>
 							</object>
 							<object class="sizeritem">
-								<object class="wxButton" name="ID_BUTTON_SSH" variable="m_pbtnSSH" member="yes">
+								<object class="wmButton" name="ID_BUTTON_SSH" variable="m_pbtnSSH" member="yes">
 									<label>SSH</label>
 									<fg>#FFFFFF</fg>
 									<bg>#44019E</bg>
@@ -586,7 +586,7 @@
 								<option>1</option>
 							</object>
 							<object class="sizeritem">
-								<object class="wxButton" name="ID_BUTTON_BACK" variable="m_pbtnBack" member="yes">
+								<object class="wmButton" name="ID_BUTTON_BACK" variable="m_pbtnBack" member="yes">
 									<label>Back</label>
 									<fg>#FFFFFF</fg>
 									<bg>#008000</bg>

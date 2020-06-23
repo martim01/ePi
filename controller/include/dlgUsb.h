@@ -2,8 +2,8 @@
 #define DLGUSB_H
 
 //(*Headers(dlgUsb)
+#include "wmbutton.h"
 #include "wmlist.h"
-#include <wx/button.h>
 #include <wx/dialog.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
@@ -17,9 +17,9 @@ class dlgUsb: public wxDialog
 		virtual ~dlgUsb();
 
 		//(*Declarations(dlgUsb)
+		wmButton* m_pbtnCancel;
+		wmButton* m_pbtnUpload;
 		wmList* m_pLst1;
-		wxButton* m_pbtnCancel;
-		wxButton* m_pbtnUpload;
 		wxStaticText* m_pstHostname;
 		//*)
 

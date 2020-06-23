@@ -134,7 +134,7 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	m_pstDescription->SetForegroundColour(wxColour(0,0,0));
 	m_pstDescription->SetBackgroundColour(wxColour(255,255,255));
 	GridBagSizer1->Add(m_pstDescription, wxGBPosition(2, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
-	m_pbtnUpdate = new wxButton(this, ID_BUTTON_UPDATE, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE"));
+	m_pbtnUpdate = new wmButton(this, ID_BUTTON_UPDATE, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE"));
 	GridBagSizer1->Add(m_pbtnUpdate, wxGBPosition(1, 2), wxGBSpan(2, 1), wxALL, 2);
 	StaticText5 = new wxStaticText(this, ID_STATICTEXT7, _("Created:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT7"));
 	StaticText5->SetForegroundColour(wxColour(255,255,255));
@@ -190,10 +190,10 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	StaticLine2 = new wxStaticLine(this, ID_STATICLINE2, wxDefaultPosition, wxSize(10,-1), wxLI_HORIZONTAL, _T("ID_STATICLINE2"));
 	StaticBoxSizer1->Add(StaticLine2, 0, wxALL|wxEXPAND, 2);
 	BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
-	m_pbtnReplace = new wxButton(this, ID_BUTTON_REPLACE, _("Replace"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_REPLACE"));
+	m_pbtnReplace = new wmButton(this, ID_BUTTON_REPLACE, _("Replace"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_REPLACE"));
 	BoxSizer2->Add(m_pbtnReplace, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
 	BoxSizer2->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
-	m_pbtnDelete = new wxButton(this, ID_BUTTON_DELETE, _("Delete"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_DELETE"));
+	m_pbtnDelete = new wmButton(this, ID_BUTTON_DELETE, _("Delete"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_DELETE"));
 	BoxSizer2->Add(m_pbtnDelete, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
 	StaticBoxSizer1->Add(BoxSizer2, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 0);
 	BoxSizer1->Add(StaticBoxSizer1, 1, wxLEFT|wxEXPAND, 5);
@@ -207,7 +207,7 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	m_pstVersionEpiServer->SetForegroundColour(wxColour(0,0,0));
 	m_pstVersionEpiServer->SetBackgroundColour(wxColour(255,255,255));
 	GridBagSizer3->Add(m_pstVersionEpiServer, wxGBPosition(0, 1), wxDefaultSpan, wxALL|wxALIGN_CENTER_VERTICAL, 2);
-	m_pbtnUpdateEpiServer = new wxButton(this, ID_BUTTON_UPDATE_EPISERVER, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_EPISERVER"));
+	m_pbtnUpdateEpiServer = new wmButton(this, ID_BUTTON_UPDATE_EPISERVER, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_EPISERVER"));
 	GridBagSizer3->Add(m_pbtnUpdateEpiServer, wxGBPosition(0, 2), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
 	StaticText13 = new wxStaticText(this, ID_STATICTEXT21, _("player3:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT21"));
 	StaticText13->SetForegroundColour(wxColour(255,0,128));
@@ -217,7 +217,7 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	m_pstVersionPlayer3->SetForegroundColour(wxColour(0,0,0));
 	m_pstVersionPlayer3->SetBackgroundColour(wxColour(255,255,255));
 	GridBagSizer3->Add(m_pstVersionPlayer3, wxGBPosition(1, 1), wxDefaultSpan, wxALL|wxALIGN_CENTER_VERTICAL, 2);
-	m_pbtnUpdatePlayer3 = new wxButton(this, ID_BUTTON_UPDATE_PLAYER3, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_PLAYER3"));
+	m_pbtnUpdatePlayer3 = new wmButton(this, ID_BUTTON_UPDATE_PLAYER3, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_PLAYER3"));
 	GridBagSizer3->Add(m_pbtnUpdatePlayer3, wxGBPosition(1, 2), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
 	StaticText14 = new wxStaticText(this, ID_STATICTEXT22, _("player67:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT22"));
 	StaticText14->SetForegroundColour(wxColour(255,0,128));
@@ -227,7 +227,7 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	m_pstVersionPlayer67->SetForegroundColour(wxColour(0,0,0));
 	m_pstVersionPlayer67->SetBackgroundColour(wxColour(255,255,255));
 	GridBagSizer3->Add(m_pstVersionPlayer67, wxGBPosition(1, 4), wxDefaultSpan, wxALL|wxALIGN_CENTER_VERTICAL, 2);
-	m_pbtnUpdatePlayer67 = new wxButton(this, ID_BUTTON_UPDATE_PLAYER67, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_PLAYER67"));
+	m_pbtnUpdatePlayer67 = new wmButton(this, ID_BUTTON_UPDATE_PLAYER67, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_PLAYER67"));
 	GridBagSizer3->Add(m_pbtnUpdatePlayer67, wxGBPosition(1, 5), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
 	StaticText15 = new wxStaticText(this, ID_STATICTEXT23, _("controller:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT23"));
 	StaticText15->SetForegroundColour(wxColour(255,0,128));
@@ -237,7 +237,7 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	m_pstVersionController->SetForegroundColour(wxColour(0,0,0));
 	m_pstVersionController->SetBackgroundColour(wxColour(255,255,255));
 	GridBagSizer3->Add(m_pstVersionController, wxGBPosition(2, 1), wxDefaultSpan, wxALL|wxALIGN_CENTER_VERTICAL, 2);
-	m_pbtnUpdateController = new wxButton(this, ID_BUTTON_UPDATE_CONTROLLER, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_CONTROLLER"));
+	m_pbtnUpdateController = new wmButton(this, ID_BUTTON_UPDATE_CONTROLLER, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_CONTROLLER"));
 	GridBagSizer3->Add(m_pbtnUpdateController, wxGBPosition(2, 2), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
 	StaticText16 = new wxStaticText(this, ID_STATICTEXT24, _("launcher:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT24"));
 	StaticText16->SetForegroundColour(wxColour(255,0,128));
@@ -247,31 +247,31 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	m_pstVersionLauncher->SetForegroundColour(wxColour(0,0,0));
 	m_pstVersionLauncher->SetBackgroundColour(wxColour(255,255,255));
 	GridBagSizer3->Add(m_pstVersionLauncher, wxGBPosition(2, 4), wxDefaultSpan, wxALL|wxALIGN_CENTER_VERTICAL, 2);
-	m_pbtnUpdateLauncher = new wxButton(this, ID_BUTTON_UPDATE_LAUNCHER, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_LAUNCHER"));
+	m_pbtnUpdateLauncher = new wmButton(this, ID_BUTTON_UPDATE_LAUNCHER, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_LAUNCHER"));
 	GridBagSizer3->Add(m_pbtnUpdateLauncher, wxGBPosition(2, 5), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
 	StaticBoxSizer2->Add(GridBagSizer3, 1, wxALL|wxEXPAND, 0);
 	BoxSizer1->Add(StaticBoxSizer2, 0, wxBOTTOM|wxLEFT|wxEXPAND, 5);
 	BoxSizer3->Add(BoxSizer1, 1, wxALL|wxEXPAND, 0);
 	StaticBoxSizer3 = new wxStaticBoxSizer(wxVERTICAL, this, wxEmptyString);
-	m_pbtnRestartServer = new wxButton(this, ID_BUTTON_RESTART_SERVER, _("Restart Server"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_RESTART_SERVER"));
+	m_pbtnRestartServer = new wmButton(this, ID_BUTTON_RESTART_SERVER, _("Restart Server"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_RESTART_SERVER"));
 	m_pbtnRestartServer->SetForegroundColour(wxColour(255,255,255));
 	m_pbtnRestartServer->SetBackgroundColour(wxColour(128,0,0));
 	StaticBoxSizer3->Add(m_pbtnRestartServer, 1, wxALL|wxEXPAND, 5);
-	m_pbtnRestartOS = new wxButton(this, ID_BUTTON_RESTART_OS, _("Restart OS"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_RESTART_OS"));
+	m_pbtnRestartOS = new wmButton(this, ID_BUTTON_RESTART_OS, _("Restart OS"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_RESTART_OS"));
 	m_pbtnRestartOS->SetForegroundColour(wxColour(255,255,255));
 	m_pbtnRestartOS->SetBackgroundColour(wxColour(128,0,0));
 	StaticBoxSizer3->Add(m_pbtnRestartOS, 1, wxALL|wxEXPAND, 5);
-	m_pbtnShutdownOS = new wxButton(this, ID_BUTTON_SHUTDOWN_OS, _("Shutdown OS"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_SHUTDOWN_OS"));
+	m_pbtnShutdownOS = new wmButton(this, ID_BUTTON_SHUTDOWN_OS, _("Shutdown OS"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_SHUTDOWN_OS"));
 	m_pbtnShutdownOS->SetForegroundColour(wxColour(255,255,255));
 	m_pbtnShutdownOS->SetBackgroundColour(wxColour(128,0,0));
 	StaticBoxSizer3->Add(m_pbtnShutdownOS, 1, wxALL|wxEXPAND, 5);
 	StaticBoxSizer3->Add(-1,-1,2, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-	m_pbtnSSH = new wxButton(this, ID_BUTTON_SSH, _("SSH"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_SSH"));
+	m_pbtnSSH = new wmButton(this, ID_BUTTON_SSH, _("SSH"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_SSH"));
 	m_pbtnSSH->SetForegroundColour(wxColour(255,255,255));
 	m_pbtnSSH->SetBackgroundColour(wxColour(68,1,158));
 	StaticBoxSizer3->Add(m_pbtnSSH, 1, wxALL|wxEXPAND, 5);
 	StaticBoxSizer3->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-	m_pbtnBack = new wxButton(this, ID_BUTTON_BACK, _("Back"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_BACK"));
+	m_pbtnBack = new wmButton(this, ID_BUTTON_BACK, _("Back"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_BACK"));
 	m_pbtnBack->SetForegroundColour(wxColour(255,255,255));
 	m_pbtnBack->SetBackgroundColour(wxColour(0,128,0));
 	StaticBoxSizer3->Add(m_pbtnBack, 1, wxALL|wxEXPAND, 5);
@@ -369,7 +369,7 @@ void dlgOptions::OnbtnReplaceClick(wxCommandEvent& event)
     wxString sFilename="palace.wav";
     wxString sFilepath = "C:\\Users\\marti\\Desktop\\Peter Hammill\\";
 
-    dlgUpload aDlg(this, m_sIpAddress, sEndpoint, sFilename, sFilepath);
+    dlgUpload aDlg(this, m_pstHostname->GetLabel(), m_sIpAddress, sEndpoint, sFilename, sFilepath);
     aDlg.ShowModal();
     FileUpdateReply(aDlg.m_jsReply);
 

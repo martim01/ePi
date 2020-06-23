@@ -102,7 +102,16 @@ void MultipartUpload::HandleEvent(mg_connection *pConnection, int nEvent, void* 
             break;
         case MG_EV_SEND:
             {
-                int nSent = *reinterpret_cast<int*>(pData);
+                m_dSent += *reinterpret_cast<int*>(pData);
+                int nProg = m_dSent/m_dLength*100.0;
+                if(nProg != m_nProgress)
+                {
+                    m_nProgress = nProg;
+                    wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_R_PROGRESS);
+                    pEvent->SetInt(m_nProgress);
+                    pEvent->SetExtraLong(m_dRead-m_dSent);
+                    wxQueueEvent(m_pHandler, pEvent);
+                }
                 SendSomeData(pConnection);
             }
             break;
@@ -132,6 +141,10 @@ void MultipartUpload::ConnectionEvent(mg_connection* pConnection, int nStatus)
         nSize += GetTotalFileLength();
 
         nSize += std::string("--"+BOUNDARY+"--"+CRLF+CRLF).size();
+
+        m_dLength = nSize;
+        m_dRead = 0;
+        m_dSent = 0;
 
         //send the header...
 
@@ -197,14 +210,6 @@ void MultipartUpload::SendSomeData(mg_connection* pConnection)
         m_ifs.read(buffer, 1460);
         m_dRead += m_ifs.gcount();
 
-        int nProg = m_dRead/m_dLength*100.0;
-        if(nProg != m_nProgress)
-        {
-            m_nProgress = nProg;
-            wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_R_PROGRESS);
-            pEvent->SetInt(m_nProgress);
-            wxQueueEvent(m_pHandler, pEvent);
-        }
 
         mg_send(pConnection, buffer, m_ifs.gcount());
 

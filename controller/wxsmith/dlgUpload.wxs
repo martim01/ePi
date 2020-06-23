@@ -21,7 +21,7 @@
 						<face>Arial</face>
 					</font>
 					<minsize>800,40</minsize>
-					<style>wxST_NO_AUTORESIZE</style>
+					<style>wxST_NO_AUTORESIZE|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</style>
 				</object>
 				<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
 				<border>2</border>
@@ -44,20 +44,46 @@
 						<face>Arial</face>
 					</font>
 					<minsize>800,40</minsize>
-					<style>wxST_NO_AUTORESIZE</style>
+					<style>wxST_NO_AUTORESIZE|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</style>
 				</object>
 				<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
 				<border>2</border>
 			</object>
 			<object class="sizeritem">
-				<object class="wxGauge" name="ID_GAUGE1" variable="m_pGuage" member="yes">
-					<size>-1,40</size>
-					<fg>#0080C0</fg>
+				<object class="Custom" name="ID_CUSTOM1" subclass="Progress" variable="m_pGuage" member="yes">
+					<creating_code>$(THIS) = new $(CLASS)($(PARENT),$(ID),$(POS),$(SIZE),$(STYLE));</creating_code>
+					<include_file>progress.h</include_file>
+					<local_include>1</local_include>
+					<fg>#0098E1</fg>
 					<bg>#000000</bg>
-					<style>wxGA_SMOOTH</style>
+					<font>
+						<size>12</size>
+						<style>normal</style>
+						<weight>normal</weight>
+						<underlined>0</underlined>
+						<family>swiss</family>
+						<face>Arial</face>
+					</font>
 				</object>
 				<flag>wxLEFT|wxRIGHT|wxEXPAND</flag>
 				<border>20</border>
+			</object>
+			<object class="sizeritem">
+				<object class="wxStaticText" name="ID_STATICTEXT2" variable="m_pstProgress" member="yes">
+					<label></label>
+					<fg>#0098E6</fg>
+					<font>
+						<size>14</size>
+						<style>normal</style>
+						<weight>normal</weight>
+						<underlined>0</underlined>
+						<family>swiss</family>
+						<face>Arial</face>
+					</font>
+					<minsize>800,40</minsize>
+					<style>wxST_NO_AUTORESIZE|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</style>
+				</object>
+				<flag>wxALL|wxEXPAND</flag>
 			</object>
 			<object class="spacer">
 				<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
@@ -65,8 +91,9 @@
 				<option>1</option>
 			</object>
 			<object class="sizeritem">
-				<object class="wxButton" name="ID_BUTTON_CANCEL" variable="m_pbtnCancel" member="yes">
+				<object class="wmButton" name="ID_BUTTON_CANCEL" variable="m_pbtnCancel" member="yes">
 					<label>Cancel</label>
+					<handler function="OnbtnCancelClick" entry="EVT_BUTTON" />
 				</object>
 				<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
 				<border>5</border>

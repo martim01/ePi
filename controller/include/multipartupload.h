@@ -88,6 +88,8 @@ class MultipartUpload : public wxEvtHandler
         std::queue<task> m_qTasks;
         wxTimer m_timerTask;
 
+        double m_dSent;
+
         static const std::string BOUNDARY;
         static const std::string CRLF;
 

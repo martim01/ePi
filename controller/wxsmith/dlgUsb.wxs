@@ -39,7 +39,7 @@
 			<object class="sizeritem">
 				<object class="wxBoxSizer" variable="BoxSizer2" member="no">
 					<object class="sizeritem">
-						<object class="wxButton" name="ID_BUTTON_UPLOAD" variable="m_pbtnUpload" member="yes">
+						<object class="wmButton" name="ID_BUTTON_UPLOAD" variable="m_pbtnUpload" member="yes">
 							<label>Upload</label>
 							<handler function="OnbtnUploadClick" entry="EVT_BUTTON" />
 						</object>
@@ -48,7 +48,7 @@
 						<option>1</option>
 					</object>
 					<object class="sizeritem">
-						<object class="wxButton" name="ID_BUTTON_CANCEL" variable="m_pbtnCancel" member="yes">
+						<object class="wmButton" name="ID_BUTTON_CANCEL" variable="m_pbtnCancel" member="yes">
 							<label>Cancel</label>
 							<handler function="OnbtnCancelClick" entry="EVT_BUTTON" />
 						</object>

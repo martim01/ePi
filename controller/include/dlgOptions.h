@@ -2,7 +2,7 @@
 #define DLGOPTIONS_H
 
 //(*Headers(dlgOptions)
-#include <wx/button.h>
+#include "wmbutton.h"
 #include <wx/dialog.h>
 #include <wx/gbsizer.h>
 #include <wx/progdlg.h>
@@ -23,19 +23,19 @@ class dlgOptions: public wxDialog
 		virtual ~dlgOptions();
 
 		//(*Declarations(dlgOptions)
-		wxButton* m_pbtnBack;
-		wxButton* m_pbtnDelete;
-		wxButton* m_pbtnReplace;
-		wxButton* m_pbtnRestartOS;
-		wxButton* m_pbtnRestartServer;
-		wxButton* m_pbtnSSH;
-		wxButton* m_pbtnShutdownOS;
-		wxButton* m_pbtnUpdate;
-		wxButton* m_pbtnUpdateController;
-		wxButton* m_pbtnUpdateEpiServer;
-		wxButton* m_pbtnUpdateLauncher;
-		wxButton* m_pbtnUpdatePlayer3;
-		wxButton* m_pbtnUpdatePlayer67;
+		wmButton* m_pbtnBack;
+		wmButton* m_pbtnDelete;
+		wmButton* m_pbtnReplace;
+		wmButton* m_pbtnRestartOS;
+		wmButton* m_pbtnRestartServer;
+		wmButton* m_pbtnSSH;
+		wmButton* m_pbtnShutdownOS;
+		wmButton* m_pbtnUpdate;
+		wmButton* m_pbtnUpdateController;
+		wmButton* m_pbtnUpdateEpiServer;
+		wmButton* m_pbtnUpdateLauncher;
+		wmButton* m_pbtnUpdatePlayer3;
+		wmButton* m_pbtnUpdatePlayer67;
 		wxProgressDialog* m_pdlgProgress;
 		wxStaticLine* StaticLine1;
 		wxStaticLine* StaticLine2;

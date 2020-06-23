@@ -2,13 +2,13 @@
 #define DLGEDIT_H
 
 //(*Headers(dlgEdit)
+#include "wmbutton.h"
+#include "wmedit.h"
 #include "wmkeyboard.h"
-#include <wx/button.h>
 #include <wx/dialog.h>
 #include <wx/gbsizer.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
-#include <wx/textctrl.h>
 //*)
 
 class dlgEdit: public wxDialog
@@ -19,14 +19,14 @@ class dlgEdit: public wxDialog
 		virtual ~dlgEdit();
 
 		//(*Declarations(dlgEdit)
+		wmButton* m_pbtnEditCancel;
+		wmButton* m_pbtnEditUpdate;
+		wmEdit* m_pedtDescription;
+		wmEdit* m_pedtLabel;
 		wmKeyboard* m_pKbd1;
-		wxButton* m_pbtnEditCancel;
-		wxButton* m_pbtnEditUpdate;
 		wxStaticText* StaticText1;
 		wxStaticText* StaticText2;
 		wxStaticText* m_pstHostname;
-		wxTextCtrl* m_pedtDescription;
-		wxTextCtrl* m_pedtLabel;
 		//*)
 
 	protected:
