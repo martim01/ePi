@@ -15,13 +15,18 @@
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-pipe" />
+					<Add option="-mthreads" />
 					<Add option="-D__WXDEBUG__" />
+					<Add option="-D__GNUWIN32__" />
+					<Add option="-D__WXMSW__" />
 					<Add directory="$(#wx)/lib/gcc_dll/mswud" />
 				</Compiler>
 				<ResourceCompiler>
 					<Add directory="$(#wx)/lib/gcc_dll/mswud" />
 				</ResourceCompiler>
 				<Linker>
+					<Add option="-mthreads" />
 					<Add library="libwxmsw30ud.a" />
 					<Add library="ws2_32" />
 					<Add directory="$(#wx)/lib/gcc_dll" />
@@ -47,14 +52,34 @@
 					<Add directory="$(#wx)/lib/gcc_dll" />
 				</Linker>
 			</Target>
+			<Target title="Linux Debug">
+				<Option platforms="Unix;" />
+				<Option output="../bin/controller" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Option parameters="4 3 0 192.168.0.120 8080" />
+				<Option projectLinkerOptionsRelation="2" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="`wx-config --cxxflags`" />
+					<Add option="-pthread" />
+					<Add option="-D__WXDEBUG__" />
+					<Add directory="$(#wx)/lib/gcc_dll/mswud" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(#wx)/lib/gcc_dll/mswud" />
+				</ResourceCompiler>
+				<Linker>
+					<Add option="`wx-config --libs`" />
+					<Add option="-pthread" />
+					<Add directory="$(#wx)/lib/gcc_dll" />
+				</Linker>
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-std=c++14" />
-			<Add option="-pipe" />
-			<Add option="-mthreads" />
-			<Add option="-D__GNUWIN32__" />
-			<Add option="-D__WXMSW__" />
 			<Add option="-DWXUSINGDLL" />
 			<Add option="-DwxUSE_UNICODE" />
 			<Add option="-DLOG_DLL" />
@@ -68,9 +93,6 @@
 		<ResourceCompiler>
 			<Add directory="$(#wx)/include" />
 		</ResourceCompiler>
-		<Linker>
-			<Add option="-mthreads" />
-		</Linker>
 		<Unit filename="../common/include/epiwriter.h" />
 		<Unit filename="../common/include/inimanager.h" />
 		<Unit filename="../common/include/inisection.h" />
@@ -98,6 +120,7 @@
 		<Unit filename="include/progress.h" />
 		<Unit filename="include/restfulclient.h" />
 		<Unit filename="include/uirect.h" />
+		<Unit filename="include/usbchecker.h" />
 		<Unit filename="include/version.h" />
 		<Unit filename="include/websocketclient.h" />
 		<Unit filename="include/wmbutton.h" />
@@ -121,6 +144,7 @@
 		<Unit filename="src/progress.cpp" />
 		<Unit filename="src/restfulclient.cpp" />
 		<Unit filename="src/uirect.cpp" />
+		<Unit filename="src/usbchecker.cpp" />
 		<Unit filename="src/websocketclient.cpp" />
 		<Unit filename="src/wmbutton.cpp" />
 		<Unit filename="src/wmedit.cpp" />

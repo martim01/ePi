@@ -8,7 +8,7 @@ using namespace std;
 const int wmButton::ID_TIMER_HOLD   = wxNewId();
 const int wmButton::ID_TIMER_FLASH  = wxNewId();
 
-BEGIN_EVENT_TABLE(wmButton, wxControl)
+BEGIN_EVENT_TABLE(wmButton, wxWindow)
     EVT_PAINT(wmButton::OnPaint)
     EVT_SIZE(wmButton::OnSize)
     EVT_LEFT_DOWN(wmButton::OnLeftDown)
@@ -20,14 +20,14 @@ BEGIN_EVENT_TABLE(wmButton, wxControl)
     EVT_TIMER(ID_TIMER_FLASH, wmButton::OnFlash)
 END_EVENT_TABLE()
 
-wxIMPLEMENT_DYNAMIC_CLASS(wmButton, wxControl);
+wxIMPLEMENT_DYNAMIC_CLASS(wmButton, wxWindow);
 
 DEFINE_EVENT_TYPE(wxEVT_BUTTON_PRESSED)
 DEFINE_EVENT_TYPE(wxEVT_BUTTON_RELEASED)
 DEFINE_EVENT_TYPE(wxEVT_BUTTON_HELD)
 
 
-wmButton::wmButton() : wxControl()
+wmButton::wmButton() : wxWindow()
 	, m_nStyle(0)
 	, m_nHoldCount(0)
 	, m_nHoldTrigger(0)
@@ -43,7 +43,7 @@ wmButton::wmButton() : wxControl()
 	{
 	}
 
-wmButton::wmButton(wxWindow *parent, wxWindowID id, const wxString& sLabel, const wxPoint& pos, const wxSize& size, long nStyle,const wxValidator& validator, const wxString& name) : wxControl()
+wmButton::wmButton(wxWindow *parent, wxWindowID id, const wxString& sLabel, const wxPoint& pos, const wxSize& size, long nStyle,const wxValidator& validator, const wxString& name) : wxWindow()
 	, m_nStyle(0)
 	, m_nHoldCount(0)
 	, m_nHoldTrigger(0)
@@ -130,7 +130,7 @@ void wmButton::CreateRects()
 
 }
 
-wmButton::wmButton( wxWindow* parent, wxWindowID id, const wxBitmap& bitmap, const wxPoint& pos, const wxSize& size, long style, const wxValidator& validator, const wxString& name) : wxControl()
+wmButton::wmButton( wxWindow* parent, wxWindowID id, const wxBitmap& bitmap, const wxPoint& pos, const wxSize& size, long style, const wxValidator& validator, const wxString& name) : wxWindow()
 , m_nStyle(0)
 	, m_nHoldCount(0)
 	, m_nHoldTrigger(0)

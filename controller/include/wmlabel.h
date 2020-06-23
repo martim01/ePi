@@ -1,12 +1,12 @@
 #pragma once
-#include <wx/control.h>
+#include <wx/window.h>
 #include <wx/timer.h>
 #include "uirect.h"
 #include <wx/bitmap.h>
 
 /** @class a class that draws a lable on the screen, derives from wxWindow
 **/
-class wmLabel : public wxControl
+class wmLabel : public wxWindow
 {
     DECLARE_EVENT_TABLE()
     wxDECLARE_DYNAMIC_CLASS(wmLabel);
@@ -75,6 +75,7 @@ class wmLabel : public wxControl
 
         virtual ~wmLabel();
 
+        void SetGradient(int nGradient);
 
         /** @brief Sets the background colour of the label when it is flashing
         *   @param colour

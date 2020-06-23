@@ -1,16 +1,16 @@
 #include "progress.h"
 #include <wx/dcbuffer.h>
 
-BEGIN_EVENT_TABLE(Progress, wxControl)
+BEGIN_EVENT_TABLE(Progress, wxWindow)
     EVT_PAINT(Progress::OnPaint)
     EVT_SIZE(Progress::OnSize)
 END_EVENT_TABLE()
 
-wxIMPLEMENT_DYNAMIC_CLASS(Progress, wxControl);
+wxIMPLEMENT_DYNAMIC_CLASS(Progress, wxWindow);
 
 
 
-Progress::Progress() : wxControl(),
+Progress::Progress() : wxWindow(),
 m_nMax(100),
 m_nValue(0),
 m_dResolution(1.0),
@@ -18,7 +18,7 @@ m_nBorder(uiRect::BORDER_FLAT)
 {
 }
 
-Progress::Progress(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& szSize, long nStyle) : wxControl(parent, id, pos, szSize, nStyle),
+Progress::Progress(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& szSize, long nStyle) : wxWindow(parent, id, pos, szSize, nStyle),
 m_nMax(100),
 m_nValue(0),
 m_dResolution(szSize.x/100.0),
@@ -46,7 +46,7 @@ bool Progress::Create(wxWindow *parent, wxWindowID id, const wxPoint& pos, const
     if(szSize.y <= 0)
         szInit.SetHeight(bestSize.y);
 
-    if(!wxControl::Create(parent,id,pos,szInit))
+    if(!wxWindow::Create(parent,id,pos,szInit))
         return false;
 
     SetMinSize(szSize);
@@ -69,7 +69,7 @@ Progress::~Progress()
 
 bool Progress::SetBackgroundColour(const wxColour &colour)
 {
-    wxControl::SetBackgroundColour(colour);
+    wxWindow::SetBackgroundColour(colour);
     Refresh();
     return true;
 }

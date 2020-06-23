@@ -34,10 +34,12 @@ class MultipartUpload : public wxEvtHandler
         void HandleEvent(mg_connection *pConnection, int nEvent, void* pData);
 
 
+        enum {UPLOAD_POST, UPLOAD_PATCH, UPLOAD_PUT};
+
     private:
 
         static const std::string UPLOAD[3];
-        enum {UPLOAD_POST, UPLOAD_PATCH, UPLOAD_PUT};
+
 
         void ConnectionEvent(mg_connection* pConnection, int nStatus);
         void OnTimerTask(const wxTimerEvent& event);

@@ -11,20 +11,21 @@
 
 #include "multipartupload.h"
 #include "json/json.h"
+#include "wmlabel.h"
 
 class dlgUpload: public wxDialog
 {
 	public:
 
-		dlgUpload(wxWindow* parent, const wxString& sHostname, const wxString& sIpAddress, const wxString& sEndpoint, const wxString& sFilename, const wxString& sFilepath, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
+		dlgUpload(wxWindow* parent, const wxString& sHostname, const wxString& sIpAddress, const wxString& sEndpoint, int nMethod, const wxString& sFilename, const wxString& sFilepath, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
 		virtual ~dlgUpload();
 
 		//(*Declarations(dlgUpload)
 		Progress* m_pGuage;
 		wmButton* m_pbtnCancel;
-		wxStaticText* m_pstDetails;
-		wxStaticText* m_pstHostname;
-		wxStaticText* m_pstProgress;
+		wmLabel* m_pstDetails;
+		wmLabel* m_pstHostname;
+		wmLabel* m_pstProgress;
 		//*)
 
 		int ShowModal() override;
@@ -53,6 +54,7 @@ class dlgUpload: public wxDialog
 
 		wxString m_sIpAddress;
 		wxString m_sEndpoint;
+		int m_nMethod;
 		wxString m_sFilename;
 		wxString m_sFilePath;
 

@@ -6,25 +6,25 @@ using namespace std;
 
 const int wmLabel::ID_TIMER_FLASH  = wxNewId();
 
-BEGIN_EVENT_TABLE(wmLabel, wxControl)
+BEGIN_EVENT_TABLE(wmLabel, wxWindow)
     EVT_PAINT(wmLabel::OnPaint)
     EVT_SIZE(wmLabel::OnSize)
     EVT_TIMER(ID_TIMER_FLASH, wmLabel::OnFlash)
 END_EVENT_TABLE()
 
 #ifdef WXSPAM
-IMPLEMENT_DYNAMIC_CLASS(wmLabel, wxControl)
+IMPLEMENT_DYNAMIC_CLASS(wmLabel, wxWindow)
 #else
-wxIMPLEMENT_DYNAMIC_CLASS(wmLabel, wxControl);
+wxIMPLEMENT_DYNAMIC_CLASS(wmLabel, wxWindow);
 #endif
 
 
-wmLabel::wmLabel() : wxControl(),
+wmLabel::wmLabel() : wxWindow(),
 	m_nStyle(0),
 	m_nHoldCount(0),
 	m_nHoldTrigger(0),
 	m_bFlashState(false),
-	m_nBorderState(0),
+	m_nBorderState(uiRect::BORDER_NONE),
 	m_nState(0),
 	m_bChecked(false),
 	m_nBitmapAlign(0)
@@ -33,12 +33,12 @@ wmLabel::wmLabel() : wxControl(),
 }
 
 
-wmLabel::wmLabel(wxWindow *parent, wxWindowID id, const wxString& sLabel, const wxPoint& pos, const wxSize& size, long nStyle,const wxString& name) : wxControl(),
+wmLabel::wmLabel(wxWindow *parent, wxWindowID id, const wxString& sLabel, const wxPoint& pos, const wxSize& size, long nStyle,const wxString& name) : wxWindow(),
 	m_nStyle(0),
 	m_nHoldCount(0),
 	m_nHoldTrigger(0),
 	m_bFlashState(false),
-	m_nBorderState(0),
+	m_nBorderState(uiRect::BORDER_NONE),
 	m_nState(0),
 	m_bChecked(false),
 	m_nBitmapAlign(0)
@@ -64,8 +64,6 @@ bool wmLabel::Create(wxWindow *parent, wxWindowID id, const wxString& sLabel , c
     SetBackgroundStyle(wxBG_STYLE_CUSTOM);
     SetFont(wxFont(10,wxFONTFAMILY_SWISS,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL,false,_T("Arial"),wxFONTENCODING_DEFAULT));
 
-    m_nBorderState = uiRect::BORDER_DOWN;
-
     m_timerFlash.SetOwner(this, ID_TIMER_FLASH);
     m_bFlashState = false;wmLabel
 
@@ -86,12 +84,12 @@ void wmLabel::CreateRects()
 
 }
 
-wmLabel::wmLabel( wxWindow* parent, wxWindowID id, const wxBitmap& bitmap, const wxPoint& pos, const wxSize& size, long style,  const wxString& name)  : wxControl(),
+wmLabel::wmLabel( wxWindow* parent, wxWindowID id, const wxBitmap& bitmap, const wxPoint& pos, const wxSize& size, long style,  const wxString& name)  : wxWindow(),
 	m_nStyle(0),
 	m_nHoldCount(0),
 	m_nHoldTrigger(0),
 	m_bFlashState(false),
-	m_nBorderState(0),
+	m_nBorderState(uiRect::BORDER_NONE),
 	m_nState(0),
 	m_bChecked(false),
 	m_nBitmapAlign(0)
@@ -244,4 +242,10 @@ bool wmLabel::SetForegroundColour(const wxColour &colour)
 uiRect& wmLabel::GetUiRect()
 {
     return m_uiRect;
+}
+
+void wmLabel::SetGradient(int nGradient)
+{
+    m_uiRect.SetGradient(nGradient);
+    Refresh();
 }

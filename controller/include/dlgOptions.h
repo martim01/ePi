@@ -14,6 +14,7 @@
 #include "json/json.h"
 #include "restfulclient.h"
 #include "multipartupload.h"
+#include "wmlabel.h"
 
 class dlgOptions: public wxDialog
 {
@@ -37,38 +38,36 @@ class dlgOptions: public wxDialog
 		wmButton* m_pbtnUpdatePlayer3;
 		wmButton* m_pbtnUpdatePlayer67;
 		wxProgressDialog* m_pdlgProgress;
-		wxStaticLine* StaticLine1;
-		wxStaticLine* StaticLine2;
-		wxStaticText* StaticText10;
-		wxStaticText* StaticText11;
-		wxStaticText* StaticText12;
-		wxStaticText* StaticText13;
-		wxStaticText* StaticText14;
-		wxStaticText* StaticText15;
-		wxStaticText* StaticText16;
-		wxStaticText* StaticText1;
-		wxStaticText* StaticText2;
-		wxStaticText* StaticText3;
-		wxStaticText* StaticText4;
-		wxStaticText* StaticText5;
-		wxStaticText* StaticText7;
-		wxStaticText* StaticText9;
-		wxStaticText* m_pstChannels;
-		wxStaticText* m_pstCreated;
-		wxStaticText* m_pstDescription;
-		wxStaticText* m_pstHostname;
-		wxStaticText* m_pstLabel;
-		wxStaticText* m_pstLength;
-		wxStaticText* m_pstModified;
-		wxStaticText* m_pstSampleRate;
-		wxStaticText* m_pstSubType;
-		wxStaticText* m_pstType;
-		wxStaticText* m_pstUid;
-		wxStaticText* m_pstVersionController;
-		wxStaticText* m_pstVersionEpiServer;
-		wxStaticText* m_pstVersionLauncher;
-		wxStaticText* m_pstVersionPlayer3;
-		wxStaticText* m_pstVersionPlayer67;
+		wmLabel* StaticText10;
+		wmLabel* StaticText11;
+		wmLabel* StaticText12;
+		wmLabel* StaticText13;
+		wmLabel* StaticText14;
+		wmLabel* StaticText15;
+		wmLabel* StaticText16;
+		wmLabel* StaticText1;
+		wmLabel* StaticText2;
+		wmLabel* StaticText3;
+		wmLabel* StaticText4;
+		wmLabel* StaticText5;
+		wmLabel* StaticText7;
+		wmLabel* StaticText9;
+		wmLabel* m_pstChannels;
+		wmLabel* m_pstCreated;
+		wmLabel* m_pstDescription;
+		wmLabel* m_pstHostname;
+		wmLabel* m_pstLabel;
+		wmLabel* m_pstLength;
+		wmLabel* m_pstModified;
+		wmLabel* m_pstSampleRate;
+		wmLabel* m_pstSubType;
+		wmLabel* m_pstType;
+		wmLabel* m_pstUid;
+		wmLabel* m_pstVersionController;
+		wmLabel* m_pstVersionEpiServer;
+		wmLabel* m_pstVersionLauncher;
+		wmLabel* m_pstVersionPlayer3;
+		wmLabel* m_pstVersionPlayer67;
 		//*)
 
 	protected:
@@ -151,8 +150,8 @@ class dlgOptions: public wxDialog
         void PowerReply(const Json::Value& jsData);
         void ShowFileDetails(const Json::Value& jsData);
 
-        void ShowStringValue(const Json::Value& jsData, const std::string& sKey, wxStaticText* pLabel);
-        void ShowIntValue(const Json::Value& jsData, const std::string& sKey, wxStaticText* pLabel);
+        void ShowStringValue(const Json::Value& jsData, const std::string& sKey, wmLabel* pLabel);
+        void ShowIntValue(const Json::Value& jsData, const std::string& sKey, wmLabel* pLabel);
 
         void ShowError(wxString sMessage, const Json::Value& jsData);
 

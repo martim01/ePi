@@ -10,7 +10,7 @@
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 //*)
-
+#include "wmlabel.h"
 class dlgEdit: public wxDialog
 {
 	public:
@@ -24,9 +24,9 @@ class dlgEdit: public wxDialog
 		wmEdit* m_pedtDescription;
 		wmEdit* m_pedtLabel;
 		wmKeyboard* m_pKbd1;
-		wxStaticText* StaticText1;
-		wxStaticText* StaticText2;
-		wxStaticText* m_pstHostname;
+		wmLabel* StaticText1;
+		wmLabel* StaticText2;
+		wmLabel* m_pstHostname;
 		//*)
 
 	protected:

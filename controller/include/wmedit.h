@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wx/control.h>
+#include <wx/window.h>
 #include <vector>
 #include <wx/textctrl.h>
 #include <set>
@@ -8,7 +8,7 @@
 
 /** @brief Class that provides an alternative text edit control
 **/
-class wmEdit : public wxControl
+class wmEdit : public wxWindow
 {
     wxDECLARE_DYNAMIC_CLASS(wmEdit);
 

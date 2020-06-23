@@ -6,6 +6,7 @@
 #include <sstream>
 #include <wx/tokenzr.h>
 #include "restfulclient.h"
+#include <iostream>
 
 wxDEFINE_EVENT(wxEVT_R_PROGRESS, wxCommandEvent);
 
@@ -103,14 +104,17 @@ void MultipartUpload::HandleEvent(mg_connection *pConnection, int nEvent, void* 
         case MG_EV_SEND:
             {
                 m_dSent += *reinterpret_cast<int*>(pData);
-                int nProg = m_dSent/m_dLength*100.0;
-                if(nProg != m_nProgress)
+                if(m_dLength != 0)
                 {
-                    m_nProgress = nProg;
-                    wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_R_PROGRESS);
-                    pEvent->SetInt(m_nProgress);
-                    pEvent->SetExtraLong(m_dRead-m_dSent);
-                    wxQueueEvent(m_pHandler, pEvent);
+                    int nProg = m_dSent/m_dLength*100.0;
+                    if(nProg != m_nProgress)
+                    {
+                        m_nProgress = nProg;
+                        wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_R_PROGRESS);
+                        pEvent->SetInt(m_nProgress);
+                        pEvent->SetExtraLong(m_dRead-m_dSent);
+                        wxQueueEvent(m_pHandler, pEvent);
+                    }
                 }
                 SendSomeData(pConnection);
             }
@@ -286,6 +290,7 @@ void MultipartUpload::DataReceived(const wxString& sData)
         size_t nPos = sData.Find(CRLF+CRLF);    //end of header
         wxString sMessage = sData.Mid(nPos+4);
 
+        std::cout << sData.ToStdString() << std::endl;
         wxLogDebug("Code= %u", nCode);
         wxLogDebug("Message = %s",sMessage.c_str());
         m_bLoop = false;

@@ -1,12 +1,12 @@
 #pragma once
-#include <wx/control.h>
+#include <wx/window.h>
 #include <wx/timer.h>
 #include "uirect.h"
 #include <wx/bitmap.h>
 
 /** @class a class that draws a button on the screen, derives from wxWindow
 **/
-class  wmButton : public wxControl
+class  wmButton : public wxWindow
 {
     DECLARE_EVENT_TABLE()
     wxDECLARE_DYNAMIC_CLASS(wmButton);

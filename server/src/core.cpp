@@ -91,7 +91,7 @@ void Core::Run(const std::string& sConfigFile)
 
         //add luauncher callbacks
         m_launcher.AddCallbacks(std::bind(&Core::StatusCallback, this, _1), std::bind(&Core::ExitCallback, this, _1));
-        m_launcher.SetPlayer(CreatePath(m_iniConfig.GetIniString("playout", "path", "/home/pi/ePi/bin")), m_iniConfig.GetIniString("playout", "app", "player3"),sConfigFile);
+        m_launcher.SetPlayer(CreatePath(m_iniConfig.GetIniString("paths", "player", "/home/pi/ePi/bin")), m_iniConfig.GetIniString("playout", "app", "player3"),sConfigFile);
         //start the server loop
         m_server.Run(false,50);
     }
@@ -241,7 +241,7 @@ response Core::GetUpdate(mg_connection* pConnection, const query& theQuery, cons
     theResponse.jsonData["server"]["date"] = ConvertTimeToIsoString(std::time_t(version::DATE));
 
 
-    theResponse.jsonData["player3"] = ConvertToJson(exec(CreatePath(m_iniConfig.GetIniString("paths", "player","."))+"player3 -v"));
+    theResponse.jsonData["player3"] = ConvertToJson(exec(CreatePath(m_iniConfig.GetIniString("paths", "player","/home/pi/ePi/bin"))+"player3 -v"));
 
 
     //get versions of other applications...

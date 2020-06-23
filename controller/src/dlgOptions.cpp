@@ -11,7 +11,7 @@
 #include <wx/msgdlg.h>
 #include "dlgUsb.h"
 #include <map>
-#include "dlgupload.h"
+#include "dlgUpload.h"
 
 //(*InternalHeaders(dlgOptions)
 #include <wx/font.h>
@@ -101,7 +101,7 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	wxFont thisFont(12,wxFONTFAMILY_SWISS,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL,false,_T("Arial"),wxFONTENCODING_DEFAULT);
 	SetFont(thisFont);
 	BoxSizer0 = new wxBoxSizer(wxVERTICAL);
-	m_pstHostname = new wxStaticText(this, ID_STATICTEXT30, _("Label"), wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE, _T("ID_STATICTEXT30"));
+	m_pstHostname = new wmLabel(this, ID_STATICTEXT30, _("Label"), wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE, _T("ID_STATICTEXT30"));
 	m_pstHostname->SetMinSize(wxSize(800,40));
 	m_pstHostname->SetForegroundColour(wxColour(255,255,255));
 	m_pstHostname->SetBackgroundColour(wxColour(0,128,64));
@@ -112,83 +112,81 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	BoxSizer1 = new wxBoxSizer(wxVERTICAL);
 	StaticBoxSizer1 = new wxStaticBoxSizer(wxVERTICAL, this, wxEmptyString);
 	GridBagSizer1 = new wxGridBagSizer(0, 0);
-	StaticText1 = new wxStaticText(this, ID_STATICTEXT1, _("UID:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT1"));
+	StaticText1 = new wmLabel(this, ID_STATICTEXT1, _("UID:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT1"));
 	StaticText1->SetForegroundColour(wxColour(255,255,255));
-	GridBagSizer1->Add(StaticText1, wxGBPosition(0, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstUid = new wxStaticText(this, ID_STATICTEXT2, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT2"));
+    GridBagSizer1->Add(StaticText1, wxGBPosition(0, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
+	m_pstUid = new wmLabel(this, ID_STATICTEXT2, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE, _T("ID_STATICTEXT2"));
 	m_pstUid->SetMinSize(wxSize(400,-1));
-	m_pstUid->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BACKGROUND));
+	m_pstUid->SetForegroundColour(*wxBLACK);
 	m_pstUid->SetBackgroundColour(wxColour(255,255,255));
 	GridBagSizer1->Add(m_pstUid, wxGBPosition(0, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
-	StaticText2 = new wxStaticText(this, ID_STATICTEXT3, _("Label:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT3"));
+	StaticText2 = new wmLabel(this, ID_STATICTEXT3, _("Label:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT3"));
 	StaticText2->SetForegroundColour(wxColour(255,255,255));
 	GridBagSizer1->Add(StaticText2, wxGBPosition(1, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstLabel = new wxStaticText(this, ID_STATICTEXT4, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT4"));
+	m_pstLabel = new wmLabel(this, ID_STATICTEXT4, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE, _T("ID_STATICTEXT4"));
 	m_pstLabel->SetForegroundColour(wxColour(0,0,0));
 	m_pstLabel->SetBackgroundColour(wxColour(255,255,255));
 	GridBagSizer1->Add(m_pstLabel, wxGBPosition(1, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
-	StaticText3 = new wxStaticText(this, ID_STATICTEXT5, _("Description:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT5"));
+	StaticText3 = new wmLabel(this, ID_STATICTEXT5, _("Description:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT5"));
 	StaticText3->SetForegroundColour(wxColour(255,255,255));
+	StaticText3->SetMinSize(wxSize(80,-1));
 	GridBagSizer1->Add(StaticText3, wxGBPosition(2, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstDescription = new wxStaticText(this, ID_STATICTEXT6, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT6"));
+	m_pstDescription = new wmLabel(this, ID_STATICTEXT6, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT6"));
 	m_pstDescription->SetForegroundColour(wxColour(0,0,0));
 	m_pstDescription->SetBackgroundColour(wxColour(255,255,255));
 	GridBagSizer1->Add(m_pstDescription, wxGBPosition(2, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
 	m_pbtnUpdate = new wmButton(this, ID_BUTTON_UPDATE, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE"));
 	GridBagSizer1->Add(m_pbtnUpdate, wxGBPosition(1, 2), wxGBSpan(2, 1), wxALL, 2);
-	StaticText5 = new wxStaticText(this, ID_STATICTEXT7, _("Created:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT7"));
+	StaticText5 = new wmLabel(this, ID_STATICTEXT7, _("Created:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT7"));
 	StaticText5->SetForegroundColour(wxColour(255,255,255));
 	GridBagSizer1->Add(StaticText5, wxGBPosition(3, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstCreated = new wxStaticText(this, ID_STATICTEXT8, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT8"));
+	m_pstCreated = new wmLabel(this, ID_STATICTEXT8, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT8"));
 	m_pstCreated->SetForegroundColour(wxColour(0,0,0));
 	m_pstCreated->SetBackgroundColour(wxColour(255,255,255));
 	GridBagSizer1->Add(m_pstCreated, wxGBPosition(3, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
-	StaticText7 = new wxStaticText(this, ID_STATICTEXT9, _("Modified:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT9"));
+	StaticText7 = new wmLabel(this, ID_STATICTEXT9, _("Modified:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT9"));
 	StaticText7->SetForegroundColour(wxColour(255,255,255));
 	GridBagSizer1->Add(StaticText7, wxGBPosition(4, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstModified = new wxStaticText(this, ID_STATICTEXT10, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT10"));
+	m_pstModified = new wmLabel(this, ID_STATICTEXT10, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT10"));
 	m_pstModified->SetForegroundColour(wxColour(0,0,0));
 	m_pstModified->SetBackgroundColour(wxColour(255,255,255));
 	GridBagSizer1->Add(m_pstModified, wxGBPosition(4, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
 	StaticBoxSizer1->Add(GridBagSizer1, 1, wxALL|wxEXPAND, 2);
-	StaticLine1 = new wxStaticLine(this, ID_STATICLINE1, wxDefaultPosition, wxSize(10,-1), wxLI_HORIZONTAL, _T("ID_STATICLINE1"));
-	StaticBoxSizer1->Add(StaticLine1, 0, wxALL|wxEXPAND, 1);
 	GridBagSizer2 = new wxGridBagSizer(0, 0);
-	StaticText4 = new wxStaticText(this, ID_STATICTEXT11, _("Channels:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT11"));
+	StaticText4 = new wmLabel(this, ID_STATICTEXT11, _("Channels:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT11"));
 	StaticText4->SetForegroundColour(wxColour(0,164,164));
 	GridBagSizer2->Add(StaticText4, wxGBPosition(0, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstChannels = new wxStaticText(this, ID_STATICTEXT12, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT12"));
-	m_pstChannels->SetMinSize(wxSize(25,-1));
+	m_pstChannels = new wmLabel(this, ID_STATICTEXT12, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT12"));
+	m_pstChannels->SetMinSize(wxSize(50,-1));
 	m_pstChannels->SetForegroundColour(wxColour(255,255,255));
 	GridBagSizer2->Add(m_pstChannels, wxGBPosition(0, 1), wxDefaultSpan, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 2);
-	StaticText10 = new wxStaticText(this, ID_STATICTEXT13, _("Sample Rate:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT13"));
+	StaticText10 = new wmLabel(this, ID_STATICTEXT13, _("Sample Rate:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT13"));
 	StaticText10->SetForegroundColour(wxColour(0,164,164));
+	StaticText10->SetMinSize(wxSize(100,-1));
 	GridBagSizer2->Add(StaticText10, wxGBPosition(0, 2), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstSampleRate = new wxStaticText(this, ID_STATICTEXT17, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT17"));
+	m_pstSampleRate = new wmLabel(this, ID_STATICTEXT17, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT17"));
 	m_pstSampleRate->SetMinSize(wxSize(50,-1));
 	m_pstSampleRate->SetForegroundColour(wxColour(255,255,255));
 	GridBagSizer2->Add(m_pstSampleRate, wxGBPosition(0, 3), wxDefaultSpan, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 2);
-	StaticText11 = new wxStaticText(this, ID_STATICTEXT14, _("Format:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT14"));
+	StaticText11 = new wmLabel(this, ID_STATICTEXT14, _("Format:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT14"));
 	StaticText11->SetForegroundColour(wxColour(0,164,164));
 	GridBagSizer2->Add(StaticText11, wxGBPosition(1, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstType = new wxStaticText(this, ID_STATICTEXT18, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT18"));
+	m_pstType = new wmLabel(this, ID_STATICTEXT18, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT18"));
 	m_pstType->SetMinSize(wxSize(50,-1));
 	m_pstType->SetForegroundColour(wxColour(255,255,255));
-	GridBagSizer2->Add(m_pstType, wxGBPosition(1, 1), wxDefaultSpan, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 2);
-	StaticText12 = new wxStaticText(this, ID_STATICTEXT15, _("Length:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT15"));
+	GridBagSizer2->Add(m_pstType, wxGBPosition(1, 1), wxGBSpan(1,1), wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 2);
+	StaticText12 = new wmLabel(this, ID_STATICTEXT15, _("Length:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT15"));
 	StaticText12->SetForegroundColour(wxColour(0,164,164));
 	GridBagSizer2->Add(StaticText12, wxGBPosition(0, 4), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstSubType = new wxStaticText(this, ID_STATICTEXT19, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT19"));
+	m_pstSubType = new wmLabel(this, ID_STATICTEXT19, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT19"));
 	m_pstSubType->SetMinSize(wxSize(150,-1));
 	m_pstSubType->SetForegroundColour(wxColour(255,255,255));
-	GridBagSizer2->Add(m_pstSubType, wxGBPosition(1, 2), wxGBSpan(1, 3), wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstLength = new wxStaticText(this, ID_STATICTEXT20, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT20"));
+	GridBagSizer2->Add(m_pstSubType, wxGBPosition(1, 2), wxGBSpan(1, 2), wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 2);
+	m_pstLength = new wmLabel(this, ID_STATICTEXT20, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT20"));
 	m_pstLength->SetMinSize(wxSize(75,-1));
 	m_pstLength->SetForegroundColour(wxColour(255,255,255));
 	GridBagSizer2->Add(m_pstLength, wxGBPosition(0, 5), wxDefaultSpan, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 2);
 	StaticBoxSizer1->Add(GridBagSizer2, 0, wxALL|wxEXPAND, 2);
-	StaticLine2 = new wxStaticLine(this, ID_STATICLINE2, wxDefaultPosition, wxSize(10,-1), wxLI_HORIZONTAL, _T("ID_STATICLINE2"));
-	StaticBoxSizer1->Add(StaticLine2, 0, wxALL|wxEXPAND, 2);
 	BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
 	m_pbtnReplace = new wmButton(this, ID_BUTTON_REPLACE, _("Replace"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_REPLACE"));
 	BoxSizer2->Add(m_pbtnReplace, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
@@ -199,50 +197,50 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	BoxSizer1->Add(StaticBoxSizer1, 1, wxLEFT|wxEXPAND, 5);
 	StaticBoxSizer2 = new wxStaticBoxSizer(wxHORIZONTAL, this, wxEmptyString);
 	GridBagSizer3 = new wxGridBagSizer(0, 0);
-	StaticText9 = new wxStaticText(this, ID_STATICTEXT16, _("episerver:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT16"));
+	StaticText9 = new wmLabel(this, ID_STATICTEXT16, _("episerver:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT16"));
 	StaticText9->SetForegroundColour(wxColour(255,0,128));
 	GridBagSizer3->Add(StaticText9, wxGBPosition(0, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstVersionEpiServer = new wxStaticText(this, ID_STATICTEXT25, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT25"));
+	m_pstVersionEpiServer = new wmLabel(this, ID_STATICTEXT25, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT25"));
 	m_pstVersionEpiServer->SetMinSize(wxSize(100,-1));
 	m_pstVersionEpiServer->SetForegroundColour(wxColour(0,0,0));
 	m_pstVersionEpiServer->SetBackgroundColour(wxColour(255,255,255));
 	GridBagSizer3->Add(m_pstVersionEpiServer, wxGBPosition(0, 1), wxDefaultSpan, wxALL|wxALIGN_CENTER_VERTICAL, 2);
 	m_pbtnUpdateEpiServer = new wmButton(this, ID_BUTTON_UPDATE_EPISERVER, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_EPISERVER"));
 	GridBagSizer3->Add(m_pbtnUpdateEpiServer, wxGBPosition(0, 2), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
-	StaticText13 = new wxStaticText(this, ID_STATICTEXT21, _("player3:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT21"));
+	StaticText13 = new wmLabel(this, ID_STATICTEXT21, _("player3:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT21"));
 	StaticText13->SetForegroundColour(wxColour(255,0,128));
 	GridBagSizer3->Add(StaticText13, wxGBPosition(1, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstVersionPlayer3 = new wxStaticText(this, ID_STATICTEXT26, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT26"));
+	m_pstVersionPlayer3 = new wmLabel(this, ID_STATICTEXT26, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT26"));
 	m_pstVersionPlayer3->SetMinSize(wxSize(100,-1));
 	m_pstVersionPlayer3->SetForegroundColour(wxColour(0,0,0));
 	m_pstVersionPlayer3->SetBackgroundColour(wxColour(255,255,255));
 	GridBagSizer3->Add(m_pstVersionPlayer3, wxGBPosition(1, 1), wxDefaultSpan, wxALL|wxALIGN_CENTER_VERTICAL, 2);
 	m_pbtnUpdatePlayer3 = new wmButton(this, ID_BUTTON_UPDATE_PLAYER3, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_PLAYER3"));
 	GridBagSizer3->Add(m_pbtnUpdatePlayer3, wxGBPosition(1, 2), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
-	StaticText14 = new wxStaticText(this, ID_STATICTEXT22, _("player67:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT22"));
+	StaticText14 = new wmLabel(this, ID_STATICTEXT22, _("player67:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT22"));
 	StaticText14->SetForegroundColour(wxColour(255,0,128));
 	GridBagSizer3->Add(StaticText14, wxGBPosition(1, 3), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstVersionPlayer67 = new wxStaticText(this, ID_STATICTEXT27, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT27"));
+	m_pstVersionPlayer67 = new wmLabel(this, ID_STATICTEXT27, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT27"));
 	m_pstVersionPlayer67->SetMinSize(wxSize(100,-1));
 	m_pstVersionPlayer67->SetForegroundColour(wxColour(0,0,0));
 	m_pstVersionPlayer67->SetBackgroundColour(wxColour(255,255,255));
 	GridBagSizer3->Add(m_pstVersionPlayer67, wxGBPosition(1, 4), wxDefaultSpan, wxALL|wxALIGN_CENTER_VERTICAL, 2);
 	m_pbtnUpdatePlayer67 = new wmButton(this, ID_BUTTON_UPDATE_PLAYER67, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_PLAYER67"));
 	GridBagSizer3->Add(m_pbtnUpdatePlayer67, wxGBPosition(1, 5), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
-	StaticText15 = new wxStaticText(this, ID_STATICTEXT23, _("controller:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT23"));
+	StaticText15 = new wmLabel(this, ID_STATICTEXT23, _("controller:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT23"));
 	StaticText15->SetForegroundColour(wxColour(255,0,128));
 	GridBagSizer3->Add(StaticText15, wxGBPosition(2, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstVersionController = new wxStaticText(this, ID_STATICTEXT28, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT28"));
+	m_pstVersionController = new wmLabel(this, ID_STATICTEXT28, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT28"));
 	m_pstVersionController->SetMinSize(wxSize(100,-1));
 	m_pstVersionController->SetForegroundColour(wxColour(0,0,0));
 	m_pstVersionController->SetBackgroundColour(wxColour(255,255,255));
 	GridBagSizer3->Add(m_pstVersionController, wxGBPosition(2, 1), wxDefaultSpan, wxALL|wxALIGN_CENTER_VERTICAL, 2);
 	m_pbtnUpdateController = new wmButton(this, ID_BUTTON_UPDATE_CONTROLLER, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_CONTROLLER"));
 	GridBagSizer3->Add(m_pbtnUpdateController, wxGBPosition(2, 2), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
-	StaticText16 = new wxStaticText(this, ID_STATICTEXT24, _("launcher:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT24"));
+	StaticText16 = new wmLabel(this, ID_STATICTEXT24, _("launcher:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT24"));
 	StaticText16->SetForegroundColour(wxColour(255,0,128));
 	GridBagSizer3->Add(StaticText16, wxGBPosition(2, 3), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstVersionLauncher = new wxStaticText(this, ID_STATICTEXT29, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT29"));
+	m_pstVersionLauncher = new wmLabel(this, ID_STATICTEXT29, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT29"));
 	m_pstVersionLauncher->SetMinSize(wxSize(100,-1));
 	m_pstVersionLauncher->SetForegroundColour(wxColour(0,0,0));
 	m_pstVersionLauncher->SetBackgroundColour(wxColour(255,255,255));
@@ -296,6 +294,23 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	Connect(ID_BUTTON_BACK,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnBackClick);
 	//*)
 
+	m_pstHostname->SetTextAlign(wxALIGN_CENTER);
+	StaticText1->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+    StaticText2->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+    StaticText3->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+    StaticText4->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+    StaticText5->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+    StaticText7->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+    StaticText9->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+    StaticText10->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+    StaticText11->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+    StaticText12->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+    StaticText13->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+    StaticText14->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+    StaticText15->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+    StaticText16->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+
+
 	/*
 	Connect(ID_BUTTON_UPDATE,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnFileUpdateClick);
 	Connect(ID_BUTTON_REPLACE,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnReplaceClick);
@@ -315,7 +330,8 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	GridBagSizer1->AddGrowableCol(1);
 	GridBagSizer1->AddGrowableRow(2);
 
-	SetPosition(wxPoint(0,0));
+	Center();
+	Move(wxPoint(0,0));
 	SetSize(800,480);
 
 
@@ -358,21 +374,24 @@ void dlgOptions::OnbtnFileUpdateClick(wxCommandEvent& event)
 void dlgOptions::OnbtnReplaceClick(wxCommandEvent& event)
 {
     //@todo(martim01) Replace File
-    //dlgUsb aDlg(this);
-    //aDlg.ShowModal();
+    dlgUsb aDlg(this,"*.wav");
+    if(aDlg.ShowModal() == wxID_OK)
+    {
+        wxString sEndpoint("/x-epi/"+STR_ENDPOINTS[FILES]);
+        if(m_sUid.empty() == false)
+        {
+            sEndpoint += "/"+wxString::FromUTF8(m_sUid.c_str());
+        }
 
 
-    wxString sEndpoint("/x-epi/"+STR_ENDPOINTS[FILES]+"/");
-    sEndpoint += wxString::FromUTF8(m_sUid.c_str());
+        wxString sFilename="test.wav";
+        wxString sFilepath = "/home/pi/";
 
-
-    wxString sFilename="palace.wav";
-    wxString sFilepath = "C:\\Users\\marti\\Desktop\\Peter Hammill\\";
-
-    dlgUpload aDlg(this, m_pstHostname->GetLabel(), m_sIpAddress, sEndpoint, sFilename, sFilepath);
-    aDlg.ShowModal();
-    FileUpdateReply(aDlg.m_jsReply);
-
+        int nUpload = (m_pbtnReplace->GetLabel() == "Upload") ? MultipartUpload::UPLOAD_POST : MultipartUpload::UPLOAD_PUT;
+        dlgUpload bDlg(this, m_pstHostname->GetLabel(), m_sIpAddress, sEndpoint, nUpload, sFilename, sFilepath);
+        bDlg.ShowModal();
+        FileUpdateReply(bDlg.m_jsReply);
+    }
 }
 
 void dlgOptions::OnbtnDeleteClick(wxCommandEvent& event)
@@ -481,7 +500,7 @@ void dlgOptions::OnRestfulReply(const wxCommandEvent &event)
     }
 }
 
-void dlgOptions::ShowStringValue(const Json::Value& jsData, const std::string& sKey, wxStaticText* pLabel)
+void dlgOptions::ShowStringValue(const Json::Value& jsData, const std::string& sKey, wmLabel* pLabel)
 {
     if(jsData[sKey].isString())
     {
@@ -493,7 +512,7 @@ void dlgOptions::ShowStringValue(const Json::Value& jsData, const std::string& s
     }
 }
 
-void dlgOptions::ShowIntValue(const Json::Value& jsData, const std::string& sKey, wxStaticText* pLabel)
+void dlgOptions::ShowIntValue(const Json::Value& jsData, const std::string& sKey, wmLabel* pLabel)
 {
     if(jsData[sKey].isInt())
     {

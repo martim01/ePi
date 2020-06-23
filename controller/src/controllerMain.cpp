@@ -96,18 +96,19 @@ m_bDown(false)
     //*)
 
 
-    int nWidth = wxDisplay().GetGeometry().GetWidth()/pntLayout.x;
-    int nHeight = wxDisplay().GetGeometry().GetHeight()/pntLayout.y;
+    int nWidth = wxGetClientDisplayRect().GetWidth()/pntLayout.x;
+    int nHeight = wxGetClientDisplayRect().GetHeight()/pntLayout.y;
 
     SetSize(nWidth,nHeight);
     int nColumn = nController%pntLayout.x;
     int nRow = nController/pntLayout.x;
 
-    SetPosition(wxPoint(nColumn*nWidth, nRow*nHeight));
+    Center();
+    Move(wxPoint(nColumn*nWidth+wxGetClientDisplayRect().GetLeft(), nRow*nHeight+wxGetClientDisplayRect().GetTop()));
 
 
-    m_uiName.SetRect(0,0,GetClientRect().GetWidth(),GetClientRect().GetHeight()/2);
-    m_uiStatus.SetRect(0,m_uiName.GetBottom(),m_uiName.GetWidth(),m_uiName.GetHeight()+1);
+    m_uiName.SetRect(1,1,GetClientRect().GetWidth()-1,GetClientRect().GetHeight()/2);
+    m_uiStatus.SetRect(1,m_uiName.GetBottom(),m_uiName.GetWidth(),m_uiName.GetHeight());
 
     m_uiName.SetGradient(0);
     m_uiStatus.SetGradient(0);
@@ -120,7 +121,7 @@ m_bDown(false)
     Connect(wxID_ANY, wxEVT_WS_FINISHED, (wxObjectEventFunction)&controllerDialog::OnWebsocketFinished);
     Connect(wxID_ANY, wxEVT_R_REPLY, (wxObjectEventFunction)&controllerDialog::OnRestfulReply);
 
-    SetBackgroundColour(wxColour(50,50,80));
+    SetBackgroundColour(wxColour(255,255,255));
     UpdateLabels();
 
     m_sIpAddress.Printf("%s:%u", sIpAddress.c_str(), nPort);
@@ -402,6 +403,8 @@ void controllerDialog::Stop()
 void controllerDialog::OnPaint(wxPaintEvent& event)
 {
     wxBufferedPaintDC dc(this);
+    dc.SetBackground(wxBrush(GetBackgroundColour()));
+    dc.Clear();
     wxFont fnt(GetFont());
     fnt.SetPointSize(20);
     dc.SetFont(fnt);

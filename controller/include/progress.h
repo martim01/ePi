@@ -1,9 +1,9 @@
 #pragma once
-#include <wx/control.h>
+#include <wx/window.h>
 #include <wx/timer.h>
 #include "uirect.h"
 
-class Progress : public wxControl
+class Progress : public wxWindow
 {
     DECLARE_EVENT_TABLE()
     wxDECLARE_DYNAMIC_CLASS(Progress);

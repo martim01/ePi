@@ -7,5 +7,6 @@
 		</Project>
 		<Project filename="tests/cron/cron.cbp" />
 		<Project filename="../autoversion/autoversion.cbp" />
+		<Project filename="controller/controller.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>

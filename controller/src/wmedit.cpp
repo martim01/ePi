@@ -19,10 +19,10 @@ DEFINE_EVENT_TYPE(wxEVT_TEXT_ESCAPE)
 DEFINE_EVENT_TYPE(wxEVT_TEXT_TAB)
 DEFINE_EVENT_TYPE(wxEVT_TEXT_BACKSPACE)
 
-wxIMPLEMENT_DYNAMIC_CLASS(wmEdit, wxControl);
+wxIMPLEMENT_DYNAMIC_CLASS(wmEdit, wxWindow);
 
 
-BEGIN_EVENT_TABLE(wmEdit, wxControl)
+BEGIN_EVENT_TABLE(wmEdit, wxWindow)
     EVT_PAINT(wmEdit::OnPaint)
     EVT_SIZE(wmEdit::OnSize)
     EVT_MOUSE_EVENTS(wmEdit::OnMouse)
@@ -34,7 +34,7 @@ BEGIN_EVENT_TABLE(wmEdit, wxControl)
     //EVT_KEY_UP(wmEdit::OnKeyUp)
 END_EVENT_TABLE()
 
-wmEdit::wmEdit() : wxControl(),
+wmEdit::wmEdit() : wxWindow(),
     m_nStyle(0),
     m_bFocus(false),
     m_pCaret(0),
@@ -57,7 +57,7 @@ wmEdit::~wmEdit()
 }
 
 
-wmEdit::wmEdit(wxWindow * pParent, wxWindowID id, const wxString& value, const wxPoint& pos, const wxSize& size,long style, const wxValidator& validator, const wxString& name) : wxControl(),
+wmEdit::wmEdit(wxWindow * pParent, wxWindowID id, const wxString& value, const wxPoint& pos, const wxSize& size,long style, const wxValidator& validator, const wxString& name) : wxWindow(),
     m_nStyle(style),
     m_bFocus(false),
     m_pCaret(0),
