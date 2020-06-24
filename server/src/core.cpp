@@ -549,6 +549,7 @@ response Core::PostFile(mg_connection* pConnection, const query& theQuery, const
 
         m_server.AddEndpoint(endpoint(MongooseServer::GET, aUrl), std::bind(&Core::GetFile, this, _1,_2,_3,_4));
         m_server.AddEndpoint(endpoint(MongooseServer::PATCH, aUrl), std::bind(&Core::PatchFile, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(endpoint(MongooseServer::PUT, aUrl), std::bind(&Core::PutFile, this, _1,_2,_3,_4));
         m_server.AddEndpoint(endpoint(MongooseServer::DELETE, aUrl), std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
     }
 
