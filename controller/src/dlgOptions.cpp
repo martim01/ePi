@@ -81,7 +81,7 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
     m_client(this)
 
 {
-	//(*Initialize(dlgOptions)
+
 	wxBoxSizer* BoxSizer0;
 	wxBoxSizer* BoxSizer1;
 	wxBoxSizer* BoxSizer2;
@@ -191,7 +191,7 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	m_pbtnReplace = new wmButton(this, ID_BUTTON_REPLACE, _("Replace"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_REPLACE"));
 	BoxSizer2->Add(m_pbtnReplace, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
 	BoxSizer2->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
-	m_pbtnDelete = new wmButton(this, ID_BUTTON_DELETE, _("Delete"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_DELETE"));
+	m_pbtnDelete = new wmButton(this, ID_BUTTON_DELETE, _("Delete"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_DELETE"));
 	BoxSizer2->Add(m_pbtnDelete, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
 	StaticBoxSizer1->Add(BoxSizer2, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 0);
 	BoxSizer1->Add(StaticBoxSizer1, 1, wxLEFT|wxEXPAND, 5);
@@ -251,20 +251,28 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	BoxSizer1->Add(StaticBoxSizer2, 0, wxBOTTOM|wxLEFT|wxEXPAND, 5);
 	BoxSizer3->Add(BoxSizer1, 1, wxALL|wxEXPAND, 0);
 	StaticBoxSizer3 = new wxStaticBoxSizer(wxVERTICAL, this, wxEmptyString);
-	m_pbtnRestartServer = new wmButton(this, ID_BUTTON_RESTART_SERVER, _("Restart Server"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_RESTART_SERVER"));
+	m_pbtnRestartServer = new wmButton(this, ID_BUTTON_RESTART_SERVER, _("Restart\nServer"), wxDefaultPosition, wxSize(100,40), wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_RESTART_SERVER"));
 	m_pbtnRestartServer->SetForegroundColour(wxColour(255,255,255));
 	m_pbtnRestartServer->SetBackgroundColour(wxColour(128,0,0));
 	StaticBoxSizer3->Add(m_pbtnRestartServer, 1, wxALL|wxEXPAND, 5);
-	m_pbtnRestartOS = new wmButton(this, ID_BUTTON_RESTART_OS, _("Restart OS"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_RESTART_OS"));
+	m_pbtnRestartOS = new wmButton(this, ID_BUTTON_RESTART_OS, _("Restart\nServer OS"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_RESTART_OS"));
 	m_pbtnRestartOS->SetForegroundColour(wxColour(255,255,255));
 	m_pbtnRestartOS->SetBackgroundColour(wxColour(128,0,0));
 	StaticBoxSizer3->Add(m_pbtnRestartOS, 1, wxALL|wxEXPAND, 5);
-	m_pbtnShutdownOS = new wmButton(this, ID_BUTTON_SHUTDOWN_OS, _("Shutdown OS"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_SHUTDOWN_OS"));
+	m_pbtnShutdownOS = new wmButton(this, ID_BUTTON_SHUTDOWN_OS, _("Shutdown\nServer OS"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_SHUTDOWN_OS"));
 	m_pbtnShutdownOS->SetForegroundColour(wxColour(255,255,255));
 	m_pbtnShutdownOS->SetBackgroundColour(wxColour(128,0,0));
 	StaticBoxSizer3->Add(m_pbtnShutdownOS, 1, wxALL|wxEXPAND, 5);
-	StaticBoxSizer3->Add(-1,-1,2, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-	m_pbtnSSH = new wmButton(this, ID_BUTTON_SSH, _("SSH"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_SSH"));
+
+	m_pbtnStopController = new wmButton(this, wxNewId(), _("Shutdown\nController"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_SHUTDOWN_OS"));
+	m_pbtnStopController->SetForegroundColour(wxColour(255,255,255));
+	m_pbtnStopController->SetBackgroundColour(wxColour(128,0,0));
+	StaticBoxSizer3->Add(m_pbtnStopController, 1, wxALL|wxEXPAND, 5);
+
+	StaticBoxSizer3->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+
+
+	m_pbtnSSH = new wmButton(this, ID_BUTTON_SSH, _("SSH"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_SSH"));
 	m_pbtnSSH->SetForegroundColour(wxColour(255,255,255));
 	m_pbtnSSH->SetBackgroundColour(wxColour(68,1,158));
 	StaticBoxSizer3->Add(m_pbtnSSH, 1, wxALL|wxEXPAND, 5);
@@ -281,18 +289,19 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 
 	Connect(ID_BUTTON_UPDATE,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnFileUpdateClick);
 	Connect(ID_BUTTON_REPLACE,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnReplaceClick);
-	Connect(ID_BUTTON_DELETE,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnDeleteClick);
+	Connect(ID_BUTTON_DELETE,wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnDeleteClick);
 	Connect(ID_BUTTON_UPDATE_EPISERVER,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnUpdateEpiServerClick);
 	Connect(ID_BUTTON_UPDATE_PLAYER3,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnUpdatePlayer3Click);
 	Connect(ID_BUTTON_UPDATE_PLAYER67,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnUpdatePlayer67Click);
 	Connect(ID_BUTTON_UPDATE_CONTROLLER,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnUpdateControllerClick);
 	Connect(ID_BUTTON_UPDATE_LAUNCHER,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnUpdateLauncherClick);
-	Connect(ID_BUTTON_RESTART_SERVER,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnRestartServerClick);
-	Connect(ID_BUTTON_RESTART_OS,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnRestartOSClick);
-	Connect(ID_BUTTON_SHUTDOWN_OS,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnShutdownOSClick);
-	Connect(ID_BUTTON_SSH,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnSSHClick);
+	Connect(ID_BUTTON_RESTART_SERVER,wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnRestartServerClick);
+	Connect(ID_BUTTON_RESTART_OS,wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnRestartOSClick);
+	Connect(ID_BUTTON_SHUTDOWN_OS,wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnShutdownOSClick);
+	Connect(m_pbtnStopController->GetId(),wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnShutdownControllerClick);
+	Connect(ID_BUTTON_SSH,wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnSSHClick);
 	Connect(ID_BUTTON_BACK,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnBackClick);
-	//*)
+
 
 	m_pstHostname->SetTextAlign(wxALIGN_CENTER);
 	StaticText1->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
@@ -373,8 +382,7 @@ void dlgOptions::OnbtnFileUpdateClick(wxCommandEvent& event)
 
 void dlgOptions::OnbtnReplaceClick(wxCommandEvent& event)
 {
-    //@todo(martim01) Replace File
-    dlgUsb aDlg(this,"*.wav");
+    dlgUsb aDlg(this,m_pstHostname->GetLabel(),"*.wav");
     if(aDlg.ShowModal() == wxID_OK)
     {
         wxString sEndpoint("/x-epi/"+STR_ENDPOINTS[FILES]);
@@ -382,21 +390,46 @@ void dlgOptions::OnbtnReplaceClick(wxCommandEvent& event)
         {
             sEndpoint += "/"+wxString::FromUTF8(m_sUid.c_str());
         }
+        wxLogDebug("Endpoint: %s", sEndpoint.c_str());
 
-
-        wxString sFilename="test.wav";
-        wxString sFilepath = "/home/pi/";
+        wxString sFilename=aDlg.m_sSelectedFile.AfterLast('/');
+        wxString sFilepath = aDlg.m_sSelectedFile.BeforeLast('/');
 
         int nUpload = (m_pbtnReplace->GetLabel() == "Upload") ? MultipartUpload::UPLOAD_POST : MultipartUpload::UPLOAD_PUT;
-        dlgUpload bDlg(this, m_pstHostname->GetLabel(), m_sIpAddress, sEndpoint, nUpload, sFilename, sFilepath);
+        dlgUpload bDlg(this, m_pstHostname->GetLabel(), m_sIpAddress, sEndpoint, nUpload, sFilename, sFilepath, aDlg.m_sSelectedDevice);
+
+
+        if(m_pbtnReplace->GetLabel() == "Upload")
+        {
+            std::map<std::string, std::string> mData;
+            mData.insert(std::make_pair("label", sFilename.ToStdString()));
+            mData.insert(std::make_pair("description", wxDateTime::Now().Format("Uploaded at %Y-%m-%d %H:%M:%S").ToStdString()));
+            bDlg.SetMulitpartTextData(mData);
+        }
+
+
         bDlg.ShowModal();
-        FileUpdateReply(bDlg.m_jsReply);
+        if(m_pbtnReplace->GetLabel() == "Upload")
+        {
+            if(bDlg.m_jsReply["result"].asBool() == false)
+            {
+                ShowError("Failed to upload file", bDlg.m_jsReply);
+            }
+            else
+            {
+                m_sUid = bDlg.m_jsReply["uid"].asString();
+                GetFileDetails();
+            }
+        }
+        else
+        {
+            FileUpdateReply(bDlg.m_jsReply);
+        }
     }
 }
 
 void dlgOptions::OnbtnDeleteClick(wxCommandEvent& event)
 {
-    if(wxMessageBox("Really delete the file?", "ePi Controller", wxYES_NO) == wxYES)
     {
         std::string sEndpoint((m_sUrl+STR_ENDPOINTS[FILES]+"/").ToStdString());
         sEndpoint += m_sUid;
@@ -406,12 +439,41 @@ void dlgOptions::OnbtnDeleteClick(wxCommandEvent& event)
 
 void dlgOptions::OnbtnUpdateEpiServerClick(wxCommandEvent& event)
 {
-    //@todo(martim01) Update EpiServer
+    UpdateApp("episerver");
+
+}
+
+void dlgOptions::UpdateApp(const wxString& sApp)
+{
+    dlgUsb aDlg(this,m_pstHostname->GetLabel(),sApp);
+    if(aDlg.ShowModal() == wxID_OK)
+    {
+        UpdateApp(sApp, aDlg.m_sSelectedFile, aDlg.m_sSelectedDevice);
+    }
+}
+
+void dlgOptions::UpdateApp(const wxString& sApp, const wxString& sChosenFile, const wxString& sChosenDevice)
+{
+    wxString sEndpoint("/x-epi/"+STR_ENDPOINTS[UPDATE]);
+    wxLogDebug("Endpoint: %s", sEndpoint.c_str());
+
+    wxString sFilename=sChosenFile.AfterLast('/');
+    wxString sFilepath = sChosenFile.BeforeLast('/');
+
+    dlgUpload bDlg(this, m_pstHostname->GetLabel(), m_sIpAddress, sEndpoint, MultipartUpload::UPLOAD_PUT, sFilename, sFilepath, sChosenDevice);
+
+    std::map<std::string, std::string> mData;
+    mData.insert(std::make_pair("application", sApp.ToStdString()));
+    bDlg.SetMulitpartTextData(mData);
+
+    bDlg.ShowModal();
+    m_client.Get((m_sUrl+STR_ENDPOINTS[UPDATE]).ToStdString(), UPDATE);
+
 }
 
 void dlgOptions::OnbtnUpdatePlayer3Click(wxCommandEvent& event)
 {
-    //@todo(martim01) Update Player3
+    UpdateApp("player3");
 }
 
 void dlgOptions::OnbtnUpdateControllerClick(wxCommandEvent& event)
@@ -421,7 +483,7 @@ void dlgOptions::OnbtnUpdateControllerClick(wxCommandEvent& event)
 
 void dlgOptions::OnbtnUpdatePlayer67Click(wxCommandEvent& event)
 {
-    //@todo(martim01) Update Player67
+    UpdateApp("player67");
 }
 
 void dlgOptions::OnbtnUpdateLauncherClick(wxCommandEvent& event)
@@ -431,7 +493,6 @@ void dlgOptions::OnbtnUpdateLauncherClick(wxCommandEvent& event)
 
 void dlgOptions::OnbtnRestartServerClick(wxCommandEvent& event)
 {
-    if(wxMessageBox("Restart Server?", "ePi Controller", wxYES_NO) == wxYES)
     {
         std::string sEndpoint = (m_sUrl+STR_ENDPOINTS[POWER]).ToStdString();
         std::string sCommand = "{ \"command\": \"restart server\"}";
@@ -441,7 +502,6 @@ void dlgOptions::OnbtnRestartServerClick(wxCommandEvent& event)
 
 void dlgOptions::OnbtnRestartOSClick(wxCommandEvent& event)
 {
-    if(wxMessageBox("Restart OS?", "ePi Controller", wxYES_NO) == wxYES)
     {
         std::string sEndpoint = (m_sUrl+STR_ENDPOINTS[POWER]).ToStdString();
         std::string sCommand = "{ \"command\": \"restart os\"}";
@@ -451,11 +511,17 @@ void dlgOptions::OnbtnRestartOSClick(wxCommandEvent& event)
 
 void dlgOptions::OnbtnShutdownOSClick(wxCommandEvent& event)
 {
-    if(wxMessageBox("Shutdown OS?", "ePi Controller", wxYES_NO) == wxYES)
     {
         std::string sEndpoint = (m_sUrl+STR_ENDPOINTS[POWER]).ToStdString();
         std::string sCommand = "{ \"command\": \"shutdown\"}";
         m_client.Put(sEndpoint, sCommand.c_str(), POWER);
+    }
+}
+
+void dlgOptions::OnbtnShutdownControllerClick(wxCommandEvent& event)
+{
+    {
+        EndModal(wxID_CANCEL);
     }
 }
 
@@ -466,7 +532,7 @@ void dlgOptions::OnbtnSSHClick(wxCommandEvent& event)
 
 void dlgOptions::OnbtnBackClick(wxCommandEvent& event)
 {
-    EndModal(wxID_CANCEL);
+    EndModal(wxID_OK);
 }
 
 
@@ -606,6 +672,7 @@ void dlgOptions::ShowError(wxString sMessage, const Json::Value& jsData)
             sMessage += wxString::FromUTF8(jsData["reason"][i].asString().c_str());
         }
     }
+    //@todo(martim01) - nicer message box
     wxMessageBox(sMessage);
 }
 

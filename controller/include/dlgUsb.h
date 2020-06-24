@@ -17,7 +17,7 @@ class dlgUsb: public wxDialog
 {
 	public:
 
-		dlgUsb(wxWindow* parent, const wxString& sFilename, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
+		dlgUsb(wxWindow* parent, const wxString& sHostname, const wxString& sFilename, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
 		virtual ~dlgUsb();
 
 		//(*Declarations(dlgUsb)
@@ -27,6 +27,11 @@ class dlgUsb: public wxDialog
 		wmLabel* m_pstHostname;
 		//*)
 		wmLabel* m_plblUSB;
+        wmList* m_plstLog;
+        wmButton* m_pbtnCheck;
+
+        wxString m_sSelectedFile;
+        wxString m_sSelectedDevice;
 
 	protected:
 
@@ -40,19 +45,24 @@ class dlgUsb: public wxDialog
 
 	private:
 
-		//(*Handlers(dlgUsb)
+
 		void OnbtnCancelClick(wxCommandEvent& event);
 		void OnbtnUploadClick(wxCommandEvent& event);
-		//*)
+		void OnbtnCheckClick(wxCommandEvent& event);
+
 
 		void OnUsbFound(const wxCommandEvent& event);
 		void OnUsbFileFound(const wxCommandEvent& event);
 		void OnUsbFinished(const wxCommandEvent& event);
+		void OnUsbError(const wxCommandEvent& event);
+        void OnFileSelected(const wxCommandEvent& event);
 
 		void StartCheck();
 		void CheckUSB();
 
 		UsbChecker m_checker;
+
+		std::map<wxString, wxString> m_mFiles;
 
 		DECLARE_EVENT_TABLE()
 };

@@ -436,7 +436,12 @@ void controllerDialog::OntimerMenuTrigger(wxTimerEvent& event)
     UpdateLabels();
 
     dlgOptions aDlg(this, m_uiName.GetLabel(), m_sIpAddress, m_sUrl, m_sDefaultFileUid, wxNewId(), wxPoint(0,0), wxSize(800,480));
-    aDlg.ShowModal();
-
-    m_rClient.Get((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString(), FILES);
+    if(aDlg.ShowModal() == wxID_CANCEL)
+    {
+        EndModal(wxID_OK);
+    }
+    else
+    {
+        m_rClient.Get((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString(), FILES);
+    }
 }

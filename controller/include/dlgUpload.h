@@ -12,12 +12,18 @@
 #include "multipartupload.h"
 #include "json/json.h"
 #include "wmlabel.h"
+#include <map>
+#include <string>
+#include <wx/timer.h>
 
 class dlgUpload: public wxDialog
 {
 	public:
 
-		dlgUpload(wxWindow* parent, const wxString& sHostname, const wxString& sIpAddress, const wxString& sEndpoint, int nMethod, const wxString& sFilename, const wxString& sFilepath, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
+		dlgUpload(wxWindow* parent, const wxString& sHostname, const wxString& sIpAddress, const wxString& sEndpoint, int nMethod, const wxString& sFilename,
+		const wxString& sFilepath, const wxString& sDevice, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
+
+		void SetMulitpartTextData(const std::map<std::string, std::string>& mData);
 		virtual ~dlgUpload();
 
 		//(*Declarations(dlgUpload)
@@ -41,6 +47,7 @@ class dlgUpload: public wxDialog
 		static const long ID_STATICTEXT2;
 		static const long ID_BUTTON_CANCEL;
 		//*)
+		wxTimer m_timer;
 
 	private:
 
@@ -49,6 +56,8 @@ class dlgUpload: public wxDialog
 		//*)
         void OnReply(const wxCommandEvent& event);
         void OnProgress(const wxCommandEvent& event);
+        void OnTimer(const wxTimerEvent& event);
+        bool MountDevice();
 
 		MultipartUpload m_upload;
 
@@ -57,6 +66,9 @@ class dlgUpload: public wxDialog
 		int m_nMethod;
 		wxString m_sFilename;
 		wxString m_sFilePath;
+		wxString m_sDevice;
+
+		std::map<std::string, std::string> m_mData;
 
 		DECLARE_EVENT_TABLE()
 };

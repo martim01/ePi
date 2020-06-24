@@ -23,7 +23,6 @@ class dlgOptions: public wxDialog
 		dlgOptions(wxWindow* parent, const wxString& sHostname, const wxString& sIpAddress, const wxString& sUrl, const std::string& sUid, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
 		virtual ~dlgOptions();
 
-		//(*Declarations(dlgOptions)
 		wmButton* m_pbtnBack;
 		wmButton* m_pbtnDelete;
 		wmButton* m_pbtnReplace;
@@ -31,6 +30,7 @@ class dlgOptions: public wxDialog
 		wmButton* m_pbtnRestartServer;
 		wmButton* m_pbtnSSH;
 		wmButton* m_pbtnShutdownOS;
+		wmButton* m_pbtnStopController;
 		wmButton* m_pbtnUpdate;
 		wmButton* m_pbtnUpdateController;
 		wmButton* m_pbtnUpdateEpiServer;
@@ -68,7 +68,7 @@ class dlgOptions: public wxDialog
 		wmLabel* m_pstVersionLauncher;
 		wmLabel* m_pstVersionPlayer3;
 		wmLabel* m_pstVersionPlayer67;
-		//*)
+
 
 	protected:
 
@@ -139,6 +139,8 @@ class dlgOptions: public wxDialog
 		void OnbtnBackClick(wxCommandEvent& event);
 		//*)
 
+		void OnbtnShutdownControllerClick(wxCommandEvent& event);
+
         void OnRestfulReply(const wxCommandEvent& event);
 
         void GetFileDetails();
@@ -154,6 +156,9 @@ class dlgOptions: public wxDialog
         void ShowIntValue(const Json::Value& jsData, const std::string& sKey, wmLabel* pLabel);
 
         void ShowError(wxString sMessage, const Json::Value& jsData);
+
+        void UpdateApp(const wxString& sApp);
+        void UpdateApp(const wxString& sApp, const wxString& sChosenFile, const wxString& sChosenDevice);
 
         wxString m_sIpAddress;
         wxString m_sUrl;

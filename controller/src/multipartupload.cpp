@@ -129,6 +129,7 @@ void MultipartUpload::ConnectionEvent(mg_connection* pConnection, int nStatus)
     wxLogDebug("MultipartUpload::ConnectionEvent %d", nStatus);
     if(nStatus != 0)
     {
+        wxLogDebug("Failed to connect %d",nStatus);
         //@todo(martim01) log this somehow
         m_bLoop = false;
     }
@@ -142,33 +143,43 @@ void MultipartUpload::ConnectionEvent(mg_connection* pConnection, int nStatus)
         {
             nSize += pairFile.second.size();
         }
-        nSize += GetTotalFileLength();
+        size_t nFileSize =GetTotalFileLength();
 
-        nSize += std::string("--"+BOUNDARY+"--"+CRLF+CRLF).size();
+        if(nFileSize > 0)
+        {
+            nSize += nFileSize;
+            nSize += std::string("--"+BOUNDARY+"--"+CRLF+CRLF).size();
 
-        m_dLength = nSize;
-        m_dRead = 0;
-        m_dSent = 0;
+            m_dLength = nSize;
+            m_dRead = 0;
+            m_dSent = 0;
 
-        //send the header...
+            //send the header...
 
-        std::stringstream ssHeader;
-        ssHeader << UPLOAD[m_qTasks.front().nMethod] << " " << m_qTasks.front().sEndpoint << " HTTP/1.1" << CRLF;
-        ssHeader << "HOST: " << m_qTasks.front().sHost << CRLF;
-        ssHeader << "User-Agent: Mongoose" << MG_VERSION << CRLF;
-        ssHeader << "Content-Length: " << nSize << CRLF;
-        ssHeader << "Connection: keep-alive" << CRLF;
-        ssHeader << "Content-Type: multipart/form-data; boundary=" << BOUNDARY << CRLF;
-        ssHeader << "Accept: */* " << CRLF;
-        ssHeader << "Origin: null " << CRLF;
-        ssHeader << CRLF;
-        ssHeader << sDataBody;
+            std::stringstream ssHeader;
+            ssHeader << UPLOAD[m_qTasks.front().nMethod] << " " << m_qTasks.front().sEndpoint << " HTTP/1.1" << CRLF;
+            ssHeader << "HOST: " << m_qTasks.front().sHost << CRLF;
+            ssHeader << "User-Agent: Mongoose" << MG_VERSION << CRLF;
+            ssHeader << "Content-Length: " << nSize << CRLF;
+            ssHeader << "Connection: keep-alive" << CRLF;
+            ssHeader << "Content-Type: multipart/form-data; boundary=" << BOUNDARY << CRLF;
+            ssHeader << "Accept: */* " << CRLF;
+            ssHeader << "Origin: null " << CRLF;
+            ssHeader << CRLF;
+            ssHeader << sDataBody;
 
-        mg_printf(pConnection, ssHeader.str().c_str());
+            mg_printf(pConnection, ssHeader.str().c_str());
 
-        m_itFile = m_mFileBody.begin();
-        m_bMore = true;
+            wxLogDebug(wxString::FromUTF8(ssHeader.str().c_str()));
 
+            m_itFile = m_mFileBody.begin();
+            m_bMore = true;
+        }
+        else
+        {
+            wxLogDebug("Could not open files");
+            m_bLoop = false;
+        }
     }
 }
 
@@ -183,7 +194,8 @@ void MultipartUpload::InitSendFile(mg_connection* pConnection)
             m_ifs.close();
         }
         //Open and find the length of the file
-        m_ifs.open(itFileData->second.second.Get()+itFileData->second.first.Get(), std::ifstream::binary | std::ifstream::ate);
+        wxLogDebug("InitSendFile %s", wxString::FromUTF8((itFileData->second.second.Get()+"/"+itFileData->second.first.Get()).c_str()));
+        m_ifs.open(itFileData->second.second.Get()+"/"+itFileData->second.first.Get(), std::ifstream::binary | std::ifstream::ate);
         m_dLength = static_cast<double>(static_cast<size_t>(m_ifs.tellg()));
         m_ifs.seekg(0);
 
@@ -204,6 +216,7 @@ void MultipartUpload::InitSendFile(mg_connection* pConnection)
 
 void MultipartUpload::SendSomeData(mg_connection* pConnection)
 {
+    wxLogDebug("MultipartUpload::SendSomeData");
     if(m_ifs.is_open() == false || m_ifs.eof())
     {
         InitSendFile(pConnection);
@@ -264,10 +277,13 @@ std::map<std::string, std::string> MultipartUpload::GetFileBody()
 
 size_t MultipartUpload::GetTotalFileLength()
 {
+    wxLogDebug("MultipartUpload::GetTotalFileLength");
     size_t nSize = 0;
     for(auto pairFile : m_qTasks.front().mFiles)
     {
-        std::string sPath(pairFile.second.second.Get()+pairFile.second.first.Get());
+        std::string sPath(pairFile.second.second.Get()+"/"+pairFile.second.first.Get());
+
+        wxLogDebug("MultipartUpload::GetTotalFileLength: '%s'", wxString::FromUTF8(sPath.c_str()).c_str());
         std::ifstream ifs(sPath, std::ifstream::ate | std::ifstream::binary);
         if(ifs)
         {

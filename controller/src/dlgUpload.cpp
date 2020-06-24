@@ -5,6 +5,8 @@
 #include <wx/msgdlg.h>
 #include <wx/log.h>
 
+#include <sys/mount.h>
+
 //(*InternalHeaders(dlgUpload)
 #include <wx/font.h>
 #include <wx/intl.h>
@@ -24,12 +26,14 @@ BEGIN_EVENT_TABLE(dlgUpload,wxDialog)
 	//*)
 END_EVENT_TABLE()
 
-dlgUpload::dlgUpload(wxWindow* parent, const wxString& sHostname, const wxString& sIpAddress, const wxString& sEndpoint, int nMethod, const wxString& sFilename, const wxString& sFilepath, wxWindowID id,const wxPoint& pos,const wxSize& size) : m_upload(this),
+dlgUpload::dlgUpload(wxWindow* parent, const wxString& sHostname, const wxString& sIpAddress, const wxString& sEndpoint, int nMethod, const wxString& sFilename,
+const wxString& sFilepath, const wxString& sDevice, wxWindowID id,const wxPoint& pos,const wxSize& size) : m_upload(this),
     m_sIpAddress(sIpAddress),
     m_sEndpoint(sEndpoint),
     m_nMethod(nMethod),
     m_sFilename(sFilename),
-    m_sFilePath(sFilepath)
+    m_sFilePath(sFilepath),
+    m_sDevice(sDevice)
 {
 	//(*Initialize(dlgUpload)
 	wxBoxSizer* BoxSizer1;
@@ -39,12 +43,13 @@ dlgUpload::dlgUpload(wxWindow* parent, const wxString& sHostname, const wxString
 	Move(wxDefaultPosition);
 	SetBackgroundColour(wxColour(0,0,0));
 	BoxSizer1 = new wxBoxSizer(wxVERTICAL);
-	m_pstHostname = new wmLabel(this, ID_STATICTEXT30, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxALIGN_CENTER, _T("ID_STATICTEXT30"));
+	m_pstHostname = new wmLabel(this, wxNewId(), sHostname, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE, _T("ID_STATICTEXT30"));
 	m_pstHostname->SetMinSize(wxSize(800,40));
 	m_pstHostname->SetForegroundColour(wxColour(255,255,255));
 	m_pstHostname->SetBackgroundColour(wxColour(0,128,64));
 	wxFont m_pstHostnameFont(24,wxFONTFAMILY_SWISS,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_BOLD,false,_T("Arial"),wxFONTENCODING_DEFAULT);
 	m_pstHostname->SetFont(m_pstHostnameFont);
+
 	BoxSizer1->Add(m_pstHostname, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
 	BoxSizer1->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
 	m_pstDetails = new wmLabel(this, ID_STATICTEXT1, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxALIGN_CENTER, _T("ID_STATICTEXT1"));
@@ -85,32 +90,46 @@ dlgUpload::dlgUpload(wxWindow* parent, const wxString& sHostname, const wxString
 	m_pGuage->SetBackgroundColour(*wxBLACK);
 	m_pGuage->SetForegroundColour(wxColour(0,152,230));
 
+    m_timer.SetOwner(this, wxNewId());
 
 
 	Connect(wxID_ANY, wxEVT_R_REPLY, (wxObjectEventFunction)&dlgUpload::OnReply);
 	Connect(wxID_ANY, wxEVT_R_PROGRESS, (wxObjectEventFunction)&dlgUpload::OnProgress);
+    Connect(m_timer.GetId(), wxEVT_TIMER, (wxObjectEventFunction)&dlgUpload::OnTimer);
 
-	m_pstDetails->SetLabel(wxString::Format("Uploading '%s'...", m_sFilename.c_str()));
 }
 
 int dlgUpload::ShowModal()
 {
-    std::map<std::string,std::string> mData;
-    std::map<std::string, muFile> mFiles;
-    mFiles.insert(std::make_pair("file", muFile(muFileName(m_sFilename.ToStdString()), muFilePath(m_sFilePath.ToStdString()))));
+    m_timer.Start(250,true);
+    return wxDialog::ShowModal();
+}
 
-    switch(m_nMethod)
+void dlgUpload::OnTimer(const wxTimerEvent& event)
+{
+    if(MountDevice())
+	{
+        m_pstDetails->SetLabel(wxString::Format("Uploading '%s'...", m_sFilename.c_str()));
+
+        std::map<std::string, muFile> mFiles;
+        mFiles.insert(std::make_pair("file", muFile(muFileName(m_sFilename.ToStdString()), muFilePath(m_sFilePath.ToStdString()))));
+
+        switch(m_nMethod)
+        {
+            case MultipartUpload::UPLOAD_PUT:
+                m_upload.Put(m_sIpAddress.ToStdString(), m_sEndpoint.ToStdString(), m_mData, mFiles, 0);
+                break;
+            case MultipartUpload::UPLOAD_POST:
+                m_upload.Post(m_sIpAddress.ToStdString(), m_sEndpoint.ToStdString(), m_mData, mFiles, 0);
+                break;
+        }
+    }
+    else
     {
-        case MultipartUpload::UPLOAD_PUT:
-            m_upload.Put(m_sIpAddress.ToStdString(), m_sEndpoint.ToStdString(), mData, mFiles, 0);
-            break;
-        case MultipartUpload::UPLOAD_POST:
-            m_upload.Post(m_sIpAddress.ToStdString(), m_sEndpoint.ToStdString(), mData, mFiles, 0);
-            break;
+        m_pstDetails->SetLabel("Failed to mount device");
     }
 
 
-    return wxDialog::ShowModal();
 }
 
 dlgUpload::~dlgUpload()
@@ -131,7 +150,8 @@ void dlgUpload::OnbtnCancelClick(wxCommandEvent& event)
 
 void dlgUpload::OnReply(const wxCommandEvent& event)
 {
-    wxLogDebug("dglUpload::OnReply  %s", event.GetString().c_str());
+    umount("/mnt/share");
+
     m_jsReply = ConvertToJson(event.GetString().ToStdString());
     if(m_jsReply["result"].isBool() && m_jsReply["result"].asBool() == false)
     {
@@ -148,4 +168,39 @@ void dlgUpload::OnProgress(const wxCommandEvent& event)
     wxLogDebug("Upload: %d", event.GetInt());
     m_pGuage->SetValue(event.GetInt());
     m_pstProgress->SetLabel(wxString::Format("%03d%%", event.GetInt()));
+}
+
+bool dlgUpload::MountDevice()
+{
+    if(m_sDevice.empty())
+    {
+        return true;
+    }
+
+    if(wxDirExists("/mnt/share") == false)
+    {
+        wxMkdir("/mnt/share");
+    }
+    int nResult = umount("/mnt/share");
+    if(nResult == -1 && errno != EAGAIN && errno != EINVAL)
+    {
+        wxLogDebug("Failed to umount");
+        return false;
+    }
+    std::string sOpt("umask=000");
+
+    nResult = mount(m_sDevice.ToStdString().c_str(), "/mnt/share", "vfat", MS_RDONLY | MS_SILENT, nullptr);
+    if(nResult == -1)
+    {
+        wxLogDebug("Failed to mount %s", m_sDevice.c_str());
+        return false;
+    }
+    wxLogDebug("%s mounted", m_sDevice.c_str());
+    return true;
+
+}
+
+void dlgUpload::SetMulitpartTextData(const std::map<std::string, std::string>& mData)
+{
+    m_mData = mData;
 }

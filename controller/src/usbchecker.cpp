@@ -2,11 +2,15 @@
 #include <thread>
 #include <wx/dir.h>
 #include <wx/log.h>
-
+#include <sys/mount.h>
+#include <wx/msgdlg.h>
+#include "json/json.h"
+#include "epiwriter.h"
 
 wxDEFINE_EVENT(wxEVT_USB_FOUND, wxCommandEvent);
 wxDEFINE_EVENT(wxEVT_USB_FILE_FOUND, wxCommandEvent);
 wxDEFINE_EVENT(wxEVT_USB_FINISHED, wxCommandEvent);
+wxDEFINE_EVENT(wxEVT_USB_ERROR, wxCommandEvent);
 
 
 
@@ -20,11 +24,14 @@ void UsbChecker::RunCheck(const wxString& sFilename)
 
         for(size_t i = 0; i < asFiles.GetCount(); i++)
         {
-            wxString sDebug(asFiles[i]);
-            wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_USB_FOUND);
-            pEvent->SetString(asFiles[i]);
-            wxQueueEvent(m_pHandler, pEvent);
-            MountAndSearch(sDebug, sFilename);
+            if(asFiles[i].Find("part") != wxNOT_FOUND)
+            {
+                wxString sDebug(asFiles[i]);
+                wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_USB_FOUND);
+                pEvent->SetString(asFiles[i]);
+                wxQueueEvent(m_pHandler, pEvent);
+                MountAndSearch(sDebug, sFilename);
+            }
         }
         wxCommandEvent* pEventFinished = new wxCommandEvent(wxEVT_USB_FINISHED);
         wxQueueEvent(m_pHandler, pEventFinished);
@@ -43,10 +50,29 @@ void UsbChecker::MountAndSearch(const wxString& sDevice, const wxString& sFilena
     {
         wxMkdir("/mnt/share");
     }
-    wxExecute("sudo umount /mnt/share", wxEXEC_SYNC);
-    wxString sCommand(wxString::Format("sudo mount -o umask=000 /dev/%s /mnt/share", sDevice.c_str()));
+    int nResult = umount("/mnt/share");
+    if(nResult == -1 && errno != EAGAIN && errno != EINVAL)
+    {
+        wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_USB_ERROR);
+        pEvent->SetInt(errno);
+        pEvent->SetString(wxString::Format("umount: %s", wxString::FromUTF8(strerror(errno)).c_str()));
 
-    wxExecute(sCommand, wxEXEC_SYNC);
+        wxQueueEvent(m_pHandler, pEvent);
+        return;
+    }
+    std::string sOpt("umask=000");
+
+    nResult = mount(sDevice.ToStdString().c_str(), "/mnt/share", "vfat", MS_RDONLY | MS_SILENT, nullptr);
+    if(nResult == -1)
+    {
+        wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_USB_ERROR);
+        pEvent->SetInt(errno);
+        pEvent->SetString(wxString::Format("%s: %s", sDevice.c_str(), wxString::FromUTF8(strerror(errno)).c_str()));
+
+        wxQueueEvent(m_pHandler, pEvent);
+        return;
+    }
+
 
     sPath = "/mnt/share";
 
@@ -56,8 +82,13 @@ void UsbChecker::MountAndSearch(const wxString& sDevice, const wxString& sFilena
     for(size_t i = 0; i < asFiles.size(); i++)
     {
         wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_USB_FILE_FOUND);
-        pEvent->SetString(wxString::Format("{ \"Device\": \"%s\", \"File\": \"%s\"}", sDevice.c_str(), asFiles[i].c_str()));
+        Json::Value jsValue;
+        jsValue["device"] = sDevice.ToStdString();
+        jsValue["file"] = asFiles[i].ToStdString();
+        std::stringstream ss;
+        epiWriter::Get().writeToSStream(jsValue, ss);
+        pEvent->SetString(wxString::FromUTF8(ss.str().c_str()));
         wxQueueEvent(m_pHandler, pEvent);
     }
-
+    umount("/mnt/share");
 }
