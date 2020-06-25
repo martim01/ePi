@@ -158,7 +158,6 @@ class dlgOptions: public wxDialog
         void ShowError(wxString sMessage, const Json::Value& jsData);
 
         void UpdateApp(const wxString& sApp);
-        void UpdateApp(const wxString& sApp, const wxString& sChosenFile, const wxString& sChosenDevice);
 
         wxString m_sIpAddress;
         wxString m_sUrl;

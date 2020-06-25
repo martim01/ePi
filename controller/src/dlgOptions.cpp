@@ -155,37 +155,43 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	GridBagSizer2 = new wxGridBagSizer(0, 0);
 	StaticText4 = new wmLabel(this, ID_STATICTEXT11, _("Channels:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT11"));
 	StaticText4->SetForegroundColour(wxColour(0,164,164));
-	GridBagSizer2->Add(StaticText4, wxGBPosition(0, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
+	GridBagSizer2->Add(StaticText4, wxGBPosition(0, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
 	m_pstChannels = new wmLabel(this, ID_STATICTEXT12, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT12"));
 	m_pstChannels->SetMinSize(wxSize(50,-1));
-	m_pstChannels->SetForegroundColour(wxColour(255,255,255));
-	GridBagSizer2->Add(m_pstChannels, wxGBPosition(0, 1), wxDefaultSpan, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 2);
+	m_pstChannels->SetForegroundColour(*wxBLACK);
+	m_pstChannels->SetBackgroundColour(*wxWHITE);
+	GridBagSizer2->Add(m_pstChannels, wxGBPosition(0, 1), wxDefaultSpan, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 0);
 	StaticText10 = new wmLabel(this, ID_STATICTEXT13, _("Sample Rate:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT13"));
 	StaticText10->SetForegroundColour(wxColour(0,164,164));
-	StaticText10->SetMinSize(wxSize(100,-1));
-	GridBagSizer2->Add(StaticText10, wxGBPosition(0, 2), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
+    StaticText10->SetMinSize(wxSize(100,-1));
+	GridBagSizer2->Add(StaticText10, wxGBPosition(0, 2), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
 	m_pstSampleRate = new wmLabel(this, ID_STATICTEXT17, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT17"));
 	m_pstSampleRate->SetMinSize(wxSize(50,-1));
-	m_pstSampleRate->SetForegroundColour(wxColour(255,255,255));
-	GridBagSizer2->Add(m_pstSampleRate, wxGBPosition(0, 3), wxDefaultSpan, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 2);
+	m_pstSampleRate->SetForegroundColour(*wxBLACK);
+	m_pstSampleRate->SetBackgroundColour(*wxWHITE);
+	GridBagSizer2->Add(m_pstSampleRate, wxGBPosition(0, 3), wxDefaultSpan, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 0);
 	StaticText11 = new wmLabel(this, ID_STATICTEXT14, _("Format:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT14"));
 	StaticText11->SetForegroundColour(wxColour(0,164,164));
-	GridBagSizer2->Add(StaticText11, wxGBPosition(1, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
+	GridBagSizer2->Add(StaticText11, wxGBPosition(1, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
 	m_pstType = new wmLabel(this, ID_STATICTEXT18, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT18"));
 	m_pstType->SetMinSize(wxSize(50,-1));
-	m_pstType->SetForegroundColour(wxColour(255,255,255));
-	GridBagSizer2->Add(m_pstType, wxGBPosition(1, 1), wxGBSpan(1,1), wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 2);
+	m_pstType->SetForegroundColour(*wxBLACK);
+	m_pstType->SetBackgroundColour(*wxWHITE);
+	GridBagSizer2->Add(m_pstType, wxGBPosition(1, 1), wxGBSpan(1,1), wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 0);
 	StaticText12 = new wmLabel(this, ID_STATICTEXT15, _("Length:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT15"));
 	StaticText12->SetForegroundColour(wxColour(0,164,164));
-	GridBagSizer2->Add(StaticText12, wxGBPosition(0, 4), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
+	GridBagSizer2->Add(StaticText12, wxGBPosition(0, 4), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
 	m_pstSubType = new wmLabel(this, ID_STATICTEXT19, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT19"));
 	m_pstSubType->SetMinSize(wxSize(150,-1));
-	m_pstSubType->SetForegroundColour(wxColour(255,255,255));
+	m_pstSubType->SetForegroundColour(*wxBLACK);
+	m_pstSubType->SetBackgroundColour(*wxWHITE);
 	GridBagSizer2->Add(m_pstSubType, wxGBPosition(1, 2), wxGBSpan(1, 2), wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 2);
 	m_pstLength = new wmLabel(this, ID_STATICTEXT20, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT20"));
-	m_pstLength->SetMinSize(wxSize(75,-1));
-	m_pstLength->SetForegroundColour(wxColour(255,255,255));
-	GridBagSizer2->Add(m_pstLength, wxGBPosition(0, 5), wxDefaultSpan, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 2);
+	m_pstLength->SetMinSize(wxSize(100,-1));
+	m_pstLength->SetForegroundColour(*wxBLACK);
+	m_pstLength->SetBackgroundColour(*wxWHITE);
+
+	GridBagSizer2->Add(m_pstLength, wxGBPosition(0, 5), wxDefaultSpan, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 0);
 	StaticBoxSizer1->Add(GridBagSizer2, 0, wxALL|wxEXPAND, 2);
 	BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
 	m_pbtnReplace = new wmButton(this, ID_BUTTON_REPLACE, _("Replace"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_REPLACE"));
@@ -264,7 +270,7 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	m_pbtnShutdownOS->SetBackgroundColour(wxColour(128,0,0));
 	StaticBoxSizer3->Add(m_pbtnShutdownOS, 1, wxALL|wxEXPAND, 5);
 
-	m_pbtnStopController = new wmButton(this, wxNewId(), _("Shutdown\nController"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_SHUTDOWN_OS"));
+	m_pbtnStopController = new wmButton(this, wxNewId(), _("Close\nController"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_SHUTDOWN_OS"));
 	m_pbtnStopController->SetForegroundColour(wxColour(255,255,255));
 	m_pbtnStopController->SetBackgroundColour(wxColour(128,0,0));
 	StaticBoxSizer3->Add(m_pbtnStopController, 1, wxALL|wxEXPAND, 5);
@@ -301,6 +307,16 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	Connect(m_pbtnStopController->GetId(),wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnShutdownControllerClick);
 	Connect(ID_BUTTON_SSH,wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnSSHClick);
 	Connect(ID_BUTTON_BACK,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnBackClick);
+
+
+	m_pbtnReplace->SetBackgroundColour(wxColour(0,80,0));
+    m_pbtnDelete->SetBackgroundColour(wxColour(0,80,0));
+
+    m_pbtnUpdateController->SetBackgroundColour(wxColour(0,30,100));
+    m_pbtnUpdateEpiServer->SetBackgroundColour(wxColour(0,30,100));
+    m_pbtnUpdateLauncher->SetBackgroundColour(wxColour(0,30,100));
+    m_pbtnUpdatePlayer3->SetBackgroundColour(wxColour(0,30,100));
+    m_pbtnUpdatePlayer67->SetBackgroundColour(wxColour(0,30,100));
 
 
 	m_pstHostname->SetTextAlign(wxALIGN_CENTER);
@@ -382,45 +398,29 @@ void dlgOptions::OnbtnFileUpdateClick(wxCommandEvent& event)
 
 void dlgOptions::OnbtnReplaceClick(wxCommandEvent& event)
 {
-    dlgUsb aDlg(this,m_pstHostname->GetLabel(),"*.wav");
-    if(aDlg.ShowModal() == wxID_OK)
+    dlgUpload aDlg(this, m_pstHostname->GetLabel(), m_sIpAddress);
+    if(m_pbtnReplace->GetLabel() == "Upload")
     {
-        wxString sEndpoint("/x-epi/"+STR_ENDPOINTS[FILES]);
-        if(m_sUid.empty() == false)
+        if(aDlg.PostAudioFile() == wxID_OK)
         {
-            sEndpoint += "/"+wxString::FromUTF8(m_sUid.c_str());
-        }
-        wxLogDebug("Endpoint: %s", sEndpoint.c_str());
-
-        wxString sFilename=aDlg.m_sSelectedFile.AfterLast('/');
-        wxString sFilepath = aDlg.m_sSelectedFile.BeforeLast('/');
-
-        int nUpload = (m_pbtnReplace->GetLabel() == "Upload") ? MultipartUpload::UPLOAD_POST : MultipartUpload::UPLOAD_PUT;
-        dlgUpload bDlg(this, m_pstHostname->GetLabel(), m_sIpAddress, sEndpoint, nUpload, sFilename, sFilepath, aDlg.m_sSelectedDevice);
-
-
-        std::map<std::string, std::string> mData;
-        mData.insert(std::make_pair("label", sFilename.ToStdString()));
-        mData.insert(std::make_pair("description", wxDateTime::Now().Format("Uploaded at %Y-%m-%d %H:%M:%S").ToStdString()));
-        bDlg.SetMulitpartTextData(mData);
-
-        bDlg.ShowModal();
-        if(m_pbtnReplace->GetLabel() == "Upload")
-        {
-            if(bDlg.m_jsReply["result"].asBool() == false)
+            if(aDlg.m_jsReply["result"].asBool() == false)
             {
-                ShowError("Failed to upload file", bDlg.m_jsReply);
+                ShowError("Failed to upload file", aDlg.m_jsReply);
             }
             else
             {
-                m_sUid = bDlg.m_jsReply["uid"].asString();
+                m_sUid = aDlg.m_jsReply["uid"].asString();
                 GetFileDetails();
             }
         }
-        else
+    }
+    else
+    {
+        if(aDlg.PutAudioFile(wxString::FromUTF8(m_sUid.c_str())) == wxID_OK)
         {
-            FileUpdateReply(bDlg.m_jsReply);
+            FileUpdateReply(aDlg.m_jsReply);
         }
+
     }
 }
 
@@ -441,31 +441,12 @@ void dlgOptions::OnbtnUpdateEpiServerClick(wxCommandEvent& event)
 
 void dlgOptions::UpdateApp(const wxString& sApp)
 {
-    dlgUsb aDlg(this,m_pstHostname->GetLabel(),sApp);
-    if(aDlg.ShowModal() == wxID_OK)
-    {
-        UpdateApp(sApp, aDlg.m_sSelectedFile, aDlg.m_sSelectedDevice);
-    }
-}
-
-void dlgOptions::UpdateApp(const wxString& sApp, const wxString& sChosenFile, const wxString& sChosenDevice)
-{
-    wxString sEndpoint("/x-epi/"+STR_ENDPOINTS[UPDATE]);
-    wxLogDebug("Endpoint: %s", sEndpoint.c_str());
-
-    wxString sFilename=sChosenFile.AfterLast('/');
-    wxString sFilepath = sChosenFile.BeforeLast('/');
-
-    dlgUpload bDlg(this, m_pstHostname->GetLabel(), m_sIpAddress, sEndpoint, MultipartUpload::UPLOAD_PUT, sFilename, sFilepath, sChosenDevice);
-
-    std::map<std::string, std::string> mData;
-    mData.insert(std::make_pair("application", sApp.ToStdString()));
-    bDlg.SetMulitpartTextData(mData);
-
-    bDlg.ShowModal();
+    dlgUpload aDlg(this, m_pstHostname->GetLabel(), m_sIpAddress);
+    aDlg.PutApp(sApp);
     m_client.Get((m_sUrl+STR_ENDPOINTS[UPDATE]).ToStdString(), UPDATE);
 
 }
+
 
 void dlgOptions::OnbtnUpdatePlayer3Click(wxCommandEvent& event)
 {
@@ -523,7 +504,8 @@ void dlgOptions::OnbtnShutdownControllerClick(wxCommandEvent& event)
 
 void dlgOptions::OnbtnSSHClick(wxCommandEvent& event)
 {
-    //@todo(martim01) SSH
+
+    wxExecute(wxString::Format("xterm -fullscreen -e 'ssh %s'", m_sIpAddress.Before(':').c_str()));
 }
 
 void dlgOptions::OnbtnBackClick(wxCommandEvent& event)

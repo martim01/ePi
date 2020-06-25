@@ -75,6 +75,9 @@
 					<Add option="-pthread" />
 					<Add directory="$(#wx)/lib/gcc_dll" />
 				</Linker>
+				<ExtraCommands>
+					<Add after="sudo setcap cap_sys_admin+ep /home/pi/ePi/bin/controller" />
+				</ExtraCommands>
 			</Target>
 		</Build>
 		<Compiler>

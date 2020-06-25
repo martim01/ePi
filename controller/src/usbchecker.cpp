@@ -6,6 +6,8 @@
 #include <wx/msgdlg.h>
 #include "json/json.h"
 #include "epiwriter.h"
+#include <fstream>
+#include <iostream>
 
 wxDEFINE_EVENT(wxEVT_USB_FOUND, wxCommandEvent);
 wxDEFINE_EVENT(wxEVT_USB_FILE_FOUND, wxCommandEvent);
@@ -62,12 +64,24 @@ void UsbChecker::MountAndSearch(const wxString& sDevice, const wxString& sFilena
     }
     std::string sOpt("umask=000");
 
-    nResult = mount(sDevice.ToStdString().c_str(), "/mnt/share", "vfat", MS_RDONLY | MS_SILENT, nullptr);
-    if(nResult == -1)
+    bool bMounted(false);
+
+    std::array<std::string, 8> fs({"ext3", "ext2", "ext4", "vfat", "msdos", "f2fs", "fuseblk", "ntfs"});
+
+    for(size_t i = 0; i < fs.size(); i++)
+    {
+        nResult = mount(sDevice.ToStdString().c_str(), "/mnt/share", fs[i].c_str(), MS_RDONLY | MS_SILENT, nullptr);
+        if(nResult == 0)
+        {
+            bMounted = true;
+            break;
+        }
+    }
+    if(bMounted == false)
     {
         wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_USB_ERROR);
         pEvent->SetInt(errno);
-        pEvent->SetString(wxString::Format("%s: %s", sDevice.c_str(), wxString::FromUTF8(strerror(errno)).c_str()));
+        pEvent->SetString(wxString::Format("%s:\nUnknown filesystem type", sDevice.c_str()));
 
         wxQueueEvent(m_pHandler, pEvent);
         return;

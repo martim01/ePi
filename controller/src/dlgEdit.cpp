@@ -24,7 +24,6 @@ END_EVENT_TABLE()
 
 dlgEdit::dlgEdit(wxWindow* parent, const wxString& sHostname, const wxString& sLabel, const wxString& sDescription, wxWindowID id,const wxPoint& pos,const wxSize& size)
 {
-	//(*Initialize(dlgEdit)
 	wxBoxSizer* BoxSizer1;
 	wxGridBagSizer* GridBagSizer1;
 
@@ -60,9 +59,9 @@ dlgEdit::dlgEdit(wxWindow* parent, const wxString& sHostname, const wxString& sL
 	m_pKbd1 = new wmKeyboard(this, ID_M_PKBD1, wxDefaultPosition, wxDefaultSize, 0, 0);
 	m_pKbd1->SetForegroundColour(wxColour(255,255,255));
 	GridBagSizer1->Add(m_pKbd1, wxGBPosition(2, 0), wxGBSpan(3, 2), wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-	m_pbtnEditUpdate = new wmButton(this, ID_BUTTON_EDIT_UPDATE, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_EDIT_UPDATE"));
+	m_pbtnEditUpdate = new wmButton(this, ID_BUTTON_EDIT_UPDATE, _("Update"), wxDefaultPosition, wxSize(100,50), 0, wxDefaultValidator, _T("ID_BUTTON_EDIT_UPDATE"));
 	GridBagSizer1->Add(m_pbtnEditUpdate, wxGBPosition(2, 2), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-	m_pbtnEditCancel = new wmButton(this, ID_BUTTON_EDIT_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_EDIT_CANCEL"));
+	m_pbtnEditCancel = new wmButton(this, ID_BUTTON_EDIT_CANCEL, _("Cancel"), wxDefaultPosition, wxSize(100,50), 0, wxDefaultValidator, _T("ID_BUTTON_EDIT_CANCEL"));
 	GridBagSizer1->Add(m_pbtnEditCancel, wxGBPosition(3, 2), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
 	BoxSizer1->Add(GridBagSizer1, 0, wxALL|wxEXPAND, 2);
 	SetSizer(BoxSizer1);
@@ -71,7 +70,7 @@ dlgEdit::dlgEdit(wxWindow* parent, const wxString& sHostname, const wxString& sL
 
 	Connect(ID_BUTTON_EDIT_UPDATE,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgEdit::OnbtnEditUpdateClick);
 	Connect(ID_BUTTON_EDIT_CANCEL,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgEdit::OnbtnEditCancelClick);
-	//*)
+
 
 	Center();
     Move(wxPoint(0,0));

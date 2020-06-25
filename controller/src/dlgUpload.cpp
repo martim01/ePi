@@ -4,8 +4,12 @@
 #include "jsonutils.h"
 #include <wx/msgdlg.h>
 #include <wx/log.h>
-
+#include "dlgUsb.h"
+#include "constants.h"
 #include <sys/mount.h>
+#include <sys/types.h>
+#include <sys/statfs.h>
+#include <unistd.h>
 
 //(*InternalHeaders(dlgUpload)
 #include <wx/font.h>
@@ -26,14 +30,8 @@ BEGIN_EVENT_TABLE(dlgUpload,wxDialog)
 	//*)
 END_EVENT_TABLE()
 
-dlgUpload::dlgUpload(wxWindow* parent, const wxString& sHostname, const wxString& sIpAddress, const wxString& sEndpoint, int nMethod, const wxString& sFilename,
-const wxString& sFilepath, const wxString& sDevice, wxWindowID id,const wxPoint& pos,const wxSize& size) : m_upload(this),
-    m_sIpAddress(sIpAddress),
-    m_sEndpoint(sEndpoint),
-    m_nMethod(nMethod),
-    m_sFilename(sFilename),
-    m_sFilePath(sFilepath),
-    m_sDevice(sDevice)
+dlgUpload::dlgUpload(wxWindow* parent, const wxString& sHostname, const wxString& sIpAddress, wxWindowID id,const wxPoint& pos,const wxSize& size) : m_upload(this),
+    m_sIpAddress(sIpAddress)
 {
 	//(*Initialize(dlgUpload)
 	wxBoxSizer* BoxSizer1;
@@ -99,37 +97,79 @@ const wxString& sFilepath, const wxString& sDevice, wxWindowID id,const wxPoint&
 
 }
 
-int dlgUpload::ShowModal()
+
+int dlgUpload::PutApp(const wxString& sApp)
 {
-    m_timer.Start(250,true);
-    return wxDialog::ShowModal();
+    m_sApp = sApp;
+    m_mData.insert(std::make_pair("application", sApp.ToStdString()));
+    m_sEndpoint= "/x-epi/"+STR_ENDPOINTS[UPDATE];
+    m_nMethod = MultipartUpload::UPLOAD_PUT;
+    m_timer.Start(20,true);
+    return ShowModal();
 }
+
+int dlgUpload::PostAudioFile()
+{
+    m_sEndpoint = ("/x-epi/"+STR_ENDPOINTS[FILES]);
+    m_sApp = "*.wav";
+    m_nMethod = MultipartUpload::UPLOAD_POST;
+    m_timer.Start(20,true);
+    return ShowModal();
+}
+
+int dlgUpload::PutAudioFile(const wxString& sUid)
+{
+    m_sEndpoint = "/x-epi/"+STR_ENDPOINTS[FILES]+"/"+sUid;
+    m_sApp = "*.wav";
+    m_nMethod = MultipartUpload::UPLOAD_PUT;
+    m_timer.Start(20,true);
+    return ShowModal();
+}
+
+
+
 
 void dlgUpload::OnTimer(const wxTimerEvent& event)
 {
-    if(MountDevice())
-	{
-        m_pstDetails->SetLabel(wxString::Format("Uploading '%s'...", m_sFilename.c_str()));
+    dlgUsb aDlg(this,m_pstHostname->GetLabel(), m_sApp);
+    if(aDlg.ShowModal() == wxID_OK)
+    {
+        wxString sFilename=aDlg.m_sSelectedFile.AfterLast('/');
+        wxString sFilePath = aDlg.m_sSelectedFile.BeforeLast('/');
 
-        std::map<std::string, muFile> mFiles;
-        mFiles.insert(std::make_pair("file", muFile(muFileName(m_sFilename.ToStdString()), muFilePath(m_sFilePath.ToStdString()))));
-
-        switch(m_nMethod)
+        if(m_sApp == "*.wav")
         {
-            case MultipartUpload::UPLOAD_PUT:
-                m_upload.Put(m_sIpAddress.ToStdString(), m_sEndpoint.ToStdString(), m_mData, mFiles, 0);
-                break;
-            case MultipartUpload::UPLOAD_POST:
-                m_upload.Post(m_sIpAddress.ToStdString(), m_sEndpoint.ToStdString(), m_mData, mFiles, 0);
-                break;
+            m_mData.insert(std::make_pair("label", sFilename.ToStdString()));
+            m_mData.insert(std::make_pair("description", wxDateTime::Now().Format("Uploaded at %Y-%m-%d %H:%M:%S").ToStdString()));
         }
+
+        if(MountDevice(aDlg.m_sSelectedDevice))
+        {
+            m_pstDetails->SetLabel(wxString::Format("Uploading '%s'...", sFilename.c_str()));
+
+            std::map<std::string, muFile> mFiles;
+            mFiles.insert(std::make_pair("file", muFile(muFileName(sFilename.ToStdString()), muFilePath(sFilePath.ToStdString()))));
+
+            switch(m_nMethod)
+            {
+                case MultipartUpload::UPLOAD_PUT:
+                    m_upload.Put(m_sIpAddress.ToStdString(), m_sEndpoint.ToStdString(), m_mData, mFiles, 0);
+                    break;
+                case MultipartUpload::UPLOAD_POST:
+                    m_upload.Post(m_sIpAddress.ToStdString(), m_sEndpoint.ToStdString(), m_mData, mFiles, 0);
+                    break;
+            }
+        }
+        else
+        {
+            m_pstDetails->SetLabel("Failed to mount device");
+        }
+
     }
     else
     {
-        m_pstDetails->SetLabel("Failed to mount device");
+        EndModal(wxID_CANCEL);
     }
-
-
 }
 
 dlgUpload::~dlgUpload()
@@ -165,14 +205,17 @@ void dlgUpload::OnReply(const wxCommandEvent& event)
 
 void dlgUpload::OnProgress(const wxCommandEvent& event)
 {
-    wxLogDebug("Upload: %d", event.GetInt());
     m_pGuage->SetValue(event.GetInt());
     m_pstProgress->SetLabel(wxString::Format("%03d%%", event.GetInt()));
+    if(event.GetInt() == 100)
+    {
+        m_pstDetails->SetLabel("Checking Upload...");
+    }
 }
 
-bool dlgUpload::MountDevice()
+bool dlgUpload::MountDevice(const wxString& sDevice)
 {
-    if(m_sDevice.empty())
+    if(sDevice.empty())
     {
         return true;
     }
@@ -187,16 +230,28 @@ bool dlgUpload::MountDevice()
         wxLogDebug("Failed to umount");
         return false;
     }
-    std::string sOpt("umask=000");
 
-    nResult = mount(m_sDevice.ToStdString().c_str(), "/mnt/share", "vfat", MS_RDONLY | MS_SILENT, nullptr);
-    if(nResult == -1)
+    struct statfs info;
+    nResult = statfs(sDevice.ToStdString().c_str(), &info);
+    if(nResult != 0)
     {
-        wxLogDebug("Failed to mount %s", m_sDevice.c_str());
+        wxLogDebug("Failed to get file type");
         return false;
     }
-    wxLogDebug("%s mounted", m_sDevice.c_str());
-    return true;
+    wxLogDebug("Type: %d", info.f_type);
+
+    std::string sOpt("umask=000");
+
+    std::array<std::string,3> fs({"vfat","fuse","ntfs"});
+    for(size_t i = 0; i < fs.size(); i++)
+    {
+        nResult = mount(sDevice.ToStdString().c_str(), "/mnt/share", fs[i].c_str(), MS_RDONLY | MS_SILENT, nullptr);
+        if(nResult == 0)
+        {
+            return true;
+        }
+    }
+    return false;
 
 }
 

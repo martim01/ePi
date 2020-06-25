@@ -7,6 +7,7 @@
 #include <wx/tokenzr.h>
 #include "restfulclient.h"
 #include <iostream>
+#include <linux/magic.h>
 
 wxDEFINE_EVENT(wxEVT_R_PROGRESS, wxCommandEvent);
 
@@ -216,7 +217,6 @@ void MultipartUpload::InitSendFile(mg_connection* pConnection)
 
 void MultipartUpload::SendSomeData(mg_connection* pConnection)
 {
-    wxLogDebug("MultipartUpload::SendSomeData");
     if(m_ifs.is_open() == false || m_ifs.eof())
     {
         InitSendFile(pConnection);

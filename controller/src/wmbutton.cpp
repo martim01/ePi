@@ -380,6 +380,10 @@ void wmButton::OnHolding(wxTimerEvent& event)
             {
                 ReleaseMouse();
             }
+            m_nBorderState = uiRect::BORDER_UP;
+            m_nState = STATE_NORMAL;
+            m_bChecked = false;
+            Refresh();
         }
     }
     if((m_nStyle & STYLE_REPEAT))

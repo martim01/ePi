@@ -20,8 +20,7 @@ class dlgUpload: public wxDialog
 {
 	public:
 
-		dlgUpload(wxWindow* parent, const wxString& sHostname, const wxString& sIpAddress, const wxString& sEndpoint, int nMethod, const wxString& sFilename,
-		const wxString& sFilepath, const wxString& sDevice, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
+		dlgUpload(wxWindow* parent, const wxString& sHostname, const wxString& sIpAddress, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
 
 		void SetMulitpartTextData(const std::map<std::string, std::string>& mData);
 		virtual ~dlgUpload();
@@ -34,7 +33,9 @@ class dlgUpload: public wxDialog
 		wmLabel* m_pstProgress;
 		//*)
 
-		int ShowModal() override;
+		int PostAudioFile();
+		int PutAudioFile(const wxString& sUid);
+		int PutApp(const wxString& sApp);
 
 		Json::Value m_jsReply;
 
@@ -57,16 +58,14 @@ class dlgUpload: public wxDialog
         void OnReply(const wxCommandEvent& event);
         void OnProgress(const wxCommandEvent& event);
         void OnTimer(const wxTimerEvent& event);
-        bool MountDevice();
+        bool MountDevice(const wxString& sDevice);
 
 		MultipartUpload m_upload;
 
 		wxString m_sIpAddress;
 		wxString m_sEndpoint;
-		int m_nMethod;
-		wxString m_sFilename;
-		wxString m_sFilePath;
-		wxString m_sDevice;
+		wxString m_sApp;
+        int m_nMethod;
 
 		std::map<std::string, std::string> m_mData;
 

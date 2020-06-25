@@ -50,7 +50,7 @@ m_checker(this)
 	BoxSizer1->Add(m_plblUSB, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
 
     wxBoxSizer* BoxSizer3 = new wxBoxSizer(wxHORIZONTAL);
-    m_plstLog = new wmList(this, wxNewId(), wxDefaultPosition, wxSize(380,300), 0, 0, wxSize(-1,30), 1, wxSize(-1,-1));
+    m_plstLog = new wmList(this, wxNewId(), wxDefaultPosition, wxSize(380,300), 0, 0, wxSize(-1,40), 1, wxSize(-1,-1));
 	BoxSizer3->Add(m_plstLog, 0, wxALL|wxEXPAND, 5);
 	m_plstFiles = new wmList(this, ID_M_PLST1, wxDefaultPosition, wxSize(380,300), wmList::STYLE_SELECT, 0, wxSize(-1,30), 1, wxSize(-1,-1));
 	BoxSizer3->Add(m_plstFiles, 0, wxALL|wxEXPAND, 5);
@@ -59,7 +59,7 @@ m_checker(this)
 	BoxSizer1->Add(BoxSizer3, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
 
 	BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
-	m_pbtnCheck = new wmButton(this, wxNewId(), _("Find Files"), wxDefaultPosition, wxSize(120,40), 0, wxDefaultValidator, _T("ID_BUTTON_UPLOAD"));
+	m_pbtnCheck = new wmButton(this, wxNewId(), _("Search Again"), wxDefaultPosition, wxSize(120,40), 0, wxDefaultValidator, _T("ID_BUTTON_UPLOAD"));
 	BoxSizer2->Add(m_pbtnCheck, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
 	m_pbtnUpload = new wmButton(this, ID_BUTTON_UPLOAD, _("Upload"), wxDefaultPosition, wxSize(120,40), 0, wxDefaultValidator, _T("ID_BUTTON_UPLOAD"));
 	BoxSizer2->Add(m_pbtnUpload, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
