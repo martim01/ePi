@@ -269,6 +269,7 @@ response ResourceManager::ModifyFile(const std::string& sUid, const Json::Value&
             }
             else
             {
+
                 std::ifstream src(jsData["multipart"]["files"]["file"].asString(), std::ios::binary);
                 std::ofstream dst(m_sAudioFilePath+sUid, std::ios::binary);
                 dst << src.rdbuf();
@@ -276,8 +277,19 @@ response ResourceManager::ModifyFile(const std::string& sUid, const Json::Value&
                 src.close();
                 remove(jsData["multipart"]["files"]["file"].asString().c_str());
 
-
                 itFile->second->FileModified();
+
+                Json::Value jsPatch;
+                if(jsData["multipart"]["data"]["label"].isString() == true && FileExists(jsData["label"].asString(), sUid) == false)
+                {
+                    jsPatch["label"] = jsData["multipart"]["data"]["label"].asString();
+                }
+                if(jsData["multipart"]["data"]["description"].isString() == true)
+                {
+                    jsPatch["description"] = jsData["multipart"]["data"]["description"].asString();
+                }
+                itFile->second->UpdateJson(jsPatch);
+
                 theResponse.nHttpCode = 200;
                 theResponse.jsonData = itFile->second->GetJson();
                 theResponse.jsonData["result"] = true;

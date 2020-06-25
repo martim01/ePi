@@ -399,14 +399,10 @@ void dlgOptions::OnbtnReplaceClick(wxCommandEvent& event)
         dlgUpload bDlg(this, m_pstHostname->GetLabel(), m_sIpAddress, sEndpoint, nUpload, sFilename, sFilepath, aDlg.m_sSelectedDevice);
 
 
-        if(m_pbtnReplace->GetLabel() == "Upload")
-        {
-            std::map<std::string, std::string> mData;
-            mData.insert(std::make_pair("label", sFilename.ToStdString()));
-            mData.insert(std::make_pair("description", wxDateTime::Now().Format("Uploaded at %Y-%m-%d %H:%M:%S").ToStdString()));
-            bDlg.SetMulitpartTextData(mData);
-        }
-
+        std::map<std::string, std::string> mData;
+        mData.insert(std::make_pair("label", sFilename.ToStdString()));
+        mData.insert(std::make_pair("description", wxDateTime::Now().Format("Uploaded at %Y-%m-%d %H:%M:%S").ToStdString()));
+        bDlg.SetMulitpartTextData(mData);
 
         bDlg.ShowModal();
         if(m_pbtnReplace->GetLabel() == "Upload")
