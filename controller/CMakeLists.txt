@@ -7,31 +7,32 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 message(${PROJECT_SOURCE_DIR})
 
-add_executable(controller "../common/src/epiwriter.cpp"    
-						 "../common/src/inimanager.cpp"    
-						 "../common/src/inisection.cpp"    
-						 "../common/src/jsonutils.cpp"    
-						 "../common/src/mongoose.c">
-						 "../external/jsoncpp/dist/jsoncpp.cpp"    
-						 "src/constants.cpp"    
-						 "src/controllerApp.cpp"    
-						 "src/controllerMain.cpp"    
-						 "src/dlgEdit.cpp"    
-						 "src/dlgOptions.cpp"    
-						 "src/dlgUpload.cpp"    
-						 "src/dlgUsb.cpp"    
-						 "src/multipartupload.cpp"    
-						 "src/progress.cpp"    
-						 "src/restfulclient.cpp"    
-						 "src/uirect.cpp"    
-						 "src/usbchecker.cpp"    
-						 "src/websocketclient.cpp"    
-						 "src/wmbutton.cpp"    
-						 "src/wmedit.cpp"    
-						 "src/wmfocusmanager.cpp"    
-						 "src/wmkeyboard.cpp"    
-						 "src/wmlabel.cpp"    
-						 "src/wmlist.cpp")
+add_executable(controller "../common/src/epiwriter.cpp"
+ "../common/src/inimanager.cpp"
+ "../common/src/inisection.cpp"
+ "../common/src/jsonutils.cpp"
+ "../common/src/mongoose.c"
+ "../external/jsoncpp/dist/jsoncpp.cpp"
+ "../external/log/src/log.cpp"
+ "src/constants.cpp"
+ "src/controllerApp.cpp"
+ "src/controllerMain.cpp"
+ "src/dlgEdit.cpp"
+ "src/dlgOptions.cpp"
+ "src/dlgUpload.cpp"
+ "src/dlgUsb.cpp"
+ "src/multipartupload.cpp"
+ "src/progress.cpp"
+ "src/restfulclient.cpp"
+ "src/uirect.cpp"
+ "src/usbchecker.cpp"
+ "src/websocketclient.cpp"
+ "src/wmbutton.cpp"
+ "src/wmedit.cpp"
+ "src/wmfocusmanager.cpp"
+ "src/wmkeyboard.cpp"
+ "src/wmlabel.cpp"
+ "src/wmlist.cpp")
 
 include_directories(${PROJECT_SOURCE_DIR}/../external/jsoncpp/dist)
 include_directories(${PROJECT_SOURCE_DIR}/../external/log/include)
@@ -48,8 +49,7 @@ find_package(wxWidgets REQUIRED)
 include(${wxWidgets_USE_FILE})
 
 
-target_link_libraries(controller ${wxWidgets_LIBRARIES})
-target_link_libraries(controller pthread sndfile portaudio samplerate)
+target_link_libraries(controller ${wxWidgets_LIBRARIES} pthread)
 
 set_target_properties(controller PROPERTIES RUNTIME_OUTPUT_DIRECTORY "../../bin/")
 

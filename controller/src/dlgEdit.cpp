@@ -45,11 +45,11 @@ dlgEdit::dlgEdit(wxWindow* parent, const wxString& sHostname, const wxString& sL
 	StaticText1 = new wmLabel(this, ID_STATICTEXT1, _("Label:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT1"));
 	StaticText1->SetForegroundColour(wxColour(255,255,255));
 	GridBagSizer1->Add(StaticText1, wxGBPosition(0, 0), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
-	m_pedtLabel = new wmEdit(this, ID_TEXTCTRL1, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_TEXTCTRL1"));
+	m_pedtLabel = new wmEdit(this, ID_TEXTCTRL1, wxEmptyString, wxDefaultPosition, wxSize(150,-1), 0, wxDefaultValidator, _T("ID_TEXTCTRL1"));
 	m_pedtLabel->SetValidation(0);
 	m_pedtLabel->SetBorderStyle(0,0);
 	GridBagSizer1->Add(m_pedtLabel, wxGBPosition(0, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
-	StaticText2 = new wmLabel(this, ID_STATICTEXT2, _("Description:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT2"));
+	StaticText2 = new wmLabel(this, ID_STATICTEXT2, _("Description:"), wxDefaultPosition, wxSize(150,-1), 0, _T("ID_STATICTEXT2"));
 	StaticText2->SetForegroundColour(wxColour(255,255,255));
 	GridBagSizer1->Add(StaticText2, wxGBPosition(1, 0), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
 	m_pedtDescription = new wmEdit(this, ID_TEXTCTRL2, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator, _T("ID_TEXTCTRL2"));

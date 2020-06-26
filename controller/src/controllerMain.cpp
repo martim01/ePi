@@ -96,8 +96,8 @@ m_bDown(false)
     //*)
 
 
-    int nWidth = wxGetClientDisplayRect().GetWidth()/pntLayout.x;
-    int nHeight = wxGetClientDisplayRect().GetHeight()/pntLayout.y;
+    int nWidth = (wxGetClientDisplayRect().GetWidth()-1)/pntLayout.x;
+    int nHeight = (wxGetClientDisplayRect().GetHeight()-1)/pntLayout.y;
 
     SetSize(nWidth,nHeight);
     int nColumn = nController%pntLayout.x;
@@ -105,9 +105,10 @@ m_bDown(false)
 
     Center();
     Move(wxPoint(nColumn*nWidth+wxGetClientDisplayRect().GetLeft(), nRow*nHeight+wxGetClientDisplayRect().GetTop()));
-
-
-    m_uiName.SetRect(1,1,GetClientRect().GetWidth()-1,GetClientRect().GetHeight()/2);
+	
+    wxSetCursor(wxSTANDARD_CURSOR);
+    wxSetCursor(wxNullCursor);
+    m_uiName.SetRect(1,1,GetClientRect().GetWidth()-2,GetClientRect().GetHeight()/2);
     m_uiStatus.SetRect(1,m_uiName.GetBottom(),m_uiName.GetWidth(),m_uiName.GetHeight());
 
     m_uiName.SetGradient(0);
@@ -346,15 +347,13 @@ void controllerDialog::OnLeftDown(wxMouseEvent& event)
 
 void controllerDialog::OnLeftUp(wxMouseEvent& event)
 {
-    m_bDown = false;
-    UpdateLabels();
     m_timerMenu.Stop();
     m_timerStop.Stop();
     if(m_bIgnoreUp)
     {
         m_bIgnoreUp = false;
     }
-    else
+    else if(m_bDown)
     {
         if(m_sDefaultFileUid.empty() == false)
         {
@@ -372,6 +371,8 @@ void controllerDialog::OnLeftUp(wxMouseEvent& event)
             wxLogDebug("%d %s", m_bPlaying, m_sDefaultFileLabel.c_str());
         }
     }
+    m_bDown = false;
+    UpdateLabels();
 }
 
 
@@ -417,7 +418,7 @@ void controllerDialog::OnPaint(wxPaintEvent& event)
     {
         fnt.SetPointSize(12);
     }
-
+    dc.SetFont(fnt);
     m_uiStatus.Draw(dc, uiRect::BORDER_NONE);
 }
 
