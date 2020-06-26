@@ -29,8 +29,8 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    std::string sRows = ini.GetIniString("Layout", "Rows","1");
-    std::string sColumns = ini.GetIniString("Layout", "Columns","1");
+    std::string sRows = ini.GetIniString("layout", "rows","1");
+    std::string sColumns = ini.GetIniString("layout", "columns","1");
 
     for(auto itSection = ini.GetSectionBegin(); itSection != ini.GetSectionEnd(); ++itSection)
     {
@@ -42,6 +42,7 @@ int main(int argc, char* argv[])
 
             if(sPosition != "-1" && sIpAddress.empty() == false && sPort.empty() == false)
             {
+		std::cout << "Launch: " << itSection->first << std::endl;
                 int nPid = fork();
                 if(nPid < 0)
                 {
@@ -52,15 +53,15 @@ int main(int argc, char* argv[])
                 }
                 else
                 {   //child
-                    int fderr = open("/dev/null", O_WRONLY);
-                    if(fderr >= 0)
-                    {
-                        dup2(fderr, STDERR_FILENO);
-                    }
+                    //int fderr = open("/dev/null", O_WRONLY);
+                    //if(fderr >= 0)
+                    //{
+                    //    dup2(fderr, STDERR_FILENO);
+                    //}
 
-                    std::string sController("controller");
+                    std::string sController("/usr/local/bin/controller");
 
-                    char* args[] = {&sController[0], &sColumns[0], &sRows[0], &sIpAddress[0], &sPort[0], nullptr};
+                    char* args[] = {&sController[0], &sColumns[0], &sRows[0], &sPosition[0], &sIpAddress[0], &sPort[0], nullptr};
                     int nError = execv(sController.c_str(), args);
                     if(nError)
                     {

@@ -9,7 +9,6 @@ message(${PROJECT_SOURCE_DIR})
 
 add_executable(launcher "../common/src/inimanager.cpp"
 						"../common/src/inisection.cpp"
-						"../common/src/logtofile.cpp"
                         "../external/log/src/log.cpp"
 						"src/main.cpp")
 
