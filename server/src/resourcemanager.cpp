@@ -106,44 +106,50 @@ response ResourceManager::AddFile( const std::string& sUploadName, const std::st
     else
     {
         std::string sUid(CreateGuid());
-
-        std::ifstream src(sUploadName, std::ios::binary);
-        std::ofstream dst(m_sAudioFilePath+sUid, std::ios::binary);
-        dst << src.rdbuf();
-        dst.close();
-        src.close();
-        remove(sUploadName.c_str());
-
-
-        std::shared_ptr<AudioFile> pFile;
-
-        if(theResponse.nHttpCode == WAV)
+        std::string sNewName((m_sAudioFilePath+sUid));
+        int nResult = rename(sUploadName.c_str(), sNewName.c_str());
+        if(nResult != 0)
         {
-            pFile = std::dynamic_pointer_cast<AudioFile>(std::make_shared<WavFile>(m_sAudioFilePath, sUid, sLabel, sDescription));
-        }
-        else
-        {
-            // @todo(martim01) mp3file
-        }
-
-        if(m_mFiles.insert(std::make_pair(sUid, pFile)).second)
-        {
-            SaveResources();
-            pFile->InitJson();
-
-            theResponse.nHttpCode = 201;
-            theResponse.jsonData["result"] = true;
-            theResponse.jsonData["uid"] = sUid;
-            theResponse.jsonData["details"] = pFile->GetJson();
-        }
-        else
-        {
-            pml::Log::Get(pml::Log::LOG_ERROR) << "failed - could not create uid" << std::endl;
-            theResponse.nHttpCode = 409;
+            theResponse.nHttpCode = 500;
             theResponse.jsonData["result"] = false;
-            theResponse.jsonData["reason"].append("Unable to create unique id for item");
+            theResponse.jsonData["reason"].append("Could not copy file from upload directory");
+            theResponse.jsonData["reason"].append(strerror(errno));
+            pml::Log::Get(pml::Log::LOG_ERROR) << "could not copy file from upload directory" << std::endl;
+            remove(sUploadName.c_str());
         }
-        pml::Log::Get() << "success" << std::endl;
+        else
+        {
+            std::shared_ptr<AudioFile> pFile;
+
+            if(theResponse.nHttpCode == WAV)
+            {
+                pFile = std::dynamic_pointer_cast<AudioFile>(std::make_shared<WavFile>(m_sAudioFilePath, sUid, sLabel, sDescription));
+            }
+            else
+            {
+                // @todo(martim01) mp3file
+            }
+
+            if(m_mFiles.insert(std::make_pair(sUid, pFile)).second)
+            {
+                SaveResources();
+                pFile->InitJson();
+
+                theResponse.nHttpCode = 201;
+                theResponse.jsonData["result"] = true;
+                theResponse.jsonData["uid"] = sUid;
+                theResponse.jsonData["details"] = pFile->GetJson();
+            }
+            else
+            {
+                pml::Log::Get(pml::Log::LOG_ERROR) << "failed - could not create uid" << std::endl;
+                theResponse.nHttpCode = 409;
+                theResponse.jsonData["result"] = false;
+                theResponse.jsonData["reason"].append("Unable to create unique id for item");
+                remove(sNewName.c_str());
+            }
+            pml::Log::Get() << "success" << std::endl;
+        }
     }
     return theResponse;
 
@@ -248,64 +254,65 @@ response ResourceManager::ModifyFile(const std::string& sUid, const Json::Value&
         theResponse.jsonData["result"] = false;
         theResponse.jsonData["reason"].append("File with uid '"+sUid+"' not found.");
         pml::Log::Get(pml::Log::LOG_ERROR) << "failed - file '" << sUid << "'not found" << std::endl;
+        return theResponse;
     }
-    else if(itFile->second->IsLocked())
+    if(itFile->second->IsLocked())
     {
         theResponse.nHttpCode = 423;
         theResponse.jsonData["result"] = false;
         theResponse.jsonData["reason"].append("File with uid '"+sUid+"' is locked.");
         pml::Log::Get(pml::Log::LOG_ERROR) << "failed - file '" << sUid << "'is locked" << std::endl;
+        return theResponse;
     }
-    else
+
+    if(jsData["multipart"].isObject() == false)
     {
-        if(jsData["multipart"].isObject())
-        {
-            //modifying the actual file
-            if(jsData["multipart"]["files"].isObject() == false || jsData["multipart"]["files"]["file"].isString() == false)
-            {
-                theResponse.nHttpCode = 400;
-                theResponse.jsonData["result"] = false;
-                theResponse.jsonData["reason"].append("No file uploaded");
-            }
-            else
-            {
-
-                std::ifstream src(jsData["multipart"]["files"]["file"].asString(), std::ios::binary);
-                std::ofstream dst(m_sAudioFilePath+sUid, std::ios::binary);
-                dst << src.rdbuf();
-                dst.close();
-                src.close();
-                remove(jsData["multipart"]["files"]["file"].asString().c_str());
-
-                itFile->second->FileModified();
-
-                Json::Value jsPatch;
-                if(jsData["multipart"]["data"]["label"].isString() == true && FileExists(jsData["label"].asString(), sUid) == false)
-                {
-                    jsPatch["label"] = jsData["multipart"]["data"]["label"].asString();
-                }
-                if(jsData["multipart"]["data"]["description"].isString() == true)
-                {
-                    jsPatch["description"] = jsData["multipart"]["data"]["description"].asString();
-                }
-                itFile->second->UpdateJson(jsPatch);
-
-                theResponse.nHttpCode = 200;
-                theResponse.jsonData = itFile->second->GetJson();
-                theResponse.jsonData["result"] = true;
-
-                SaveResources();
-            }
-        }
-        else
-        {
-            theResponse.nHttpCode = 404;
-            theResponse.jsonData["result"] = false;
-            theResponse.jsonData["reason"].append("No file sent .");
-            pml::Log::Get(pml::Log::LOG_ERROR) << "failed - no file sent" << std::endl;
-        }
-
+        theResponse.nHttpCode = 404;
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("No file sent .");
+        pml::Log::Get(pml::Log::LOG_ERROR) << "failed - no file sent" << std::endl;
+        return theResponse;
     }
+    //modifying the actual file
+    if(jsData["multipart"]["files"].isObject() == false || jsData["multipart"]["files"]["file"].isString() == false)
+    {
+        theResponse.nHttpCode = 400;
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("No file uploaded");
+        return theResponse;
+    }
+
+    std::string sNewName(m_sAudioFilePath+sUid);
+    int nResult = rename(jsData["multipart"]["files"]["file"].asString().c_str(), sNewName.c_str());
+    if(nResult != 0)
+    {
+        theResponse.nHttpCode = 500;
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("Could not copy file from upload directory");
+        theResponse.jsonData["reason"].append(strerror(errno));
+        pml::Log::Get(pml::Log::LOG_ERROR) << "could not copy file from upload directory" << std::endl;
+        remove(jsData["multipart"]["files"]["file"].asString().c_str());
+        return theResponse;
+    }
+
+    itFile->second->FileModified();
+
+    Json::Value jsPatch;
+    if(jsData["multipart"]["data"]["label"].isString() == true && FileExists(jsData["label"].asString(), sUid) == false)
+    {
+        jsPatch["label"] = jsData["multipart"]["data"]["label"].asString();
+    }
+    if(jsData["multipart"]["data"]["description"].isString() == true)
+    {
+        jsPatch["description"] = jsData["multipart"]["data"]["description"].asString();
+    }
+    itFile->second->UpdateJson(jsPatch);
+
+    theResponse.nHttpCode = 200;
+    theResponse.jsonData = itFile->second->GetJson();
+    theResponse.jsonData["result"] = true;
+
+    SaveResources();
     return theResponse;
 }
 
