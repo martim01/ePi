@@ -456,5 +456,5 @@ void controllerDialog::OnTimerCheck(const wxTimerEvent& event)
     //Ask for status and info...
     m_rClient.Get((m_sUrl+STR_ENDPOINTS[CONFIG]).ToStdString(), CONFIG);
     m_rClient.Get((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString(), FILES);
-    m_timerCheck.Start(1000, true);
+    m_timerCheck.Start(10000, true);
 }
