@@ -67,7 +67,8 @@ bool Launcher::Run()
             Launch(itSection->second);
         }
     }
-
+    Loop();
+    return true;
 }
 
 
