@@ -59,7 +59,14 @@ Launcher::Launcher(iniManager& ini) : m_ini(ini)
 
 bool Launcher::Run()
 {
+    LaunchAll();
+    Loop();
+    return true;
+}
 
+
+void Launcher::LaunchAll()
+{
     for(auto itSection = m_ini.GetSectionBegin(); itSection != m_ini.GetSectionEnd(); ++itSection)
     {
         if(itSection->first != "layout")
@@ -67,10 +74,7 @@ bool Launcher::Run()
             Launch(itSection->second);
         }
     }
-    Loop();
-    return true;
 }
-
 
 bool Launcher::Launch(const iniSection* pSection)
 {
@@ -103,7 +107,7 @@ bool Launcher::Launch(const iniSection* pSection)
         {   // Parent
             close(nPipe[1]);  //close write end
             FD_SET(nPipe[0], &m_master);
-            m_mControllers.insert(std::make_pair(nPipe[0], controller(pSection)));
+            m_mControllers.insert(std::make_pair(nPipe[0], controller(pSection, nPid)));
             m_nMaxFd = std::max(m_nMaxFd, nPipe[0]);
             return true;
         }
@@ -171,7 +175,14 @@ void Launcher::CheckReadSet()
             if(ReadFromPipe(itController->first, itController->second))
             {
                 //@todo do something with the data
-                ++itController;
+                if(HandleData(itController->second))
+                {
+                    ++itController;
+                }
+                else
+                {   //false means we are restarting stuff so exit the loop
+                    break;
+                }
             }
             else
             {
@@ -214,4 +225,44 @@ void Launcher::ResetMaxFd()
         --itMax;
         m_nMaxFd = itMax->first;
     }
+}
+
+
+bool Launcher::HandleData(const controller& aController)
+{
+    for(auto str : aController.vLines)
+    {
+        std::vector<std::string> vData(SplitString(str, ':'));
+        if(vData.size() > 0)
+        {
+            if(vData[0] == "command")
+            {
+                if(vData[1] == "restart_all")
+                {
+                    RestartAll();
+                    return false;
+                }
+            }
+            else
+            {
+                //@todo (martim01) logging?
+            }
+        }
+    }
+    return true;
+}
+
+
+void Launcher::RestartAll()
+{
+    ResetMaxFd();
+    for(auto pairController : m_mControllers)
+    {
+        kill(pairController.second.nPid, SIGTERM);
+    }
+    m_mControllers.clear();
+    FD_ZERO(&m_master);
+    FD_ZERO(&m_read);
+    LaunchAll();
+
 }

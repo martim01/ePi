@@ -476,7 +476,9 @@ void dlgOptions::OnbtnUpdateControllerClick(wxCommandEvent& event)
                 dest << source.rdbuf();
                 source.close();
                 dest.close();
-                //@todo(martim01) tell the launcher to restart everything
+
+                //tell launcher to restart all
+                std::cout << "command:restart_all" << std::endl;
 
             }
             else
@@ -543,7 +545,6 @@ void dlgOptions::OnbtnBackClick(wxCommandEvent& event)
 
 void dlgOptions::OnRestfulReply(const wxCommandEvent &event)
 {
-    wxLogDebug(event.GetString());
     Json::Value jsValue(ConvertToJson(event.GetString().ToStdString()));
 
     switch(event.GetInt())

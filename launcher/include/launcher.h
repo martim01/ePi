@@ -14,20 +14,25 @@ class Launcher
 
         struct controller
         {
-            controller(const iniSection* pS) : pSection(pS){}
+            controller(const iniSection* pS, int nP) : pSection(pS), nPid(nP){}
             const iniSection* pSection;
             std::string sBuffer;
             std::vector<std::string> vLines;
+            int nPid;
         };
 
 
     private:
-
+        void LaunchAll();
         bool Launch(const iniSection* pSection);
         void Loop();
 
         void CheckReadSet();
         void ResetMaxFd();
+
+        bool HandleData(const controller& aController);
+
+        void RestartAll();
 
         iniManager& m_ini;
         std::string m_sRows;

@@ -157,7 +157,6 @@ void controllerDialog::OnAbout(wxCommandEvent& event)
 
 void controllerDialog::OnWebsocketConnection(const wxCommandEvent& event)
 {
-    wxLogDebug("Connection=%d", event.GetInt());
     if(event.GetInt() != 0)
     {
         m_nConnected = DISCONNECTED;
@@ -221,8 +220,6 @@ void controllerDialog::UpdatePlayingStatus(const Json::Value& jsData)
 
 void controllerDialog::OnWebsocketFinished(const wxCommandEvent& event)
 {
-    wxLogDebug("Finished");
-
     m_nConnected = DISCONNECTED;
     UpdateLabels();
     m_uiStatus.SetLabel("Offline");
@@ -268,7 +265,6 @@ void controllerDialog::ReplyConfig(const Json::Value& jsData)
 
 void controllerDialog::ReplyFiles(const Json::Value& jsData)
 {
-    wxLogDebug("ReplyFiles");
     if(jsData.isArray() && jsData.size() > 0)
     {
         m_sDefaultFileLabel = wxString::FromUTF8(jsData[0]["label"].asString().c_str());
@@ -368,10 +364,6 @@ void controllerDialog::OnLeftUp(wxMouseEvent& event)
             {
                 m_bCountUp = !m_bCountUp;
             }
-        }
-        else
-        {
-            wxLogDebug("%d %s", m_bPlaying, m_sDefaultFileLabel.c_str());
         }
     }
     m_bDown = false;

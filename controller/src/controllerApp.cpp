@@ -30,10 +30,6 @@ void controllerApp::OnInitCmdLine(wxCmdLineParser& parser)
 
 bool controllerApp::OnCmdLineParsed(wxCmdLineParser& parser)
 {
-    for(size_t i = 0; i < parser.GetParamCount(); i++)
-    {
-        wxLogDebug(parser.GetParam(i));
-    }
 
     if(parser.GetParam(0).ToULong(&m_nColumns) == false)
     {
@@ -69,8 +65,7 @@ bool controllerApp::OnInit()
     wxInitAllImageHandlers();
     if ( wxsOK )
     {
-        wxLogDebug("(%u,%u) %d %s:%u", m_nColumns, m_nRows, m_nController, m_sIpAddress.c_str(), m_nPort);
-    	controllerDialog Dlg(0, wxPoint(m_nColumns,m_nRows), m_nController, m_sIpAddress, m_nPort);
+        controllerDialog Dlg(0, wxPoint(m_nColumns,m_nRows), m_nController, m_sIpAddress, m_nPort);
     	SetTopWindow(&Dlg);
     	Dlg.ShowModal();
     	wxsOK = false;

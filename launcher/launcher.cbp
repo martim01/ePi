@@ -11,6 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option parameters="/home/pi/ePi/bin/launch.ini" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
@@ -35,11 +36,13 @@
 			<Add directory="include" />
 			<Add directory="../common/include" />
 			<Add directory="../external/log/include" />
+			<Add directory="../external/json/dist" />
 		</Compiler>
 		<Unit filename="../common/include/inimanager.h" />
 		<Unit filename="../common/include/inisection.h" />
 		<Unit filename="../common/src/inimanager.cpp" />
 		<Unit filename="../common/src/inisection.cpp" />
+		<Unit filename="../common/src/utils.cpp" />
 		<Unit filename="../external/log/src/log.cpp" />
 		<Unit filename="include/launcher.h" />
 		<Unit filename="src/launcher.cpp" />
