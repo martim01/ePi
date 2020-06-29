@@ -260,38 +260,38 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	m_pbtnRestartServer = new wmButton(this, ID_BUTTON_RESTART_SERVER, _("Restart\nServer"), wxDefaultPosition, wxSize(100,40), wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_RESTART_SERVER"));
 	m_pbtnRestartServer->SetForegroundColour(wxColour(255,255,255));
 	m_pbtnRestartServer->SetBackgroundColour(wxColour(128,0,0));
-	StaticBoxSizer3->Add(m_pbtnRestartServer, 1, wxALL|wxEXPAND, 5);
+	StaticBoxSizer3->Add(m_pbtnRestartServer, 1, wxALL|wxEXPAND,0);
 	m_pbtnRestartOS = new wmButton(this, ID_BUTTON_RESTART_OS, _("Restart\nServer OS"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_RESTART_OS"));
 	m_pbtnRestartOS->SetForegroundColour(wxColour(255,255,255));
 	m_pbtnRestartOS->SetBackgroundColour(wxColour(128,0,0));
-	StaticBoxSizer3->Add(m_pbtnRestartOS, 1, wxALL|wxEXPAND, 5);
+	StaticBoxSizer3->Add(m_pbtnRestartOS, 1, wxALL|wxEXPAND,0);
 	m_pbtnShutdownOS = new wmButton(this, ID_BUTTON_SHUTDOWN_OS, _("Shutdown\nServer OS"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_SHUTDOWN_OS"));
 	m_pbtnShutdownOS->SetForegroundColour(wxColour(255,255,255));
 	m_pbtnShutdownOS->SetBackgroundColour(wxColour(128,0,0));
-	StaticBoxSizer3->Add(m_pbtnShutdownOS, 1, wxALL|wxEXPAND, 5);
+	StaticBoxSizer3->Add(m_pbtnShutdownOS, 1, wxALL|wxEXPAND,0);
 
 	m_pbtnStopController = new wmButton(this, wxNewId(), _("Restart\nController"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_SHUTDOWN_OS"));
 	m_pbtnStopController->SetForegroundColour(wxColour(255,255,255));
 	m_pbtnStopController->SetBackgroundColour(wxColour(128,0,0));
-	StaticBoxSizer3->Add(m_pbtnStopController, 1, wxALL|wxEXPAND, 5);
+	StaticBoxSizer3->Add(m_pbtnStopController, 1, wxALL|wxEXPAND,0);
 
 	m_pbtnRestartAll = new wmButton(this, wxNewId(), _("Restart\nAll"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_SHUTDOWN_OS"));
 	m_pbtnRestartAll->SetForegroundColour(wxColour(255,255,255));
 	m_pbtnRestartAll->SetBackgroundColour(wxColour(128,0,0));
-	StaticBoxSizer3->Add(m_pbtnRestartAll, 1, wxALL|wxEXPAND, 5);
+	StaticBoxSizer3->Add(m_pbtnRestartAll, 1, wxALL|wxEXPAND,0);
 
-	StaticBoxSizer3->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+	StaticBoxSizer3->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
 
 
 	m_pbtnSSH = new wmButton(this, ID_BUTTON_SSH, _("SSH"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_SSH"));
 	m_pbtnSSH->SetForegroundColour(wxColour(255,255,255));
 	m_pbtnSSH->SetBackgroundColour(wxColour(68,1,158));
-	StaticBoxSizer3->Add(m_pbtnSSH, 1, wxALL|wxEXPAND, 5);
-	StaticBoxSizer3->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+	StaticBoxSizer3->Add(m_pbtnSSH, 1, wxALL|wxEXPAND,0);
+	StaticBoxSizer3->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
 	m_pbtnBack = new wmButton(this, ID_BUTTON_BACK, _("Back"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_BACK"));
 	m_pbtnBack->SetForegroundColour(wxColour(255,255,255));
 	m_pbtnBack->SetBackgroundColour(wxColour(0,128,0));
-	StaticBoxSizer3->Add(m_pbtnBack, 1, wxALL|wxEXPAND, 5);
+	StaticBoxSizer3->Add(m_pbtnBack, 1, wxALL|wxEXPAND,0);
 	BoxSizer3->Add(StaticBoxSizer3, 0, wxBOTTOM|wxRIGHT|wxEXPAND, 5);
 	BoxSizer0->Add(BoxSizer3, 1, wxALL|wxEXPAND, 0);
 	SetSizer(BoxSizer0);
