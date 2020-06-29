@@ -275,6 +275,11 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	m_pbtnStopController->SetBackgroundColour(wxColour(128,0,0));
 	StaticBoxSizer3->Add(m_pbtnStopController, 1, wxALL|wxEXPAND, 5);
 
+	m_pbtnRestartAll = new wmButton(this, wxNewId(), _("Restart\nAll"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_SHUTDOWN_OS"));
+	m_pbtnRestartAll->SetForegroundColour(wxColour(255,255,255));
+	m_pbtnRestartAll->SetBackgroundColour(wxColour(128,0,0));
+	StaticBoxSizer3->Add(m_pbtnRestartAll, 1, wxALL|wxEXPAND, 5);
+
 	StaticBoxSizer3->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
 
 
@@ -305,6 +310,7 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	Connect(ID_BUTTON_RESTART_OS,wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnRestartOSClick);
 	Connect(ID_BUTTON_SHUTDOWN_OS,wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnShutdownOSClick);
 	Connect(m_pbtnStopController->GetId(),wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnShutdownControllerClick);
+	Connect(m_pbtnRestartAll->GetId(),wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnRestartAllClick);
 	Connect(ID_BUTTON_SSH,wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnSSHClick);
 	Connect(ID_BUTTON_BACK,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnBackClick);
 
@@ -734,3 +740,7 @@ void dlgOptions::PowerReply(const Json::Value& jsData)
 }
 
 
+void dlgOptions::OnbtnRestartAllClick(const wxCommandEvent& event)
+{
+    std::cout << "command:restart_all" << std::endl;
+}

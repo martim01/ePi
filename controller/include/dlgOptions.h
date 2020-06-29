@@ -31,6 +31,7 @@ class dlgOptions: public wxDialog
 		wmButton* m_pbtnSSH;
 		wmButton* m_pbtnShutdownOS;
 		wmButton* m_pbtnStopController;
+		wmButton* m_pbtnRestartAll;
 		wmButton* m_pbtnUpdate;
 		wmButton* m_pbtnUpdateController;
 		wmButton* m_pbtnUpdateEpiServer;
@@ -140,6 +141,8 @@ class dlgOptions: public wxDialog
 		//*)
 
 		void OnbtnShutdownControllerClick(wxCommandEvent& event);
+		void OnbtnRestartAllClick(const wxCommandEvent& event);
+
 
         void OnRestfulReply(const wxCommandEvent& event);
 
