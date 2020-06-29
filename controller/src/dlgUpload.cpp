@@ -159,7 +159,7 @@ void dlgUpload::OnTimer(const wxTimerEvent& event)
                     m_upload.Post(m_sIpAddress.ToStdString(), m_sEndpoint.ToStdString(), m_mData, mFiles, 0);
                     break;
             }
-            UsbChecker::UnmountDevice();
+
         }
         else
         {
@@ -191,7 +191,7 @@ void dlgUpload::OnbtnCancelClick(wxCommandEvent& event)
 
 void dlgUpload::OnReply(const wxCommandEvent& event)
 {
-    umount("/mnt/share");
+    UsbChecker::UnmountDevice();
 
     m_jsReply = ConvertToJson(event.GetString().ToStdString());
     if(m_jsReply["result"].isBool() && m_jsReply["result"].asBool() == false)

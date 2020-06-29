@@ -77,6 +77,7 @@ int UsbChecker::MountDevice(const wxString& sDevice)
         nResult = mount(sDevice.ToStdString().c_str(), "/mnt/share", fs[i].c_str(), MS_RDONLY | MS_SILENT, nullptr);
         if(nResult == 0)
         {
+            wxLogDebug("Mounted as %s",wxString::FromUTF8(fs[i].c_str()).c_str());
             return 0;
         }
     }

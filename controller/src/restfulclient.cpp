@@ -133,7 +133,7 @@ bool RestfulClient::Delete(const std::string& sEndpoint,int nUserId)
 
 void RestfulClient::DoNextTask()
 {
-    wxLogDebug("DoNextTask = '%s'", wxString::FromUTF8(m_qTasks.front().sEndpoint.c_str()).c_str());
+
 
     m_pManager = new mg_mgr;
 
@@ -158,7 +158,7 @@ void RestfulClient::DoNextTask()
 
 void RestfulClient::HandleEvent(mg_connection *pConnection, int nEvent, void* pData)
 {
-    wxLogDebug("RestfulClinet::Event: #%d", nEvent);
+
     switch(nEvent)
     {
         case MG_EV_CONNECT:
@@ -176,7 +176,7 @@ void RestfulClient::HandleEvent(mg_connection *pConnection, int nEvent, void* pD
 
 void RestfulClient::ConnectionEvent(int nStatus)
 {
-    wxLogDebug("ConnectionEvent: %d", nStatus);
+
     if(m_pHandler)
     {
         wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_R_CONNECTION);
@@ -187,7 +187,7 @@ void RestfulClient::ConnectionEvent(int nStatus)
 
 void RestfulClient::ReplyEvent(http_message* pMessage)
 {
-    wxLogDebug("ReplyEvent: %d", m_qTasks.front().nId);
+
 
     if(m_pHandler)
     {
@@ -218,7 +218,7 @@ void RestfulClient::OnConnectionEvent(wxCommandEvent& event)
 
 void RestfulClient::OnFinishedEvent(wxCommandEvent& event)
 {
-    wxLogDebug("Finished");
+
     m_qTasks.pop();
     m_timerTask.Start(250, true);
 }
