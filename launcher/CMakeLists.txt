@@ -8,9 +8,11 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 message(${PROJECT_SOURCE_DIR})
 
 add_executable(launcher "../common/src/inimanager.cpp"
-						"../common/src/inisection.cpp"
+			"../common/src/inisection.cpp"
                         "../external/log/src/log.cpp"
-						"src/main.cpp")
+			"src/main.cpp"
+                        "../common/src/utils.cpp" 
+                        "src/launcher.cpp")
 
 include_directories(${PROJECT_SOURCE_DIR}/../external/log/include)
 include_directories(${PROJECT_SOURCE_DIR}/../common/include)
