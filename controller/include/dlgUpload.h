@@ -58,7 +58,7 @@ class dlgUpload: public wxDialog
         void OnReply(const wxCommandEvent& event);
         void OnProgress(const wxCommandEvent& event);
         void OnTimer(const wxTimerEvent& event);
-        bool MountDevice(const wxString& sDevice);
+
 
 		MultipartUpload m_upload;
 

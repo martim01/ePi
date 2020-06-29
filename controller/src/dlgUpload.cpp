@@ -10,7 +10,7 @@
 #include <sys/types.h>
 #include <sys/statfs.h>
 #include <unistd.h>
-
+#include "usbchecker.h"
 //(*InternalHeaders(dlgUpload)
 #include <wx/font.h>
 #include <wx/intl.h>
@@ -143,7 +143,7 @@ void dlgUpload::OnTimer(const wxTimerEvent& event)
             m_mData.insert(std::make_pair("description", wxDateTime::Now().Format("Uploaded at %Y-%m-%d %H:%M:%S").ToStdString()));
         }
 
-        if(MountDevice(aDlg.m_sSelectedDevice))
+        if(UsbChecker::MountDevice(aDlg.m_sSelectedDevice) == 0)
         {
             m_pstDetails->SetLabel(wxString::Format("Uploading '%s'...", sFilename.c_str()));
 
@@ -159,6 +159,7 @@ void dlgUpload::OnTimer(const wxTimerEvent& event)
                     m_upload.Post(m_sIpAddress.ToStdString(), m_sEndpoint.ToStdString(), m_mData, mFiles, 0);
                     break;
             }
+            UsbChecker::UnmountDevice();
         }
         else
         {
@@ -213,47 +214,6 @@ void dlgUpload::OnProgress(const wxCommandEvent& event)
     }
 }
 
-bool dlgUpload::MountDevice(const wxString& sDevice)
-{
-    if(sDevice.empty())
-    {
-        return true;
-    }
-
-    if(wxDirExists("/mnt/share") == false)
-    {
-        wxMkdir("/mnt/share");
-    }
-    int nResult = umount("/mnt/share");
-    if(nResult == -1 && errno != EAGAIN && errno != EINVAL)
-    {
-        wxLogDebug("Failed to umount");
-        return false;
-    }
-
-    struct statfs info;
-    nResult = statfs(sDevice.ToStdString().c_str(), &info);
-    if(nResult != 0)
-    {
-        wxLogDebug("Failed to get file type");
-        return false;
-    }
-    wxLogDebug("Type: %d", info.f_type);
-
-    std::string sOpt("umask=000");
-
-    std::array<std::string,3> fs({"vfat","fuse","ntfs"});
-    for(size_t i = 0; i < fs.size(); i++)
-    {
-        nResult = mount(sDevice.ToStdString().c_str(), "/mnt/share", fs[i].c_str(), MS_RDONLY | MS_SILENT, nullptr);
-        if(nResult == 0)
-        {
-            return true;
-        }
-    }
-    return false;
-
-}
 
 void dlgUpload::SetMulitpartTextData(const std::map<std::string, std::string>& mData)
 {

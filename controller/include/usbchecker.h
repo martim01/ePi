@@ -7,6 +7,9 @@ class UsbChecker
         UsbChecker(wxEvtHandler* pHandler) :m_pHandler(pHandler){}
         void RunCheck(const wxString& sFilename);
 
+        static int MountDevice(const wxString& sDevice);
+        static int UnmountDevice();
+
     private:
         void MountAndSearch(const wxString& sDevice, const wxString& sFilename);
 

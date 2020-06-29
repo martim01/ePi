@@ -57,7 +57,7 @@ public:
 	/** @brief Get the name of the section
 	*	@return <i>std::string</i> the section name
 	**/
-	const std::string& GetSectionName()
+	const std::string& GetSectionName() const
 	{	return m_sSectionName;	}
 
 	/** @brief Get the string value of data with key sKey
@@ -65,7 +65,7 @@ public:
 	*	@param sDefault the value to return of the data does not exist
 	*	@return <i>std::string</i> the value of the data
 	**/
-    const std::string& GetString(const std::string& sKey, const std::string& sDefault);
+    const std::string& GetString(const std::string& sKey, const std::string& sDefault) const;
 
 	/** @brief Get the int value of data with key sKey
 	*	@param sKey the key name of the data

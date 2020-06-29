@@ -54,13 +54,14 @@ class controllerDialog: public wxDialog
         wxTimer m_timerMenu;
         wxTimer m_timerStop;
         //*)
+        wxTimer m_timerCheck;
 
         void OnWebsocketConnection(const wxCommandEvent& event);
         void OnWebsocketHandshake(const wxCommandEvent& event);
         void OnWebsocketFrame(const wxCommandEvent& event);
         void OnWebsocketFinished(const wxCommandEvent& event);
         void OnRestfulReply(const wxCommandEvent& event);
-
+        void OnTimerCheck(const wxTimerEvent& event);
         void UpdateLabels();
 
         void ReplyConfig(const Json::Value& jsData);

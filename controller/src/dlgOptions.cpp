@@ -270,7 +270,7 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	m_pbtnShutdownOS->SetBackgroundColour(wxColour(128,0,0));
 	StaticBoxSizer3->Add(m_pbtnShutdownOS, 1, wxALL|wxEXPAND, 5);
 
-	m_pbtnStopController = new wmButton(this, wxNewId(), _("Close\nController"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_SHUTDOWN_OS"));
+	m_pbtnStopController = new wmButton(this, wxNewId(), _("Restart\nController"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_SHUTDOWN_OS"));
 	m_pbtnStopController->SetForegroundColour(wxColour(255,255,255));
 	m_pbtnStopController->SetBackgroundColour(wxColour(128,0,0));
 	StaticBoxSizer3->Add(m_pbtnStopController, 1, wxALL|wxEXPAND, 5);
@@ -456,7 +456,41 @@ void dlgOptions::OnbtnUpdatePlayer3Click(wxCommandEvent& event)
 
 void dlgOptions::OnbtnUpdateControllerClick(wxCommandEvent& event)
 {
-    //@todo(martim01) Update Controller
+    dlgUsb aDlg(this, m_pstHostname->GetLabel(), "controller");
+    if(aDlg.ShowModal() == wxID_OK && UsbChecker::MountDevice(aDlg.m_sSelectedDevice))
+    {
+        //get the current directory
+        char buffer[256];
+        int nBytes = readlink("/proc/self/exe", buffer, 256);
+        if(nBytes > 0)
+        {
+            buffer[nBytes] = '\0';
+            //rename the controller app
+            int nResult = rename(buffer, "/tmp/controller.old");
+
+            //copy the new app in place of the controller app
+            std::ifstream source(aDlg.m_sSelectedFile, std::ios::binary);
+            std::ofstream dest(buffer, std::ios::binary);
+            if(source && dest)
+            {
+                dest << source.rdbuf();
+                source.close();
+                dest.close();
+                //@todo(martim01) tell the launcher to restart everything
+
+            }
+            else
+            {
+                wxLogDebug("Couldn't open source or dest files");
+            }
+
+        }
+        else
+        {
+            wxLogDebug("Couldn't find running app");
+        }
+        UsbChecker::UnmountDevice();
+    }
 }
 
 void dlgOptions::OnbtnUpdatePlayer67Click(wxCommandEvent& event)
@@ -471,42 +505,34 @@ void dlgOptions::OnbtnUpdateLauncherClick(wxCommandEvent& event)
 
 void dlgOptions::OnbtnRestartServerClick(wxCommandEvent& event)
 {
-    {
-        std::string sEndpoint = (m_sUrl+STR_ENDPOINTS[POWER]).ToStdString();
-        std::string sCommand = "{ \"command\": \"restart server\"}";
-        m_client.Put(sEndpoint, sCommand.c_str(), POWER);
-    }
+    std::string sEndpoint = (m_sUrl+STR_ENDPOINTS[POWER]).ToStdString();
+    std::string sCommand = "{ \"command\": \"restart server\"}";
+    m_client.Put(sEndpoint, sCommand.c_str(), POWER);
 }
 
 void dlgOptions::OnbtnRestartOSClick(wxCommandEvent& event)
 {
-    {
-        std::string sEndpoint = (m_sUrl+STR_ENDPOINTS[POWER]).ToStdString();
-        std::string sCommand = "{ \"command\": \"restart os\"}";
-        m_client.Put(sEndpoint, sCommand.c_str(), POWER);
-    }
+    std::string sEndpoint = (m_sUrl+STR_ENDPOINTS[POWER]).ToStdString();
+    std::string sCommand = "{ \"command\": \"restart os\"}";
+    m_client.Put(sEndpoint, sCommand.c_str(), POWER);
 }
 
 void dlgOptions::OnbtnShutdownOSClick(wxCommandEvent& event)
 {
-    {
-        std::string sEndpoint = (m_sUrl+STR_ENDPOINTS[POWER]).ToStdString();
-        std::string sCommand = "{ \"command\": \"shutdown\"}";
-        m_client.Put(sEndpoint, sCommand.c_str(), POWER);
-    }
+   std::string sEndpoint = (m_sUrl+STR_ENDPOINTS[POWER]).ToStdString();
+    std::string sCommand = "{ \"command\": \"shutdown\"}";
+    m_client.Put(sEndpoint, sCommand.c_str(), POWER);
 }
 
 void dlgOptions::OnbtnShutdownControllerClick(wxCommandEvent& event)
 {
-    {
-        EndModal(wxID_CANCEL);
-    }
+    EndModal(wxID_CANCEL);
 }
 
 void dlgOptions::OnbtnSSHClick(wxCommandEvent& event)
 {
 
-    wxExecute(wxString::Format("xterm -fullscreen -e 'ssh %s'", m_sIpAddress.Before(':').c_str()));
+    wxExecute(wxString::Format("xterm -maximized -e 'ssh %s'", m_sIpAddress.Before(':').c_str()));
 }
 
 void dlgOptions::OnbtnBackClick(wxCommandEvent& event)

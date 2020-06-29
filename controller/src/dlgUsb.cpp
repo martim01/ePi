@@ -194,3 +194,5 @@ void dlgUsb::OnbtnCheckClick(wxCommandEvent& event)
 {
     CheckUSB();
 }
+
+

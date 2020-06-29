@@ -42,12 +42,24 @@ void UsbChecker::RunCheck(const wxString& sFilename)
     th.detach();
 }
 
-
-void UsbChecker::MountAndSearch(const wxString& sDevice, const wxString& sFilename)
+int UsbChecker::UnmountDevice()
 {
-    wxString sPath;
+    int nResult = umount("/mnt/share");
+    if(nResult == -1 && errno != EAGAIN && errno != EINVAL)
+    {
+        return errno;
+    }
+    return 0;
+}
 
-    //mount the drive
+
+int UsbChecker::MountDevice(const wxString& sDevice)
+{
+    if(sDevice.empty())
+    {
+        return EINVAL;
+    }
+
     if(wxDirExists("/mnt/share") == false)
     {
         wxMkdir("/mnt/share");
@@ -55,40 +67,38 @@ void UsbChecker::MountAndSearch(const wxString& sDevice, const wxString& sFilena
     int nResult = umount("/mnt/share");
     if(nResult == -1 && errno != EAGAIN && errno != EINVAL)
     {
-        wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_USB_ERROR);
-        pEvent->SetInt(errno);
-        pEvent->SetString(wxString::Format("umount: %s", wxString::FromUTF8(strerror(errno)).c_str()));
-
-        wxQueueEvent(m_pHandler, pEvent);
-        return;
+        return errno;
     }
-    std::string sOpt("umask=000");
 
-    bool bMounted(false);
 
     std::array<std::string, 8> fs({"ext3", "ext2", "ext4", "vfat", "msdos", "f2fs", "fuseblk", "ntfs"});
-
     for(size_t i = 0; i < fs.size(); i++)
     {
         nResult = mount(sDevice.ToStdString().c_str(), "/mnt/share", fs[i].c_str(), MS_RDONLY | MS_SILENT, nullptr);
         if(nResult == 0)
         {
-            bMounted = true;
-            break;
+            return 0;
         }
     }
-    if(bMounted == false)
+    return errno;
+
+}
+
+
+void UsbChecker::MountAndSearch(const wxString& sDevice, const wxString& sFilename)
+{
+    int nError = MountDevice(sDevice);
+    if(nError != 0)
     {
         wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_USB_ERROR);
-        pEvent->SetInt(errno);
-        pEvent->SetString(wxString::Format("%s:\nUnknown filesystem type", sDevice.c_str()));
+        pEvent->SetInt(nError);
+        pEvent->SetString(wxString::Format("Mount: %s", wxString::FromUTF8(strerror(errno)).c_str()));
 
         wxQueueEvent(m_pHandler, pEvent);
         return;
     }
 
-
-    sPath = "/mnt/share";
+    wxString sPath = "/mnt/share";
 
     wxArrayString asFiles;
     wxDir::GetAllFiles("/mnt/share", &asFiles, sFilename);

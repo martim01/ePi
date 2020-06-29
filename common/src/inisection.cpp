@@ -106,10 +106,10 @@ std::map<string,string>::const_iterator iniSection::GetDataEnd() const
 /*!
     \fn iniSection::GetString(const string& sKey, const string& sDefault)
  */
-const string& iniSection::GetString(const string& sKey, const string& sDefault)
+const string& iniSection::GetString(const string& sKey, const string& sDefault) const
 {
   	//does the key exist
-  	itIniData it = m_mSectionData.find(getlower(sKey));
+  	auto it = m_mSectionData.find(getlower(sKey));
 	if(it==m_mSectionData.end())
 		return sDefault;
 	return it->second;

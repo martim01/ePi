@@ -41,6 +41,8 @@
 		<Unit filename="../common/src/inimanager.cpp" />
 		<Unit filename="../common/src/inisection.cpp" />
 		<Unit filename="../external/log/src/log.cpp" />
+		<Unit filename="include/launcher.h" />
+		<Unit filename="src/launcher.cpp" />
 		<Unit filename="src/main.cpp" />
 		<Extensions>
 			<code_completion />

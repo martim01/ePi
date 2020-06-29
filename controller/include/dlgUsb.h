@@ -20,6 +20,8 @@ class dlgUsb: public wxDialog
 		dlgUsb(wxWindow* parent, const wxString& sHostname, const wxString& sFilename, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
 		virtual ~dlgUsb();
 
+
+
 		//(*Declarations(dlgUsb)
 		wmButton* m_pbtnCancel;
 		wmButton* m_pbtnUpload;

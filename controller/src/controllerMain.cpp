@@ -105,8 +105,8 @@ m_bDown(false)
 
     Center();
     Move(wxPoint(nColumn*nWidth+wxGetClientDisplayRect().GetLeft(), nRow*nHeight+wxGetClientDisplayRect().GetTop()));
-	
-    wxSetCursor(wxSTANDARD_CURSOR);
+
+    wxSetCursor(*wxSTANDARD_CURSOR);
     wxSetCursor(wxNullCursor);
     m_uiName.SetRect(1,1,GetClientRect().GetWidth()-2,GetClientRect().GetHeight()/2);
     m_uiStatus.SetRect(1,m_uiName.GetBottom(),m_uiName.GetWidth(),m_uiName.GetHeight());
@@ -122,6 +122,10 @@ m_bDown(false)
     Connect(wxID_ANY, wxEVT_WS_FINISHED, (wxObjectEventFunction)&controllerDialog::OnWebsocketFinished);
     Connect(wxID_ANY, wxEVT_R_REPLY, (wxObjectEventFunction)&controllerDialog::OnRestfulReply);
 
+
+    m_timerCheck.SetOwner(this, wxNewId());
+    Connect(m_timerCheck.GetId(), wxEVT_TIMER, (wxObjectEventFunction)&controllerDialog::OnTimerCheck);
+
     SetBackgroundColour(wxColour(255,255,255));
     UpdateLabels();
 
@@ -129,9 +133,6 @@ m_bDown(false)
 
     m_sWSEndpoint.Printf("ws://%s", m_sIpAddress.c_str());
     m_sUrl.Printf("http://%s/x-epi/", m_sIpAddress.c_str());
-
-    m_rClient.Get((m_sUrl+STR_ENDPOINTS[CONFIG]).ToStdString(), CONFIG);
-    m_rClient.Get((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString(), FILES);
 
     m_wsClient.Connect(std::string(m_sWSEndpoint.mb_str()));
 }
@@ -166,6 +167,8 @@ void controllerDialog::OnWebsocketConnection(const wxCommandEvent& event)
     else
     {
         m_nConnected = CONNECTING;
+        m_timerCheck.Start(100,true);
+
         UpdateLabels();
     }
 }
@@ -445,4 +448,13 @@ void controllerDialog::OntimerMenuTrigger(wxTimerEvent& event)
     {
         m_rClient.Get((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString(), FILES);
     }
+}
+
+
+void controllerDialog::OnTimerCheck(const wxTimerEvent& event)
+{
+    //Ask for status and info...
+    m_rClient.Get((m_sUrl+STR_ENDPOINTS[CONFIG]).ToStdString(), CONFIG);
+    m_rClient.Get((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString(), FILES);
+    m_timerCheck.Start(1000, true);
 }

@@ -51,7 +51,6 @@ const url Core::EP_OUTPUTS     = url(EP_EPI.Get()+"/"+OUTPUTS);
 Core::Core() : m_manager(m_launcher, m_iniConfig), m_nTimeSinceLastCall(0)
 {
 
-
     m_jsStatus["player"] ="Stopped";
 }
 
@@ -668,6 +667,10 @@ void Core::LoopCallback(int nTook)
     if(m_nTimeSinceLastCall > 2000)
     {
         m_server.SendWebsocketMessage(m_info.GetInfo());
+        if(m_jsStatus["player"].asString() == "Stopped")
+        {
+            m_server.SendWebsocketMessage(m_jsStatus);
+        }
         m_nTimeSinceLastCall = 0;
     }
 }
