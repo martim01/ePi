@@ -28,6 +28,9 @@ target_link_libraries(launcher pthread)
 
 set_target_properties(launcher PROPERTIES RUNTIME_OUTPUT_DIRECTORY "../../bin/")
 
+add_custom_command(TARGET launcher POST_BUILD COMMAND "setcap" ARGS " cap_sys_admin+ep" "../../bin/launcher")
+
+
 #install
 install(TARGETS launcher RUNTIME DESTINATION /usr/local/bin)
 
