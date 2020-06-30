@@ -496,30 +496,6 @@ void dlgOptions::OnbtnUpdateControllerClick(wxCommandEvent& event)
                     chmod(buffer, 0755);
 
 
-                    //set the caps
-                    cap_t file_cap = cap_from_text("cap_sys_admin,cap_setfcap+ep");
-                    if(file_cap == nullptr)
-                    {
-                        Json::Value jsError;
-                        jsError["reason"] = Json::Value(Json::arrayValue);
-                        jsError["reason"].append("Couldn't cap_from_text");
-
-                        ShowError("Can't update controller!", jsError);
-                    }
-                    else
-                    {
-                        int nResult = cap_set_file(buffer, file_cap);
-                        if(nResult != 0)
-                        {
-                            Json::Value jsError;
-                            jsError["reason"] = Json::Value(Json::arrayValue);
-                            jsError["reason"].append("Couldn't cap_set_file");
-                            jsError["reason"].append(strerror(errno));
-
-                        }
-                    }
-
-
                     //tell launcher to restart all
                     std::cout << "command:restart_all" << std::endl;
 

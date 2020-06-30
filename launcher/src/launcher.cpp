@@ -11,7 +11,8 @@
 #include <fcntl.h>
 #include "utils.h"
 #include <string.h>
-
+#include <sys/capability.h>
+#include <sys/prctl.h>
 
 bool ReadFromPipe(int nFd, Launcher::controller& aController)
 {
@@ -48,6 +49,7 @@ bool ReadFromPipe(int nFd, Launcher::controller& aController)
 
 Launcher::Launcher(iniManager& ini) : m_ini(ini)
 {
+    pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
     m_sRows = m_ini.GetIniString("layout", "rows","1");
     m_sColumns = m_ini.GetIniString("layout", "columns","1");
 
@@ -59,6 +61,10 @@ Launcher::Launcher(iniManager& ini) : m_ini(ini)
 
 bool Launcher::Run()
 {
+    if(!InheritCapabilities())
+    {
+        return false;
+    }
     LaunchAll();
     Loop();
     return true;
@@ -265,4 +271,49 @@ void Launcher::RestartAll()
     FD_ZERO(&m_read);
     LaunchAll();
 
+}
+
+
+bool Launcher::InheritCapabilities()
+{
+    cap_t caps = cap_get_proc();
+    if(caps == nullptr)
+    {
+        pml::Log::Get(pml::Log::LOG_ERROR) << "Failed to load cap" << std::endl;
+        return false;
+    }
+    std::cout << "Loaded caps = " << cap_to_text(caps, nullptr) << std::endl;
+
+    cap_value_t cap_list[1];
+    cap_list[0] = CAP_SYS_ADMIN;
+    if(cap_set_flag(caps, CAP_INHERITABLE, 1, cap_list, CAP_SET) == -1)
+    {
+        pml::Log::Get(pml::Log::LOG_ERROR) << "Failed to set inheritable " << strerror(errno) << std::endl;
+        return false;
+    }
+
+    std::cout << "Loaded caps = " << cap_to_text(caps, nullptr) << std::endl;
+
+    if(cap_set_proc(caps) == -1)
+    {
+        pml::Log::Get(pml::Log::LOG_ERROR) << "Failed to set proc " << strerror(errno) << std::endl;
+        return false;
+    }
+
+    caps = cap_get_proc();
+    if(caps == nullptr)
+    {
+        pml::Log::Get(pml::Log::LOG_ERROR) << "Failed to load cap" << std::endl;
+        return false;
+    }
+
+    std::cout << "Loaded caps = " << cap_to_text(caps, nullptr) << std::endl;
+
+    if(prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, CAP_SYS_ADMIN,0,0) == -1)
+    {
+        pml::Log::Get(pml::Log::LOG_ERROR) << "Failed to rasie cap" << std::endl;
+        return false;
+    }
+
+    return true;
 }

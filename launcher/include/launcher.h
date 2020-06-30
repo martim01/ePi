@@ -23,6 +23,7 @@ class Launcher
 
 
     private:
+        bool InheritCapabilities();
         void LaunchAll();
         bool Launch(const iniSection* pSection);
         void Loop();

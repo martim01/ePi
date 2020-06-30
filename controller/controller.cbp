@@ -77,9 +77,6 @@
 					<Add library="cap" />
 					<Add directory="$(#wx)/lib/gcc_dll" />
 				</Linker>
-				<ExtraCommands>
-					<Add after="sudo setcap cap_sys_admin+ep /home/pi/ePi/bin/controllerd" />
-				</ExtraCommands>
 			</Target>
 			<Target title="Linux Release">
 				<Option platforms="Unix;" />
@@ -105,9 +102,6 @@
 					<Add library="cap" />
 					<Add directory="$(#wx)/lib/gcc_dll" />
 				</Linker>
-				<ExtraCommands>
-					<Add after="sudo setcap cap_setfcap,cap_sys_admin+ep /home/pi/ePi/bin/controller" />
-				</ExtraCommands>
 			</Target>
 		</Build>
 		<Compiler>

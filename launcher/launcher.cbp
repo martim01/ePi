@@ -17,7 +17,7 @@
 				</Compiler>
 			</Target>
 			<Target title="Release">
-				<Option output="bin/Release/launcher" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/launcher" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -27,7 +27,12 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="cap" />
 				</Linker>
+				<ExtraCommands>
+					<Add after="sudo setcap cap_sys_admin+ep /home/pi/ePi/bin/launcher" />
+					<Mode after="always" />
+				</ExtraCommands>
 			</Target>
 		</Build>
 		<Compiler>
@@ -39,9 +44,6 @@
 			<Add directory="../external/log/include" />
 			<Add directory="../external/json/dist" />
 		</Compiler>
-		<ExtraCommands>
-			<Add after="sudo setcap cap_sys_admin+epi /home/pi/ePi/bin/launcher" />
-		</ExtraCommands>
 		<Unit filename="../common/include/inimanager.h" />
 		<Unit filename="../common/include/inisection.h" />
 		<Unit filename="../common/src/inimanager.cpp" />
