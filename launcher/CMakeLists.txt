@@ -24,7 +24,7 @@ target_compile_definitions(launcher PUBLIC NDEBUG)
 
 
 
-target_link_libraries(launcher pthread)
+target_link_libraries(launcher pthread cap)
 
 set_target_properties(launcher PROPERTIES RUNTIME_OUTPUT_DIRECTORY "../../bin/")
 
