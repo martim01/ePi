@@ -75,7 +75,7 @@
 			<Add directory="../external/log/lib" />
 		</Linker>
 		<ExtraCommands>
-			<Add before="../autoversion include/version.h" />
+			<Add before="../autoversion src/version.cpp" />
 		</ExtraCommands>
 		<Unit filename="../common/include/epicron.h" />
 		<Unit filename="../common/include/inimanager.h" />
@@ -124,6 +124,7 @@
 		<Unit filename="src/resourcemanager.cpp" />
 		<Unit filename="src/sysinfomanager.cpp" />
 		<Unit filename="src/uidutils.cpp" />
+		<Unit filename="src/version.cpp" />
 		<Unit filename="src/wavfile.cpp" />
 		<Extensions>
 			<code_completion />

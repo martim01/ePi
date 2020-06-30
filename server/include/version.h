@@ -1,14 +1,15 @@
 #pragma once
 
+#pragma once
+
 namespace version
 {
-    static const unsigned long MAJOR=0;
-    static const unsigned long MINOR=1;
-    static const unsigned long PATCH=0;
-    static const unsigned long BUILD=53;
-    static const unsigned long DATE=1593439214;
-}
-
+    extern const unsigned long MAJOR;
+    extern const unsigned long MINOR;
+    extern const unsigned long PATCH;
+    extern const unsigned long BUILD;
+    extern const unsigned long DATE;
+};
 
 
 

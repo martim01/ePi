@@ -96,6 +96,9 @@
 		<ResourceCompiler>
 			<Add directory="$(#wx)/include" />
 		</ResourceCompiler>
+		<ExtraCommands>
+			<Add before="../autoversion src/version.cpp" />
+		</ExtraCommands>
 		<Unit filename="../common/include/epiwriter.h" />
 		<Unit filename="../common/include/inimanager.h" />
 		<Unit filename="../common/include/inisection.h" />
@@ -148,6 +151,7 @@
 		<Unit filename="src/restfulclient.cpp" />
 		<Unit filename="src/uirect.cpp" />
 		<Unit filename="src/usbchecker.cpp" />
+		<Unit filename="src/version.cpp" />
 		<Unit filename="src/websocketclient.cpp" />
 		<Unit filename="src/wmbutton.cpp" />
 		<Unit filename="src/wmedit.cpp" />

@@ -49,7 +49,7 @@
 			<Add library="samplerate" />
 		</Linker>
 		<ExtraCommands>
-			<Add before="../autoversion include/version.h" />
+			<Add before="../autoversion src/version.cpp" />
 		</ExtraCommands>
 		<Unit filename="../common/include/epicron.h" />
 		<Unit filename="../common/include/epiwriter.h" />
@@ -83,6 +83,7 @@
 		<Unit filename="src/resources.cpp" />
 		<Unit filename="src/schedule.cpp" />
 		<Unit filename="src/soundfile.cpp" />
+		<Unit filename="src/version.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />
