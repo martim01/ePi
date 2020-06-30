@@ -12,6 +12,8 @@
 #include "dlgUsb.h"
 #include <map>
 #include "dlgUpload.h"
+#include "dlgError.h"
+#include <sys/capability.h>
 
 //(*InternalHeaders(dlgOptions)
 #include <wx/font.h>
@@ -463,41 +465,93 @@ void dlgOptions::OnbtnUpdatePlayer3Click(wxCommandEvent& event)
 void dlgOptions::OnbtnUpdateControllerClick(wxCommandEvent& event)
 {
     dlgUsb aDlg(this, m_pstHostname->GetLabel(), "controller");
-    if(aDlg.ShowModal() == wxID_OK && UsbChecker::MountDevice(aDlg.m_sSelectedDevice))
+    if(aDlg.ShowModal() == wxID_OK)
     {
-        //get the current directory
-        char buffer[256];
-        int nBytes = readlink("/proc/self/exe", buffer, 256);
-        if(nBytes > 0)
+        UsbChecker::UnmountDevice();
+        if(UsbChecker::MountDevice(aDlg.m_sSelectedDevice) == 0)
         {
-            buffer[nBytes] = '\0';
-            //rename the controller app
-            int nResult = rename(buffer, "/tmp/controller.old");
-
-            //copy the new app in place of the controller app
-            std::ifstream source(aDlg.m_sSelectedFile, std::ios::binary);
-            std::ofstream dest(buffer, std::ios::binary);
-            if(source && dest)
+            //get the current directory
+            char buffer[256];
+            int nBytes = readlink("/proc/self/exe", buffer, 256);
+            if(nBytes > 0)
             {
-                dest << source.rdbuf();
-                source.close();
-                dest.close();
+                buffer[nBytes] = '\0';
+                //rename the controller app
+                int nResult = rename(buffer, "/tmp/controller.old");
 
-                //tell launcher to restart all
-                std::cout << "command:restart_all" << std::endl;
+                std::cout << buffer << std::endl;
 
+                //copy the new app in place of the controller app
+                std::ifstream source(aDlg.m_sSelectedFile, std::ios::binary);
+                std::ofstream dest(buffer, std::ios::binary);
+                if(source && dest)
+                {
+                    dest << source.rdbuf();
+                    source.close();
+                    dest.close();
+
+                    //set the x
+                    chmod(buffer, 0755);
+
+
+                    //set the caps
+                    cap_t file_cap = cap_from_text("cap_sys_admin,cap_setfcap+ep");
+                    if(file_cap == nullptr)
+                    {
+                        Json::Value jsError;
+                        jsError["reason"] = Json::Value(Json::arrayValue);
+                        jsError["reason"].append("Couldn't cap_from_text");
+
+                        ShowError("Can't update controller!", jsError);
+                    }
+                    else
+                    {
+                        Json::Value jsError;
+                        jsError["reason"] =Json::Value(Json::arrayValue);
+                        ShowError("Set cap",jsError);
+                        int nResult = cap_set_file(buffer, file_cap);
+                        if(nResult != 0)
+                        {
+
+                            jsError["reason"] = Json::Value(Json::arrayValue);
+                            jsError["reason"].append("Couldn't cap_set_file");
+                            jsError["reason"].append(strerror(errno));
+
+                        }
+                    }
+
+
+                    //tell launcher to restart all
+                    std::cout << "command:restart_all" << std::endl;
+
+                }
+                else
+                {
+                    Json::Value jsError;
+                    jsError["reason"] = Json::Value(Json::arrayValue);
+                    jsError["reason"].append("Couldn't open source or dest files");
+                    jsError["reason"].append(aDlg.m_sSelectedFile.ToStdString());
+                    jsError["reason"].append(buffer);
+
+                    ShowError("Can't update controller!", jsError);
+                }
             }
             else
             {
-                wxLogDebug("Couldn't open source or dest files");
+                Json::Value jsError;
+                jsError["reason"].append("Couldn't find running app!");
+                jsError["reason"].append(strerror(errno));
+                ShowError("Can't update controller!", jsError);
             }
-
+            UsbChecker::UnmountDevice();
         }
         else
         {
-            wxLogDebug("Couldn't find running app");
+            Json::Value jsError;
+            jsError["reason"].append("Couldn't mount device!");
+            jsError["reason"].append(aDlg.m_sSelectedDevice.ToStdString());
+            ShowError("Can't update controller!", jsError);
         }
-        UsbChecker::UnmountDevice();
     }
 }
 
@@ -676,16 +730,8 @@ void dlgOptions::VersionReply(const Json::Value& jsData)
 
 void dlgOptions::ShowError(wxString sMessage, const Json::Value& jsData)
 {
-    for(size_t i = 0; i < jsData["reason"].size(); i++)
-    {
-        if(jsData["reason"][i].isString())
-        {
-            sMessage += "\n";
-            sMessage += wxString::FromUTF8(jsData["reason"][i].asString().c_str());
-        }
-    }
-    //@todo(martim01) - nicer message box
-    wxMessageBox(sMessage);
+    dlgError aDlg(this, sMessage, jsData);
+    aDlg.ShowModal();
 }
 
 void dlgOptions::FileDeleteReply(const Json::Value& jsData)

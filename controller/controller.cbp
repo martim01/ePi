@@ -54,13 +54,14 @@
 			</Target>
 			<Target title="Linux Debug">
 				<Option platforms="Unix;" />
-				<Option output="../bin/controller" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/controllerd" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option parameters="4 3 0 192.168.0.120 8080" />
+				<Option parameters="4 3 0 192.168.0.101 8080" />
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
+					<Add option="-std=c++14" />
 					<Add option="-g" />
 					<Add option="`wx-config --cxxflags`" />
 					<Add option="-pthread" />
@@ -73,10 +74,39 @@
 				<Linker>
 					<Add option="`wx-config --libs`" />
 					<Add option="-pthread" />
+					<Add library="cap" />
 					<Add directory="$(#wx)/lib/gcc_dll" />
 				</Linker>
 				<ExtraCommands>
-					<Add after="sudo setcap cap_sys_admin+ep /home/pi/ePi/bin/controller" />
+					<Add after="sudo setcap cap_sys_admin+ep /home/pi/ePi/bin/controllerd" />
+				</ExtraCommands>
+			</Target>
+			<Target title="Linux Release">
+				<Option platforms="Unix;" />
+				<Option output="../bin/controller" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Option parameters="4 3 0 192.168.0.101 8080" />
+				<Option projectLinkerOptionsRelation="2" />
+				<Compiler>
+					<Add option="`wx-config --cxxflags`" />
+					<Add option="-pthread" />
+					<Add option="-DNDEBUG" />
+					<Add directory="$(#wx)/lib/gcc_dll/mswud" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(#wx)/lib/gcc_dll/mswud" />
+				</ResourceCompiler>
+				<Linker>
+					<Add option="-O3" />
+					<Add option="`wx-config --libs`" />
+					<Add option="-pthread" />
+					<Add library="cap" />
+					<Add directory="$(#wx)/lib/gcc_dll" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="sudo setcap cap_setfcap,cap_sys_admin+ep /home/pi/ePi/bin/controller" />
 				</ExtraCommands>
 			</Target>
 		</Build>
@@ -163,7 +193,6 @@
 		<Unit filename="src/wmlist.cpp" />
 		<Unit filename="wxsmith/controllerdialog.wxs" />
 		<Unit filename="wxsmith/dlgEdit.wxs" />
-		<Unit filename="wxsmith/dlgError.wxs" />
 		<Unit filename="wxsmith/dlgOptions.wxs" />
 		<Unit filename="wxsmith/dlgUpload.wxs" />
 		<Unit filename="wxsmith/dlgUsb.wxs" />
@@ -180,7 +209,6 @@
 					<wxDialog wxs="wxsmith/dlgEdit.wxs" src="src/dlgEdit.cpp" hdr="include/dlgEdit.h" fwddecl="0" i18n="1" name="dlgEdit" language="CPP" />
 					<wxDialog wxs="wxsmith/dlgUsb.wxs" src="src/dlgUsb.cpp" hdr="include/dlgUsb.h" fwddecl="0" i18n="1" name="dlgUsb" language="CPP" />
 					<wxDialog wxs="wxsmith/dlgUpload.wxs" src="src/dlgUpload.cpp" hdr="include/dlgUpload.h" fwddecl="0" i18n="1" name="dlgUpload" language="CPP" />
-					<wxDialog wxs="wxsmith/dlgError.wxs" src="src/dlgError.cpp" hdr="include/dlgError.h" fwddecl="0" i18n="1" name="dlgError" language="CPP" />
 				</resources>
 			</wxsmith>
 		</Extensions>

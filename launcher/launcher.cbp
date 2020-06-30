@@ -21,6 +21,7 @@
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option parameters="/home/pi/ePi/bin/launch.ini" />
 				<Compiler>
 					<Add option="-O2" />
 				</Compiler>
@@ -38,6 +39,9 @@
 			<Add directory="../external/log/include" />
 			<Add directory="../external/json/dist" />
 		</Compiler>
+		<ExtraCommands>
+			<Add after="sudo setcap cap_sys_admin+epi /home/pi/ePi/bin/launcher" />
+		</ExtraCommands>
 		<Unit filename="../common/include/inimanager.h" />
 		<Unit filename="../common/include/inisection.h" />
 		<Unit filename="../common/src/inimanager.cpp" />

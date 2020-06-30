@@ -9,20 +9,22 @@
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 //*)
+#include "wmbutton.h"
+#include "wmlabel.h"
+#include "json/json.h"
 
 class dlgError: public wxDialog
 {
 	public:
 
-		dlgError(wxWindow* parent,wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
+		dlgError(wxWindow* parent,const wxString& sMessage, const Json::Value& jsError, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
 		virtual ~dlgError();
 
-		//(*Declarations(dlgError)
-		wmList* m_plstReasons;
-		wxButton* m_pbtnClose;
+        wmList* m_plstReasons;
+		wmButton* m_pbtnClose;
 		wxPanel* panel1;
-		wxStaticText* StaticText1;
-		//*)
+		wmLabel* m_plblMessage;
+
 
 	protected:
 

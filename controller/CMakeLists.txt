@@ -49,11 +49,11 @@ find_package(wxWidgets REQUIRED)
 include(${wxWidgets_USE_FILE})
 
 
-target_link_libraries(controller ${wxWidgets_LIBRARIES} pthread)
+target_link_libraries(controller ${wxWidgets_LIBRARIES} pthread cap)
 
 set_target_properties(controller PROPERTIES RUNTIME_OUTPUT_DIRECTORY "../../bin/")
 
-add_custom_command(TARGET controller POST_BUILD COMMAND "setcap" ARGS " cap_sys_admin+ep" "../../bin/controller")
+add_custom_command(TARGET controller POST_BUILD COMMAND "setcap" ARGS " cap_sys_admin,cap_setfcap+ep" "../../bin/controller")
 
 #install
 install(TARGETS controller RUNTIME DESTINATION /usr/local/bin)

@@ -109,11 +109,13 @@ dlgUsb::~dlgUsb()
 
 void dlgUsb::OnbtnCancelClick(wxCommandEvent& event)
 {
+    UsbChecker::UnmountDevice();
     EndModal(wxID_CANCEL);
 }
 
 void dlgUsb::OnbtnUploadClick(wxCommandEvent& event)
 {
+    UsbChecker::UnmountDevice();
     EndModal(wxID_OK);
 }
 
