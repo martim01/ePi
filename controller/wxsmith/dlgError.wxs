@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<wxsmith>
+	<object class="wxDialog" name="dlgError">
+		<bg>#FF0000</bg>
+		<pos_arg>1</pos_arg>
+		<size_arg>1</size_arg>
+		<style>wxNO_BORDER</style>
+		<object class="wxBoxSizer" variable="BoxSizer1" member="no">
+			<orient>wxVERTICAL</orient>
+			<object class="sizeritem">
+				<object class="wxStaticText" name="ID_STATICTEXT1" variable="StaticText1" member="yes">
+					<label>Label</label>
+				</object>
+				<flag>wxALL|wxEXPAND</flag>
+				<border>2</border>
+			</object>
+			<object class="sizeritem">
+				<object class="wmList" name="ID_M_PLST1" variable="m_plstReasons" member="yes">
+					<scrolling>None</scrolling>
+					<button_size>-1,25</button_size>
+					<button>#000000</button>
+					<text>#FFFFFF</text>
+					<items />
+					<size>300,300</size>
+					<bg>#000000</bg>
+				</object>
+				<flag>wxTOP|wxLEFT|wxRIGHT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+				<border>2</border>
+				<option>1</option>
+			</object>
+			<object class="sizeritem">
+				<object class="wxPanel" name="ID_PANEL1" variable="panel1" member="yes">
+					<bg>#000000</bg>
+					<object class="wxBoxSizer" variable="BoxSizer2" member="no">
+						<object class="sizeritem">
+							<object class="wxButton" name="ID_BUTTON1" variable="m_pbtnClose" member="yes">
+								<label>Close</label>
+							</object>
+							<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+							<border>2</border>
+						</object>
+					</object>
+				</object>
+				<flag>wxBOTTOM|wxLEFT|wxRIGHT|wxEXPAND</flag>
+				<border>2</border>
+			</object>
+		</object>
+	</object>
+</wxsmith>

@@ -119,6 +119,7 @@
 		<Unit filename="include/controllerApp.h" />
 		<Unit filename="include/controllerMain.h" />
 		<Unit filename="include/dlgEdit.h" />
+		<Unit filename="include/dlgError.h" />
 		<Unit filename="include/dlgOptions.h" />
 		<Unit filename="include/dlgUpload.h" />
 		<Unit filename="include/dlgUsb.h" />
@@ -143,6 +144,7 @@
 		<Unit filename="src/controllerApp.cpp" />
 		<Unit filename="src/controllerMain.cpp" />
 		<Unit filename="src/dlgEdit.cpp" />
+		<Unit filename="src/dlgError.cpp" />
 		<Unit filename="src/dlgOptions.cpp" />
 		<Unit filename="src/dlgUpload.cpp" />
 		<Unit filename="src/dlgUsb.cpp" />
@@ -161,6 +163,7 @@
 		<Unit filename="src/wmlist.cpp" />
 		<Unit filename="wxsmith/controllerdialog.wxs" />
 		<Unit filename="wxsmith/dlgEdit.wxs" />
+		<Unit filename="wxsmith/dlgError.wxs" />
 		<Unit filename="wxsmith/dlgOptions.wxs" />
 		<Unit filename="wxsmith/dlgUpload.wxs" />
 		<Unit filename="wxsmith/dlgUsb.wxs" />
@@ -177,6 +180,7 @@
 					<wxDialog wxs="wxsmith/dlgEdit.wxs" src="src/dlgEdit.cpp" hdr="include/dlgEdit.h" fwddecl="0" i18n="1" name="dlgEdit" language="CPP" />
 					<wxDialog wxs="wxsmith/dlgUsb.wxs" src="src/dlgUsb.cpp" hdr="include/dlgUsb.h" fwddecl="0" i18n="1" name="dlgUsb" language="CPP" />
 					<wxDialog wxs="wxsmith/dlgUpload.wxs" src="src/dlgUpload.cpp" hdr="include/dlgUpload.h" fwddecl="0" i18n="1" name="dlgUpload" language="CPP" />
+					<wxDialog wxs="wxsmith/dlgError.wxs" src="src/dlgError.cpp" hdr="include/dlgError.h" fwddecl="0" i18n="1" name="dlgError" language="CPP" />
 				</resources>
 			</wxsmith>
 		</Extensions>
