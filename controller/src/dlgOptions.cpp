@@ -254,6 +254,7 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	m_pstVersionLauncher->SetBackgroundColour(wxColour(255,255,255));
 	GridBagSizer3->Add(m_pstVersionLauncher, wxGBPosition(2, 4), wxDefaultSpan, wxALL|wxALIGN_CENTER_VERTICAL, 2);
 	m_pbtnUpdateLauncher = new wmButton(this, ID_BUTTON_UPDATE_LAUNCHER, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_LAUNCHER"));
+	m_pbtnUpdateLauncher->Hide();
 	GridBagSizer3->Add(m_pbtnUpdateLauncher, wxGBPosition(2, 5), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
 	StaticBoxSizer2->Add(GridBagSizer3, 1, wxALL|wxEXPAND, 0);
 	BoxSizer1->Add(StaticBoxSizer2, 0, wxBOTTOM|wxLEFT|wxEXPAND, 5);
@@ -283,6 +284,7 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	StaticBoxSizer3->Add(m_pbtnRestartAll, 1, wxALL|wxEXPAND,2);
 
 	StaticBoxSizer3->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+
 
 
 	m_pbtnSSH = new wmButton(this, ID_BUTTON_SSH, _("SSH"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_SSH"));
@@ -506,13 +508,10 @@ void dlgOptions::OnbtnUpdateControllerClick(wxCommandEvent& event)
                     }
                     else
                     {
-                        Json::Value jsError;
-                        jsError["reason"] =Json::Value(Json::arrayValue);
-                        ShowError("Set cap",jsError);
                         int nResult = cap_set_file(buffer, file_cap);
                         if(nResult != 0)
                         {
-
+                            Json::Value jsError;
                             jsError["reason"] = Json::Value(Json::arrayValue);
                             jsError["reason"].append("Couldn't cap_set_file");
                             jsError["reason"].append(strerror(errno));
@@ -529,7 +528,14 @@ void dlgOptions::OnbtnUpdateControllerClick(wxCommandEvent& event)
                 {
                     Json::Value jsError;
                     jsError["reason"] = Json::Value(Json::arrayValue);
-                    jsError["reason"].append("Couldn't open source or dest files");
+                    if(!source)
+                    {
+                        jsError["reason"].append("Couldn't open source file to read");
+                    }
+                    if(!dest)
+                    {
+                        jsError["reason"].append("Couldn't open destination file to write");
+                    }
                     jsError["reason"].append(aDlg.m_sSelectedFile.ToStdString());
                     jsError["reason"].append(buffer);
 
