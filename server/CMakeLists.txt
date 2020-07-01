@@ -9,6 +9,7 @@ add_executable(episerver
  "../common/src/inimanager.cpp" 
  "../common/src/inisection.cpp" 
  "../common/src/utils.cpp" 
+ "../common/src/jsonutils.cpp"
  "../external/jsoncpp/dist/jsoncpp.cpp" 
  "../external/uuid/guid.cpp" 
  "../external/uuid/md5.cpp" 
