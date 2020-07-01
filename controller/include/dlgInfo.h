@@ -7,72 +7,76 @@
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 //*)
+#include "wmlabel.h"
+#include "wmbutton.h"
+class WebSocketClient;
 
 class dlgInfo: public wxDialog
 {
 	public:
 
-		dlgInfo(wxWindow* parent,wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
+		dlgInfo(wxWindow* parent,WebSocketClient& wsClient, const wxString& sHostname, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
 		virtual ~dlgInfo();
 
 		//(*Declarations(dlgInfo)
-		wxButton* m_pbtnClose;
-		wxStaticText* StaticText10;
-		wxStaticText* StaticText11;
-		wxStaticText* StaticText12;
-		wxStaticText* StaticText13;
-		wxStaticText* StaticText14;
-		wxStaticText* StaticText15;
-		wxStaticText* StaticText16;
-		wxStaticText* StaticText17;
-		wxStaticText* StaticText18;
-		wxStaticText* StaticText19;
-		wxStaticText* StaticText1;
-		wxStaticText* StaticText20;
-		wxStaticText* StaticText24;
-		wxStaticText* StaticText25;
-		wxStaticText* StaticText26;
-		wxStaticText* StaticText27;
-		wxStaticText* StaticText28;
-		wxStaticText* StaticText29;
-		wxStaticText* StaticText32;
-		wxStaticText* StaticText33;
-		wxStaticText* StaticText34;
-		wxStaticText* StaticText35;
-		wxStaticText* StaticText3;
-		wxStaticText* StaticText5;
-		wxStaticText* StaticText6;
-		wxStaticText* StaticText7;
-		wxStaticText* StaticText8;
-		wxStaticText* StaticText9;
-		wxStaticText* m_plblApplicationTime;
-		wxStaticText* m_plblApplicationUptime;
-		wxStaticText* m_plblApplicationVersion;
-		wxStaticText* m_plblApplicationlStartTime;
-		wxStaticText* m_plblBytesAvailable;
-		wxStaticText* m_plblBytesFree;
-		wxStaticText* m_plblBytesTotal;
-		wxStaticText* m_plblCPU0;
-		wxStaticText* m_plblCPU1;
-		wxStaticText* m_plblCPU2;
-		wxStaticText* m_plblCPU3;
-		wxStaticText* m_plblCPUOverall;
-		wxStaticText* m_plblHighFree;
-		wxStaticText* m_plblHighTotal;
-		wxStaticText* m_plblInodesAvailable;
-		wxStaticText* m_plblInodesFree;
-		wxStaticText* m_plblInodesTotal;
-		wxStaticText* m_plblLoads15;
-		wxStaticText* m_plblLoads1;
-		wxStaticText* m_plblLoads5;
-		wxStaticText* m_plblRamBuffered;
-		wxStaticText* m_plblRamFree;
-		wxStaticText* m_plblRamShared;
-		wxStaticText* m_plblRamTotal;
-		wxStaticText* m_plblSwapFree;
-		wxStaticText* m_plblSwapTotal;
-		wxStaticText* m_plblSystemProcs;
-		wxStaticText* m_plblSystemUpTime;
+		wmButton* m_pbtnClose;
+		wmLabel* StaticText10;
+		wmLabel* StaticText11;
+		wmLabel* StaticText12;
+		wmLabel* StaticText13;
+		wmLabel* StaticText14;
+		wmLabel* StaticText15;
+		wmLabel* StaticText16;
+		wmLabel* StaticText17;
+		wmLabel* StaticText18;
+		wmLabel* StaticText19;
+		wmLabel* StaticText1;
+		wmLabel* StaticText20;
+		wmLabel* StaticText24;
+		wmLabel* StaticText25;
+		wmLabel* StaticText26;
+		wmLabel* StaticText27;
+		wmLabel* StaticText28;
+		wmLabel* StaticText29;
+		wmLabel* StaticText32;
+		wmLabel* StaticText33;
+		wmLabel* StaticText34;
+		wmLabel* StaticText35;
+		wmLabel* StaticText3;
+		wmLabel* StaticText5;
+		wmLabel* StaticText6;
+		wmLabel* StaticText7;
+		wmLabel* StaticText8;
+		wmLabel* StaticText9;
+		wmLabel* m_plblApplicationTime;
+		wmLabel* m_plblApplicationUptime;
+		wmLabel* m_plblApplicationVersion;
+		wmLabel* m_plblApplicationlStartTime;
+		wmLabel* m_plblBytesAvailable;
+		wmLabel* m_plblBytesFree;
+		wmLabel* m_plblBytesTotal;
+		wmLabel* m_plblCPU0;
+		wmLabel* m_plblCPU1;
+		wmLabel* m_plblCPU2;
+		wmLabel* m_plblCPU3;
+		wmLabel* m_plblCPUOverall;
+		wmLabel* m_plblHighFree;
+		wmLabel* m_plblHighTotal;
+		wmLabel* m_plblInodesAvailable;
+		wmLabel* m_plblInodesFree;
+		wmLabel* m_plblInodesTotal;
+		wmLabel* m_plblLoads15;
+		wmLabel* m_plblLoads1;
+		wmLabel* m_plblLoads5;
+		wmLabel* m_plblRamBuffered;
+		wmLabel* m_plblRamFree;
+		wmLabel* m_plblRamShared;
+		wmLabel* m_plblRamTotal;
+		wmLabel* m_plblSwapFree;
+		wmLabel* m_plblSwapTotal;
+		wmLabel* m_plblSystemProcs;
+		wmLabel* m_plblSystemUpTime;
+		wmLabel* m_pstHostname;
 		//*)
 
 	protected:
@@ -142,6 +146,15 @@ class dlgInfo: public wxDialog
 		//(*Handlers(dlgInfo)
 		void OnbtnCloseClick(wxCommandEvent& event);
 		//*)
+
+		WebSocketClient& m_wsClient;
+
+		void OnWebsocketConnection(const wxCommandEvent& event);
+        void OnWebsocketHandshake(const wxCommandEvent& event);
+        void OnWebsocketFrame(const wxCommandEvent& event);
+        void OnWebsocketFinished(const wxCommandEvent& event);
+
+        void ClearLabels();
 
 		DECLARE_EVENT_TABLE()
 };

@@ -14,7 +14,7 @@
 #include "dlgUpload.h"
 #include "dlgError.h"
 #include <sys/capability.h>
-
+#include "dlgInfo.h"
 //(*InternalHeaders(dlgOptions)
 #include <wx/font.h>
 #include <wx/intl.h>
@@ -76,7 +76,8 @@ BEGIN_EVENT_TABLE(dlgOptions,wxDialog)
 	//*)
 END_EVENT_TABLE()
 
-dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxString& sIpAddress, const wxString& sUrl, const std::string& sUid, wxWindowID id,const wxPoint& pos,const wxSize& size) :
+dlgOptions::dlgOptions(wxWindow* parent, WebSocketClient& wsClient, const wxString& sHostname, const wxString& sIpAddress, const wxString& sUrl, const std::string& sUid, wxWindowID id,const wxPoint& pos,const wxSize& size) :
+    m_wsClient(wsClient),
     m_sIpAddress(sIpAddress),
     m_sUrl(sUrl),
     m_sUid(sUid),
@@ -99,7 +100,7 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	SetClientSize(wxDefaultSize);
 	Move(wxDefaultPosition);
 	SetMinSize(wxSize(800,480));
-	SetBackgroundColour(wxColour(0,0,0));
+	SetBackgroundColour(wxColour(255,255,255));
 	wxFont thisFont(12,wxFONTFAMILY_SWISS,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL,false,_T("Arial"),wxFONTENCODING_DEFAULT);
 	SetFont(thisFont);
 	BoxSizer0 = new wxBoxSizer(wxVERTICAL);
@@ -115,7 +116,7 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	StaticBoxSizer1 = new wxStaticBoxSizer(wxVERTICAL, this, wxEmptyString);
 	GridBagSizer1 = new wxGridBagSizer(0, 0);
 	StaticText1 = new wmLabel(this, ID_STATICTEXT1, _("UID:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT1"));
-	StaticText1->SetForegroundColour(wxColour(255,255,255));
+	StaticText1->SetForegroundColour(wxColour(0,150,100));
     GridBagSizer1->Add(StaticText1, wxGBPosition(0, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
 	m_pstUid = new wmLabel(this, ID_STATICTEXT2, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE, _T("ID_STATICTEXT2"));
 	m_pstUid->SetMinSize(wxSize(400,-1));
@@ -123,14 +124,14 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	m_pstUid->SetBackgroundColour(wxColour(255,255,255));
 	GridBagSizer1->Add(m_pstUid, wxGBPosition(0, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
 	StaticText2 = new wmLabel(this, ID_STATICTEXT3, _("Label:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT3"));
-	StaticText2->SetForegroundColour(wxColour(255,255,255));
+	StaticText2->SetForegroundColour(wxColour(0,150,100));
 	GridBagSizer1->Add(StaticText2, wxGBPosition(1, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
 	m_pstLabel = new wmLabel(this, ID_STATICTEXT4, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE, _T("ID_STATICTEXT4"));
 	m_pstLabel->SetForegroundColour(wxColour(0,0,0));
 	m_pstLabel->SetBackgroundColour(wxColour(255,255,255));
 	GridBagSizer1->Add(m_pstLabel, wxGBPosition(1, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
 	StaticText3 = new wmLabel(this, ID_STATICTEXT5, _("Description:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT5"));
-	StaticText3->SetForegroundColour(wxColour(255,255,255));
+	StaticText3->SetForegroundColour(wxColour(0,150,100));
 	StaticText3->SetMinSize(wxSize(80,-1));
 	GridBagSizer1->Add(StaticText3, wxGBPosition(2, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
 	m_pstDescription = new wmLabel(this, ID_STATICTEXT6, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT6"));
@@ -140,14 +141,14 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	m_pbtnUpdate = new wmButton(this, ID_BUTTON_UPDATE, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE"));
 	GridBagSizer1->Add(m_pbtnUpdate, wxGBPosition(1, 2), wxGBSpan(2, 1), wxALL, 2);
 	StaticText5 = new wmLabel(this, ID_STATICTEXT7, _("Created:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT7"));
-	StaticText5->SetForegroundColour(wxColour(255,255,255));
+	StaticText5->SetForegroundColour(wxColour(0,150,100));
 	GridBagSizer1->Add(StaticText5, wxGBPosition(3, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
 	m_pstCreated = new wmLabel(this, ID_STATICTEXT8, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT8"));
 	m_pstCreated->SetForegroundColour(wxColour(0,0,0));
 	m_pstCreated->SetBackgroundColour(wxColour(255,255,255));
 	GridBagSizer1->Add(m_pstCreated, wxGBPosition(3, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
 	StaticText7 = new wmLabel(this, ID_STATICTEXT9, _("Modified:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT9"));
-	StaticText7->SetForegroundColour(wxColour(255,255,255));
+	StaticText7->SetForegroundColour(wxColour(0, 150,100));
 	GridBagSizer1->Add(StaticText7, wxGBPosition(4, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
 	m_pstModified = new wmLabel(this, ID_STATICTEXT10, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT10"));
 	m_pstModified->SetForegroundColour(wxColour(0,0,0));
@@ -256,6 +257,10 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	m_pbtnUpdateLauncher = new wmButton(this, ID_BUTTON_UPDATE_LAUNCHER, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_LAUNCHER"));
 	m_pbtnUpdateLauncher->Hide();
 	GridBagSizer3->Add(m_pbtnUpdateLauncher, wxGBPosition(2, 5), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+
+	m_pbtnInfo = new wmButton(this, wxNewId(), _("System Info"), wxDefaultPosition, wxSize(150,-1), 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_LAUNCHER"));
+	GridBagSizer3->Add(m_pbtnInfo, wxGBPosition(0, 3), wxGBSpan(1,2), wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+
 	StaticBoxSizer2->Add(GridBagSizer3, 1, wxALL|wxEXPAND, 0);
 	BoxSizer1->Add(StaticBoxSizer2, 0, wxBOTTOM|wxLEFT|wxEXPAND, 5);
 	BoxSizer3->Add(BoxSizer1, 1, wxALL|wxEXPAND, 0);
@@ -317,6 +322,7 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	Connect(m_pbtnRestartAll->GetId(),wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnRestartAllClick);
 	Connect(ID_BUTTON_SSH,wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnSSHClick);
 	Connect(ID_BUTTON_BACK,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnBackClick);
+	Connect(m_pbtnInfo->GetId(),wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnInfoClick);
 
 
 	m_pbtnReplace->SetBackgroundColour(wxColour(0,80,0));
@@ -332,7 +338,7 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
 	m_pstHostname->SetTextAlign(wxALIGN_CENTER);
 	StaticText1->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
     StaticText2->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-    StaticText3->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+    StaticText3->SetTextAlign(wxALIGN_TOP|wxALIGN_RIGHT);
     StaticText4->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
     StaticText5->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
     StaticText7->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
@@ -345,6 +351,28 @@ dlgOptions::dlgOptions(wxWindow* parent,  const wxString& sHostname, const wxStr
     StaticText15->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
     StaticText16->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
 
+
+    m_pstUid->SetTextAlign(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
+    m_pstCreated->SetTextAlign(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
+    m_pstLabel->SetTextAlign(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
+    m_pstDescription->SetTextAlign(wxALIGN_LEFT | wxALIGN_TOP);
+    m_pstModified->SetTextAlign(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
+
+    m_pstUid->SetBorderState(uiRect::BORDER_FLAT);
+    m_pstCreated->SetBorderState(uiRect::BORDER_FLAT);
+    m_pstLabel->SetBorderState(uiRect::BORDER_FLAT);
+    m_pstDescription->SetBorderState(uiRect::BORDER_FLAT);
+    m_pstModified->SetBorderState(uiRect::BORDER_FLAT);
+    m_pstChannels->SetBorderState(uiRect::BORDER_FLAT);
+    m_pstSampleRate->SetBorderState(uiRect::BORDER_FLAT);
+    m_pstLength->SetBorderState(uiRect::BORDER_FLAT);
+    m_pstType->SetBorderState(uiRect::BORDER_FLAT);
+    m_pstSubType->SetBorderState(uiRect::BORDER_FLAT);
+    m_pstVersionController->SetBorderState(uiRect::BORDER_FLAT);
+    m_pstVersionEpiServer->SetBorderState(uiRect::BORDER_FLAT);
+    m_pstVersionLauncher->SetBorderState(uiRect::BORDER_FLAT);
+    m_pstVersionPlayer3->SetBorderState(uiRect::BORDER_FLAT);
+    m_pstVersionPlayer67->SetBorderState(uiRect::BORDER_FLAT);
 
 
 	/*
@@ -771,4 +799,11 @@ void dlgOptions::PowerReply(const Json::Value& jsData)
 void dlgOptions::OnbtnRestartAllClick(const wxCommandEvent& event)
 {
     std::cout << "command:restart_all" << std::endl;
+}
+
+void dlgOptions::OnbtnInfoClick(const wxCommandEvent& event)
+{
+    dlgInfo aDlg(this, m_wsClient, m_pstHostname->GetLabel());
+    aDlg.ShowModal();
+
 }

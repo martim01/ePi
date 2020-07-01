@@ -16,11 +16,13 @@
 #include "multipartupload.h"
 #include "wmlabel.h"
 
+class WebSocketClient;
+
 class dlgOptions: public wxDialog
 {
 	public:
 
-		dlgOptions(wxWindow* parent, const wxString& sHostname, const wxString& sIpAddress, const wxString& sUrl, const std::string& sUid, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
+		dlgOptions(wxWindow* parent,WebSocketClient& wsClient, const wxString& sHostname, const wxString& sIpAddress, const wxString& sUrl, const std::string& sUid, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
 		virtual ~dlgOptions();
 
 		wmButton* m_pbtnBack;
@@ -69,6 +71,8 @@ class dlgOptions: public wxDialog
 		wmLabel* m_pstVersionLauncher;
 		wmLabel* m_pstVersionPlayer3;
 		wmLabel* m_pstVersionPlayer67;
+
+		wmButton* m_pbtnInfo;
 
 
 	protected:
@@ -142,7 +146,7 @@ class dlgOptions: public wxDialog
 
 		void OnbtnShutdownControllerClick(wxCommandEvent& event);
 		void OnbtnRestartAllClick(const wxCommandEvent& event);
-
+        void OnbtnInfoClick(const wxCommandEvent& event);
 
         void OnRestfulReply(const wxCommandEvent& event);
 
@@ -162,6 +166,7 @@ class dlgOptions: public wxDialog
 
         void UpdateApp(const wxString& sApp);
 
+        WebSocketClient& m_wsClient;
         wxString m_sIpAddress;
         wxString m_sUrl;
         std::string m_sUid;

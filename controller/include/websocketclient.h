@@ -1,6 +1,8 @@
 #pragma once
 #include <wx/event.h>
 #include <atomic>
+#include <set>
+#include <mutex>
 
 
 struct mg_mgr;
@@ -21,6 +23,9 @@ class WebSocketClient
         **/
         void HandleEvent(mg_connection *pConnection, int nEvent, void* pData);
 
+        void AddHandler(wxEvtHandler* pHandler);
+        void RemoveHandler(wxEvtHandler* pHandler);
+
     private:
 
         void ConnectionEvent(int nStatus);
@@ -28,10 +33,12 @@ class WebSocketClient
         void FrameReceived(websocket_message* pMessage);
         void CloseEvent();
 
-        wxEvtHandler* m_pHandler;
+        std::set<wxEvtHandler*> m_setHandlers;
+
         mg_mgr* m_pManager;
         mg_connection* m_pConnection;
         std::atomic<bool> m_bLoop;
+        std::mutex m_mutex;
 };
 
 

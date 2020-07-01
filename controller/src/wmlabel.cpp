@@ -65,11 +65,12 @@ bool wmLabel::Create(wxWindow *parent, wxWindowID id, const wxString& sLabel , c
     SetFont(wxFont(10,wxFONTFAMILY_SWISS,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL,false,_T("Arial"),wxFONTENCODING_DEFAULT));
 
     m_timerFlash.SetOwner(this, ID_TIMER_FLASH);
-    m_bFlashState = false;wmLabel
+    m_bFlashState = false;
 
     CreateRects();
     m_uiRect.SetLabel(sLabel);
     m_uiRect.SetTextAlign(wxALIGN_CENTER);
+    m_uiRect.SetGradient(0);
     SetBackgroundColour(GetParent()->GetBackgroundColour());
     SetForegroundColour(GetParent()->GetForegroundColour());
 

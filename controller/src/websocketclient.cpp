@@ -14,11 +14,11 @@ static void ev_handler(mg_connection* pConnection, int nEvent, void* pData)
     pThread->HandleEvent(pConnection, nEvent, pData);
 }
 
-WebSocketClient::WebSocketClient(wxEvtHandler* pHandler) : m_pHandler(pHandler),
+WebSocketClient::WebSocketClient(wxEvtHandler* pHandler) :
 m_pConnection(nullptr),
 m_bLoop(false)
 {
-
+    AddHandler(pHandler);
 }
 
 
@@ -80,40 +80,56 @@ void WebSocketClient::HandleEvent(mg_connection *pConnection, int nEvent, void* 
 
 void WebSocketClient::ConnectionEvent(int nStatus)
 {
-    if(m_pHandler)
+    std::lock_guard<std::mutex> lg(m_mutex);
+    for(auto pHandler : m_setHandlers)
     {
         wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_WS_CONNECTION);
         pEvent->SetInt(nStatus);
-        wxQueueEvent(m_pHandler, pEvent);
+        wxQueueEvent(pHandler, pEvent);
     }
 }
 
 void WebSocketClient::HandshakeDone(http_message* pMessage)
 {
-    if(m_pHandler)
+    std::lock_guard<std::mutex> lg(m_mutex);
+    for(auto pHandler : m_setHandlers)
     {
         wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_WS_HANDSHAKE);
         pEvent->SetInt(pMessage->resp_code);
-        wxQueueEvent(m_pHandler, pEvent);
+        wxQueueEvent(pHandler, pEvent);
     }
 }
 
 void WebSocketClient::FrameReceived(websocket_message* pMessage)
 {
-    if(m_pHandler)
+    std::lock_guard<std::mutex> lg(m_mutex);
+    for(auto pHandler : m_setHandlers)
     {
         wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_WS_FRAME);
         pEvent->SetString(wxString::FromUTF8(reinterpret_cast<char*>(pMessage->data), pMessage->size));
-        wxQueueEvent(m_pHandler, pEvent);
+        wxQueueEvent(pHandler, pEvent);
     }
 }
 
 void WebSocketClient::CloseEvent()
 {
-    if(m_pHandler)
+    std::lock_guard<std::mutex> lg(m_mutex);
+    for(auto pHandler : m_setHandlers)
     {
         wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_WS_FINISHED);
-        wxQueueEvent(m_pHandler, pEvent);
+        wxQueueEvent(pHandler, pEvent);
     }
     m_bLoop = false;
+}
+
+void WebSocketClient::AddHandler(wxEvtHandler* pHandler)
+{
+    std::lock_guard<std::mutex> lg(m_mutex);
+    m_setHandlers.insert(pHandler);
+}
+
+void WebSocketClient::RemoveHandler(wxEvtHandler* pHandler)
+{
+    std::lock_guard<std::mutex> lg(m_mutex);
+    m_setHandlers.erase(pHandler);
 }
