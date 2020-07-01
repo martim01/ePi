@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(player3 LANGUAGES CXX C)
 
-add_custom_command(TARGET player3 PRE_BUILD COMMAND ${PROJECT_SOURCE_DIR}/../autoversion ARGS ${PROJECT_SOURCE_DIR}/include/version.h)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
@@ -16,7 +15,7 @@ add_executable(player3 "../common/src/epicron.cpp"
 						"../external/jsoncpp/dist/jsoncpp.cpp"
 						"src/main.cpp"
 						"src/audiofile.cpp"
-						"src/epiwriter.cpp"
+						"../common/src/epiwriter.cpp"
 						"src/filesource.cpp"
 						"src/mp3file.cpp"
 						"src/playlist.cpp"
