@@ -23,7 +23,8 @@ add_executable(player3 "../common/src/epicron.cpp"
 						"src/resampler.cpp"
 						"src/resources.cpp"
 						"src/schedule.cpp"
-						"src/soundfile.cpp")
+						"src/soundfile.cpp"
+                                                "src/version.cpp")
 
 include_directories(${PROJECT_SOURCE_DIR}/../external/jsoncpp/dist)
 include_directories(${PROJECT_SOURCE_DIR}/../external/log/include)
