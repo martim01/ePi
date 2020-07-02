@@ -33,13 +33,13 @@ END_EVENT_TABLE()
 dlgUpload::dlgUpload(wxWindow* parent, const wxString& sHostname, const wxString& sIpAddress, wxWindowID id,const wxPoint& pos,const wxSize& size) : m_upload(this),
     m_sIpAddress(sIpAddress)
 {
-	//(*Initialize(dlgUpload)
+
 	wxBoxSizer* BoxSizer1;
 
 	Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxNO_BORDER, _T("id"));
 	SetClientSize(wxDefaultSize);
 	Move(wxDefaultPosition);
-	SetBackgroundColour(wxColour(0,0,0));
+	SetBackgroundColour(*wxWHITE);
 	BoxSizer1 = new wxBoxSizer(wxVERTICAL);
 	m_pstHostname = new wmLabel(this, wxNewId(), sHostname, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE, _T("ID_STATICTEXT30"));
 	m_pstHostname->SetMinSize(wxSize(800,40));
@@ -52,7 +52,7 @@ dlgUpload::dlgUpload(wxWindow* parent, const wxString& sHostname, const wxString
 	BoxSizer1->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
 	m_pstDetails = new wmLabel(this, ID_STATICTEXT1, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxALIGN_CENTER, _T("ID_STATICTEXT1"));
 	m_pstDetails->SetMinSize(wxSize(800,40));
-	m_pstDetails->SetForegroundColour(wxColour(255,255,255));
+	m_pstDetails->SetForegroundColour(*wxBLACK);
 	wxFont m_pstDetailsFont(24,wxFONTFAMILY_SWISS,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_BOLD,false,_T("Arial"),wxFONTENCODING_DEFAULT);
 	m_pstDetails->SetFont(m_pstDetailsFont);
 	BoxSizer1->Add(m_pstDetails, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);

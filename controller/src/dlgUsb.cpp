@@ -31,7 +31,7 @@ m_checker(this)
 	Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxNO_BORDER, _T("id"));
 	SetClientSize(wxDefaultSize);
 	Move(wxDefaultPosition);
-	SetBackgroundColour(wxColour(0,0,0));
+	SetBackgroundColour(*wxWHITE);
 	BoxSizer1 = new wxBoxSizer(wxVERTICAL);
 	m_pstHostname = new wmLabel(this, wxNewId(), sHostname, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE, _T("ID_STATICTEXT30"));
 	m_pstHostname->SetMinSize(wxSize(800,40));
@@ -43,8 +43,8 @@ m_checker(this)
 
 	m_plblUSB = new wmLabel(this, wxNewId(), _("Checking USB Drives For Files"), wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE, _T("ID_STATICTEXT30"));
 	m_plblUSB->SetMinSize(wxSize(800,40));
-	m_plblUSB->SetForegroundColour(wxColour(255,255,255));
-	m_plblUSB->SetBackgroundColour(wxColour(0,0,0));
+	m_plblUSB->SetForegroundColour(*wxBLACK);
+	m_plblUSB->SetBackgroundColour(*wxWHITE);
 	m_plblUSB->SetTextAlign(wxALIGN_CENTER);
 	m_plblUSB->SetFont(wxFont(20,wxFONTFAMILY_SWISS,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL,false,_T("Arial"),wxFONTENCODING_DEFAULT));
 	BoxSizer1->Add(m_plblUSB, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);

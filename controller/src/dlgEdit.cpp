@@ -30,7 +30,7 @@ dlgEdit::dlgEdit(wxWindow* parent, const wxString& sHostname, const wxString& sL
 	Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxNO_BORDER, _T("id"));
 	SetClientSize(wxDefaultSize);
 	Move(wxDefaultPosition);
-	SetBackgroundColour(wxColour(0,0,0));
+	SetBackgroundColour(wxColour(255,255,255));
 	wxFont thisFont(12,wxFONTFAMILY_SWISS,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL,false,_T("Arial"),wxFONTENCODING_DEFAULT);
 	SetFont(thisFont);
 	BoxSizer1 = new wxBoxSizer(wxVERTICAL);
@@ -58,6 +58,7 @@ dlgEdit::dlgEdit(wxWindow* parent, const wxString& sHostname, const wxString& sL
 	GridBagSizer1->Add(m_pedtDescription, wxGBPosition(1, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
 	m_pKbd1 = new wmKeyboard(this, ID_M_PKBD1, wxDefaultPosition, wxDefaultSize, 0, 0);
 	m_pKbd1->SetForegroundColour(wxColour(255,255,255));
+	m_pKbd1->SetBackgroundColour(wxColour(255,255,255));
 	GridBagSizer1->Add(m_pKbd1, wxGBPosition(2, 0), wxGBSpan(3, 2), wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
 	m_pbtnEditUpdate = new wmButton(this, ID_BUTTON_EDIT_UPDATE, _("Update"), wxDefaultPosition, wxSize(100,50), 0, wxDefaultValidator, _T("ID_BUTTON_EDIT_UPDATE"));
 	GridBagSizer1->Add(m_pbtnEditUpdate, wxGBPosition(2, 2), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
