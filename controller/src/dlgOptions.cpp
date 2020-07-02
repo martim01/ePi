@@ -258,7 +258,7 @@ dlgOptions::dlgOptions(wxWindow* parent, WebSocketClient& wsClient, const wxStri
 	m_pbtnUpdateLauncher->Hide();
 	GridBagSizer3->Add(m_pbtnUpdateLauncher, wxGBPosition(2, 5), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
 
-	m_pbtnInfo = new wmButton(this, wxNewId(), _("System Info"), wxDefaultPosition, wxSize(150,-1), 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_LAUNCHER"));
+	m_pbtnInfo = new wmButton(this, wxNewId(), _("Server Info"), wxDefaultPosition, wxSize(150,-1), 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_LAUNCHER"));
 	GridBagSizer3->Add(m_pbtnInfo, wxGBPosition(0, 3), wxGBSpan(1,2), wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
 
 	StaticBoxSizer2->Add(GridBagSizer3, 1, wxALL|wxEXPAND, 0);

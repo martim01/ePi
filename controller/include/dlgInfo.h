@@ -156,6 +156,9 @@ class dlgInfo: public wxDialog
 
         void ClearLabels();
 
+        static const unsigned long MBYTES = 1048576;
+        static const unsigned long GBYTES = 1073741824;
+
 		DECLARE_EVENT_TABLE()
 };
 

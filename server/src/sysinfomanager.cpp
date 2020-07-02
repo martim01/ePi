@@ -74,9 +74,13 @@ Json::Value SysInfoManager::GetDiskInfo()
     }
     else
     {
-        jsInfo["bytes"]["available"] = static_cast<Json::UInt64>(info.f_bavail*info.f_bsize);
-        jsInfo["bytes"]["free"] =      static_cast<Json::UInt64>(info.f_bfree*info.f_bsize);
-        jsInfo["bytes"]["total"] =     static_cast<Json::UInt64>(info.f_blocks * info.f_bsize);
+        jsInfo["bytes"]["available"] = static_cast<Json::UInt64>(info.f_bavail)*static_cast<Json::UInt64>(info.f_bsize);
+        jsInfo["bytes"]["free"] =      static_cast<Json::UInt64>(info.f_bfree)*static_cast<Json::UInt64>(info.f_bsize);
+        jsInfo["bytes"]["total"] =     static_cast<Json::UInt64>(info.f_blocks)*static_cast<Json::UInt64>(info.f_frsize);
+        jsInfo["bytes"]["blocks_total"] =     static_cast<Json::UInt64>(info.f_blocks);
+        jsInfo["bytes"]["frsize"] =     static_cast<Json::UInt64>(info.f_frsize);
+        jsInfo["bytes"]["bsize"] =     static_cast<Json::UInt64>(info.f_bsize);
+        jsInfo["bytes"]["blocks_free"] =     static_cast<Json::UInt64>(info.f_bfree);
 
         jsInfo["inodes"]["available"] = static_cast<Json::UInt64>(info.f_favail);
         jsInfo["inodes"]["free"] = static_cast<Json::UInt64>(info.f_ffree);

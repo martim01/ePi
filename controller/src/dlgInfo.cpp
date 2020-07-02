@@ -2,6 +2,7 @@
 #include "websocketclient.h"
 #include "restfulclient.h"
 #include "jsonutils.h"
+#include <iostream>
 
 //(*InternalHeaders(dlgInfo)
 #include <wx/font.h>
@@ -361,7 +362,11 @@ void dlgInfo::OnWebsocketHandshake(const wxCommandEvent& event)
 
 void dlgInfo::OnWebsocketFrame(const wxCommandEvent& event)
 {
+
     Json::Value jsValue(ConvertToJson(event.GetString().ToStdString()));
+    std::cout << jsValue << std::endl;
+
+
     if(jsValue["application"].isObject())
     {
         if(jsValue["application"]["up_time"].isInt())
@@ -383,17 +388,17 @@ void dlgInfo::OnWebsocketFrame(const wxCommandEvent& event)
             m_plblApplicationlStartTime->SetLabel(jsValue["application"]["start_time"].asString());
         }
 
-        if(jsValue["disk"]["bytes"]["available"].isInt())
+        if(jsValue["disk"]["bytes"]["available"].isUInt64())
         {
-            m_plblBytesAvailable->SetLabel(wxString::Format("%d", jsValue["disk"]["bytes"]["available"].asInt()));
+            m_plblBytesAvailable->SetLabel(wxString::Format("%llu GB", jsValue["disk"]["bytes"]["available"].asUInt64()/GBYTES));
         }
-        if(jsValue["disk"]["bytes"]["free"].isInt())
+        if(jsValue["disk"]["bytes"]["free"].isUInt64())
         {
-            m_plblBytesFree->SetLabel(wxString::Format("%d", jsValue["disk"]["bytes"]["free"].asInt()));
+            m_plblBytesFree->SetLabel(wxString::Format("%llu GB", jsValue["disk"]["bytes"]["free"].asUInt64()/GBYTES));
         }
-        if(jsValue["disk"]["bytes"]["total"].isInt())
+        if(jsValue["disk"]["bytes"]["total"].isUInt64())
         {
-            m_plblBytesTotal->SetLabel(wxString::Format("%d", jsValue["disk"]["bytes"]["total"].asInt()));
+            m_plblBytesTotal->SetLabel(wxString::Format("%llu GB", jsValue["disk"]["bytes"]["total"].asUInt64()/GBYTES));
         }
 
         if(jsValue["cpu"]["cpu0"].isInt())
@@ -417,26 +422,26 @@ void dlgInfo::OnWebsocketFrame(const wxCommandEvent& event)
             m_plblCPUOverall->SetLabel(wxString::Format("%d%%", jsValue["cpu"]["cpu"].asInt()));
         }
 
-        if(jsValue["system"]["high"]["free"].isInt())
+        if(jsValue["system"]["high"]["free"].isUInt64())
         {
-            m_plblHighFree->SetLabel(wxString::Format("%d", jsValue["system"]["high"]["free"].asInt()));
+            m_plblHighFree->SetLabel(wxString::Format("%llu MB", jsValue["system"]["high"]["free"].asUInt64()/MBYTES));
         }
-        if(jsValue["system"]["high"]["total"].isInt())
+        if(jsValue["system"]["high"]["total"].isUInt64())
         {
-            m_plblHighTotal->SetLabel(wxString::Format("%d", jsValue["system"]["high"]["total"].asInt()));
+            m_plblHighTotal->SetLabel(wxString::Format("%llu MB", jsValue["system"]["high"]["total"].asUInt64()/MBYTES));
         }
 
-        if(jsValue["disk"]["inodes"]["available"].isInt())
+        if(jsValue["disk"]["inodes"]["available"].isUInt64())
         {
-            m_plblInodesAvailable->SetLabel(wxString::Format("%d", jsValue["disk"]["inodes"]["available"].asInt()));
+            m_plblInodesAvailable->SetLabel(wxString::Format("%llu", jsValue["disk"]["inodes"]["available"].asUInt64()));
         }
-        if(jsValue["disk"]["inodes"]["free"].isInt())
+        if(jsValue["disk"]["inodes"]["free"].isUInt64())
         {
-            m_plblInodesFree->SetLabel(wxString::Format("%d", jsValue["disk"]["inodes"]["free"].asInt()));
+            m_plblInodesFree->SetLabel(wxString::Format("%llu", jsValue["disk"]["inodes"]["free"].asUInt64()));
         }
-        if(jsValue["disk"]["inodes"]["total"].isInt())
+        if(jsValue["disk"]["inodes"]["total"].isUInt64())
         {
-            m_plblInodesTotal->SetLabel(wxString::Format("%d", jsValue["disk"]["inodes"]["total"].asInt()));
+            m_plblInodesTotal->SetLabel(wxString::Format("%llu", jsValue["disk"]["inodes"]["total"].asUInt64()));
         }
 
         m_plblLoads15->SetLabel(wxString::Format("%.2f%%", jsValue["system"]["loads"]["1"].asDouble()));
@@ -444,13 +449,32 @@ void dlgInfo::OnWebsocketFrame(const wxCommandEvent& event)
         m_plblLoads5->SetLabel(wxString::Format("%.2f%%", jsValue["system"]["loads"]["15"].asDouble()));
 
 
-//        m_plblRamBuffered->SetLabel(wxString::Format("%d", jsValue["system"]["ram"]["buffered"].asInt()));
-//        m_plblRamFree->SetLabel(wxString::Format("%d", jsValue["system"]["ram"]["free"].asInt()));
-//        m_plblRamShared->SetLabel(wxString::Format("%d", jsValue["system"]["ram"]["shared"].asInt()));
-//        m_plblRamTotal->SetLabel(wxString::Format("%d", jsValue["system"]["ram"]["total"].asInt()));
-//
-//        m_plblSwapFree->SetLabel(wxString::Format("%d", jsValue["system"]["swap"]["free"].asInt()));
-//        m_plblSwapTotal->SetLabel(wxString::Format("%d", jsValue["system"]["swap"]["total"].asInt()));
+        if(jsValue["system"]["ram"]["buffered"].isUInt64())
+        {
+            m_plblRamBuffered->SetLabel(wxString::Format("%llu MB", jsValue["system"]["ram"]["buffered"].asUInt64()/MBYTES));
+        }
+
+        if(jsValue["system"]["ram"]["free"].isUInt64())
+        {
+            m_plblRamFree->SetLabel(wxString::Format("%llu MB", jsValue["system"]["ram"]["free"].asUInt64()/MBYTES));
+        }
+        if(jsValue["system"]["ram"]["shared"].isUInt64())
+        {
+            m_plblRamShared->SetLabel(wxString::Format("%llu MB", jsValue["system"]["ram"]["shared"].asUInt64()/MBYTES));
+        }
+        if(jsValue["system"]["ram"]["total"].isUInt64())
+        {
+            m_plblRamTotal->SetLabel(wxString::Format("%llu MB", jsValue["system"]["ram"]["total"].asUInt64()/MBYTES));
+        }
+
+        if(jsValue["system"]["swap"]["free"].isUInt64())
+        {
+            m_plblSwapFree->SetLabel(wxString::Format("%llu MB", jsValue["system"]["swap"]["free"].asUInt64()/MBYTES));
+        }
+        if(jsValue["system"]["swap"]["total"].isUInt64())
+        {
+            m_plblSwapTotal->SetLabel(wxString::Format("%llu MB", jsValue["system"]["swap"]["total"].asUInt64()/MBYTES));
+        }
 
         m_plblSystemProcs->SetLabel(wxString::Format("%d", jsValue["system"]["procs"].asInt()));
 
