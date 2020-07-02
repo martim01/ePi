@@ -325,6 +325,9 @@ dlgOptions::dlgOptions(wxWindow* parent, WebSocketClient& wsClient, const wxStri
 	Connect(m_pbtnInfo->GetId(),wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnInfoClick);
 
 
+	m_pbtnUpdate->SetBackgroundColour(wxColour(128,128,0));
+	m_pbtnInfo->SetBackgroundColour(wxColour(0,128,128));
+
 	m_pbtnReplace->SetBackgroundColour(wxColour(0,80,0));
     m_pbtnDelete->SetBackgroundColour(wxColour(0,80,0));
 
@@ -334,6 +337,17 @@ dlgOptions::dlgOptions(wxWindow* parent, WebSocketClient& wsClient, const wxStri
     m_pbtnUpdatePlayer3->SetBackgroundColour(wxColour(0,30,100));
     m_pbtnUpdatePlayer67->SetBackgroundColour(wxColour(0,30,100));
 
+    m_pbtnUpdate->SetColourDisabled(wxColour(140,140,140));
+    m_pbtnReplace->SetColourDisabled(wxColour(140,140,140));
+    m_pbtnDelete->SetColourDisabled(wxColour(140,140,140));
+    m_pbtnUpdateController->SetColourDisabled(wxColour(140,140,140));
+    m_pbtnUpdateEpiServer->SetColourDisabled(wxColour(140,140,140));
+    m_pbtnUpdatePlayer3->SetColourDisabled(wxColour(140,140,140));
+    m_pbtnUpdatePlayer67->SetColourDisabled(wxColour(140,140,140));
+
+    m_pbtnRestartServer->SetColourDisabled(wxColour(140,140,140));
+    m_pbtnRestartOS->SetColourDisabled(wxColour(140,140,140));
+    m_pbtnShutdownOS->SetColourDisabled(wxColour(140,140,140));
 
 	m_pstHostname->SetTextAlign(wxALIGN_CENTER);
 	StaticText1->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
@@ -374,6 +388,7 @@ dlgOptions::dlgOptions(wxWindow* parent, WebSocketClient& wsClient, const wxStri
     m_pstVersionPlayer3->SetBorderState(uiRect::BORDER_FLAT);
     m_pstVersionPlayer67->SetBorderState(uiRect::BORDER_FLAT);
 
+    ShowConnectedButtons(false);
 
 	/*
 	Connect(ID_BUTTON_UPDATE,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnFileUpdateClick);
@@ -615,6 +630,7 @@ void dlgOptions::OnbtnBackClick(wxCommandEvent& event)
 
 void dlgOptions::OnRestfulReply(const wxCommandEvent &event)
 {
+    ShowConnectedButtons(true);
     Json::Value jsValue(ConvertToJson(event.GetString().ToStdString()));
 
     switch(event.GetInt())
@@ -805,5 +821,22 @@ void dlgOptions::OnbtnInfoClick(const wxCommandEvent& event)
 {
     dlgInfo aDlg(this, m_wsClient, m_pstHostname->GetLabel());
     aDlg.ShowModal();
+
+}
+
+
+void dlgOptions::ShowConnectedButtons(bool bConnected)
+{
+    m_pbtnUpdate->Enable(bConnected);
+    m_pbtnReplace->Enable(bConnected);
+    m_pbtnDelete->Enable(bConnected);
+    m_pbtnUpdateController->Enable(bConnected);
+    m_pbtnUpdateEpiServer->Enable(bConnected);
+    m_pbtnUpdatePlayer3->Enable(bConnected);
+    m_pbtnUpdatePlayer67->Enable(bConnected);
+
+    m_pbtnRestartServer->Enable(bConnected);
+    m_pbtnRestartOS->Enable(bConnected);
+    m_pbtnShutdownOS->Enable(bConnected);
 
 }

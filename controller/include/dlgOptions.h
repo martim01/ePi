@@ -150,6 +150,8 @@ class dlgOptions: public wxDialog
 
         void OnRestfulReply(const wxCommandEvent& event);
 
+        void ShowConnectedButtons(bool bConnected);
+
         void GetFileDetails();
         void FilesReply(const Json::Value& jsData);
         void FileGetReply(const Json::Value& jsData);
@@ -171,6 +173,7 @@ class dlgOptions: public wxDialog
         wxString m_sUrl;
         std::string m_sUid;
         RestfulClient m_client;
+
 
 		DECLARE_EVENT_TABLE()
 };
