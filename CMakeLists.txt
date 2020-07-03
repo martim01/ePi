@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(epiworkspace)
 
+option(BUILD_SERVER "Build episerver and player3" OFF)
+option(BUILD_CONTROLLER "Build controller and launcher OFF)
+
 #log
 find_path(LOG_LIB_DIR NAMES "include/log.h" PATHS ${PROJECT_SOURCE_DIR}/external/log)
 if((NOT LOG_LIB_DIR) OR (NOT EXISTS ${LOG_LIB_DIR}))
@@ -20,7 +23,6 @@ find_path(JSON_DIR NAMES "amalgamate.py" PATHS ${PROJECT_SOURCE_DIR}/external/js
 if((NOT JSON_DIR) OR (NOT EXISTS ${JSON_DIR}))
     # we couldn't find the header files for FOO or they don't exist
     message("Unable to find jsoncpp")
-    
     # we have a submodule setup for pml_log
     # now we need to clone this submodule
     execute_process(COMMAND git submodule update --init -- external/jsoncpp WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
@@ -31,9 +33,16 @@ else()
 endif()
 
 
-message(STATUS "Configure player3")
-add_subdirectory(player3)
-message(STATUS "Configure episerver")
-add_subdirectory(server)
-#message(STATUS "Configure controller")
-#add_subdirectory(controller)
+if(BUILD_SERVER)
+    message(STATUS "Configure player3")
+    add_subdirectory(player3)
+    message(STATUS "Configure episerver")
+    add_subdirectory(server)
+endif() 
+
+if(BUILD_CONTROLLER)
+    message(STATUS "Configure controller")
+    add_subdirectory(controller)
+    message(STATUS "Configure launcher")
+    add_subdirectory(launcher)
+endif()
