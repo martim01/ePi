@@ -18,20 +18,33 @@ The same as Player3 but will produce an AES67 bitstream.
 ### Controller
 An application designed for a Raspberry Pi 7" touchscreen that will allow full control of the ePi via the Server API.
 
+### Launcher
+A simple application that reads and ini file and launches 1 or more controllers and restarts them should they stop.
 
 ## Prerequisites
 
-### Core libraries required
+### Core libraries required for the Server and Player3
 
 * [PortAudio](http://www.portaudio.com/download.html)
-* [libsndfile]http://www.mega-nerd.com/libsndfile/)
-* [Secret Rabit Code]http://www.mega-nerd.com/SRC/)
+* [libsndfile](http://www.mega-nerd.com/libsndfile/)
+* [Secret Rabit Code](http://www.mega-nerd.com/SRC/)
 * OpenSSL
 
 ##### To install these libraries on Raspbian
 ```
 sudo apt-get update
 sudo apt-get install portaudio19-dev libsndfile1-dev libsamplerate0-dev libssl-dev
+```
+
+### Core libraries needed for the Controller and Launcher
+
+* [wxWidgets](www.wxwidgets.org)
+* libcap-dev
+
+##### To install these libraries on Raspbian
+```
+sudo apt-get update
+sudo apt-get install libcap-dev libwxgtk3.0-dev
 ```
 
 ### Other libraries included in the project
