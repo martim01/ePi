@@ -518,8 +518,6 @@ void MongooseServer::SendOptions(mg_connection* pConnection, const std::string& 
     {
         stringstream ssHeaders;
         ssHeaders << "HTTP/1.1 200\r\n"
-                  << "Transfer-Encoding: chunked\r\n"
-                  << "Content-Type: " << "application/json" << "\r\n"
                   << "Access-Control-Allow-Origin:*\r\n"
                   << "Access-Control-Allow-Methods: OPTIONS";
 
@@ -528,11 +526,13 @@ void MongooseServer::SendOptions(mg_connection* pConnection, const std::string& 
             ssHeaders << ", " << itOption->second.Get();
         }
         ssHeaders << "\r\n"
+                  << "Content-Length: 0 \r\n"
                   << "Access-Control-Allow-Headers:Content-Type, Accept\r\n"
                   << "Access-Control-Max-AgeL3600\r\n\r\n";
+
         mg_printf(pConnection, "%s", ssHeaders.str().c_str());
 
-        mg_send_http_chunk(pConnection, "", 0); //send empty chunk to inidicate end
+        pConnection->flags |= MG_F_SEND_AND_CLOSE;
 
     }
 }

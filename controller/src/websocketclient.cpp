@@ -2,6 +2,7 @@
 #include <thread>
 #include <wx/log.h>
 #include "mongoose.h"
+#include <iostream>
 
 wxDEFINE_EVENT(wxEVT_WS_CONNECTION, wxCommandEvent);
 wxDEFINE_EVENT(wxEVT_WS_HANDSHAKE, wxCommandEvent);
@@ -14,11 +15,10 @@ static void ev_handler(mg_connection* pConnection, int nEvent, void* pData)
     pThread->HandleEvent(pConnection, nEvent, pData);
 }
 
-WebSocketClient::WebSocketClient(wxEvtHandler* pHandler) :
+WebSocketClient::WebSocketClient() :
 m_pConnection(nullptr),
 m_bLoop(false)
 {
-    AddHandler(pHandler);
 }
 
 
@@ -102,11 +102,14 @@ void WebSocketClient::HandshakeDone(http_message* pMessage)
 
 void WebSocketClient::FrameReceived(websocket_message* pMessage)
 {
+
     std::lock_guard<std::mutex> lg(m_mutex);
+    wxString sMessage(wxString::FromUTF8(reinterpret_cast<char*>(pMessage->data), pMessage->size));
     for(auto pHandler : m_setHandlers)
     {
+
         wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_WS_FRAME);
-        pEvent->SetString(wxString::FromUTF8(reinterpret_cast<char*>(pMessage->data), pMessage->size));
+        pEvent->SetString(sMessage);
         wxQueueEvent(pHandler, pEvent);
     }
 }

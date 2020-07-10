@@ -2,7 +2,7 @@
 #include <thread>
 #include <wx/log.h>
 #include "mongoose.h"
-
+#include <iostream>
 
 struct mg_connection *mg_connect_http_opt(
     struct mg_mgr *mgr, MG_CB(mg_event_handler_t ev_handler, void *user_data),
@@ -158,11 +158,14 @@ void RestfulClient::DoNextTask()
 
 void RestfulClient::HandleEvent(mg_connection *pConnection, int nEvent, void* pData)
 {
-
+    std::cout << "RestfulClient::HandleEvent: " << nEvent << std::endl;
     switch(nEvent)
     {
         case MG_EV_CONNECT:
             ConnectionEvent(*reinterpret_cast<int*>(pData));
+            break;
+        case MG_EV_RECV:
+            std::cout << std::string(pConnection->recv_mbuf.buf, pConnection->recv_mbuf.len) << std::endl;
             break;
         case MG_EV_HTTP_REPLY:
             ReplyEvent(reinterpret_cast<http_message*>(pData));
@@ -188,7 +191,7 @@ void RestfulClient::ConnectionEvent(int nStatus)
 void RestfulClient::ReplyEvent(http_message* pMessage)
 {
 
-
+    std::cout << "RestfulClient::ReplyEvent" << std::endl;
     if(m_pHandler)
     {
         wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_R_REPLY);

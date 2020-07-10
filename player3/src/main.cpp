@@ -90,7 +90,6 @@ static const int DEBUG=6;
 
 int main(int argc, char* argv[])
 {
-
     //make sure got all the arguments
     if(argc < DEBUG && argc != 2)
     {

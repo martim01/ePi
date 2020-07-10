@@ -13,7 +13,7 @@ struct websocket_message;
 class WebSocketClient
 {
     public:
-        WebSocketClient(wxEvtHandler* pHandler);
+        WebSocketClient();
         bool Connect(const std::string& sEndpoint);
 
         /** Handles an event

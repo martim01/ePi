@@ -70,7 +70,9 @@ BEGIN_EVENT_TABLE(controllerDialog,wxDialog)
     //*)
 END_EVENT_TABLE()
 
-controllerDialog::controllerDialog(wxWindow* parent,  const wxPoint pntLayout, unsigned int nController, const wxString& sIpAddress, unsigned short nPort, wxWindowID id) : m_wsClient(this), m_rClient(this),
+controllerDialog::controllerDialog(wxWindow* parent,  const wxPoint pntLayout, unsigned int nController, const wxString& sIpAddress, unsigned short nPort, wxWindowID id) :
+m_wsClient(),
+m_rClient(this),
 m_sIpAddress(sIpAddress),
 m_nConnected(DISCONNECTED),
 m_bPlaying(false),
@@ -134,6 +136,7 @@ m_bDown(false)
     m_sWSEndpoint.Printf("ws://%s", m_sIpAddress.c_str());
     m_sUrl.Printf("http://%s/x-epi/", m_sIpAddress.c_str());
 
+    m_wsClient.AddHandler(this);
     m_wsClient.Connect(std::string(m_sWSEndpoint.mb_str()));
 }
 
@@ -191,6 +194,8 @@ void controllerDialog::OnWebsocketHandshake(const wxCommandEvent& event)
 
 void controllerDialog::OnWebsocketFrame(const wxCommandEvent& event)
 {
+
+
     Json::Value jsValue(ConvertToJson(event.GetString().ToStdString()));
     if(jsValue["player"].isString())
     {
@@ -238,6 +243,7 @@ void controllerDialog::OntimerConnectionTrigger(wxTimerEvent& event)
 
 void controllerDialog::OnRestfulReply(const wxCommandEvent& event)
 {
+    wxLogDebug("OnRestfulReply");
     Json::Value jsValue(ConvertToJson(event.GetString().ToStdString()));
     switch(event.GetInt())
     {
@@ -445,6 +451,7 @@ void controllerDialog::OntimerMenuTrigger(wxTimerEvent& event)
 
 void controllerDialog::OnTimerCheck(const wxTimerEvent& event)
 {
+    wxLogDebug("OnTimerCheck");
     //Ask for status and info...
     m_rClient.Get((m_sUrl+STR_ENDPOINTS[CONFIG]).ToStdString(), CONFIG);
     m_rClient.Get((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString(), FILES);
