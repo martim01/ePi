@@ -1,4 +1,8 @@
 # ePi
+
+[![Code Grade](https://www.code-inspector.com/project/11011/score/svg)](https://www.code-inspector.com)
+[![Code Grade](https://www.code-inspector.com/project/11011/status/svg)](https://www.code-inspector.com)
+
 Raspberry Pi Emergency Audio Material and Loop Player
 
 ## Introduction
