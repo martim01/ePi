@@ -77,6 +77,15 @@ cmake ..
 cmake --build .
 ```
 This will initialise and update the Git submodules and build all the applications - they will end up in ```{epi directory}/bin```
+To build only the controller and launcher
+```
+cmake -DBUILD_SERVER=OFF ..
+```
+To build only the episerver and players
+```
+cmake -DBUILD_CONTROLLER=OFF ..
+```
+
 
 ## Creating an ePi Server
 Instructions can be found in the [wiki](https://github.com/martim01/ePi/wiki/building)
