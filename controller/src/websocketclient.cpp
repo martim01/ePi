@@ -136,3 +136,8 @@ void WebSocketClient::RemoveHandler(wxEvtHandler* pHandler)
     std::lock_guard<std::mutex> lg(m_mutex);
     m_setHandlers.erase(pHandler);
 }
+
+void WebSocketClient::Stop()
+{
+    m_bLoop = false;
+}

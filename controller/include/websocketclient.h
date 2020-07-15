@@ -26,6 +26,8 @@ class WebSocketClient
         void AddHandler(wxEvtHandler* pHandler);
         void RemoveHandler(wxEvtHandler* pHandler);
 
+        void Stop();
+
     private:
 
         void ConnectionEvent(int nStatus);

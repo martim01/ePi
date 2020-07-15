@@ -125,6 +125,7 @@ m_bDown(false)
     Connect(wxID_ANY, wxEVT_R_REPLY, (wxObjectEventFunction)&controllerDialog::OnRestfulReply);
 
 
+
     m_timerCheck.SetOwner(this, wxNewId());
     Connect(m_timerCheck.GetId(), wxEVT_TIMER, (wxObjectEventFunction)&controllerDialog::OnTimerCheck);
 
@@ -138,6 +139,10 @@ m_bDown(false)
 
     m_wsClient.AddHandler(this);
     m_wsClient.Connect(std::string(m_sWSEndpoint.mb_str()));
+
+    m_timerTimeout.SetOwner(this, wxNewId());
+    Connect(m_timerTimeout.GetId(), wxEVT_TIMER, (wxObjectEventFunction)&controllerDialog::OnTimerTimeout);
+    m_timerTimeout.Start(5000, true);
 }
 
 controllerDialog::~controllerDialog()
@@ -194,7 +199,8 @@ void controllerDialog::OnWebsocketHandshake(const wxCommandEvent& event)
 
 void controllerDialog::OnWebsocketFrame(const wxCommandEvent& event)
 {
-
+    m_timerTimeout.Stop();
+    m_timerTimeout.Start(5000, true);
 
     Json::Value jsValue(ConvertToJson(event.GetString().ToStdString()));
     if(jsValue["player"].isString())
@@ -456,4 +462,13 @@ void controllerDialog::OnTimerCheck(const wxTimerEvent& event)
     m_rClient.Get((m_sUrl+STR_ENDPOINTS[CONFIG]).ToStdString(), CONFIG);
     m_rClient.Get((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString(), FILES);
     m_timerCheck.Start(10000, true);
+}
+
+
+void controllerDialog::OnTimerTimeout(const wxTimerEvent& event)
+{
+    m_nConnected = DISCONNECTED;
+    m_wsClient.Stop();
+    UpdateLabels();
+    m_timerConnection.Start(100,true);
 }

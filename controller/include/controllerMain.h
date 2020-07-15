@@ -61,6 +61,8 @@ class controllerDialog: public wxDialog
         void OnWebsocketFrame(const wxCommandEvent& event);
         void OnWebsocketFinished(const wxCommandEvent& event);
         void OnRestfulReply(const wxCommandEvent& event);
+        void OnTimerTimeout(const wxTimerEvent& event);
+
         void OnTimerCheck(const wxTimerEvent& event);
         void UpdateLabels();
 
@@ -95,6 +97,9 @@ class controllerDialog: public wxDialog
 
         bool m_bIgnoreUp;
         bool m_bDown;
+
+        wxTimer m_timerTimeout;
+
         DECLARE_EVENT_TABLE()
 
         static const wxColour CLR_PLAYING;
