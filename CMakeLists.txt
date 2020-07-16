@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(epiworkspace)
 
 option(BUILD_SERVER "Build episerver and player3" ON)
-option(BUILD_CONTROLLER "Build controller and launcher ON)
+option(BUILD_CONTROLLER "Build controller and launcher" ON)
 
 #log
 find_path(LOG_LIB_DIR NAMES "include/log.h" PATHS ${PROJECT_SOURCE_DIR}/external/log)
