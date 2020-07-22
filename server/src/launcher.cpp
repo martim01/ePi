@@ -218,8 +218,13 @@ void Launcher::PipeThread()
             if(nSelect == 0)
             {
                 //timeout
-                // @todo(martim01) no messages for 5 seconds? player must have hung. Kill it and report error
-                pml::Log::Get() << "PipeThread\tTimeout" << std::endl;
+                //no messages for 5 seconds? player must have hung. Kill it and report error
+                kill(m_pid, SIGKILL);
+                FD_CLR(m_nPipe[READ], &read_set);
+                close(m_nPipe[READ]);
+                m_nPipe[READ] = -1;
+                pml::Log::Get(pml::Log::LOG_ERROR) << "PipeThread\tTimeout" << std::endl;
+                break;
             }
             else if(nSelect > 0)
             {
@@ -253,7 +258,6 @@ void Launcher::PipeThread()
                 break;
             }
         }
-        // @todo(martim01) should we check the app has actually stopped?
         int nStatus;
         waitpid(m_pid, &nStatus,0);
         m_pid = 0;
