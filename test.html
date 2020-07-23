@@ -13,7 +13,13 @@
 		<title>ePI</title>
 		<script type="text/javascript" language="javascript">
 			
-			var g_endpoint = prompt("Enter endpoint");
+			var url = new URL(window.location.href);
+			var g_endpoint = url.searchParams.get("endpoint");
+			console.log(g_endpoint);
+			if(g_endpoint === null)
+			{
+				g_endpoint = prompt("Enter endpoint");
+			}
 			
 			//var g_endpoint = "192.168.0.101:8080";
 			var g_url = "http://"+g_endpoint+"/x-epi/";
@@ -128,6 +134,11 @@
 						setElementText("system_ram_free", "free", jsonObj["system"]["ram"]);
 						setElementText("system_load", "1", jsonObj["system"]["loads"]);
 					}
+					if(jsonObj["temperature"] !== undefined)
+					{
+						setElementText("system_temp", "cpu", jsonObj["temperature"]);
+
+					}
 					
 					console.log(jsonObj);
 					
@@ -192,6 +203,7 @@
 					clearElementText("playing_length");
 					clearElementText("playing_loop");
 					clearElementText("playing_time");
+					clearElementText("resampler");
 					clearElementText("status_action");
 					clearElementText("status_time");
 					clearElementText("status_type");
@@ -231,6 +243,15 @@
 						setElementText("playing_loop", "loop", jsonObj["playing"]);
 						document.getElementById("playing_length").innerHTML = millisecondsToTime(jsonObj["playing"]["length"]);
 						document.getElementById("playing_time").innerHTML = millisecondsToTime(jsonObj["playing"]["time"]);
+						if(jsonObj["playing"]["resampler"] == true)
+						{
+							document.getElementById("resampler").innerHTML = "On";
+						}
+						else
+						{
+							document.getElementById("resampler").innerHTML = "Off";
+						}
+						
 					}
 				}
 			}
@@ -243,22 +264,26 @@
 			
 			function next(index, resObj)
 			{
+				console.log("next("+index+")");
 				switch(index)
 				{
-					case 0:
-						getStatus();
-					case 1:
-						getResource("files","div_files", 1);
+					case 0: 
+						getConfig(index);
 						break;
+					case 1:
+						getStatus(index);
 					case 2:
-						g_files = resObj;
-						getResource("schedules","div_schedules", 2);
+						getResource("files","div_files", index);
 						break;
 					case 3:
-						g_schedules = resObj;
-						getResource("playlists","div_playlists", 3);
+						g_files = resObj;
+						getResource("schedules","div_schedules", index);
 						break;
 					case 4:
+						g_schedules = resObj;
+						getResource("playlists","div_playlists", index);
+						break;
+					case 5:
 						g_playlists = resObj;
 						if(g_ws === null)
 						{
@@ -271,7 +296,7 @@
 				}
 			}
 			
-			function getStatus()
+			function getStatus(index)
 			{
 				var ajax = new XMLHttpRequest();
 				ajax.onreadystatechange = function()
@@ -283,10 +308,30 @@
 						{
 							updateStatus(resObj);
 						}
-						next(1);
+						next(index+1);
 					}
 				}
 				ajax.open("GET", g_url+"status",true);
+				ajax.send();
+			}
+			
+			function getConfig(index)
+			{
+				var ajax = new XMLHttpRequest();
+				ajax.onreadystatechange = function()
+				{
+					if(this.readyState == 4)
+					{
+						var resObj = JSON.parse(this.responseText);
+						if(resObj !== null)
+						{
+							document.title = resObj["server"]["hostname"];
+							document.getElementById("hostname").innerHTML = resObj["server"]["hostname"];
+						}
+						next(index+1);
+					}
+				}
+				ajax.open("GET", g_url+"config",true);
 				ajax.send();
 			}
 			
@@ -1700,6 +1745,7 @@
 		</style>
 	</head>
 	<body onload="startup()">
+		<h1 id="hostname"></h1>
 		<div class="grid grid_status"> 
 			<div class="grid grid_player">
 				<div class="grid_title">Player3</div><div>&nbsp;</div>
@@ -1719,6 +1765,7 @@
 				<div class="grid_label grid_inset_more">Length</div><div id="playing_length" class="grid_value"></div>
 				<div class="grid_label grid_inset_more">Loop</div><div id="playing_loop" class="grid_value"></div>
 				<div class="grid_label grid_inset_more">Time</div><div id="playing_time" class="grid_value"></div>
+				<div class="grid_label grid_inset_more">Resampler</div><div id="resampler" class="grid_value"></div>
 				<div class="grid_value"><button id="lock" onclick="showLock()" style="padding: 5px;">Lock System</button></div><div class="grid_label"><button id="stop" onclick="stop()" style="padding: 5px; visibility: hidden">Stop Playout</button></div>
 			</div>
 			<div class="grid grid_system">
@@ -1733,7 +1780,7 @@
 				<div class="grid_label grid_inset_more">Bytes Available</div><div id="disk_bytes_available" class="grid_value">&nbsp;</div><div class="grid_label grid_inset_more">Bytes Total</div><div id="disk_bytes_total" class="grid_value">&nbsp;</div>
 				<div class="grid_label grid_inset_more">Indodes Available</div><div id="disk_inodes_available" class="grid_value">&nbsp;</div><div class="grid_label grid_inset_more">Indodes Total</div><div id="disk_inodes_total" class="grid_value">&nbsp;</div>
 				<div class="grid_title">System</div><div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>
-				<div class="grid_label grid_inset_more">Uptime</div><div id="system_uptime" class="grid_value">&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>
+				<div class="grid_label grid_inset_more">Uptime</div><div id="system_uptime" class="grid_value">&nbsp;</div><div class="grid_label grid_inset_more">Temperature</div><div id="system_temp" class="grid_value">&nbsp;</div>
 				<div class="grid_label grid_inset_more">Ram</div><div id="system_ram_free" class="grid_value">&nbsp;</div><div class="grid_label grid_inset_more">Load</div><div id="system_load" class="grid_value">&nbsp;</div>
 				<div class="grid_label" style="grid-column:1/3"><button onclick="restart('restart server')">Restart Server</button>&nbsp;<button onclick="restart('restart os')">Restart OS</button>&nbsp;<button onclick="restart('shutdown')">Shutdown</button></div>
 				<div class="grid_label" style="grid-column:3/5"><button onclick="showUpdate('episerver')">Update Server</button>&nbsp;<button onclick="showUpdate('player3')">Update Player3</button></div>
