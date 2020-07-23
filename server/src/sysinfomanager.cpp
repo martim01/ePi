@@ -97,7 +97,7 @@ Json::Value SysInfoManager::GetInfo()
     jsInfo["disk"] = GetDiskInfo();
     jsInfo["cpu"] = GetCpuInfo();
     jsInfo["application"] = GetApplicationInfo();
-
+    jsInfo["temperature"] = GetTemperature();
     return jsInfo;
 }
 
@@ -184,3 +184,33 @@ Json::Value SysInfoManager::GetApplicationInfo()
     return jsInfo;
 }
 
+Json::Value SysInfoManager::GetTemperature()
+{
+    Json::Value jsInfo;
+    std::ifstream ifs;
+    ifs.open("/sys/class/thermal/thermal_zone0/temp");
+    if(ifs.is_open() == false)
+    {
+        jsInfo["error"] = "Could not open /sys/class/thermal/thermal_zone0/temp";
+    }
+    else
+    {
+        ifs.clear();
+        std::string sLine;
+        while(ifs.eof() == false)
+        {
+            getline(ifs,sLine,'\n');
+            try
+            {
+                double dTemp = std::stod(sLine);
+                dTemp /= 1000.0;
+                jsInfo["cpu"] = dTemp;
+            }
+            catch(const std::invalid_argument& e)
+            {
+                jsInfo["error"] = "Temp in invalid format";
+            }
+        }
+    }
+    return jsInfo;
+}
