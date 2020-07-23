@@ -43,7 +43,7 @@ bool FileSource::Play()
         m_jsStatus["playing"]["length"] = m_pFile->GetLength().count();
 
         //Init the resampler
-        unsigned long nSampleRate(m_iniConfig.GetIniInt("player3", "samplerate", 48000));
+        int nSampleRate(m_iniConfig.GetIniInt("player3", "samplerate", 48000));
         if(m_pFile->GetSampleRate() != nSampleRate)
         {
             m_pSampler = std::unique_ptr<Resampler>(new Resampler(nSampleRate));
@@ -54,8 +54,14 @@ bool FileSource::Play()
                 epiWriter::Get().writeToStdOut(m_jsStatus);
                 return false;
             }
+            m_jsStatus["playing"]["samplerate"]["out"] = nSampleRate;
+            m_jsStatus["playing"]["samplerate"]["in"] = m_pFile->GetSampleRate();
+            m_jsStatus["playing"]["resampler"] = true;
         }
-
+        else
+        {
+            m_jsStatus["playing"]["resampler"] = false;
+        }
         for(unsigned long nLoop = 1; nLoop <= m_nTimesToPlay && m_bPlay; nLoop++)
         {
             m_jsStatus["playing"]["loop"] = Json::UInt(nLoop);
@@ -92,6 +98,7 @@ bool FileSource::PlayOnce()
 
             if(m_pSampler != nullptr)
             {
+                m_jsStatus["playing"]["resampler"] = true;
                 if(!m_pSampler->Resample(vRead, vResample))
                 {
                     m_jsStatus["playing"]["error"] = true;
@@ -106,6 +113,7 @@ bool FileSource::PlayOnce()
             }
             else
             {
+
                 m_player.AddSamples(vRead);
             }
         }
