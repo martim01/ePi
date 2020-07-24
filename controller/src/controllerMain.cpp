@@ -75,7 +75,7 @@ m_wsClient(),
 m_rClient(this),
 m_sIpAddress(sIpAddress),
 m_nConnected(DISCONNECTED),
-m_bPlaying(false),
+m_nPlaying(STOPPED),
 m_bCountUp(true),
 m_bIgnoreUp(false),
 m_bDown(false)
@@ -213,16 +213,22 @@ void controllerDialog::UpdatePlayingStatus(const Json::Value& jsData)
 {
     if(jsData["player"].asString() == "Running")
     {
-        m_bPlaying = true;
+        m_nPlaying = PLAYING;
         if(jsData["status"].isObject() && jsData["status"]["playing"].isObject())
         {
            m_tsLength = wxTimeSpan(0,0,0, jsData["status"]["playing"]["length"].asInt());
            m_tsPosition = wxTimeSpan(0,0,0, jsData["status"]["playing"]["time"].asInt());
         }
     }
+    else if(jsData["player"].asString() == "Orphaned")
+    {
+        m_nPlaying = ORPHANED;
+        m_tsLength = wxTimeSpan(0);
+        m_tsPosition = wxTimeSpan(0);
+    }
     else
     {
-        m_bPlaying = false;
+        m_nPlaying = STOPPED;
         m_tsLength = wxTimeSpan(0);
         m_tsPosition = wxTimeSpan(0);
     }
@@ -309,10 +315,15 @@ void controllerDialog::UpdateLabels()
                 clr = CLR_NO_FILE;
                 m_uiStatus.SetLabel("No File");
             }
-            else if(m_bPlaying == false)
+            else if(m_nPlaying == STOPPED)
             {
                 clr = CLR_IDLE;
                 m_uiStatus.SetLabel(m_sDefaultFileLabel);
+            }
+            else if(m_nPlaying  == ORPHANED)
+            {
+                clr = CLR_PLAYING;
+                m_uiStatus.SetLabel("??:??:??");
             }
             else
             {
@@ -346,7 +357,7 @@ void controllerDialog::OnLeftDown(wxMouseEvent& event)
     m_uiName.SetBackgroundColour(wxColour(255,128,0));
     m_uiStatus.SetBackgroundColour(wxColour(255,128,0));
     Refresh();
-    if(m_bPlaying)
+    if(m_nPlaying != STOPPED)
     {
         m_timerStop.Start(2000,true);
     }
@@ -368,7 +379,7 @@ void controllerDialog::OnLeftUp(wxMouseEvent& event)
     {
         if(m_sDefaultFileUid.empty() == false)
         {
-            if(m_bPlaying == false)
+            if(m_nPlaying == STOPPED)
             {
                 Play();
             }
@@ -399,8 +410,16 @@ void controllerDialog::Play()
 
 void controllerDialog::Stop()
 {
+
     Json::Value jsCommand;
-    jsCommand["command"] = "stop";
+    if(m_nPlaying == PLAYING)
+    {
+        jsCommand["command"] = "stop";
+    }
+    else
+    {
+        jsCommand["command"] = "kill";
+    }
 
     std::stringstream ss;
     epiWriter::Get().writeToSStream(jsCommand, ss);
@@ -417,7 +436,7 @@ void controllerDialog::OnPaint(wxPaintEvent& event)
     fnt.SetPointSize(20);
     dc.SetFont(fnt);
     m_uiName.Draw(dc, uiRect::BORDER_NONE);
-    if(m_bPlaying)
+    if(m_nPlaying != STOPPED)
     {
         fnt.SetPointSize(16);
     }

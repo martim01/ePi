@@ -1158,6 +1158,17 @@ response ResourceManager::ModifyStatus(const Json::Value& jsData)
         pml::Log::Get(pml::Log::LOG_INFO) << "lock" << std::endl;
         return  Lock(jsData);
     }
+    else if(CmpNoCase(jsData["command"].asString(), "kill"))
+    {
+        pml::Log::Get(pml::Log::LOG_INFO) << "kill" << std::endl;
+        response tr(IsLocked());
+        if(tr.nHttpCode == 423)
+        {
+            return tr;
+        }
+
+        return  Kill(jsData);
+    }
     else
     {
         response theResponse(400);
@@ -1313,9 +1324,28 @@ response ResourceManager::Pause(const Json::Value& jsData)
 
 response ResourceManager::Stop(const Json::Value& jsData)
 {
-
     return m_launcher.StopPlayer();
+}
 
+response ResourceManager::Kill(const Json::Value& jsData)
+{
+    response theResponse;
+    theResponse.jsonData["result"] = true;
+
+    int nError = KillProc("player3");
+    if(nError != 0)
+    {
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append(strerror(errno));
+    }
+    nError = KillProc("player67");
+    if(nError != 0)
+    {
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append(strerror(errno));
+    }
+
+    return theResponse;
 }
 
 response ResourceManager::Lock(const Json::Value& jsData)

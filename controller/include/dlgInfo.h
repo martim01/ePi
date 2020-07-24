@@ -77,6 +77,8 @@ class dlgInfo: public wxDialog
 		wmLabel* m_plblSystemProcs;
 		wmLabel* m_plblSystemUpTime;
 		wmLabel* m_pstHostname;
+		wmLabel* m_plblTemperature;
+		wmLabel* StaticText36;
 		//*)
 
 	protected:

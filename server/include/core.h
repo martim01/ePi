@@ -71,6 +71,7 @@ class Core
 
         response Reboot(int nCommand);
 
+        void GetInitialPlayerStatus();
 
         Json::Value m_jsStatus;
 

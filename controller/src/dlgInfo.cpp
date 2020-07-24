@@ -291,20 +291,28 @@ m_wsClient(wsClient)
 	StaticBoxSizer6->Add(FlexGridSizer6, 1, wxALL|wxEXPAND, 0);
 	BoxSizer2->Add(StaticBoxSizer6, 0, wxALL|wxEXPAND, 2);
 	StaticBoxSizer7 = new wxStaticBoxSizer(wxVERTICAL, this, _("System"));
-	FlexGridSizer7 = new wxFlexGridSizer(0, 4, 0, 0);
+	FlexGridSizer7 = new wxFlexGridSizer(0, 6, 0, 0);
 	StaticText34 = new wmLabel(this, ID_STATICTEXT34, _("Up Time:"), wxDefaultPosition, wxSize(120,-1), 0, _T("ID_STATICTEXT34"));
 	wxFont StaticText34Font(10,wxFONTFAMILY_SWISS,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_BOLD,false,"Arial",wxFONTENCODING_DEFAULT);
 	StaticText34->SetFont(StaticText34Font);
-	FlexGridSizer7->Add(StaticText34, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
-	m_plblSystemUpTime = new wmLabel(this, ID_STATICTEXT55, _(""), wxDefaultPosition, wxSize(160,-1), 0, _T("ID_STATICTEXT55"));
-	FlexGridSizer7->Add(m_plblSystemUpTime, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
-	StaticText35 = new wmLabel(this, ID_STATICTEXT35, _("Running Procs:"), wxDefaultPosition, wxSize(160,-1), 0, _T("ID_STATICTEXT35"));
+	FlexGridSizer7->Add(StaticText34, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
+    m_plblSystemUpTime = new wmLabel(this, ID_STATICTEXT55, _(""), wxDefaultPosition, wxSize(120,-1), 0, _T("ID_STATICTEXT55"));
+	FlexGridSizer7->Add(m_plblSystemUpTime, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
+
+	StaticText35 = new wmLabel(this, ID_STATICTEXT35, _("Procs:"), wxDefaultPosition, wxSize(80,-1), 0, _T("ID_STATICTEXT35"));
 	wxFont StaticText35Font(10,wxFONTFAMILY_SWISS,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_BOLD,false,"Arial",wxFONTENCODING_DEFAULT);
 	StaticText35->SetFont(StaticText35Font);
-	FlexGridSizer7->Add(StaticText35, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
+	FlexGridSizer7->Add(StaticText35, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
 	m_plblSystemProcs = new wmLabel(this, ID_STATICTEXT56, _(""), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT56"));
-	FlexGridSizer7->Add(m_plblSystemProcs, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
+	FlexGridSizer7->Add(m_plblSystemProcs, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
+
+	StaticText36 = new wmLabel(this, wxNewId(), _("Temperature:"), wxDefaultPosition, wxSize(120,-1), 0, _T("ID_STATICTEXT35"));
+    StaticText36->SetFont(StaticText35Font);
+	FlexGridSizer7->Add(StaticText36, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
+	m_plblTemperature = new wmLabel(this, wxNewId(), _(""), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT56"));
+	FlexGridSizer7->Add(m_plblTemperature, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
 	StaticBoxSizer7->Add(FlexGridSizer7, 1, wxALL|wxEXPAND, 0);
+
 	BoxSizer2->Add(StaticBoxSizer7, 0, wxALL|wxEXPAND, 2);
 	BoxSizer1->Add(BoxSizer2, 1, wxALL|wxEXPAND, 0);
 	BoxSizer3 = new wxBoxSizer(wxVERTICAL);
@@ -477,7 +485,7 @@ void dlgInfo::OnWebsocketFrame(const wxCommandEvent& event)
         }
 
         m_plblSystemProcs->SetLabel(wxString::Format("%d", jsValue["system"]["procs"].asInt()));
-
+        m_plblTemperature->SetLabel(wxString::Format("%.2fC", jsValue["temperature"]["cpu"].asDouble()));
         wxTimeSpan tsSysUptime(0,0,jsValue["system"]["uptime"].asInt());
         m_plblSystemUpTime->SetLabel(tsSysUptime.Format("%D days %H:%M:%S"));
     }

@@ -95,6 +95,7 @@ class ResourceManager
         response Pause(const Json::Value& jsData);
         response Stop(const Json::Value& jsData);
         response Lock(const Json::Value& jsData);
+        response Kill(const Json::Value& jsData);
 
         response PlayFile(const Json::Value& jsData);
         response PlayPlaylist(const Json::Value& jsData);

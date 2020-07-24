@@ -15,14 +15,15 @@ using namespace pml;
 
 bool IsProcRunning(const std::string& sProc)
 {
+    return (FindProc(sProc, false) != 0);
+}
+
+pid_t FindProc(const std::string& sProc, bool bKill)
+{
     DIR* dir;
     struct dirent* ent;
     char* endptr;
     char buf[512];
-
-    bool bExec(false);
-    bool bSNMP(false);
-    bool bDecoder(false);
 
     if (!(dir = opendir("/proc")))
     {
@@ -52,7 +53,17 @@ bool IsProcRunning(const std::string& sProc)
                 char* first = strtok(buf, " ");
                 if (strstr(first, sProc.c_str())!=NULL)
                 {
-                    return true;
+                    if(bKill)
+                    {
+                        if(kill(lpid, SIGKILL) != 0)
+                        {
+                            return errno;
+                        }
+                    }
+                    else
+                    {
+                        return lpid;
+                    }
                 }
             }
             fclose(fp);
@@ -60,6 +71,11 @@ bool IsProcRunning(const std::string& sProc)
     }
 
     closedir(dir);
-    return false;
+    return 0;
 }
 
+
+int KillProc(const std::string& sProc)
+{
+    return FindProc(sProc, true);
+}

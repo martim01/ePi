@@ -19,6 +19,7 @@
 #include <linux/reboot.h>
 #include <sys/reboot.h>
 #include "jsonutils.h"
+#include "proccheck.h"
 
 using namespace std::placeholders;
 using namespace pml;
@@ -51,7 +52,20 @@ const url Core::EP_OUTPUTS     = url(EP_EPI.Get()+"/"+OUTPUTS);
 Core::Core() : m_manager(m_launcher, m_iniConfig), m_nTimeSinceLastCall(0)
 {
 
-    m_jsStatus["player"] ="Stopped";
+    GetInitialPlayerStatus();
+}
+
+
+void Core::GetInitialPlayerStatus()
+{
+    if(IsProcRunning("player3") || IsProcRunning("player67"))
+    {   //just started up so must be an orphaned player
+        m_jsStatus["player"] = "Orphaned";
+    }
+    else
+    {
+        m_jsStatus["player"] ="Stopped";
+    }
 }
 
 void Core::InitLogging()
@@ -323,9 +337,14 @@ response Core::PatchStatus(mg_connection* pConnection, const query& theQuery, co
 {
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PatchStatus" << std::endl;
 
-
     Json::Value jsData(ConvertToJson(theData.Get()));
-    return m_manager.ModifyStatus(jsData);
+    response theResponse(m_manager.ModifyStatus(jsData));
+
+    if(CmpNoCase(jsData["command"].asString(), "kill"))
+    {
+        GetInitialPlayerStatus();   //see if the players have been killed
+    }
+    return theResponse;
 }
 
 response Core::PutPower(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
@@ -667,7 +686,7 @@ void Core::LoopCallback(int nTook)
     if(m_nTimeSinceLastCall > 2000)
     {
         m_server.SendWebsocketMessage(m_info.GetInfo());
-        if(m_jsStatus["player"].asString() == "Stopped")
+        if(m_jsStatus["player"].asString() != "Playing")
         {
             m_server.SendWebsocketMessage(m_jsStatus);
         }

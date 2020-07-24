@@ -92,7 +92,8 @@ class controllerDialog: public wxDialog
 
         enum {DISCONNECTED, CONNECTING, CONNECTED};
         int m_nConnected;
-        bool m_bPlaying;
+        enum {STOPPED, PLAYING, ORPHANED};
+        int m_nPlaying;
         bool m_bCountUp;
 
         bool m_bIgnoreUp;

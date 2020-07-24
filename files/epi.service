@@ -15,8 +15,8 @@ KillMode=process
 GuessMainPID=no
 SuccessExitStatus=5 6
 ExecStart=/usr/local/bin/episerver /usr/local/etc/ePi/config.ini
-CapabilityBoundingSet=CAP_SYS_BOOT
-AmbientCapabilities=CAP_SYS_BOOT
+CapabilityBoundingSet=CAP_SYS_BOOT CAP_KILL
+AmbientCapabilities=CAP_SYS_BOOT CAP_KILL
 #Capabilities=CAP_SYS_BOOT+epi
 
 [Install]
