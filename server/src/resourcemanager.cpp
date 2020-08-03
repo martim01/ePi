@@ -26,13 +26,8 @@ ResourceManager::ResourceManager(Launcher& launcher, iniManager& iniConfig) :
 
 void ResourceManager::Init()
 {
-    m_sAudioFilePath = CreatePath(m_iniConfig.GetIniString("paths", "audio", "/var/ePi/audio"));
-    m_sResourcePath = CreatePath(m_iniConfig.GetIniString("paths", "resources", "/var/ePi/resources"));
+    InitPaths();
 
-    mkpath(m_sAudioFilePath, 0755);
-    mkpath(m_sResourcePath, 0755);
-
-    LoadResources();
 
     //remove any old application files
     iniSection* pSection = m_iniConfig.GetSection("remove");
@@ -43,8 +38,20 @@ void ResourceManager::Init()
             remove(itData->second.c_str());
         }
         m_iniConfig.DeleteSection("remove");
+
         m_iniConfig.WriteIniFile();
     }
+}
+
+void ResourceManager::InitPaths()
+{
+    m_sAudioFilePath = CreatePath(m_iniConfig.GetIniString("paths", "audio", "/var/ePi/audio"));
+    m_sResourcePath = CreatePath(m_iniConfig.GetIniString("paths", "resources", "/var/ePi/resources"));
+
+    mkpath(m_sAudioFilePath, 0755);
+    mkpath(m_sResourcePath, 0755);
+
+    LoadResources();
 }
 
 ResourceManager::~ResourceManager()
@@ -93,6 +100,14 @@ response ResourceManager::AddFile( const std::string& sUploadName, const std::st
     if(theResponse.nHttpCode ==400)
     {
         pml::Log::Get(pml::Log::LOG_ERROR) << "failed - incorrect JSON" << std::endl;
+        remove(sUploadName.c_str());
+    }
+    else if(m_iniConfig.GetIniInt("maximum", "files", -1) > 0 &&  m_iniConfig.GetIniInt("maximum", "files", -1) == m_mFiles.size())
+    {
+        theResponse.nHttpCode = 409;
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("Maximum number of files already uploaded.");
+        pml::Log::Get(pml::Log::LOG_ERROR) << "failed - maximum file count" << std::endl;
         remove(sUploadName.c_str());
     }
     else if(FileExists(sLabel))
@@ -169,6 +184,13 @@ response ResourceManager::AddSchedule(const Json::Value& jsData)
             theResponse.jsonData["reason"].append("Schedule already exists with the given label.");
             pml::Log::Get(pml::Log::LOG_ERROR) << "failed - label already in use" << std::endl;
         }
+        else if(m_iniConfig.GetIniInt("maximum", "schedules", -1) > 0 &&  m_iniConfig.GetIniInt("maximum", "schedules", -1) == m_mFiles.size())
+        {
+            theResponse.nHttpCode = 409;
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("Maximum number of schedules already uploaded.");
+            pml::Log::Get(pml::Log::LOG_ERROR) << "failed - maximum schedule count" << std::endl;
+        }
         else
         {
             //all valid so create the new schedule item
@@ -212,6 +234,13 @@ response ResourceManager::AddPlaylist(const Json::Value& jsData)
             theResponse.jsonData["result"] = false;
             theResponse.jsonData["reason"].append("Playlist already exists with the given label.");
             pml::Log::Get(pml::Log::LOG_ERROR) << "failed - label already in use" << std::endl;
+        }
+        else if(m_iniConfig.GetIniInt("maximum", "playlists", -1) > 0 &&  m_iniConfig.GetIniInt("maximum", "playlists", -1) == m_mFiles.size())
+        {
+            theResponse.nHttpCode = 409;
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("Maximum number of playlists already uploaded.");
+            pml::Log::Get(pml::Log::LOG_ERROR) << "failed - maximum playlist count" << std::endl;
         }
         else
         {
@@ -1378,6 +1407,7 @@ response ResourceManager::Lock(const Json::Value& jsData)
         }
         else
         {
+            m_iniConfig.ReReadIniFile();    //make sure up to date
             m_iniConfig.SetSectionValue("restricted", "locked", 0);
             m_iniConfig.SetSectionValue("restricted", "password", "");
             m_iniConfig.WriteIniFile();
@@ -1387,6 +1417,7 @@ response ResourceManager::Lock(const Json::Value& jsData)
     }
     else
     {
+        m_iniConfig.ReReadIniFile();    //make sure up to date
         m_iniConfig.SetSectionValue("restricted", "locked", 1);
         m_iniConfig.SetSectionValue("restricted", "password", jsData["password"].asString());
         m_iniConfig.WriteIniFile();
@@ -1540,6 +1571,7 @@ response ResourceManager::Update(const std::string& sApplication, const std::str
         }
         else
         {
+            m_iniConfig.ReReadIniFile();    //make sure up to date
             m_iniConfig.SetSectionValue("remove", sApplication, ssOld.str());
             m_iniConfig.WriteIniFile();
             theResponse.jsonData["restart"] = true;

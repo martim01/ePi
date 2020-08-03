@@ -49,7 +49,10 @@ const url Core::EP_UPDATE      = url(EP_EPI.Get()+"/"+UPDATE);
 const url Core::EP_OUTPUTS     = url(EP_EPI.Get()+"/"+OUTPUTS);
 
 
-Core::Core() : m_manager(m_launcher, m_iniConfig), m_nTimeSinceLastCall(0)
+Core::Core() : m_manager(m_launcher, m_iniConfig),
+   m_nTimeSinceLastCall(0),
+   m_nLogToConsole(0),
+   m_nLogToFile(0)
 {
 
     GetInitialPlayerStatus();
@@ -70,14 +73,26 @@ void Core::GetInitialPlayerStatus()
 
 void Core::InitLogging()
 {
-    if(m_iniConfig.GetIniInt("logging", "console",0) == 1)
+    if(m_iniConfig.GetIniInt("logging", "console",0) == 1 && m_nLogToConsole == 0)
     {
-        pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
+        m_nLogToConsole = pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
     }
-    if(m_iniConfig.GetIniInt("logging", "file",0) == 1)
+    else if(m_nLogToConsole != 0)
     {
-        pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new LogToFile(CreatePath(m_iniConfig.GetIniString("paths","logs","."))+"episerver")));
+        pml::Log::Get().RemoveOutput(m_nLogToConsole);
+        m_nLogToConsole = 0;
     }
+
+    if(m_iniConfig.GetIniInt("logging", "file",0) == 1 &&  m_nLogToFile == 0)
+    {
+        m_nLogToFile = pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new LogToFile(CreatePath(m_iniConfig.GetIniString("paths","logs","."))+"episerver")));
+    }
+    else if(m_nLogToFile != 0)
+    {
+        pml::Log::Get().RemoveOutput(m_nLogToFile);
+        m_nLogToFile = 0;
+    }
+
 }
 
 void Core::Run(const std::string& sConfigFile)
@@ -387,7 +402,8 @@ response Core::PutPower(mg_connection* pConnection, const query& theQuery, const
     else
     {
         theResponse.nHttpCode = 400;
-        theResponse.jsonData["result"] = "Invalid command sent";
+        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["reason"].append("Invalid command sent");
         Log::Get(Log::LOG_ERROR) << "'" << jsData["command"].asString() <<"' is not a valid command" << std::endl;
     }
 
@@ -397,15 +413,66 @@ response Core::PutPower(mg_connection* pConnection, const query& theQuery, const
 response Core::PatchConfig(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PatchConfig" << std::endl;
-    response theResponse(m_manager.IsLocked());
-    if(theResponse.nHttpCode == 423)
-    {
-        return theResponse;
-    }
-    // @todo(martim01) PutConfig
-    // not sure yet
 
+    Json::Value jsData(ConvertToJson(theData.Get()));
+
+    response theResponse(m_manager.IsLocked());
+    if(theResponse.nHttpCode != 423)
+    {
+        if(jsData.isObject() == false)
+        {
+            theResponse.nHttpCode  = 400;
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("Invalid JSON");
+        }
+        else
+        {
+            m_iniConfig.ReReadIniFile();    //sync with on disk version
+
+            for(auto const& sSection : jsData.getMemberNames())
+            {
+                if(jsData[sSection].isObject())
+                {
+                    if(sSection == "server")
+                    {
+                        PatchServerConfig(jsData[sSection]);
+                    }
+                    else if(sSection != "restricted" && sSection != "remove")
+                    {
+                        iniSection* pSection = m_iniConfig.GetSection(sSection);
+                        if(pSection)
+                        {
+                            for(auto const& sKey : jsData[sSection].getMemberNames())
+                            {
+                                if(pSection->FindData(sKey) != pSection->GetDataEnd() && jsData[sSection][sKey].isConvertibleTo(Json::stringValue))
+                                {
+                                    pSection->SetValue(sKey, jsData[sSection][sKey].asString());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            m_iniConfig.WriteIniFile();
+            InitLogging();  //change logging if necessary
+            m_manager.InitPaths();  //change paths if necessary
+            theResponse = GetConfig(pConnection, theQuery, theData, theUrl);
+            theResponse.jsonData["result"] = true;
+        }
+    }
     return theResponse;
+}
+
+
+void Core::PatchServerConfig(const Json::Value& jsData)
+{
+    for(auto const& sKey : jsData.getMemberNames())
+    {
+        if(sKey == "hostname" && jsData[sKey].isString())
+        {
+            sethostname(jsData[sKey].asString().c_str(), jsData[sKey].asString().length());
+        }
+    }
 }
 
 response Core::PatchFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)

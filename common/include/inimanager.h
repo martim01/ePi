@@ -54,6 +54,8 @@ public:
     **/
     bool ReadIniFile(const std::string& sFilename);
 
+    bool ReReadIniFile();
+
     /** @brief Get the string value for the specified key in the specified section.
     *   @param sSection the section of the ini file the key live is
     *   @param sKey the key you want to retrieve the value of

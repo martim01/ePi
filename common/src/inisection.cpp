@@ -171,3 +171,8 @@ size_t iniSection::GetNumberOfEntries()
 {
     return m_mSectionData.size();
 }
+
+std::map<std::string,std::string>::const_iterator iniSection::FindData(const std::string& sKey) const
+{
+    return m_mSectionData.find(getlower(sKey));
+}

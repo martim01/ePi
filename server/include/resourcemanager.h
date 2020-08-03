@@ -67,6 +67,7 @@ class ResourceManager
         std::shared_ptr<const Resource> GetPlayingResource();
 
         response IsLocked();
+        void InitPaths();
 
     private:
         bool LoadResources();

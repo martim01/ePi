@@ -73,6 +73,8 @@ class Core
 
         void GetInitialPlayerStatus();
 
+        void PatchServerConfig(const Json::Value& jsData);
+
         Json::Value m_jsStatus;
 
          /**
@@ -116,4 +118,7 @@ class Core
         std::mutex m_mutex;
 
         unsigned int m_nTimeSinceLastCall;
+
+        size_t m_nLogToConsole;
+        size_t m_nLogToFile;
 };
