@@ -19,6 +19,7 @@
 #include "dlgOptions.h"
 #include "constants.h"
 
+
 const wxColour controllerDialog::CLR_PLAYING = wxColour(146,208,80);
 const wxColour controllerDialog::CLR_IDLE = wxColour(141,180,226);
 const wxColour controllerDialog::CLR_ERROR =  wxColour(255,0,0);
@@ -78,7 +79,9 @@ m_nConnected(DISCONNECTED),
 m_nPlaying(STOPPED),
 m_bCountUp(true),
 m_bIgnoreUp(false),
-m_bDown(false)
+m_bDown(false),
+m_gen(m_rd()),
+m_dist(500,1000)
 {
     //(*Initialize(controllerDialog)
     Create(parent, id, _("wxWidgets app"), wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER, _T("id"));
@@ -169,7 +172,7 @@ void controllerDialog::OnWebsocketConnection(const wxCommandEvent& event)
     {
         m_nConnected = DISCONNECTED;
         UpdateLabels();
-        m_timerConnection.Start(100,true);
+        m_timerConnection.Start(m_dist(m_gen),true);
     }
     else
     {
@@ -242,7 +245,7 @@ void controllerDialog::OnWebsocketFinished(const wxCommandEvent& event)
     m_uiStatus.SetLabel("Offline");
 
 
-    m_timerConnection.Start(100,true);
+    m_timerConnection.Start(m_dist(m_gen),true);
 }
 
 
@@ -489,5 +492,5 @@ void controllerDialog::OnTimerTimeout(const wxTimerEvent& event)
     m_nConnected = DISCONNECTED;
     m_wsClient.Stop();
     UpdateLabels();
-    m_timerConnection.Start(100,true);
+    m_timerConnection.Start(m_dist(m_gen),true);
 }

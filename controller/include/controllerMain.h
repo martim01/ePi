@@ -18,6 +18,7 @@
 #include <wx/timer.h>
 //*)
 #include "uirect.h"
+#include <random>
 
 class controllerDialog: public wxDialog
 {
@@ -100,6 +101,10 @@ class controllerDialog: public wxDialog
         bool m_bDown;
 
         wxTimer m_timerTimeout;
+
+        std::random_device m_rd;
+        std::mt19937 m_gen;
+        std::uniform_int_distribution<> m_dist;
 
         DECLARE_EVENT_TABLE()
 
