@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Title</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="../css/uikit.min.css" />
+        <script src="../js/uikit.min.js"></script>
+        <script src="../js/uikit-icons.min.js"></script>
+        <script src="../js/ajax.js"></script>
+        <script type="text/javascript">        
+		var url = new URL(window.location.href);
+		var endpoint = url.searchParams.get("loopi");			
+		g_loopi_array.push(new loopi(0, endpoint));
+		console.log(endpoint);
+		
+		function status()
+		{
+			document.getElementById('hostname').innerHTML = endpoint;
+			getLoopiConfig_Details();
+		}
+	</script>
+	<style>
+		.loopi_label { padding-left: 5px; padding-top: 2px; padding-bottom: 2px; padding-right: 5px; color: #ffffff; background-color: #000000}
+		.loopi_label_muted { background-color: #c8c8c8}
+		.loopi_label_running { background-color: #32d296}
+		.loopi_label_warning { background-color: #ffa800}
+	</style>
+    </head>
+    <body onload="status()">
+	<h1 class="uk-heading-divider">
+            <img src="../images/loopi.png">
+            <span id="hostname"></span>
+        </h1>
+	
+	<div class="uk-section uk-section-muted">
+		<div class="uk-container">
+			<div class="uk-card uk-card-default uk-card-small uk-card-body">
+				<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
+					<div class='uk-width-1-4'><div><span class='uk-text-bold'>System:</span></div></div>
+					<div><span class='uk-label' id='lock'>Unknown</span></div>
+				</div>
+				<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
+					<div class='uk-width-1-4'><div><span class='uk-text-bold'>Player:</span></div></div>
+					<div><span  class='uk-label' id='player'>Unknown</span></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="uk-section uk-section-primary  uk-margin-medium" id="section_player">
+		<div class="uk-container">
+			<div class="uk-grid-match uk-child-width-expand@m" uk-grid>
+				<div>
+					<div class="uk-card uk-card-default uk-card-small" id="card_resource">
+						<div class="uk-card-header">Resource</div>
+						<div class="uk-card-body">
+							<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
+								<div class='uk-width-1-4'><span class='uk-text-bold'>Type:</span></div>
+								<div><span id='resource_type'>Unknown</span></div>
+							</div>
+							<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
+								<div class='uk-width-1-4'><span class='uk-text-bold'>Label:</span></div>
+								<div><span id='resource_label'>Unknown</span></div>
+							</div>
+							<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
+								<div class='uk-width-1-4'><span class='uk-text-bold'>Status:</span></div>
+								<div><span class='loopi_label' id='resource_status'>Unknown</span></div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div>
+					<div class="uk-card uk-card-default uk-card-small" id="card_playout">
+						<div class="uk-card-header">Playout</div>
+						<div class="uk-card-body">
+							<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
+								<div class='uk-width-1-4'><span class='uk-text-bold'>Label:</span></div>
+								<div><span id='playout_label'>Unknown</span></div>
+							</div>
+							<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
+								<div class='uk-width-1-4'><span class='uk-text-bold'>Started:</span></div>
+								<div><span id='playout_started'>Unknown</span></div>
+							</div>
+							<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
+								<div class='uk-width-1-4'><span class='uk-text-bold'>Length:</span></div>
+								<div><span id='playout_length'>Unknown</span></div>
+							</div>
+							<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
+								<div class='uk-width-1-4'><span class='uk-text-bold'>Loop:</span></div>
+								<div><span id='playout_loop'>Unknown</span></div>
+							</div>
+							<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
+								<div class='uk-width-1-4'><span class='uk-text-bold'>Time:</span></div>
+								<div><span id='playout_time'>Unknown</span></div>
+							</div>
+							<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
+								<div class='uk-width-1-4'><span class='uk-text-bold'>SRC:</span></div>
+								<div><span class="loopi_label" id='playout_src'>Unknown</span></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>  
+    </body>
+</html>
