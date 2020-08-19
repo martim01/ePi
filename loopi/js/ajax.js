@@ -782,5 +782,9 @@ function handleStatusPatch(status, jsonObj)
 	if(status != 200)
 	{
 		alert(jsonObj["reason"]);
-	}		
+	}
+	else
+	{
+		getStatus(0, handleStatus_Details);
+	}
 }
