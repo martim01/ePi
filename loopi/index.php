@@ -32,12 +32,12 @@ $loopi_array = loadloopi();
             <img src="images/loopi.png">
             loopi Dashboard
         </h1>
-        <div class="uk-grid-column-small uk-grid-row-large uk-grid-match uk-text-center" uk-grid id="loopi_grid">
+        <div class="uk-grid-column-small uk-grid-row-small uk-grid-match uk-text-center" uk-grid id="loopi_grid">
         <?php
         for($i = 0; $i < count($loopi_array); $i++)
         {
             echo "<div>\n";
-            echo "<a class='uk-link-reset uk-display-block uk-width-large uk-card uk-card-default uk-card-body uk-card-hover uk-card-small' id='loopi_$i'  href='status/?loopi=".$loopi_array[$i]."'>\n";
+            echo "<a class='uk-link-reset uk-display-block uk-width-large@l uk-width-1-3@s uk-card uk-card-default uk-card-body uk-card-hover uk-card-small' id='loopi_$i'  href='status/?loopi=".$loopi_array[$i]."'>\n";
             echo "<div class='uk-card-header'>\n";
             echo "<h3 class='uk-card-title'><span id='host_$i'>".$loopi_array[$i]."</span></h3>\n";
             echo "</div>\n";

@@ -2,7 +2,7 @@
 
 function loadLoopi()
 {
-	$file = fopen($_SERVER['DOCUMENT_ROOT']."/data/loopi", "r");
+	$file = fopen($_SERVER['DOCUMENT_ROOT']."/loopi/data/loopi", "r");
 	if($file)
 	{
 		$loopi_array = array();
@@ -22,7 +22,7 @@ function loadLoopi()
 
 function saveLoopi($loopi_array)
 {
-	$file = fopen($_SERVER['DOCUMENT_ROOT']."/data/loopi", "w");
+	$file = fopen($_SERVER['DOCUMENT_ROOT']."/loopi/data/loopi", "w");
 	if($file)
 	{
 		for($i = 0; $i < count($loopi_array); $i++)
