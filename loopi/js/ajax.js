@@ -579,7 +579,9 @@ function updateConfig_Details(loopi, jsonObj)
 		{
 			title.innerHTML = jsonObj["server"]["hostname"];
 		}	
+		window.document.title = jsonObj["server"]["hostname"];
 	}
+	
 }
 
 function updateStatus_Details(loopi, jsonObj)
