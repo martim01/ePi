@@ -596,6 +596,7 @@ function updateStatus_Details(loopi, jsonObj)
 				document.getElementById("lock").classList.remove("uk-label-danger");
 				document.getElementById("lock").classList.remove("uk-label-warning");
 				document.getElementById("lock").classList.add("uk-label-success");
+				document.getElementById("button_lock").innerHTML = "Lock";
 				
 			}
 			else if(jsonObj["locked"] == true)
@@ -604,9 +605,13 @@ function updateStatus_Details(loopi, jsonObj)
 				document.getElementById("lock").classList.remove("uk-label-success");
 				document.getElementById("lock").classList.remove("uk-label-danger");
 				document.getElementById("lock").classList.add("uk-label-warning");
+				document.getElementById("button_lock").innerHTML = "Unlock";
+				
+				document.getElementById("button_stop").style.visibility = "hidden";
 			}
 		}
 	}
+	
 	if(jsonObj["player"] === undefined)
 	{
 		document.getElementById("player").innerHTML = "Unknown";
@@ -614,6 +619,10 @@ function updateStatus_Details(loopi, jsonObj)
 		document.getElementById("player").classList.remove("uk-label-warning");
 		document.getElementById("player").classList.add("uk-label-danger");
 		document.getElementById("section_player").style.display = "none";
+		
+		document.getElementById("button_stop").style.visibility = "hidden";
+		
+		
 	}
 	else if(jsonObj["player"] === "Stopped")
 	{
@@ -626,6 +635,7 @@ function updateStatus_Details(loopi, jsonObj)
 		document.getElementById("card_resource").style.visibility = "hidden";
 		document.getElementById("card_playout").style.visibility = "hidden";
 		
+		document.getElementById("button_stop").style.visibility = "hidden";
 	}
 	else if(jsonObj["player"] === "Running")
 	{
@@ -633,6 +643,8 @@ function updateStatus_Details(loopi, jsonObj)
 		document.getElementById("player").classList.add("uk-label-success");
 		document.getElementById("player").classList.remove("uk-label-warning");
 		document.getElementById("player").classList.remove("uk-label-danger");
+		
+		showStopButton(loopi);
 		
 		document.getElementById("section_player").style.display = "block";
 		document.getElementById("card_resource").style.visibility = "visible";
@@ -700,8 +712,75 @@ function updateStatus_Details(loopi, jsonObj)
 		document.getElementById("section_player").style.display = "none";
 		document.getElementById("card_resource").style.visibility = "hidden";
 		document.getElementById("card_playout").style.visibility = "hidden";
+		
+		showStopButton(loopi);
+	}
+}
+
+
+function showStopButton(loopi)
+{
+	if(g_loopi_array[loopi].status.locked == false)
+	{
+		document.getElementById("button_stop").style.visibility = "visible";
+	}
+	else
+	{
+		document.getElementById("button_stop").style.visibility = "hidden";
 	}
 }
 
 
 
+function lock()
+{
+	var lock = false;
+	var message = "Unlock loopi: Enter password";
+	if(document.getElementById('button_lock').innerHTML == "Lock")
+	{
+		lock = true;
+		message = "Lock loopi: Enter password";
+	}
+				
+	UIkit.modal.prompt(message, '').then(function (password) 
+	{
+		if(password !== null && password != "")
+		{
+			var play = { "command" : "lock", "lock" : lock, "password" : password};
+			ajaxPatch(0, "/x-epi/status", JSON.stringify(play), handleStatusPatch);
+		}
+	});
+}
+
+function stop()
+{	
+	var play = { "command" : "stop"};
+	ajaxPatch(0, "/x-epi/status", JSON.stringify(play), handleStatusPatch);
+}
+
+
+function ajaxPatch(loopi, endpoint, jsonData, callback)
+{
+	var ajax = new XMLHttpRequest();
+	ajax.onreadystatechange = function()
+	{
+		
+		if(this.readyState == 4)
+		{
+			var jsonObj = JSON.parse(this.responseText);
+			callback(this.status, jsonObj);
+		}
+	}
+	console.log(jsonData);
+	ajax.open("PATCH", "http://"+g_loopi_array[0].url+endpoint, true);
+	ajax.setRequestHeader("Content-type", "application/json");
+	ajax.send(jsonData);
+}
+
+function handleStatusPatch(status, jsonObj)
+{
+	if(status != 200)
+	{
+		alert(jsonObj["reason"]);
+	}		
+}
