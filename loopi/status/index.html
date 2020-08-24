@@ -33,7 +33,7 @@
             <span id="hostname"></span>
         </h1>
 	
-	<div class="uk-section uk-section-muted">
+	<div class="uk-section uk-section-xsmall uk-section-muted">
 		<div class="uk-container">
 			<div class="uk-card uk-card-default uk-card-small uk-card-body">
 				<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
@@ -50,7 +50,7 @@
 		</div>
 	</div>
 
-	<div class="uk-section uk-section-primary  uk-margin-medium" id="section_player">
+	<div class="uk-section uk-section-xsmall uk-section-primary  uk-margin-medium" id="section_player" style="display: none">
 		<div class="uk-container">
 			<div class="uk-grid-match uk-child-width-expand@m" uk-grid>
 				<div>
@@ -107,5 +107,34 @@
 			</div>
 		</div>
 	</div>  
+	
+	<div class="uk-section uk-section-xsmall uk-section-muted uk-margin-medium" id="section_resources" style="display: none">
+		<div class="uk-container">
+			<ul uk-tab class="uk-subnav uk-subnav-pill">
+			<li><a href="#">Files</a></li>
+			<li><a href="#">Playlists</a></li>
+			<li><a href="#">Schedules</a></li>
+			</ul>			
+			<ul class="uk-switcher uk-margin">
+				<li>
+					<div class="uk-card uk-card-default uk-card-small uk-card-body">
+						<ul uk-accordion="animation: false" id="resource_files" class="uk-list  uk-list-striped uk-list-collapse">
+						</ul>
+					</div>
+				</li>
+				<li>
+					<div class="uk-card uk-card-default uk-card-small uk-card-body">
+						<ul uk-accordion id="resource_playlists" class="uk-list  uk-list-striped uk-list-collapse">>
+						</ul>
+				</li>
+				<li>
+					<div class="uk-card uk-card-default uk-card-small uk-card-body">
+						<ul uk-accordion id="resource_schedules" class="uk-list  uk-list-striped uk-list-collapse">>
+						</ul>
+					</div>
+				</li>
+			</ul>
+		</div>
+	</div>
     </body>
 </html>
