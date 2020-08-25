@@ -52,7 +52,8 @@ const url Core::EP_OUTPUTS     = url(EP_EPI.Get()+"/"+OUTPUTS);
 Core::Core() : m_manager(m_launcher, m_iniConfig),
    m_nTimeSinceLastCall(0),
    m_nLogToConsole(0),
-   m_nLogToFile(0)
+   m_nLogToFile(0),
+   m_jsResources(Json::arrayValue)
 {
 
     GetInitialPlayerStatus();
@@ -475,20 +476,57 @@ void Core::PatchServerConfig(const Json::Value& jsData)
     }
 }
 
+void Core::ResourceModified(enumType eType, const std::string& sUid, enumModification eModification)
+{
+    Json::Value jsValue;
+    switch(eType)
+    {
+        case FILE:
+            jsValue["type"] = "file";
+            break;
+        case PLAYLIST:
+            jsValue["type"] = "playlist";
+            break;
+        case SCHEDULE:
+            jsValue["type"] = "schedule";
+            break;
+    }
+
+    jsValue["uid"] = sUid;
+
+    switch(eModification)
+    {
+        case MODIFIED:
+            jsValue["modification"] = "modified";
+            break;
+        case ADDED:
+            jsValue["modification"] = "added";
+            break;
+        case DELETED:
+            jsValue["modification"] = "deleted";
+            break;
+    }
+    m_jsResources.append(jsValue);
+}
+
 response Core::PatchFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
 {
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PatchFile" << std::endl;
 
     response theResponse(m_manager.IsLocked());
-    if(theResponse.nHttpCode == 423)
+    if(theResponse.nHttpCode != 423)
     {
-        return theResponse;
+
+        std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
+
+        theResponse = m_manager.ModifyFileMeta(vSplit.back(), ConvertToJson(theData.Get()));
+
+        if(theResponse.nHttpCode == 200)
+        {
+            ResourceModified(FILE, vSplit.back(), MODIFIED);
+        }
     }
-
-    std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
-
-    return m_manager.ModifyFileMeta(vSplit.back(), ConvertToJson(theData.Get()));
-
+    return theResponse;
 }
 
 response Core::PutFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
@@ -496,15 +534,19 @@ response Core::PutFile(mg_connection* pConnection, const query& theQuery, const 
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PatchFile" << std::endl;
 
     response theResponse(m_manager.IsLocked());
-    if(theResponse.nHttpCode == 423)
+    if(theResponse.nHttpCode != 423)
     {
-        return theResponse;
+
+        std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
+
+        theResponse = m_manager.ModifyFile(vSplit.back(), ConvertToJson(theData.Get()));
+
+        if(theResponse.nHttpCode == 200)
+        {
+            ResourceModified(FILE, vSplit.back(), MODIFIED);
+        }
     }
-
-    std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
-
-    return m_manager.ModifyFile(vSplit.back(), ConvertToJson(theData.Get()));
-
+    return theResponse;
 }
 
 response Core::PutPlaylist(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
@@ -512,14 +554,17 @@ response Core::PutPlaylist(mg_connection* pConnection, const query& theQuery, co
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutPlaylist" << std::endl;
 
     response theResponse(m_manager.IsLocked());
-    if(theResponse.nHttpCode == 423)
+    if(theResponse.nHttpCode != 423)
     {
-        return theResponse;
+        std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
+
+        theResponse = m_manager.ModifyPlaylist(vSplit.back(), ConvertToJson(theData.Get()));
+        if(theResponse.nHttpCode == 200)
+        {
+            ResourceModified(PLAYLIST, vSplit.back(), MODIFIED);
+        }
     }
-
-    std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
-
-    return m_manager.ModifyPlaylist(vSplit.back(), ConvertToJson(theData.Get()));
+    return theResponse;
 }
 
 response Core::PutSchedule(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
@@ -527,14 +572,17 @@ response Core::PutSchedule(mg_connection* pConnection, const query& theQuery, co
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutSchedule" << std::endl;
 
     response theResponse(m_manager.IsLocked());
-    if(theResponse.nHttpCode == 423)
+    if(theResponse.nHttpCode != 423)
     {
-        return theResponse;
+        std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
+
+        theResponse = m_manager.ModifySchedule(vSplit.back(), ConvertToJson(theData.Get()));
+        if(theResponse.nHttpCode == 200)
+        {
+            ResourceModified(PLAYLIST, vSplit.back(), MODIFIED);
+        }
     }
-
-    std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
-
-    return m_manager.ModifySchedule(vSplit.back(), ConvertToJson(theData.Get()));
+    return theResponse;
 }
 
 
@@ -543,21 +591,22 @@ response Core::DeleteFile(mg_connection* pConnection, const query& theQuery, con
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "DeleteFile" << std::endl;
 
     response theResponse(m_manager.IsLocked());
-    if(theResponse.nHttpCode == 423)
+    if(theResponse.nHttpCode != 423)
     {
-        return theResponse;
-    }
+        std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
 
-    std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
+        theResponse = m_manager.DeleteFile(vSplit.back());
+        if(theResponse.nHttpCode == 200)
+        {
+            url aUrl(url(EP_FILES.Get()+"/"+vSplit.back()));
 
-    theResponse = m_manager.DeleteFile(vSplit.back());
-    if(theResponse.nHttpCode == 200)
-    {
-        url aUrl(url(EP_FILES.Get()+"/"+vSplit.back()));
+            m_server.DeleteEndpoint(endpoint(MongooseServer::GET, aUrl));
+            m_server.DeleteEndpoint(endpoint(MongooseServer::PATCH, aUrl));
+            m_server.DeleteEndpoint(endpoint(MongooseServer::DELETE, aUrl));
 
-        m_server.DeleteEndpoint(endpoint(MongooseServer::GET, aUrl));
-        m_server.DeleteEndpoint(endpoint(MongooseServer::PATCH, aUrl));
-        m_server.DeleteEndpoint(endpoint(MongooseServer::DELETE, aUrl));
+            ResourceModified(FILE, vSplit.back(), DELETED);
+        }
+
     }
     return theResponse;
 }
@@ -566,23 +615,22 @@ response Core::DeletePlaylist(mg_connection* pConnection, const query& theQuery,
 {
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "DeletePlaylist" << std::endl;
     response theResponse(m_manager.IsLocked());
-    if(theResponse.nHttpCode == 423)
+    if(theResponse.nHttpCode != 423)
     {
-        return theResponse;
-    }
+        std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
 
+        theResponse = m_manager.DeletePlaylist(vSplit.back());
 
-    std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
+        if(theResponse.nHttpCode == 200)
+        {
+            url aUrl(url(EP_PLAYLISTS.Get()+"/"+vSplit.back()));
 
-    theResponse = m_manager.DeletePlaylist(vSplit.back());
+            m_server.DeleteEndpoint(endpoint(MongooseServer::GET, aUrl));
+            m_server.DeleteEndpoint(endpoint(MongooseServer::PATCH, aUrl));
+            m_server.DeleteEndpoint(endpoint(MongooseServer::DELETE, aUrl));
 
-    if(theResponse.nHttpCode == 200)
-    {
-        url aUrl(url(EP_PLAYLISTS.Get()+"/"+vSplit.back()));
-
-        m_server.DeleteEndpoint(endpoint(MongooseServer::GET, aUrl));
-        m_server.DeleteEndpoint(endpoint(MongooseServer::PATCH, aUrl));
-        m_server.DeleteEndpoint(endpoint(MongooseServer::DELETE, aUrl));
+            ResourceModified(PLAYLIST, vSplit.back(), DELETED);
+        }
     }
     return theResponse;
 }
@@ -593,20 +641,20 @@ response Core::DeleteSchedule(mg_connection* pConnection, const query& theQuery,
     std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
 
     response theResponse(m_manager.IsLocked());
-    if(theResponse.nHttpCode == 423)
+    if(theResponse.nHttpCode != 423)
     {
-        return theResponse;
-    }
+        theResponse = m_manager.DeleteSchedule(vSplit.back());
 
-    theResponse = m_manager.DeleteSchedule(vSplit.back());
+        if(theResponse.nHttpCode == 200)
+        {
+            url aUrl(url(EP_SCHEDULES.Get()+"/"+vSplit.back()));
 
-    if(theResponse.nHttpCode == 200)
-    {
-        url aUrl(url(EP_SCHEDULES.Get()+"/"+vSplit.back()));
+            m_server.DeleteEndpoint(endpoint(MongooseServer::GET, aUrl));
+            m_server.DeleteEndpoint(endpoint(MongooseServer::PATCH, aUrl));
+            m_server.DeleteEndpoint(endpoint(MongooseServer::DELETE, aUrl));
 
-        m_server.DeleteEndpoint(endpoint(MongooseServer::GET, aUrl));
-        m_server.DeleteEndpoint(endpoint(MongooseServer::PATCH, aUrl));
-        m_server.DeleteEndpoint(endpoint(MongooseServer::DELETE, aUrl));
+            ResourceModified(SCHEDULE, vSplit.back(), DELETED);
+        }
     }
     return theResponse;
 }
@@ -618,26 +666,24 @@ response Core::PostFile(mg_connection* pConnection, const query& theQuery, const
     Json::Value jsonData(ConvertToJson(theData.Get()));
 
     response theResponse(m_manager.IsLocked());
-    if(theResponse.nHttpCode == 423)
+    if(theResponse.nHttpCode != 423)
     {
-        return theResponse;
+        theResponse = m_manager.AddFiles(jsonData);
+        Log::Get() << theResponse.jsonData << std::endl;
+        Log::Get() << theResponse.nHttpCode << std::endl;
+
+        if(theResponse.nHttpCode == 201)
+        {
+            url aUrl(url(EP_FILES.Get()+"/"+theResponse.jsonData["uid"].asString()));
+
+            m_server.AddEndpoint(endpoint(MongooseServer::GET, aUrl), std::bind(&Core::GetFile, this, _1,_2,_3,_4));
+            m_server.AddEndpoint(endpoint(MongooseServer::PATCH, aUrl), std::bind(&Core::PatchFile, this, _1,_2,_3,_4));
+            m_server.AddEndpoint(endpoint(MongooseServer::PUT, aUrl), std::bind(&Core::PutFile, this, _1,_2,_3,_4));
+            m_server.AddEndpoint(endpoint(MongooseServer::DELETE, aUrl), std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
+
+            ResourceModified(FILE, theResponse.jsonData["uid"].asString(), ADDED);
+        }
     }
-
-    theResponse = m_manager.AddFiles(jsonData);
-    Log::Get() << theResponse.jsonData << std::endl;
-    Log::Get() << theResponse.nHttpCode << std::endl;
-
-
-    if(theResponse.nHttpCode == 201)
-    {
-        url aUrl(url(EP_FILES.Get()+"/"+theResponse.jsonData["uid"].asString()));
-
-        m_server.AddEndpoint(endpoint(MongooseServer::GET, aUrl), std::bind(&Core::GetFile, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::PATCH, aUrl), std::bind(&Core::PatchFile, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::PUT, aUrl), std::bind(&Core::PutFile, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::DELETE, aUrl), std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
-    }
-
     return theResponse;
 }
 
@@ -646,20 +692,20 @@ response Core::PostPlaylist(mg_connection* pConnection, const query& theQuery, c
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PostPlaylist" << std::endl;
 
     response theResponse(m_manager.IsLocked());
-    if(theResponse.nHttpCode == 423)
+    if(theResponse.nHttpCode != 423)
     {
-        return theResponse;
-    }
 
+        theResponse = m_manager.AddPlaylist(ConvertToJson(theData.Get()));
+        if(theResponse.nHttpCode == 201)
+        {
+            url aUrl(url(EP_PLAYLISTS.Get()+"/"+theResponse.jsonData["uid"].asString()));
 
-    theResponse = m_manager.AddPlaylist(ConvertToJson(theData.Get()));
-    if(theResponse.nHttpCode == 201)
-    {
-        url aUrl(url(EP_PLAYLISTS.Get()+"/"+theResponse.jsonData["uid"].asString()));
+            m_server.AddEndpoint(endpoint(MongooseServer::GET, aUrl), std::bind(&Core::GetPlaylist, this, _1,_2,_3,_4));
+            m_server.AddEndpoint(endpoint(MongooseServer::PATCH, aUrl), std::bind(&Core::PutPlaylist, this, _1,_2,_3,_4));
+            m_server.AddEndpoint(endpoint(MongooseServer::DELETE, aUrl), std::bind(&Core::DeletePlaylist, this, _1,_2,_3,_4));
 
-        m_server.AddEndpoint(endpoint(MongooseServer::GET, aUrl), std::bind(&Core::GetPlaylist, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::PATCH, aUrl), std::bind(&Core::PutPlaylist, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::DELETE, aUrl), std::bind(&Core::DeletePlaylist, this, _1,_2,_3,_4));
+            ResourceModified(PLAYLIST, theResponse.jsonData["uid"].asString(), ADDED);
+        }
     }
     return theResponse;
 }
@@ -668,19 +714,18 @@ response Core::PostSchedule(mg_connection* pConnection, const query& theQuery, c
 {
     Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PostSchedule" << std::endl;
     response theResponse(m_manager.IsLocked());
-    if(theResponse.nHttpCode == 423)
+    if(theResponse.nHttpCode != 423)
     {
-        return theResponse;
-    }
+        theResponse = m_manager.AddSchedule(ConvertToJson(theData.Get()));
+        if(theResponse.nHttpCode == 201)
+        {
+            url aUrl(url(EP_SCHEDULES.Get()+"/"+theResponse.jsonData["uid"].asString()));
+            m_server.AddEndpoint(endpoint(MongooseServer::GET, aUrl), std::bind(&Core::GetSchedule, this, _1,_2,_3,_4));
+            m_server.AddEndpoint(endpoint(MongooseServer::PUT, aUrl), std::bind(&Core::PutSchedule, this, _1,_2,_3,_4));
+            m_server.AddEndpoint(endpoint(MongooseServer::DELETE,aUrl), std::bind(&Core::DeleteSchedule, this, _1,_2,_3,_4));
 
-
-    theResponse = m_manager.AddSchedule(ConvertToJson(theData.Get()));
-    if(theResponse.nHttpCode == 201)
-    {
-        url aUrl(url(EP_SCHEDULES.Get()+"/"+theResponse.jsonData["uid"].asString()));
-        m_server.AddEndpoint(endpoint(MongooseServer::GET, aUrl), std::bind(&Core::GetSchedule, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::PUT, aUrl), std::bind(&Core::PutSchedule, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::DELETE,aUrl), std::bind(&Core::DeleteSchedule, this, _1,_2,_3,_4));
+            ResourceModified(SCHEDULE, theResponse.jsonData["uid"].asString(), ADDED);
+        }
     }
     return theResponse;
 }
@@ -705,6 +750,7 @@ void Core::StatusCallback(const std::string& sData)
 
     m_jsStatus["player"] ="Running";
     m_jsStatus["status"] = ConvertToJson(sData);
+    m_jsStatus["current_time"] = GetCurrentTimeAsIsoString();
     m_server.SendWebsocketMessage(m_jsStatus);
 }
 
@@ -750,11 +796,18 @@ void Core::LoopCallback(int nTook)
 {
     m_nTimeSinceLastCall += nTook;
 
+    if(m_jsResources.size() > 0)
+    {
+        m_server.SendWebsocketMessage(m_jsResources);
+        m_jsResources.clear();
+    }
+
     if(m_nTimeSinceLastCall > 2000)
     {
         m_server.SendWebsocketMessage(m_info.GetInfo());
         if(m_jsStatus["player"].asString() != "Playing")
         {
+            m_jsStatus["current_time"] = GetCurrentTimeAsIsoString();
             m_server.SendWebsocketMessage(m_jsStatus);
         }
         m_nTimeSinceLastCall = 0;

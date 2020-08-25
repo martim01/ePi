@@ -75,7 +75,13 @@ class Core
 
         void PatchServerConfig(const Json::Value& jsData);
 
+        enum enumType{FILE, PLAYLIST, SCHEDULE};
+        enum enumModification{MODIFIED, ADDED, DELETED};
+
+        void ResourceModified(enumType eType, const std::string& sUid, enumModification eModification);
+
         Json::Value m_jsStatus;
+        Json::Value m_jsResources;
 
          /**
         x-epi                               GET
