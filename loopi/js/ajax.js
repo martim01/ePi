@@ -1945,3 +1945,63 @@ function doUpdate()
 	ajax.send(fd);
 }
 
+
+
+var g_cron = {'s': {}, 'm': {}, 'h': {}, 'd': {}, 'M': {}, 'w': {}};
+
+function cron(event)
+{
+	var sp = event.target.id.split('_');
+	
+	if(event.target.classList.contains('uk-button-default'))
+	{
+		event.target.classList.remove('uk-button-default');
+		event.target.classList.add('uk-button-primary');
+	
+		g_cron[sp[0]][sp[1]] = true;
+	}
+	else
+	{
+		event.target.classList.add('uk-button-default');
+		event.target.classList.remove('uk-button-primary');
+		g_cron[sp[0]][sp[1]] = false;
+	}
+	
+	var all = true;
+	for(key in g_cron[sp[0]])
+	{
+		if(g_cron[sp[0]][key])
+		{
+			all = false;
+			break;
+		}
+	}
+	
+	if(all)
+	{
+		document.getElementById(sp[0]+'_all').classList.remove('uk-button-default');
+		document.getElementById(sp[0]+'_all').classList.add('uk-button-primary');
+	}
+	else
+	{
+		document.getElementById(sp[0]+'_all').classList.add('uk-button-default');
+		document.getElementById(sp[0]+'_all').classList.remove('uk-button-primary');
+	}
+}
+
+function cronAll(event)
+{
+	var sp = event.target.id.split('_');
+	for(key in g_cron[sp[0]])
+	{
+		if(g_cron[sp[0]][key] == true)
+		{
+			g_cron[sp[0]][key] = false;
+			document.getElementById(sp[0]+'_'+key).classList.add('uk-button-default');
+			document.getElementById(sp[0]+'_'+key).classList.remove('uk-button-primary');
+		}
+	}
+	
+	document.getElementById(sp[0]+'_all').classList.remove('uk-button-default');
+	document.getElementById(sp[0]+'_all').classList.add('uk-button-primary');
+}
