@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Title</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="../css/uikit.min.css" />
+        <script src="../js/uikit.min.js"></script>
+        <script src="../js/uikit-icons.min.js"></script>
+        <script src="../js/ajax.js"></script>
+        <script type="text/javascript">        
+
+		var url = new URL(window.location.href);
+		var endpoint = url.searchParams.get("loopi");
+		g_loopi_array.push(new loopi(0, endpoint));
+
+		
+		function status()
+		{
+			setLinks(endpoint);
+			document.getElementById('loopi_0').innerHTML = endpoint;
+			getLoopiConfig_System();
+		}
+	</script>
+	<style>
+		.loopi_label { padding-left: 5px; padding-top: 2px; padding-bottom: 2px; padding-right: 5px; color: #ffffff; background-color: #000000}
+		.loopi_label_muted { background-color: #c8c8c8}
+		.loopi_label_running { background-color: #32d296}
+		.loopi_label_warning { background-color: #ffa800}
+		.loopi_button_warning { background-color: #ffa800; color: #ffffff}
+		.loopi_button_update { background-color: #336faa; color: #ffffff}
+		.loopi_subheading {text-decoration: underline};
+	</style>
+    </head>
+    <body onload="status()">
+	<nav class="uk-navbar-container" uk-navbar style="background: #ffffff; border-bottom: 1px solid #a8a8d8">
+		<div class="uk-navbar-left">
+			<ul class="uk-navbar-nav">
+				<li class="uk-parent"><a href="../" class="uk-logo"><img src="../images/loopi.png" title="dashboard"></a></a></li>
+				<li class="uk-active"><a href="" id="a_status"><span class="uk-h1" id="loopi_0" style = "padding: 8px"></span></a></li>
+			</ul>
+		</div>
+		<div class="uk-navbar-center">
+			<ul class="uk-navbar-nav">
+				<li><span class="uk-h3" id="current_time"></span></li>
+			</ul>
+		</div>
+		<div class="uk-navbar-right">
+			<ul class="uk-navbar-nav">
+				<li class="uk-parent"><a href="../">Dashboard</a></a></li>
+				<li><a href="" id="a_control">Control</a></li>
+				<li><a href="" id="a_files">Files</a></li>
+				<li><a href="" id="a_playlists">Playlists</a></li>
+				<li><a href="" id="a_schedules">Schedules</a></li>
+				<li class="uk-active"><a href="" id="a_system">System</a></li>
+			</ul>
+		</div>
+	</nav>
+
+	<div class="uk-section uk-section-xsmall uk-section-muted">
+		<div class="uk-container" >
+			<div class="uk-card uk-card-default uk-card-small uk-card-body">
+				<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
+					<div class='uk-width-1-4'><div><span class='uk-text-bold'>System:</span></div></div>
+					<div><span class='uk-label' id='lock_0'>Unknown</span></div>
+					<div><button id="button_lock" class="uk-button uk-button-default uk-button-small" onclick="lock()">Lock</button></div>
+				</div>
+				<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
+					<div class='uk-width-1-4'><div><span class='uk-text-bold'>Player:</span></div></div>
+					<div><span  class='uk-label' id='player'>Unknown</span></div>
+					<div id="button_stop" style="visibility: hidden"><button class="uk-button uk-button-danger uk-button-small" onclick="stop()">Stop</button></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="uk-section uk-section-xsmall uk-section-muted">
+		<div class="uk-container uk-container-expand" >
+			<div class="uk-grid-small uk-child-width-1-3 uk-text-center uk-grid-match" uk-grid>
+				<div>
+					<div class="uk-card uk-card-default">
+						<div class="uk-card-header"> <h3 class="uk-card-title">episerver</h3></div>
+						<div class="uk-card-body">
+							<div class="uk-grid-small uk-text-left" uk-grid>
+								<div><span class='uk-text-bold'>Start Time:</span></div>
+								<div><span id="application-start_time"></span></div>
+								<div><span class='uk-text-bold'>Up Time:</span></div>
+								<div><span id="application-up_time"></span></div>
+							</div>
+						</div>
+						<div class="uk-card-footer">
+							<button class="uk-button loopi_button_warning" onclick="restart('restart server')">Restart Server</button>
+						</div>
+					</div>
+				</div>
+				<div>
+					<div class="uk-card uk-card-default">
+						<div class="uk-card-header"> <h3 class="uk-card-title">System</h3></div>
+						<div class="uk-card-body">
+							<div class="uk-grid-small uk-text-left" uk-grid>
+								<div><span class='uk-text-bold'>Up Time:</span></div>
+								<div><span id="system-uptime"></span></div>
+								<div><span class='uk-text-bold'>Procs:</span></div>
+								<div><span id="system-procs"></span></div>
+								<div><span class='uk-text-bold'>Temperature:</span></div>
+								<div><span id="temperature-cpu"></span>&#176;C</div>
+							</div>
+						</div>
+						<div class="uk-card-footer">
+							<button class="uk-button loopi_button_warning" onclick="restart('restart os')">Restart OS</button>
+							<button class="uk-button uk-button-danger"onclick="restart('shutdown')">Shutdown OS</button>
+						</div>
+					</div>
+				</div>
+				<div>
+					<div class="uk-card uk-card-default">
+						<div class="uk-card-header"> <h3 class="uk-card-title">CPU <span id="cpu-cpu"></span>%</h3>
+						</div>
+						<div class="uk-card-body">
+							<div class="uk-grid-small uk-text-left" uk-grid>
+								<div class="uk-width-1-4"><span class='uk-text-bold'>CPU1:</span></div>
+								<div class="uk-width-1-4"> <span id="cpu-cpu0"></span>%</div>
+								<div class="uk-width-1-4"><span class='uk-text-bold'>CPU2:</span></div>
+								<div class="uk-width-1-4"> <span id="cpu-cpu1"></span>%</div>
+							</div>
+							<div class="uk-grid-small uk-text-left" uk-grid>
+								<div class="uk-width-1-4"><span class='uk-text-bold'>CPU3:</span></div>
+								<div class="uk-width-1-4"> <span id="cpu-cpu2"></span>%</div>
+								<div class="uk-width-1-4"><span class='uk-text-bold'>CPU4:</span></div>
+								<div class="uk-width-1-4"> <span id="cpu-cpu3"></span>%</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div>
+					<div class="uk-card uk-card-default">
+						<div class="uk-card-header"> <h3 class="uk-card-title">Disk</h3></div>
+						<div class="uk-card-body  uk-text-left">
+							<span class="uk-text-muted loopi_subheading">BYTES</span>
+							<div class="uk-grid-small uk-text-left uk-child-width-1-4" uk-grid>
+								<div><span class='uk-text-bold'>Total:</span></div>
+								<div><span id="disk-bytes-total"></span>GB</div>
+								<div><span class='uk-text-bold'>Free:</span></div>
+								<div><span id="disk-bytes-free"></span>GB</div>
+								<div><span class='uk-text-bold'>Available:</span></div>
+								<div><span id="disk-bytes-available"></span>GB</div>
+							</div>
+							<hr>
+							<span class="loopi_subheading uk-text-muted">INODES</span>
+							<div class="uk-grid-small uk-text-left uk-child-width-1-4" uk-grid>
+								<div><span class='uk-text-bold'>Total:</span></div>
+								<div><span id="disk-inodes-total"></span></div>
+								<div><span class='uk-text-bold'>Free:</span></div>
+								<div><span id="disk-inodes-free"></span></div>
+								<div><span class='uk-text-bold'>Available:</span></div>
+								<div><span id="disk-inodes-available"></span></div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div>
+					<div class="uk-card uk-card-default">
+						<div class="uk-card-header"> <h3 class="uk-card-title">Loads</h3></div>
+						<div class="uk-card-body">
+							<div class="uk-grid-small uk-text-left uk-child-width-1-4" uk-grid>
+								<div><span class='uk-text-bold'>1 Minute:</span></div>
+								<div><span id="system-loads-1"></span>%</div>
+								<div><span class='uk-text-bold'>5 Minute:</span></div>
+								<div><span id="system-loads-5"></span>%</div>
+								<div><span class='uk-text-bold'>15 Minute:</span></div>
+								<div><span id="system-loads-15"></span>%</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div>
+					<div class="uk-card uk-card-default">
+						<div class="uk-card-header"> <h3 class="uk-card-title">Memory</h3></div>
+						<div class="uk-card-body">
+							<div class="uk-grid-small uk-text-left uk-child-width-1-6" uk-grid>
+								<div><span class='uk-text-bold'>Total:</span></div>
+								<div><span id="system-ram-total"></span>MB</div>
+								<div><span class='uk-text-bold'>Buffered:</span></div>
+								<div><span id="system-ram-buffered"></span>MB</div>
+								<div><span class='uk-text-bold'>Shared:</span></div>
+								<div><span id="system-ram-shared"></span>MB</div>
+								<div><span class='uk-text-bold'>Free:</span></div>
+								<div><span id="system-ram-free"></span>MB</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div>
+					<div class="uk-card uk-card-default">
+						<div class="uk-card-header"> <h3 class="uk-card-title">Versions</h3></div>
+						<div class="uk-card-body uk-text-left">
+							<span class="loopi_subheading uk-text-muted">EPISERVER</span>
+							<div class="uk-grid-small uk-text-left" uk-grid>
+								<div class="uk-width-1-6"><span class='uk-text-bold'>Version:</span></div>
+								<div class="uk-width-1-6"><span id="server-version"></span></div>
+								<div class="uk-width-1-6"><span class='uk-text-bold'>Created:</span></div>
+								<div class="uk-width-expand"><span id="server-date"></span></div>
+							</div>
+							<span class="loopi_subheading uk-text-muted">PLAYER3</span>
+							<div class="uk-grid-small uk-text-left" uk-grid>
+								<div class="uk-width-1-6"><span class='uk-text-bold'>Version:</span></div>
+								<div class="uk-width-1-6"><span id="player3-version"></span></div>
+								<div class="uk-width-1-6"><span class='uk-text-bold'>Created:</span></div>
+								<div class="uk-width-expand"><span id="player3-date"></span></div>
+							</div>
+							<span class="loopi_subheading uk-text-muted">PLAYER67</span>
+							<div class="uk-grid-small uk-text-left" uk-grid>
+								<div class="uk-width-1-6"><span class='uk-text-bold'>Version:</span></div>
+								<div class="uk-width-1-6"><span id="player67-version"></span></div>
+								<div class="uk-width-1-6"><span class='uk-text-bold'>Created:</span></div>
+								<div class="uk-width-expand"><span id="player67-date"></span></div>
+							</div>
+						</div>
+						<div class="uk-card-footer">
+							<button class="uk-button uk-button-small loopi_button_update" onclick="showUpdate('episerver')">Update episerver</button>
+							<button class="uk-button uk-button-small loopi_button_update" onclick="showUpdate('player3')">Update player3</button>
+							<button class="uk-button uk-button-small loopi_button_update" onclick="showUpdate('player67')">Update player67</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="update_modal" uk-modal>
+		<div class="uk-modal-dialog">
+			<button class="uk-modal-close-default" type="button" uk-close></button>
+			<div class="uk-modal-header">
+				<h3 class="uk-modal-title">Update <span id="update_application_title"></span></h3>
+			</div>
+			<div class="uk-modal-body">
+				<form class="uk-form-horizontal uk-margin-small" id="update_form" enctype="multipart/form-data" onsubmit="return false;">
+					<div class="uk-form-controls">
+						<div uk-form-custom="target: true">
+							<input type="file" id="upload_file" name="file">
+							<input class="uk-input uk-form-width-medium" type="text" id="filename" placeholder="Select file" disabled>
+							<input type="hidden" id="update_application" name="application">
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="uk-modal-footer uk-text-right">
+				<button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
+			<button class="uk-button uk-button-primary" type="button" onclick="updateApp()">Update</button>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

@@ -11,7 +11,6 @@ class loopi
 		this.schedules = [];
 		this.connected = false;
 		
-		this.expanded = false;
 	}
 	
 	setWebsocket(ws)
@@ -89,6 +88,31 @@ class loopi
 		}
 		return -1;
 	}
+	
+	removeFile(uid)
+	{
+		var i = this.findFile(uid);
+		if(i > -1)
+		{
+			this.files.splice(i,1);
+		}		
+	}
+	removePlaylist(uid)
+	{
+		var i = this.findPlaylist(uid);
+		if(i > -1)
+		{
+			this.playlists.splice(i,1);
+		}		
+	}
+	removeSchedue(uid)
+	{
+		var i = this.findSchedule(uid);
+		if(i > -1)
+		{
+			this.schedules.splice(i,1);
+		}		
+	}
 }
 
 
@@ -96,7 +120,7 @@ var g_loopi_array = new Array();
 
 const CLR_PLAYING = "#92d14f";
 const CLR_IDLE = "#8db4e2";
-const CLR_ERROR =  "#c3c3c3";
+const CLR_ERROR =  "#ff7777";
 const CLR_NO_FILE = "#a0a0a0"
 const CLR_CONNECTING = "#ffff00";
 
@@ -145,25 +169,16 @@ function handleStatus_Dashboard(loopi, jsonObj)
 
 }
 
-function doNextLoopi(loopi)
-{
-	loopi++;
-	if(loopi < g_loopi_array.length)
-	{
-	}
-}
-
-
 
 function storeFiles_Dashboard(loopi, jsonObj)
 {
 	g_loopi_array[loopi].setFiles(jsonObj);
-	ws_connect(loopi, updateStatus_Dashboard);
+	ws_connect(loopi, updateStatus_Dashboard, null,null);
 	doNextLoopi_Dashboard(loopi);
 }
 
 
-function ws_connect(loopi, statusCallback)
+function ws_connect(loopi, statusCallback, systemCallback, resourceCallback)
 {
 	g_loopi_array[loopi].setWebsocket(new WebSocket('ws://' + g_loopi_array[loopi].url));
 	g_loopi_array[loopi].ws.index = loopi;			
@@ -179,10 +194,29 @@ function ws_connect(loopi, statusCallback)
 		this.tm = setTimeout(loopiOffline, 4000, this.index);
 		
 		var jsonObj = JSON.parse(ev.data);
+		
 		if(jsonObj["player"] !== undefined)
 		{
-			statusCallback(this.index, jsonObj);
-		}							
+			if(statusCallback !== null)
+			{
+				statusCallback(this.index, jsonObj);
+			}
+		}
+		else if(jsonObj["application"] !== undefined)
+		{
+			if(systemCallback !== null)
+			{
+				systemCallback(this.index, jsonObj);
+			}
+		}
+		else
+		{
+			console.log(jsonObj);
+			if(Array.isArray(jsonObj) && resourceCallback !== null)
+			{
+				resourceCallback(this.index, jsonObj);
+			}
+		}
 	}	
 }
 
@@ -197,7 +231,7 @@ function doNextLoopi_Dashboard(loopi)
 	}
 	else
 	{
-		setTimeout(dashboard, 5000);
+		setTimeout(dashboard, 2000);
 	}
 }
 
@@ -567,17 +601,19 @@ function createBodyGrid(name, id)
 	
 function getLoopiConfig_Details()
 {
-	
 	if(g_loopi_array[0].connected == false)
 	{
 		getConfig(0, handleConfig_Details)
 	}
+	setTimeout(getLoopiConfig_Details, 2000);
 }
 
 function handleConfig_Details(loopi, jsonObj)
 {
 	if(jsonObj !== null)
 	{
+		document.getElementById('loopi_'+loopi).style.backgroundColor = "#ffffff";
+		
 		updateConfig_Details(loopi, jsonObj);
 		getStatus(loopi, handleStatus_Details);
 	}
@@ -617,7 +653,7 @@ function storeSchedules_Details(loopi, jsonObj)
 	
 	listResource_Details(jsonObj, "schedules", getScheduleDetails);
 	
-	ws_connect(loopi, updateStatus_Details);
+	ws_connect(loopi, updateStatus_Details, null, updateResources_Details);
 	
 }
 
@@ -637,85 +673,120 @@ function listResource_Details(jsonObj, type, clickFunction)
 								return 0;
 							});
 	
-		
+	var select =  null;
+	if(type == "files")
+	{
+		select = document.getElementById('select_files');
+		clearElement(select);
+	}
+	
 	for(var i = 0; i < resObj.length; i++)
 	{
-		var li = document.createElement('li');
-		li.classList.add('uk-margin-small-top');
-		li.style.padding = '4px 6px';
+		createResourceLi(ul, resObj[i], type, clickFunction);
+			
+		if(select !== null)
+		{
+			var opt = document.createElement('option');
+			opt.value = resObj[i]["uid"];
+			opt.innerHTML = resObj[i]["label"];
+			select.appendChild(opt);
+		}
+			
+	}
+}
+
+function createResourceLi(ul, resObj, type, clickFunction)
+{
+	var li = document.createElement('li');
+	li.classList.add('uk-margin-small-top');
+	li.style.padding = '4px 6px';
+	li.id = "li_"+resObj['uid'];
 		
-		var a = document.createElement('a');
-		a.className = 'uk-accordion-title';
-		a.id = resObj[i]['uid'];
-		a.addEventListener('click', clickFunction, false);
-		a.href='#';
+	var a = document.createElement('a');
+	a.className = 'uk-accordion-title';
+	a.id = resObj['uid'];
+	a.addEventListener('click', clickFunction, false);
+	a.href='#';
 		
-		var div_label = document.createElement('div');
-		div_label.style.float = 'left';
-		div_label.style.width = '60%';
+	var div_label = document.createElement('div');
+	div_label.style.float = 'left';
+	div_label.style.width = '60%';
 		
-		var span = document.createElement('span');
-		span.innerHTML = resObj[i]['label'];
-		div_label.appendChild(span);
+	var span = document.createElement('span');
+	span.innerHTML = resObj['label'];
+	span.id="span_"+resObj['uid'];
+	div_label.appendChild(span);
 		
-		var div_action = document.createElement('div');
-		div_action.style.float = 'left';
-		div_action.style.width = '20%';
+	var div_action = document.createElement('div');
+	div_action.style.float = 'left';
+	div_action.style.width = '20%';
 		
-		var button = document.createElement('button');
-		button.className = "uk-button";
-		button.classList.add("uk-button-primary");
-		button.classList.add("uk-button-small");
-		button.id = "play_"+type+"_"+resObj[i]["uid"];
-		button.innerHTML = 'Play';
-		button.addEventListener('click',play, false);
-		div_action.appendChild(button);
+	var buttonOnce = document.createElement('button');
+	buttonOnce.className = "uk-button";
+	buttonOnce.classList.add("uk-button-primary");
+	buttonOnce.classList.add("uk-button-small");
+	buttonOnce.id = "play_"+type+"_"+resObj["uid"];
+	buttonOnce.innerHTML = 'Play';
+	buttonOnce.addEventListener('click',play, false);
+	div_action.appendChild(buttonOnce);
+		
+	if(type != 'schedules')
+	{
+		var buttonMulti = document.createElement('button');
+		buttonMulti.className = "uk-button";
+		buttonMulti.classList.add("uk-button-primary");
+		buttonMulti.classList.add("uk-button-small");
+		buttonMulti.style.marginLeft = '5px';
+		buttonMulti.id = "play_"+type+"_"+resObj["uid"];
+		buttonMulti.innerHTML = 'Play Loop';
+		buttonMulti.addEventListener('click',playLoop, false);
+		div_action.appendChild(buttonMulti);
+	}
 		
 		
-		a.appendChild(div_label);
-		a.appendChild(div_action);
+	a.appendChild(div_label);
+	a.appendChild(div_action);
 		
-		li.appendChild(a);
+	li.appendChild(a);
 		
 			
-		var div_content = document.createElement('div');
-		div_content.className = "uk-accordion-content";
+	var div_content = document.createElement('div');
+	div_content.className = "uk-accordion-content";
+	
 		
+	var tableResource = document.createElement('table');
+	tableResource.className = 'uk-table';
+	tableResource.classList.add('uk-table-small');
 		
-		var tableResource = document.createElement('table');
-		tableResource.className = 'uk-table';
-		tableResource.classList.add('uk-table-small');
-		//tableResource.style.border = 'solid 2px #c8c8f8';
+	var tbodyResourceDetails = document.createElement('tbody');
+	tbodyResourceDetails.id = 'details_'+resObj["uid"];
 		
-		var tbodyResourceDetails = document.createElement('tbody');
-		tbodyResourceDetails.id = 'details_'+resObj[i]["uid"];
+	tableResource.appendChild(tbodyResourceDetails);
+	div_content.appendChild(tableResource);
 		
-		tableResource.appendChild(tbodyResourceDetails);
-		div_content.appendChild(tableResource);
-		
-		var tableSpecific = document.createElement('table');
-		tableSpecific.className = 'uk-table';
-		tableSpecific.classList.add('uk-table-small');
-		if(type != 'files')
-		{
-			tableSpecific.classList.add('uk-table-divider');
-		}
-		
-		var theadspecific = document.createElement('thead');
-		theadspecific.id = 'specifichead_'+resObj[i]["uid"];
-		
-		var tbodySpecificDetails = document.createElement('tbody');
-		tbodySpecificDetails.id = 'specific_'+resObj[i]["uid"];
-		
-		tableSpecific.appendChild(theadspecific);
-		tableSpecific.appendChild(tbodySpecificDetails);
-		div_content.appendChild(tableSpecific);
-		
-		
-		li.appendChild(div_content);
-		
-		ul.appendChild(li);
+	var tableSpecific = document.createElement('table');
+	tableSpecific.className = 'uk-table';
+	tableSpecific.classList.add('uk-table-small');
+	if(type != 'files')
+	{
+		tableSpecific.classList.add('uk-table-divider');
 	}
+		
+	var theadspecific = document.createElement('thead');
+	theadspecific.id = 'specifichead_'+resObj["uid"];
+		
+	var tbodySpecificDetails = document.createElement('tbody');
+	tbodySpecificDetails.id = 'specific_'+resObj["uid"];
+		
+	tableSpecific.appendChild(theadspecific);
+	tableSpecific.appendChild(tbodySpecificDetails);
+	div_content.appendChild(tableSpecific);
+		
+		
+	li.appendChild(div_content);
+		
+	ul.appendChild(li);
+
 }
 
 
@@ -725,10 +796,13 @@ function getFileDetails(e)
 	while(target.tagName != 'A' && target.tagName != 'a')
 	{
 		target = target.parentElement;
-		console.log(target.tagName);
 	}
 	
-	getFile(0, target.id, createFileDetails);
+	var tbody = document.getElementById('details_'+target.id);
+	if(!tbody.firstChild)
+	{
+		getFile(0, target.id, createFileDetails);
+	}
 }
 
 function getPlaylistDetails(e)
@@ -737,9 +811,12 @@ function getPlaylistDetails(e)
 	while(target.tagName != 'A' && target.tagName != 'a')
 	{
 		target = target.parentElement;
-		console.log(target.tagName);
 	}
-	getPlaylist(0, target.id, createPlaylistDetails);
+	var tbody = document.getElementById('details_'+target.id);
+	if(!tbody.firstChild)
+	{
+		getPlaylist(0, target.id, createPlaylistDetails);
+	}
 }
 
 function getScheduleDetails(e)
@@ -748,9 +825,12 @@ function getScheduleDetails(e)
 	while(target.tagName != 'A' && target.tagName != 'a')
 	{
 		target = target.parentElement;
-		console.log(target.tagName);
 	}
-	getSchedule(0, target.id, createScheduleDetails);
+	var tbody = document.getElementById('details_'+target.id);
+	if(!tbody.firstChild)
+	{
+		getSchedule(0, target.id, createScheduleDetails);
+	}
 }
 
 
@@ -1014,7 +1094,7 @@ function createScheduleDetailsRow(type, label, loop, cron)
 
 function updateConfig_Details(loopi, jsonObj)
 {
-	var title = document.getElementById('hostname');
+	var title = document.getElementById('loopi_0');
 	
 	if(jsonObj != null)
 	{
@@ -1029,36 +1109,40 @@ function updateConfig_Details(loopi, jsonObj)
 	
 }
 
-function updateStatus_Details(loopi, jsonObj)
+
+function updateOverallStatus(loopi, jsonObj)
 {
-	if(jsonObj != null)
+	if(jsonObj["locked"] !== undefined)
 	{
-		g_loopi_array[loopi].setStatus(jsonObj);
-		
-		if(jsonObj["locked"] !== undefined)
+		if(jsonObj["locked"] == false)
 		{
-			if(jsonObj["locked"] == false)
-			{
-				document.getElementById("lock").innerHTML = "Unlocked";
-				document.getElementById("lock").classList.remove("uk-label-danger");
-				document.getElementById("lock").classList.remove("uk-label-warning");
-				document.getElementById("lock").classList.add("uk-label-success");
-				document.getElementById("button_lock").innerHTML = "Lock";
-				
-			}
-			else if(jsonObj["locked"] == true)
-			{
-				document.getElementById("lock").innerHTML = "Locked";
-				document.getElementById("lock").classList.remove("uk-label-success");
-				document.getElementById("lock").classList.remove("uk-label-danger");
-				document.getElementById("lock").classList.add("uk-label-warning");
-				document.getElementById("button_lock").innerHTML = "Unlock";
-				
-				document.getElementById("button_stop").style.visibility = "hidden";
-			}
+			document.getElementById("lock_0").innerHTML = "Unlocked";
+			document.getElementById("lock_0").classList.remove("uk-label-danger");
+			document.getElementById("lock_0").classList.remove("uk-label-warning");
+			document.getElementById("lock_0").classList.add("uk-label-success");
+			document.getElementById("button_lock").innerHTML = "Lock";
+			
+		}
+		else if(jsonObj["locked"] == true)
+		{
+			document.getElementById("lock_0").innerHTML = "Locked";
+			document.getElementById("lock_0").classList.remove("uk-label-success");
+			document.getElementById("lock_0").classList.remove("uk-label-danger");
+			document.getElementById("lock_0").classList.add("uk-label-warning");
+			document.getElementById("button_lock").innerHTML = "Unlock";
+			
+			document.getElementById("button_stop").style.visibility = "hidden";
 		}
 	}
-	
+
+	if(jsonObj["current_time"] !== undefined)
+	{
+		document.getElementById('current_time').innerHTML = jsonObj["current_time"];
+	}
+}
+
+function updatePlayerStatus(loopi, jsonObj)
+{
 	if(jsonObj["player"] === undefined)
 	{
 		document.getElementById("player").innerHTML = "Unknown";
@@ -1169,6 +1253,196 @@ function updateStatus_Details(loopi, jsonObj)
 	}
 }
 
+function updateStatus_Details(loopi, jsonObj)
+{
+	if(jsonObj != null)
+	{
+		g_loopi_array[loopi].setStatus(jsonObj);
+		
+		updateOverallStatus(loopi, jsonObj);
+		updatePlayerStatus(loopi, jsonObj);
+	}
+	
+}
+
+
+function updateResources_Details(loopi, jsonObj)
+{
+	console.log("updateResources_Details");
+	for(var i = 0; i < jsonObj.length; i++)
+	{
+		updateResource_Details(loopi, jsonObj[i]);
+	}
+}
+
+
+function updateResource_Details(loopi, jsonObj)
+{
+	if(jsonObj["modification"] == "modified")
+	{
+		if(jsonObj["type"] == "file")
+		{
+			getFile(loopi, jsonObj['uid'], updateFile_Details);
+		}
+		else if(jsonObj["type"] == "playlist")
+		{
+			getPlaylist(loopi, jsonObj['uid'], updatePlaylist_Details);
+		}
+		else if(jsonObj["type"] == "schedule")
+		{
+			getSchedule(loopi, jsonObj['uid'], updateSchedule_Details);
+		}
+	}
+	else if(jsonObj["modification"] == "deleted")
+	{
+		//delete the specific elements
+		var li = document.getElementById('li_'+jsonObj['uid']);
+		li.parentNode.removeChild(li);
+		
+		if(jsonObj["type"] == "file")
+		{
+			g_loopi_array[loopi].removeFile(jsonObj['uid']);
+		}
+		else if(jsonObj["type"] == "playlist")
+		{
+			g_loopi_array[loopi].removePlaylist(jsonObj['uid']);
+		}
+		else if(jsonObj["type"] == "schedule")
+		{
+			g_loopi_array[loopi].removeSchedule(jsonObj['uid']);
+		}
+	}
+	else if(jsonObj["modification"] == "added")
+	{
+		if(jsonObj["type"] == "file")
+		{
+			getFile(loopi, jsonObj['uid'], addFile_Details);
+		}
+		else if(jsonObj["type"] == "playlist")
+		{
+			getPlaylist(loopi, jsonObj['uid'], addPlaylist_Details);
+		}
+		else if(jsonObj["type"] == "schedule")
+		{
+			getSchedule(loopi, jsonObj['uid'], addSchedule_Details);
+		}
+	}
+}
+
+
+function updateFile_Details(loopi, jsonObj)
+{
+	var i = g_loopi_array[loopi].findFile(jsonObj["uid"]);
+	if(i > -1)
+	{
+		g_loopi_array[loopi].files[i]["label"] = jsonObj["label"];
+	}
+	
+	var span = document.getElementById('span_'+jsonObj["uid"]);
+	if(span)
+	{
+		span.innerHTML = jsonObj["label"];
+	}
+	createFileDetails(loop, jsonObj);
+}
+
+function updatePlaylist_Details(loopi, jsonObj)
+{
+	var i = g_loopi_array[loopi].findPlaylist(jsonObj["uid"]);
+	if(i > -1)
+	{
+		g_loopi_array[loopi].playlists[i]["label"] = jsonObj["label"];
+	}
+	
+	var span = document.getElementById('span_'+jsonObj["uid"]);
+	if(span)
+	{
+		span.innerHTML = jsonObj["label"];
+	}
+	createPlaylistDetails(loop, jsonObj);
+}
+
+function updateSchedule_Details(loopi, jsonObj)
+{
+	var i = g_loopi_array[loopi].findSchedule(jsonObj["uid"]);
+	if(i > -1)
+	{
+		g_loopi_array[loopi].schedules[i]["label"] = jsonObj["label"];
+	}
+	
+	var span = document.getElementById('span_'+jsonObj["uid"]);
+	if(span)
+	{
+		span.innerHTML = jsonObj["label"];
+	}
+	createScheduleDetails(loopi, jsonObj);
+}
+
+
+function addFile_Details(loopi, jsonObj)
+{
+	var obj = { "label": jsonObj["label"], "uid" : jsonObj["uid"]};
+	g_loopi_array[loopi].files.push(obj);
+		
+	createResourceLi(document.getElementById("resource_files"), obj, "files", getFileDetails);
+	
+	createFileDetails(loopi, jsonObj);
+}
+
+function addPlaylist_Details(loopi, jsonObj)
+{
+	var obj = { "label": jsonObj["label"], "uid" : jsonObj["uid"]};
+	g_loopi_array[loopi].playlists.push(obj);
+		
+	createResourceLi(document.getElementById("resource_playlists"), obj, "playlists", getPlaylistDetails);
+	
+	createPlaylistDetails(loopi, jsonObj);
+}
+
+function addSchedule_Details(loopi, jsonObj)
+{
+	var obj = { "label": jsonObj["label"], "uid" : jsonObj["uid"]};
+	g_loopi_array[loopi].schedules.push(obj);
+		
+	createResourceLi(document.getElementById("resource_schedules"), obj, "schedules", getScheduleDetails);
+	
+	createScheduleDetails(loopi, jsonObj);
+}
+
+
+
+function updatePlaylist_Details(loopi, jsonObj)
+{
+	var i = g_loopi_array[loopi].findPlaylist(jsonObj["uid"]);
+	if(i > -1)
+	{
+		g_loopi_array[loopi].playlists[i]["label"] = jsonObj["label"];
+	}
+	
+	var span = document.getElementById('span_'+jsonObj["uid"]);
+	if(span)
+	{
+		span.innerHTML = jsonObj["label"];
+	}
+	createPlaylistDetails(loopi, jsonObj);
+}
+
+function updateSchedule_Details(loopi, jsonObj)
+{
+	var i = g_loopi_array[loopi].findSchedule(jsonObj["uid"]);
+	if(i > -1)
+	{
+		g_loopi_array[loopi].schedules[i]["label"] = jsonObj["label"];
+	}
+	
+	var span = document.getElementById('span_'+jsonObj["uid"]);
+	if(span)
+	{
+		span.innerHTML = jsonObj["label"];
+	}
+	createScheduleDetails(loopi, jsonObj);
+}
+
 
 function showStopButton(loopi)
 {
@@ -1182,6 +1456,56 @@ function showStopButton(loopi)
 	}
 }
 
+
+function createPlaylistEntry()
+{
+	var row = document.getElementById('playlist_entry');
+	
+	var tr  = document.createElement('tr');
+	var td_file =  document.createElement('td');
+	var td_loop =  document.createElement('td');
+	var td_action =  document.createElement('td');
+	
+	td_file.style.padding = '3px 6px';
+	td_loop.style.padding = '3px 6px';
+	td_action.style.padding = '3px 6px';
+	
+	td_file.className = "uk-background-muted";
+	td_loop.className = "uk-background-muted";
+	td_action.className = "uk-background-muted";
+	
+	
+	var sel =  document.getElementById('select_files');
+	
+	tr.id = "playlistEntry_"+sel.options[sel.selectedIndex].value;
+	td_loop.id = "playlistEntryLoop_"+sel.options[sel.selectedIndex].value;
+				
+	td_file.innerHTML = sel.options[sel.selectedIndex].text;
+	td_loop.innerHTML = document.getElementById('playlist_file_loop').value;
+	
+	var button = document.createElement('button');
+	button.className = "uk-button";
+	button.classList.add("uk-button-small");
+	button.style.background = '#ffffff';
+	button.id = "playlistRemove_"+sel.options[sel.selectedIndex].value;
+	button.innerHTML = 'Remove';
+	button.addEventListener('click',removePlaylistEntry, false);
+	td_action.appendChild(button);
+	
+	tr.appendChild(td_file);
+	tr.appendChild(td_loop);
+	tr.appendChild(td_action);
+	
+	row.parentNode.insertBefore(tr, row);
+}
+
+function removePlaylistEntry(e)
+{
+	var target = e.target.id.split('_')[1];
+	console.log(target);
+	var row = document.getElementById('playlistEntry_'+target);
+	row.parentNode.removeChild(row);
+}
 
 
 function lock()
@@ -1223,8 +1547,25 @@ function ajaxPatch(loopi, endpoint, jsonData, callback)
 			callback(this.status, jsonObj);
 		}
 	}
-	console.log(jsonData);
 	ajax.open("PATCH", "http://"+g_loopi_array[0].url+endpoint, true);
+	ajax.setRequestHeader("Content-type", "application/json");
+	ajax.send(jsonData);
+}
+
+
+function ajaxPut(loopi, endpoint, jsonData, callback)
+{
+	var ajax = new XMLHttpRequest();
+	ajax.onreadystatechange = function()
+	{
+		
+		if(this.readyState == 4)
+		{
+			var jsonObj = JSON.parse(this.responseText);
+			callback(this.status, jsonObj);
+		}
+	}
+	ajax.open("PUT", "http://"+g_loopi_array[0].url+endpoint, true);
 	ajax.setRequestHeader("Content-type", "application/json");
 	ajax.send(jsonData);
 }
@@ -1233,7 +1574,7 @@ function handleStatusPatch(status, jsonObj)
 {
 	if(status != 200)
 	{
-		alert(jsonObj["reason"]);
+		UIkit.notification({message: jsonObj["reason"], status: 'danger', timeout: 2000})
 	}
 	else
 	{
@@ -1242,8 +1583,133 @@ function handleStatusPatch(status, jsonObj)
 }
 
 
+function fileChosen()
+{
+	var label = document.getElementById('upload_label');
+	label.value = document.getElementById('upload_file').files[0].name;
+}
+
+
+function uploadFile()
+{
+	if(document.getElementById('upload_label').value == '')
+	{
+		UIkit.notification({message: "You must enter a label for the file", status: 'danger', timeout: 2000})
+		return;
+	}
+	
+	if(document.getElementById('upload_description').value == '')
+	{
+		UIkit.notification({message: "You must enter a description for the file", status: 'danger', timeout: 2000})
+		return;
+	}
+	
+	var fd = new FormData(document.getElementById('upload_form'));
+	
+	var ajax = new XMLHttpRequest();
+
+		
+	ajax.upload.addEventListener('progress', function(e) {
+		var percent_complete = (e.loaded/e.total)*100;
+		document.getElementById('progress').value = percent_complete;
+		});
+
+
+	ajax.onreadystatechange = function()
+	{
+		
+		if(this.readyState == 4)
+		{
+			var jsonObj = JSON.parse(this.responseText);
+			
+			UIkit.modal(document.getElementById('progress_modal')).hide();
+			document.getElementById('uploading_label').innerHTML = '';
+			document.getElementById('progress').value = 0;
+			
+			if(this.status != 201)
+			{
+				UIkit.notification({message: jsonObj["reason"], status: 'danger', timeout: 2000})
+			}
+		}
+	}
+
+	UIkit.modal(document.getElementById('upload_modal')).hide();
+	UIkit.modal(document.getElementById('progress_modal')).show();
+	document.getElementById('uploading_label').innerHTML = document.getElementById('upload_label').value;
+	
+	
+	ajax.open('POST',"http://"+g_loopi_array[0].url+"/x-epi/files");
+	ajax.send(fd);
+	
+}
+
+function createPlaylist()
+{
+	if(document.getElementById('playlist_label').value == '')
+	{
+		UIkit.notification({message: "You must enter a label for the playlist", status: 'danger', timeout: 2000})
+		return;
+	}
+	if(document.getElementById('playlist_description').value == '')
+	{
+		UIkit.notification({message: "You must enter a description for the playlist", status: 'danger', timeout: 2000})
+		return;
+	}
+		
+	var tbody = document.getElementById('playlist_entries');
+	if(tbody.childElementCount == 1)		
+	{
+		UIkit.notification({message: "You must enter some files for the playlist", status: 'danger', timeout: 2000})
+		return;
+	}
+				
+	var jsonPost = {"label" : document.getElementById('playlist_label').value, "description" : document.getElementById('playlist_description').value, "files" : []};
+	
+	var row = tbody.childNodes;
+	for(var i = 0; i < tbody.childElementCount; i++)
+	{
+		if(row[i].id !== undefined && row[i].id.split('_')[0] == 'playlistEntry')
+		{
+			var jsonRow = {"uid" : row[i].id.split('_')[1], "times_to_play" : document.getElementById('playlistEntryLoop_'+row[i].id.split('_')[1]).innerHTML};
+			jsonPost.files.push(jsonRow);
+		}
+	}
+		
+	
+				
+	var ajax = new XMLHttpRequest();
+	ajax.onreadystatechange = function()
+	{
+		if(this.readyState == 4)
+		{
+			var jsonObj = JSON.parse(this.responseText);
+			if(this.status != 201)
+			{
+				UIkit.notification({message: jsonObj["reason"], status: 'danger', timeout: 2000})
+			}
+		}
+	}		
+	
+	closePlaylist();
+
+	ajax.open('POST',"http://"+g_loopi_array[0].url+"/x-epi/playlists");
+	ajax.setRequestHeader("Content-type", "application/json");
+	ajax.send(JSON.stringify(jsonPost));
+}
+
+function closePlaylist()
+{
+	document.getElementById('playlist_label').value = '';
+	document.getElementById('playlist_description').value = '';
+	
+	clearElement(document.getElementById('playlist_entries'));
+	UIkit.modal(document.getElementById('playlist_modal')).hide();
+}
+
 function play(e)
 {
+	e.stopPropagation();
+	
 	var split = e.target.id.split('_');
 	var type = split[1];
 	var uid = split[2];
@@ -1256,6 +1722,28 @@ function play(e)
 				
 }
 
+function playLoop(e)
+{
+	e.stopPropagation();
+	UIkit.modal.prompt('Enter number of times to play', '1').then(function (times_to_play) 
+	{
+		if(times_to_play !== null && times_to_play != "")
+		{
+	
+			var split = e.target.id.split('_');
+			var type = split[1];
+			var uid = split[2];
+				
+			type = type.substring(0, type.length-1);	//remove the s
+				
+			var play = { "command" : "play", "type" : type, "uid" : uid, "times_to_play" : parseInt(times_to_play,10), "shuffle" : false};
+		
+			ajaxPatch(0, "/x-epi/status", JSON.stringify(play), handleStatusPatch);
+		}
+	})
+			
+}
+
 
 function clearElement(elm)
 {
@@ -1264,3 +1752,196 @@ function clearElement(elm)
 		elm.removeChild(elm.lastChild);
 	}
 }
+
+
+function setLinks()
+{
+	document.getElementById("a_system").href = "../system/?loopi="+endpoint;
+	document.getElementById("a_playlists").href = "../playlists/?loopi="+endpoint;
+	document.getElementById("a_schedules").href = "../schedules/?loopi="+endpoint;
+	document.getElementById("a_files").href = "../files/?loopi="+endpoint;
+	document.getElementById("a_control").href = "../status/?loopi="+endpoint;
+	document.getElementById("a_status").href = "../status/?loopi="+endpoint;
+}
+
+
+
+
+function getLoopiConfig_System()
+{
+	if(g_loopi_array[0].connected == false)
+	{
+		getConfig(0, handleConfig_System);
+	}
+	setTimeout(getLoopiConfig_System, 2000);
+	
+}
+
+
+
+function handleConfig_System(loopi, jsonObj)
+{
+	if(jsonObj !== null)
+	{
+		document.getElementById('loopi_'+loopi).style.backgroundColor = "#ffffff";
+		updateConfig_Details(loopi, jsonObj);
+		getStatus(loopi, handleStatus_System);
+	}
+}
+
+function handleStatus_System(loopi, jsonObj)
+{
+	updateStatus_System(loopi, jsonObj);
+	
+	getUpdate(loopi, handleUpdate_System);
+}
+
+function handleUpdate_System(loopi, jsonObj)
+{
+	if(jsonObj != null)
+	{
+		document.getElementById('server-version').innerHTML = jsonObj.server.version;
+		document.getElementById('server-date').innerHTML = jsonObj.server.date;
+		
+		document.getElementById('player3-version').innerHTML = jsonObj.player3.version;
+		document.getElementById('player3-date').innerHTML = jsonObj.player3.date;
+		
+		if(jsonObj.player67 !== undefined)
+		{
+			document.getElementById('player67-version').innerHTML = jsonObj.player67.version;
+			document.getElementById('player67-date').innerHTML = jsonObj.player67.date;
+		}
+	}
+	ws_connect(loopi, updateStatus_System, updateInfo_System, null);
+}
+
+	
+function updateStatus_System(loopi, jsonObj)
+{
+	if(jsonObj != null)
+	{
+		g_loopi_array[loopi].setStatus(jsonObj);
+		
+		updateOverallStatus(loopi, jsonObj);
+	}
+}
+
+function updateInfo_System(loopi, jsonObj)
+{
+	document.getElementById('application-start_time').innerHTML = jsonObj.application.start_time;
+	document.getElementById('application-up_time').innerHTML = millisecondsToTime(jsonObj.application.up_time*1000);
+	
+	document.getElementById('system-uptime').innerHTML = millisecondsToTime(jsonObj.system.uptime*1000);
+	document.getElementById('system-procs').innerHTML = jsonObj.system.procs;
+	document.getElementById('temperature-cpu').innerHTML = jsonObj.temperature.cpu;
+	
+	document.getElementById('cpu-cpu').innerHTML = jsonObj.cpu.cpu;
+	document.getElementById('cpu-cpu0').innerHTML = jsonObj.cpu.cpu0;
+	document.getElementById('cpu-cpu1').innerHTML = jsonObj.cpu.cpu1;
+	document.getElementById('cpu-cpu2').innerHTML = jsonObj.cpu.cpu2;
+	document.getElementById('cpu-cpu3').innerHTML = jsonObj.cpu.cpu3;
+	
+	document.getElementById('disk-bytes-total').innerHTML = Math.round(jsonObj.disk.bytes.total/1073741824);
+	document.getElementById('disk-bytes-free').innerHTML = Math.round(jsonObj.disk.bytes.free/1073741824);
+	document.getElementById('disk-bytes-available').innerHTML = Math.round(jsonObj.disk.bytes.available/1073741824);
+	
+	document.getElementById('disk-inodes-total').innerHTML = jsonObj.disk.inodes.total;
+	document.getElementById('disk-inodes-free').innerHTML = jsonObj.disk.inodes.free;
+	document.getElementById('disk-inodes-available').innerHTML = jsonObj.disk.inodes.available;
+	
+	document.getElementById('system-loads-1').innerHTML = Math.round(jsonObj.system.loads["1"]*100)/100;
+	document.getElementById('system-loads-5').innerHTML = Math.round(jsonObj.system.loads["5"]*100)/100;
+	document.getElementById('system-loads-15').innerHTML = Math.round(jsonObj.system.loads["15"]*100)/100;
+	
+	document.getElementById('system-ram-total').innerHTML = Math.round(jsonObj.system.ram.total/1048576);
+	document.getElementById('system-ram-buffered').innerHTML = Math.round(jsonObj.system.ram.buffered/1048576);
+	document.getElementById('system-ram-shared').innerHTML = Math.round(jsonObj.system.ram.shared/1048576);
+	document.getElementById('system-ram-free').innerHTML = Math.round(jsonObj.system.ram.free/1048576);	
+}
+
+function restart(command)
+{
+	UIkit.modal.confirm('Are you sure?').then(function() 
+	{
+		var play = { "command" : command};
+		ajaxPut(0, "/x-epi/power", JSON.stringify(play), handleRestartPut);
+	}, function () {
+	});
+
+	
+}
+
+
+function handleRestartPut(status, jsonObj)
+{
+	if(status != 200)
+	{
+		UIkit.notification({message: jsonObj["reason"], status: 'danger', timeout: 2000})
+	}
+
+}
+
+
+function showUpdate(application)
+{
+	document.getElementById('update_application_title').innerHTML = application;
+	document.getElementById('update_application').value = application;
+	UIkit.modal(document.getElementById('update_modal')).show();
+}
+
+function updateApp()
+{
+	if(document.getElementById('filename').value != document.getElementById('update_application').value)
+	{
+		UIkit.modal.confirm('File chosen has different name to application. Continue?').then(function() 
+		{
+			doUpdate();
+		}, function () {
+		});
+	}
+	else
+	{
+		doUpdate();
+	}
+}
+
+function doUpdate()
+{
+	var fd = new FormData(document.getElementById('update_form'));
+	
+	var ajax = new XMLHttpRequest();
+
+		
+	ajax.onreadystatechange = function()
+	{
+		
+		if(this.readyState == 4)
+		{
+			var jsonObj = JSON.parse(this.responseText);
+			
+			UIkit.modal(document.getElementById('progress_modal')).hide();
+			document.getElementById('uploading_label').innerHTML = '';
+			document.getElementById('progress').value = 0;
+			
+			if(this.status != 200)
+			{
+				UIkit.notification({message: jsonObj["reason"], status: 'danger', timeout: 2000});
+			}
+			else if(jsonObj["restart"] == true)
+			{
+				UIkit.notification({message: document.getElementById('update_application').value+" has been updated but needs restarting.", status: 'danger', timeout: 2000});
+			}
+			else
+			{
+				UIkit.notification({message: document.getElementById('update_application').value+" has been updated", status: 'danger', timeout: 2000});
+			}
+		}
+	}
+
+	UIkit.modal(document.getElementById('update_modal')).hide();
+	
+	
+	ajax.open('PUT',"http://"+g_loopi_array[0].url+"/x-epi/update");
+	ajax.send(fd);
+}
+

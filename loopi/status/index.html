@@ -9,14 +9,17 @@
         <script src="../js/uikit-icons.min.js"></script>
         <script src="../js/ajax.js"></script>
         <script type="text/javascript">        
+		
 		var url = new URL(window.location.href);
 		var endpoint = url.searchParams.get("loopi");			
 		g_loopi_array.push(new loopi(0, endpoint));
-		console.log(endpoint);
 		
+				
 		function status()
 		{
-			document.getElementById('hostname').innerHTML = endpoint;
+			setLinks(endpoint);
+			
+			document.getElementById('loopi_0').innerHTML = endpoint;
 			getLoopiConfig_Details();
 		}
 	</script>
@@ -28,23 +31,42 @@
 	</style>
     </head>
     <body onload="status()">
-	<h1 class="uk-heading-divider">
-            <a href="../"><img src="../images/loopi.png"></a>
-            <span id="hostname"></span>
-        </h1>
-	
+	<nav class="uk-navbar-container" uk-navbar style="background: #ffffff; border-bottom: 1px solid #a8a8d8">
+		<div class="uk-navbar-left">
+			<ul class="uk-navbar-nav">
+				<li class="uk-parent"><a href="../" class="uk-logo"><img src="../images/loopi.png" title="dashboard"></a></a></li>
+				<li class="uk-active"><a href="" id="a_status"><span class="uk-h1" id="loopi_0"></span></a></li>
+			</ul>
+		</div>
+		<div class="uk-navbar-center">
+			<ul class="uk-navbar-nav">
+				<li><span class="uk-h3" id="current_time"></span></li>
+			</ul>
+		</div>
+		<div class="uk-navbar-right">
+			<ul class="uk-navbar-nav">
+				<li class="uk-parent"><a href="../">Dashboard</a></a></li>
+				<li class="uk-active"><a href="" id="a_control">Control</a></li>
+				<li><a href="" id="a_files">Files</a></li>
+				<li><a href="" id="a_playlists">Playlists</a></li>
+				<li><a href="" id="a_schedules">Schedules</a></li>
+				<li><a href="" id="a_system">System</a></li>
+			</ul>
+		</div>
+	</nav>
+
 	<div class="uk-section uk-section-xsmall uk-section-muted">
-		<div class="uk-container">
+		<div class="uk-container" >
 			<div class="uk-card uk-card-default uk-card-small uk-card-body">
 				<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
 					<div class='uk-width-1-4'><div><span class='uk-text-bold'>System:</span></div></div>
-					<div><span class='uk-label' id='lock'>Unknown</span></div>
+					<div><span class='uk-label' id='lock_0'>Unknown</span></div>
 					<div><button id="button_lock" class="uk-button uk-button-default uk-button-small" onclick="lock()">Lock</button></div>
 				</div>
 				<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
 					<div class='uk-width-1-4'><div><span class='uk-text-bold'>Player:</span></div></div>
 					<div><span  class='uk-label' id='player'>Unknown</span></div>
-					<div id="button_stop"><button class="uk-button uk-button-default uk-button-small" onclick="stop()">Stop</button></div>
+					<div id="button_stop" style="visibility: hidden"><button class="uk-button uk-button-danger uk-button-small" onclick="stop()">Stop</button></div>
 				</div>
 			</div>
 		</div>
@@ -118,23 +140,121 @@
 			<ul class="uk-switcher uk-margin">
 				<li>
 					<div class="uk-card uk-card-default uk-card-small uk-card-body">
-						<ul uk-accordion="animation: false" id="resource_files" class="uk-list  uk-list-striped uk-list-collapse">
+						<ul uk-accordion id="resource_files" class="uk-list  uk-list-striped uk-list-collapse">
 						</ul>
+						<a class="uk-button uk-button-default"  style="background: #c8efc8" href="#upload_modal" uk-toggle>Upload New Audio</a>
 					</div>
 				</li>
 				<li>
 					<div class="uk-card uk-card-default uk-card-small uk-card-body">
 						<ul uk-accordion id="resource_playlists" class="uk-list  uk-list-striped uk-list-collapse">>
 						</ul>
+						<a class="uk-button uk-button-default"  style="background: #c8efc8" href="#playlist_modal" uk-toggle>Create New Playlist</a>
+					</div>
 				</li>
 				<li>
 					<div class="uk-card uk-card-default uk-card-small uk-card-body">
 						<ul uk-accordion id="resource_schedules" class="uk-list  uk-list-striped uk-list-collapse">>
 						</ul>
+						<a class="uk-button uk-button-default"  style="background: #c8efc8" href="#schedule_modal" uk-toggle>Create New Schedule</a>
 					</div>
 				</li>
 			</ul>
 		</div>
 	</div>
+	
+	<div id="upload_modal" uk-modal>
+		<div class="uk-modal-dialog">
+			<button class="uk-modal-close-default" type="button" uk-close></button>
+			<div class="uk-modal-header">
+				<h3 class="uk-modal-title">Upload New Audio</h3>
+			</div>
+			<div class="uk-modal-body">
+				<form class="uk-form-horizontal uk-margin-small" id="upload_form">
+					<div class="uk-margin uk-margin-small">
+						<label class="uk-form-label" for="upload_file">File</label>
+						<div class="uk-form-controls">
+							<div uk-form-custom="target: true">
+								<input type="file" id="upload_file" name="file" onchange="fileChosen()">
+								<input class="uk-input uk-form-width-medium" type="text" placeholder="Select file" disabled>
+							</div>
+						</div>
+					</div>
+					<div class="uk-margin uk-margin-small">
+						<label class="uk-form-label" for="upload_label">Label</label>
+						<div class="uk-form-controls">
+							<input class="uk-input" type="text" name="label" id="upload_label">
+						</div>
+					</div>
+					<div class="uk-margin uk-margin-small">
+						<label class="uk-form-label" for="upload_description">Description</label>
+						<div class="uk-form-controls">
+							<input class="uk-input" type="text" name="description" id="upload_description">
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="uk-modal-footer uk-text-right">
+				<button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
+			<button class="uk-button uk-button-primary" type="button" onclick="uploadFile()">Upload</button>
+			</div>
+		</div>
+	</div>
+	
+	<div id="progress_modal" uk-modal>
+		<div class="uk-modal-dialog uk-margin-auto-vertical">
+			<div class="uk-modal-header">
+				<h3 class="uk-modal-title">Uploading <span id="uploading_label"></span></h3>
+			</div>
+			<div class="uk-modal-body">
+				<progress class="uk-progress" value="0" max="100" id="progress"></progress>
+			</div>
+		</div>
+	</div>
+
+	<div id="playlist_modal" uk-modal>
+		<div class="uk-modal-dialog">
+			<button class="uk-modal-close-default" type="button" uk-close></button>
+			<div class="uk-modal-header">
+				<h3 class="uk-modal-title">Create New Playlist</h3>
+			</div>
+			<div class="uk-modal-body">
+				<form class="uk-form-horizontal uk-margin-small" id="playlist_form">
+					<div class="uk-margin uk-margin-small">
+						<label class="uk-form-label" for="playlist_label">Label</label>
+						<div class="uk-form-controls">
+							<input class="uk-input" type="text" name="playlist_label" id="playlist_label">
+						</div>
+					</div>
+					<div class="uk-margin uk-margin-small">
+						<label class="uk-form-label" for="playlist_description">Description</label>
+						<div class="uk-form-controls">
+							<input class="uk-input" type="text" name="playlist_description" id="playlist_description">
+						</div>
+					</div>
+				</form>
+				<table class="uk-table uk-table-small uk-table-divider uk-table-justify">
+					<caption>Entries</caption>
+					<thead>
+						<th class="uk-table-expand">File</th>
+						<th class="uk-table-shrink">Play</th>
+						<td class="uk-table-shrink">&nbsp;</td>
+					</thead>
+					<tbody id="playlist_entries">
+						<tr id="playlist_entry">
+							<td><select class="uk-select" id="select_files"></select></td>
+							<td><input class="uk-input uk-form-width-small" type="number" value="1" id="playlist_file_loop"></td>
+							<td><button class="uk-button uk-button-default" onclick="createPlaylistEntry()">Add</button></td>
+						</tr>
+					</tbody>
+				</table>			
+			</div>
+			<div class="uk-modal-footer uk-text-right">
+				<button class="uk-button uk-button-default" type="button" onclick="closePlaylist()">Cancel</button>
+			<button class="uk-button uk-button-primary" type="button" onclick="createPlaylist()">Create</button>
+			</div>
+		</div>
+	</div>
+
     </body>
 </html>
