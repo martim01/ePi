@@ -1,0 +1,10 @@
+.loopi_label { padding-left: 5px; padding-top: 2px; padding-bottom: 2px; padding-right: 5px; color: #ffffff; background-color: #000000}
+.loopi_label_muted { background-color: #c8c8c8}
+.loopi_label_running { background-color: #32d296}
+.loopi_label_warning { background-color: #ffa800}
+.loopi_button_warning { background-color: #ffa800; color: #ffffff}
+.loopi_button_update { background-color: #336faa; color: #ffffff}
+.loopi_subheading {text-decoration: underline}
+.loopi_button_add {background-color: #33aa6f; color: #ffffff}
+
+.loopi_entry_td {border-top: 1px solid #c8c8c8}
