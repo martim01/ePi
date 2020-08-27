@@ -8,23 +8,25 @@ Raspberry Pi Emergency Audio Material and Loop Player
 ## Introduction
 This is a project to create a broadcast standard audio loop player that can also be used as an emergency material player for radio transmission chains.
 
-The project will consist of a number of applications
+The project consists of a number of applications
 
-### Server
+### episerver
 A RESTFUL server that allows the user to see the status of the player, upload audio files, schedules and playlists and control playback.
 
-### Player3
-The application that will play out the audio files through a soundcard (as an AES3 stream). It will be able to play a single file, a playlist of files one after the other or a schedule of files based on a "cron" type schedule.
+### player3
+The application that plays out the audio files through a soundcard. It is able to play a single file, a playlist of files one after the other or a schedule of files/playlists based on a "cron" type schedule.
 
-### Player67
-The same as Player3 but will produce an AES67 bitstream.
+### player67
+The same as Player3 but produces an AES67 bitstream. (Not yet written)
 
-### Controller
-An application designed for a Raspberry Pi 7" touchscreen that will allow full control of the ePi via the Server API.
+### controller
+An application designed for a Raspberry Pi 7" touchscreen that allows control of the ePi via the Server API. Designed for using the ePi as an emergency playout machine.
 
-### Launcher
+### launcher
 A simple application that reads and ini file and launches 1 or more controllers and restarts them should they stop.
 
+### loopi
+A set of webpages written using PHP and javascript that allows full control of the episerver. Designed for using the ePi as a loop/barker player.
 ## Prerequisites
 
 ### Core libraries required for the Server and Player3
@@ -51,7 +53,7 @@ sudo apt-get update
 sudo apt-get install libcap-dev libwxgtk3.0-dev
 ```
 
-### Other libraries included in the project
+### Other source code included in the project
 
 * [Mongoose](https://github.com/cesanta/mongoose) - source code included in the Server project
 * [JsonCPP](https://github.com/open-source-parsers/jsoncpp) - included as a Git submodule
