@@ -105,6 +105,37 @@ include ("../include/overview.inc");
 		</div>
 	</div>
 	
+<!-- modal dialogs -->
+	<div id="play_modal" uk-modal>
+		<div class="uk-modal-dialog">
+			<button class="uk-modal-close-default" type="button" uk-close></button>
+			<div class="uk-modal-header">
+				<h3 class="uk-modal-title">Play '<span id="play_label"></span>'</h3>
+			</div>
+			<div class="uk-modal-body">
+				<div id="play_options">
+					<div class="uk-form-controls">
+						  <label><input class="uk-radio" type="radio" name="play_radio" checked> Play Once</label>
+					</div>
+					<div class="uk-form-controls">
+						  <label><input class="uk-radio" type="radio" name="play_radio"> Play Forever</label>
+					 </div>
+					 <div class="uk-form-controls">
+						  <label><input class="uk-radio" type="radio" name="play_radio"> Play <input type="number" class="uk-input uk-form-width-xsmall" id="play_x"> times</label>
+					 </div>
+					 <div class="uk-form-controls" id="play_shuffle" style="margin-top: 10px; display: none">
+						  <label><input class="uk-checkbox" type="checkbox" id="check_play_shuffle"> Shuffle</label>
+						  <input id="play_uid" type="hidden"><input id="play_type" type="hidden">
+					</div>
+				</div>
+			</div>
+			<div class="uk-modal-footer uk-text-right">
+			<button class="uk-button uk-button-primary" type="button" onclick="doPlay()">Play</button>
+			</div>
+		</div>
+	</div>
+
+
 	<div id="upload_modal" uk-modal>
 		<div class="uk-modal-dialog">
 			<button class="uk-modal-close-default" type="button" uk-close></button>
@@ -155,10 +186,12 @@ include ("../include/overview.inc");
 	</div>
 
 	<div id="playlist_modal" uk-modal>
-		<div class="uk-modal-dialog">
+		<div class="uk-modal-dialog" style="width: 800px">
 			<button class="uk-modal-close-default" type="button" uk-close></button>
 			<div class="uk-modal-header">
 				<h3 class="uk-modal-title">Create New Playlist</h3>
+				<input type="hidden" id="playlist_count" value="0">
+				<input type="hidden" id="playlist_edit" value="-1">
 			</div>
 			<div class="uk-modal-body">
 				<form class="uk-form-horizontal uk-margin-small" id="playlist_form">
@@ -180,12 +213,12 @@ include ("../include/overview.inc");
 					<thead>
 						<th class="uk-table-expand">File</th>
 						<th class="uk-table-shrink">Play</th>
-						<td class="uk-table-shrink">&nbsp;</td>
+						<td class="uk-table-expand">&nbsp;</td>
 					</thead>
 					<tbody id="playlist_entries">
 						<tr id="playlist_entry">
 							<td class="loopi_entry_td"><select class="uk-select" id="select_files"></select></td>
-							<td class="loopi_entry_td"><input class="uk-input uk-form-width-small" type="number" value="1" id="playlist_file_loop"></td>
+							<td class="loopi_entry_td"><input class="uk-input uk-form-width-xsmall" type="number" value="1" id="playlist_file_loop"></td>
 							<td class="loopi_entry_td"><button class="uk-button uk-button-default loopi_button_add" onclick="createPlaylistEntry()">Add</button></td>
 						</tr>
 					</tbody>

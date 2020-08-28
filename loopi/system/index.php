@@ -41,7 +41,7 @@ include ("../include/overview.inc");
 								<div><span class='uk-text-bold'>Procs:</span></div>
 								<div><span id="system-procs"></span></div>
 								<div><span class='uk-text-bold'>Temperature:</span></div>
-								<div><span id="temperature-cpu"></span>&#176;C</div>
+								<div><span id="temperature-cpu"></span>&#176; C</div>
 							</div>
 						</div>
 						<div class="uk-card-footer">

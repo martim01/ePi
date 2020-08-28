@@ -105,7 +105,7 @@ class loopi
 			this.playlists.splice(i,1);
 		}		
 	}
-	removeSchedue(uid)
+	removeSchedule(uid)
 	{
 		var i = this.findSchedule(uid);
 		if(i > -1)
@@ -604,6 +604,7 @@ function getLoopiConfig_Details()
 {
 	if(g_loopi_array[0].connected == false)
 	{
+		clearCron();	//probably could do this somewhere better...
 		getConfig(0, handleConfig_Details)
 	}
 	setTimeout(getLoopiConfig_Details, 2000);
@@ -1033,21 +1034,22 @@ function createScheduleDetails(loopi, jsonObj)
 	var thead = document.getElementById('specifichead_'+jsonObj["uid"]);
 	clearElement(thead);
 	
-	var thType = document.createElement('th');
-	thType.innerHTML = 'Type';
-	
 	var thFile = document.createElement('th');
 	thFile.innerHTML = 'Label';
 	
 	var thTime = document.createElement('th');
 	thTime.innerHTML = 'Times To Play';
 	
+	var thShuffle = document.createElement('th');
+	thShuffle.innerHTML = 'Shuffle';
+	
+	
 	var thS = document.createElement('th');
 	thS.innerHTML = 'Schedule To Play';
 	
-	thead.appendChild(thType);
 	thead.appendChild(thFile);
 	thead.appendChild(thTime);
+	thead.appendChild(thShuffle);
 	thead.appendChild(thS);
 	
 	
@@ -1068,6 +1070,7 @@ function createScheduleResourceDetails(tbody,type, jsonObj)
 	{
 		var file = -1;
 		var label = jsonObj[res][i]['uid'];
+		var shuffle;
 		
 		if(type == 'file')
 		{
@@ -1076,6 +1079,7 @@ function createScheduleResourceDetails(tbody,type, jsonObj)
 			{
 				label = g_loopi_array[0].files[file]['label'];
 			}
+			shuffle = "-";
 		}
 		else
 		{
@@ -1084,25 +1088,38 @@ function createScheduleResourceDetails(tbody,type, jsonObj)
 			{
 				label = g_loopi_array[0].playlists[file]['label'];
 			}
+			if(jsonObj[res][i]['shuffle'] == true)
+			{
+				shuffle = 'Y';
+			}
+			else
+			{
+				shuffle = 'N';
+			}
 		}
 		
 		
-		tbody.appendChild(createScheduleDetailsRow(type, label, jsonObj[res][i]['times_to_play'], jsonObj[res][i]['cron']));
+		tbody.appendChild(createScheduleDetailsRow(type, label, jsonObj[res][i]['times_to_play'], shuffle, jsonObj[res][i]['cron']));
 	}
 }
 
-function createScheduleDetailsRow(type, label, loop, cron)
+function createScheduleDetailsRow(type, label, loop, shuffle, cron)
 {
 
 	var tr = document.createElement('tr');
 	
-	var td_type= document.createElement('td');
-	td_type.style.padding = '3px 6px';
-	td_type.innerHTML = type;
 	
 		
 	var td_label = document.createElement('td');
-	td_label.innerHTML = label;
+	if(type == 'file')
+	{
+		td_label.innerHTML = label;
+	}
+	else
+	{
+		td_label.innerHTML = '&equiv; '+label;
+	}
+	
 	td_label.style.padding = '3px 6px';
 	
 	var td_loop = document.createElement('td');
@@ -1115,11 +1132,16 @@ function createScheduleDetailsRow(type, label, loop, cron)
 		td_loop.innerHTML = '&infin;';
 	}
 	
+	
 	td_loop.style.padding = '3px 6px';
 	
-	tr.appendChild(td_type);
+	var td_shuffle = document.createElement('td');
+	td_shuffle.innerHTML = shuffle;
+	td_shuffle.style.padding = '3px 6px';
+	
 	tr.appendChild(td_label);
 	tr.appendChild(td_loop);
+	tr.appendChild(td_shuffle);
 	
 	var td_cron = document.createElement('td');
 	td_cron.style.padding = '3px 6px';
@@ -1337,19 +1359,22 @@ function updateResource_Details(loopi, jsonObj)
 	{
 		//delete the specific elements
 		var li = document.getElementById('li_'+jsonObj['uid']);
-		li.parentNode.removeChild(li);
-		
-		if(jsonObj["type"] == "file")
+		if(li !== undefined)
 		{
-			g_loopi_array[loopi].removeFile(jsonObj['uid']);
-		}
-		else if(jsonObj["type"] == "playlist")
-		{
-			g_loopi_array[loopi].removePlaylist(jsonObj['uid']);
-		}
-		else if(jsonObj["type"] == "schedule")
-		{
-			g_loopi_array[loopi].removeSchedule(jsonObj['uid']);
+			li.parentNode.removeChild(li);
+			
+			if(jsonObj["type"] == "file")
+			{
+				g_loopi_array[loopi].removeFile(jsonObj['uid']);
+			}
+			else if(jsonObj["type"] == "playlist")
+			{
+				g_loopi_array[loopi].removePlaylist(jsonObj['uid']);
+			}
+			else if(jsonObj["type"] == "schedule")
+			{
+				g_loopi_array[loopi].removeSchedule(jsonObj['uid']);
+			}
 		}
 	}
 	else if(jsonObj["modification"] == "added")
@@ -1517,17 +1542,58 @@ function createPlaylistEntry()
 	
 	var sel =  document.getElementById('select_files');
 	
-	tr.id = "playlistEntry_"+sel.options[sel.selectedIndex].value;
-	td_loop.id = "playlistEntryLoop_"+sel.options[sel.selectedIndex].value;
-				
-	td_file.innerHTML = sel.options[sel.selectedIndex].text;
-	td_loop.innerHTML = document.getElementById('playlist_file_loop').value;
+	var index = document.getElementById('playlist_count').value;
+	document.getElementById('playlist_count').value = index+1;
+	
+	tr.id = "playlistEntry_"+index;
+	
+	var span_label = document.createElement('span');
+	span_label.id = 'playlistEntryLabel_'+index;
+	span_label.innerHTML = sel.options[sel.selectedIndex].text;
+	td_file.appendChild(span_label);
+	
+	
+	var input_file = document.createElement('input');
+	input_file.type = "hidden";
+	input_file.id = "playlistEntryUid_"+index;
+	input_file.value = sel.options[sel.selectedIndex].value;
+	td_file.appendChild(input_file);
+
+
+	var span_loop = document.createElement('span');
+	span_loop.id = 'playlistEntryLoopLabel_'+index;
+	span_loop.innerHTML = sel.options[sel.selectedIndex].text;
+	td_loop.appendChild(span_loop);
+	if(document.getElementById('playlist_file_loop').value >= 0)
+	{
+		span_loop.innerHTML = document.getElementById('playlist_file_loop').value;
+	}
+	else
+	{
+		span_loop.innerHTML = "&infin;";
+	}
+		
+	var input_loop = document.createElement('input');
+	input_loop.type = "hidden";
+	input_loop.id = "playlistEntryLoop_"+index;
+	input_loop.value = document.getElementById('playlist_file_loop').value;
+	td_loop.appendChild(input_loop);
+	
+	var buttonMod = document.createElement('button');
+	buttonMod.className = "uk-button";
+	buttonMod.classList.add("uk-button-small");
+	buttonMod.style.background = '#ffffff';
+	buttonMod.id = "playlistModify_"+index;
+	buttonMod.innerHTML = 'Modify';
+	buttonMod.addEventListener('click',modifyPlaylistEntry, false);
+	td_action.appendChild(buttonMod);
 	
 	var button = document.createElement('button');
 	button.className = "uk-button";
 	button.classList.add("uk-button-small");
 	button.style.background = '#ffffff';
-	button.id = "playlistRemove_"+sel.options[sel.selectedIndex].value;
+	button.style.marginLeft = '5px';
+	button.id = "playlistRemove_"+index;
 	button.innerHTML = 'Remove';
 	button.addEventListener('click',removePlaylistEntry, false);
 	td_action.appendChild(button);
@@ -1545,6 +1611,115 @@ function removePlaylistEntry(e)
 	console.log(target);
 	var row = document.getElementById('playlistEntry_'+target);
 	row.parentNode.removeChild(row);
+}
+
+
+function modifyPlaylistEntry(e)
+{
+	alert("need to remove all the modify buttons whilst modifying something!");
+	var index = e.target.id.split('_')[1];
+	
+	document.getElementById('playlist_edit').value = index;
+	
+	var row = document.getElementById('playlistEntry_'+index);
+	row.style.display = 'none';
+	
+	var tr  = document.createElement('tr');
+	tr.id = 'mod_row';
+	
+	var td_file =  document.createElement('td');
+	var td_loop =  document.createElement('td');
+	var td_action =  document.createElement('td');
+	
+	td_file.style.padding = '3px 6px';
+	td_loop.style.padding = '3px 6px';
+	td_action.style.padding = '3px 6px';
+	
+	td_file.className = "uk-background-muted";
+	td_loop.className = "uk-background-muted";
+	td_action.className = "uk-background-muted";
+	
+	
+		
+	var sel =  document.getElementById('select_files');
+	
+	var selMod = sel.cloneNode(true);
+	selMod.value = document.getElementById('playlistEntryUid_'+index).value;
+	//set the value
+	
+	selMod.id = 'playlist_mod_sel';
+	td_file.appendChild(selMod);
+	
+	var loopMod = document.getElementById('playlist_file_loop').cloneNode();
+	loopMod.id = 'playlist_mod_loop';
+	loopMod.value = document.getElementById('playlistEntryLoop_'+index).value;
+	//set the value
+	td_loop.appendChild(loopMod);
+	
+	
+	var buttonMod = document.createElement('button');
+	buttonMod.className = "uk-button";
+	buttonMod.classList.add("uk-button-small");
+	buttonMod.style.background = '#ffffff';
+	buttonMod.innerHTML = 'Update';
+	buttonMod.addEventListener('click',updatePlaylistEntry, false);
+	td_action.appendChild(buttonMod);
+	
+	var button = document.createElement('button');
+	button.className = "uk-button";
+	button.classList.add("uk-button-small");
+	button.style.background = '#ffffff';
+	button.style.marginLeft = '5px';
+	button.innerHTML = 'Cancel';
+	button.addEventListener('click',cancelPlaylistEntry, false);
+	td_action.appendChild(button);
+	
+	tr.appendChild(td_file);	
+	tr.appendChild(td_loop);	
+	tr.appendChild(td_action);
+		
+	row.parentNode.insertBefore(tr, row);	
+	
+}
+
+function updatePlaylistEntry()
+{
+	var index = document.getElementById('playlist_edit').value;
+	
+	var sel = document.getElementById('playlist_mod_sel');
+	var uid = sel.options[sel.selectedIndex].value;
+	var label = sel.options[sel.selectedIndex].text;
+	
+	document.getElementById("playlistEntryUid_"+index).value = uid;
+	document.getElementById('playlistEntryLabel_'+index).innerHTML = label;
+	
+	document.getElementById('playlistEntryLoop_'+index).value = document.getElementById('playlist_mod_loop').value;
+	if(document.getElementById('playlist_mod_loop').value >= 0)
+	{
+		document.getElementById('playlistEntryLoopLabel_'+index).innerHTML = document.getElementById('playlist_mod_loop').value;
+	}
+	else
+	{
+		document.getElementById('playlistEntryLoopLabel_'+index).innerHTML = "&infin;";
+	}
+	
+	
+	cancelPlaylistEntry();
+	
+	
+}
+
+
+function cancelPlaylistEntry()
+{
+	var index = document.getElementById('playlist_edit').value;
+	
+	var row = document.getElementById('playlistEntry_'+index);
+	row.style.display = '';
+	
+	document.getElementById('mod_row').parentNode.removeChild(document.getElementById('mod_row'));
+	
+	document.getElementById('playlist_edit').value = -1;
 }
 
 
@@ -1643,10 +1818,10 @@ function handleStatusPatch(status, jsonObj)
 	{
 		UIkit.notification({message: jsonObj["reason"], status: 'danger', timeout: 4000})
 	}
-	else
-	{
-		getStatus(0, handleStatus_Details);
-	}
+	//else
+	//{
+	//	getStatus(0, handleStatus_Details);
+	//}
 }
 
 
@@ -1735,10 +1910,15 @@ function createPlaylist()
 	var row = tbody.childNodes;
 	for(var i = 0; i < tbody.childElementCount; i++)
 	{
-		if(row[i].id !== undefined && row[i].id.split('_')[0] == 'playlistEntry')
+		if(row[i].id !== undefined)
 		{
-			var jsonRow = {"uid" : row[i].id.split('_')[1], "times_to_play" : parseInt(document.getElementById('playlistEntryLoop_'+row[i].id.split('_')[1]).innerHTML,10)};
-			jsonPost.files.push(jsonRow);
+			var sp = row[i].id.split('_');
+			if(sp[0] == 'playlistEntry')
+			{
+				var uid = document.getElementById('playlistEntryUid_'+sp[1]).value;
+				var jsonRow = {"uid" : uid, "times_to_play" : parseInt(document.getElementById('playlistEntryLoop_'+sp[1]).value,10)};
+				jsonPost.files.push(jsonRow);
+			}
 		}
 	}
 		
@@ -1780,7 +1960,7 @@ function closePlaylist()
 
 function play(e)
 {
-	console.log('play');
+
 	
 	e.stopPropagation();
 	
@@ -1789,11 +1969,74 @@ function play(e)
 	var uid = split[2];
 				
 	type = type.substring(0, type.length-1);	//remove the s
-				
-	var play = { "command" : "play", "type" : type, "uid" : uid, "times_to_play" : 1, "shuffle" : false};
+	
+	document.getElementById('play_label').innerHTML = document.getElementById('span_'+uid).innerHTML;
+	
+	if(type == 'schedule')
+	{
+		document.getElementById('play_options').style.display = 'none';
+	}
+	else
+	{
+		document.getElementById('play_options').style.display = 'block';
+	
+		if(type == 'playlist')
+		{
+			document.getElementById('play_shuffle').style.display = 'block';
+		}
+		else
+		{
+			document.getElementById('play_shuffle').style.display = 'none';
+		}
+	}
+	document.getElementById('play_shuffle').checked = false;
+	
+	document.getElementById('play_uid').value = uid;
+	document.getElementById('play_type').value = type;
+	
+	document.getElementsByName('play_radio')[0].checked = true;
+	
+	UIkit.modal(document.getElementById('play_modal')).show();
+}
+
+function doPlay()
+{
+	console.log('doPlay');
+	
+	var uid = document.getElementById('play_uid').value;
+	var type = document.getElementById('play_type').value;
+	
+	var radios = document.getElementsByName('play_radio');
+	var i = 0;
+	for(; i < radios.length; i++)
+	{
+		if(radios[i].checked)
+		{
+			break;
+		}
+	}
+	
+	var loop = 0;
+	switch(i)
+	{
+		case 0:
+			loop = 1;
+			break;
+		case 1:
+			loop = -1;
+			break;
+		case 2:
+			loop = parseInt(document.getElementById("play_x").value,10);
+			break;
+	}
+	var shuffle = document.getElementById('check_play_shuffle').checked;
+	
+	var play = { "command" : "play", "type" : type, "uid" : uid, "shuffle" : shuffle, "times_to_play" : loop};
 	
 	ajaxPatch(0, "/x-epi/status", JSON.stringify(play), handleStatusPatch);
-				
+	
+	UIkit.modal(document.getElementById('play_modal')).hide();
+			
 }
 
 function deleteResource(e)
@@ -2159,7 +2402,6 @@ function createScheduleEntry()
 	var sel =  document.getElementById('schedule_select_files');
 	
 	tr.id = "scheduleEntry_"+sel.options[sel.selectedIndex].value;
-	td_loop.id = "scheduleEntryLoop_"+sel.options[sel.selectedIndex].value;
 				
 	td_file.innerHTML = sel.options[sel.selectedIndex].text;
 	
@@ -2172,14 +2414,33 @@ function createScheduleEntry()
 		td_loop.innerHTML = "&infin;";
 	}
 	
+	td_shuffle.id = "scheduleEntryShuffle_"+sel.options[sel.selectedIndex].value;
+	
 	td_shuffle.innerHTML = document.getElementById('schedule_file_shuffle').checked;
 	td_cron.innerHTML = document.getElementById('cron_text').innerHTML;
 	
-	var input = document.createElement('input');
-	input.type = 'hidden';
-	input.value = createReadableCron()[0];
+	var input_cron = document.createElement('input');
+	input_cron.type = 'hidden';
+	input_cron.id="scheduleEntryCron_"+sel.options[sel.selectedIndex].value;
+	input_cron.value = createReadableCron()[0];
 	
-	td_cron.append(input);
+	var input_type = document.createElement('input');
+	input_type.type = 'hidden';
+	input_type.id="scheduleEntryType_"+sel.options[sel.selectedIndex].value
+	
+	var input_loop = document.createElement('input');
+	input_loop.type = 'hidden';
+	input_loop.id="scheduleEntryLoop_"+sel.options[sel.selectedIndex].value
+	input_loop.value = document.getElementById('schedule_file_loop').value;
+	
+	if(isPlaylist(sel.options[sel.selectedIndex].innerHTML))
+	{
+		input_type.value = "playlist";
+	}
+	
+	td_cron.append(input_cron);
+	td_cron.append(input_type);
+	td_cron.append(input_loop);
 	
 	var button = document.createElement('button');
 	button.className = "uk-button";
@@ -2211,11 +2472,9 @@ function removeScheduleEntry(e)
 function scheduleSelectChange()
 {
 	var sel =  document.getElementById('schedule_select_files');
-	var playlist = document.createElement('div');
-	playlist.innerHTML = "&equiv;";
 	
 
-	if(sel.options[sel.selectedIndex].innerHTML.startsWith(playlist.innerHTML))
+	if(isPlaylist(sel.options[sel.selectedIndex].innerHTML))
 	{
 		console.log("playlist");
 		document.getElementById('schedule_file_shuffle').style.visibility = 'visible';
@@ -2227,6 +2486,12 @@ function scheduleSelectChange()
 	}
 }
 
+function isPlaylist(label)
+{
+	var playlist = document.createElement('div');
+	playlist.innerHTML = "&equiv;";
+	return (label.startsWith(playlist.innerHTML));
+}
 
 function closeSchedule()
 {
@@ -2248,6 +2513,7 @@ function closeSchedule()
 
 function clearCron()
 {
+	//clear
 	for(cronSection in g_cron)
 	{
 		for(time in g_cron[cronSection])
@@ -2263,6 +2529,97 @@ function clearCron()
 		document.getElementById(cronSection+'_all').classList.add('uk-button-primary');
     }
 	
-	g_cron = {'s': {}, 'm': {}, 'h': {}, 'd': {}, 'M': {}, 'w': {}};
+	g_cron = {'s': {'00' : true}, 'm': {}, 'h': {}, 'd': {}, 'M': {}, 'w': {}};
 	
+	for(cronSection in g_cron)
+	{
+		for(time in g_cron[cronSection])
+		{
+			if(g_cron[cronSection][time])
+			{
+				document.getElementById(cronSection+'_'+time).classList.remove('uk-button-default');
+				document.getElementById(cronSection+'_'+time).classList.add('uk-button-primary');
+				
+				document.getElementById(cronSection+'_all').classList.add('uk-button-default');
+				document.getElementById(cronSection+'_all').classList.remove('uk-button-primary');
+			}
+		}
+    }
+	
+}
+
+
+function createSchedule()
+{
+	if(document.getElementById('schedule_label').value == '')
+	{
+		UIkit.notification({message: "You must enter a label for the schedule", status: 'danger', timeout: 2000})
+		return;
+	}
+	if(document.getElementById('schedule_description').value == '')
+	{
+		UIkit.notification({message: "You must enter a description for the schedule", status: 'danger', timeout: 2000})
+		return;
+	}
+		
+	var tbody = document.getElementById('schedule_entries');
+	if(tbody.childElementCount == 1)		
+	{
+		UIkit.notification({message: "You must enter some resources for the schedule", status: 'danger', timeout: 2000})
+		return;
+	}
+				
+	var jsonPost = {"label" : document.getElementById('schedule_label').value, "description" : document.getElementById('schedule_description').value, "files" : [], "playlists" : []};
+	
+	var row = tbody.childNodes;
+	for(var i = 0; i < tbody.childElementCount; i++)
+	{
+		if(row[i].id !== undefined)
+		{
+			var sp = row[i].id.split('_');
+			if(sp[0] == 'scheduleEntry')
+			{
+				var loop = parseInt(document.getElementById('scheduleEntryLoop_'+sp[1]).value,10);
+				var aCron = document.getElementById('scheduleEntryCron_'+sp[1]).value+' *';		//add the year in
+				
+				if(document.getElementById('scheduleEntryType_'+sp[1]).value == "playlist")
+				{
+					var shuffle = (document.getElementById('scheduleEntryShuffle_'+sp[1]).value == "true");
+					
+					var jsonRow = {"uid" : row[i].id.split('_')[1], "times_to_play" : loop, "cron" : aCron, "shuffle" : shuffle};
+					jsonPost.playlists.push(jsonRow);
+				}
+				else
+				{
+					var jsonRow = {"uid" : row[i].id.split('_')[1], "times_to_play" : loop, "cron" : aCron};
+					jsonPost.files.push(jsonRow);
+				}
+			}
+		}
+	}
+		
+	
+	
+	
+				
+	var ajax = new XMLHttpRequest();
+	ajax.onreadystatechange = function()
+	{
+		if(this.readyState == 4)
+		{
+			var jsonObj = JSON.parse(this.responseText);
+			if(this.status != 201)
+			{
+				UIkit.notification({message: jsonObj["reason"], status: 'danger', timeout: 2000})
+			}
+			else
+			{
+				closeSchedule();
+			}
+		}
+	}		
+	
+	ajax.open('POST',"http://"+g_loopi_array[0].url+"/x-epi/schedules");
+	ajax.setRequestHeader("Content-type", "application/json");
+	ajax.send(JSON.stringify(jsonPost));
 }
