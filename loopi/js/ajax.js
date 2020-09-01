@@ -52,6 +52,39 @@ class loopi
 		}
 	}
 	
+	setFileDetails(jsonObj)
+	{
+		var i = this.findFile(jsonObj["uid"]);
+		if(i != -1)
+		{
+			this.files[i].details = jsonObj;
+			
+			console.log(this.files[i]);
+		}
+	}
+	
+	setPlaylistDetails(jsonObj)
+	{
+		var i = this.findPlaylist(jsonObj["uid"]);
+		if(i != -1)
+		{
+			this.playlists[i].details = jsonObj;
+			
+			console.log(this.playlists[i]);
+		}
+	}
+	
+	setScheduleDetails(jsonObj)
+	{
+		var i = this.findSchedule(jsonObj["uid"]);
+		if(i != -1)
+		{
+			this.schedules[i].details = jsonObj;
+			
+			console.log(this.schedules[i]);
+		}
+	}
+	
 	
 	findFile(uid)
 	{
@@ -604,7 +637,7 @@ function getLoopiConfig_Details()
 {
 	if(g_loopi_array[0].connected == false)
 	{
-		clearCron();	//probably could do this somewhere better...
+		clearCron();
 		getConfig(0, handleConfig_Details)
 	}
 	setTimeout(getLoopiConfig_Details, 2000);
@@ -782,6 +815,7 @@ function createResourceLi(ul, resObj, type, clickFunction)
 	buttonOnce.addEventListener('click',play, false);
 	div_action.appendChild(buttonOnce);
 			
+	
 	var buttonDelete = document.createElement('button');
 	buttonDelete.className = "uk-button";
 	buttonDelete.classList.add("uk-button-danger");
@@ -831,6 +865,15 @@ function createResourceLi(ul, resObj, type, clickFunction)
 	tableSpecific.appendChild(tbodySpecificDetails);
 	div_content.appendChild(tableSpecific);
 		
+	var buttonMod = document.createElement('button');
+	buttonMod.className = "uk-button";
+	buttonMod.classList.add("uk-button-primary");
+	buttonMod.classList.add("uk-button-small");
+	buttonMod.style.marginLeft = '5px';
+	buttonMod.id = "delete_"+type+"_"+resObj["uid"];
+	buttonMod.innerHTML = 'Modify';
+	buttonMod.addEventListener('click',modifyResource, false);
+	div_content.appendChild(buttonMod);
 		
 	li.appendChild(div_content);
 		
@@ -932,6 +975,8 @@ function createResourceDetails(jsonObj)
 
 function createFileDetails(loopi, jsonObj)
 {
+	g_loopi_array[loopi].setFileDetails(jsonObj);
+	
 	createResourceDetails(jsonObj);
 	var tbody = document.getElementById('specific_'+jsonObj["uid"]);
 	if(tbody)
@@ -987,6 +1032,8 @@ function createFormatRow(key1, value1, key2, value2)
 
 function createPlaylistDetails(loopi, jsonObj)
 {
+	g_loopi_array[loopi].setPlaylistDetails(jsonObj);
+	
 	createResourceDetails(jsonObj);
 	
 	var thead = document.getElementById('specifichead_'+jsonObj["uid"]);
@@ -1029,6 +1076,9 @@ function createPlaylistDetails(loopi, jsonObj)
 
 function createScheduleDetails(loopi, jsonObj)
 {
+	
+	g_loopi_array[loopi].setScheduleDetails(jsonObj);
+	
 	createResourceDetails(jsonObj);
 	
 	var thead = document.getElementById('specifichead_'+jsonObj["uid"]);
@@ -1211,8 +1261,6 @@ function updatePlayerStatus(loopi, jsonObj)
 		document.getElementById("player").classList.remove("uk-label-success");
 		document.getElementById("player").classList.remove("uk-label-warning");
 		document.getElementById("player").classList.add("uk-label-danger");
-		document.getElementById("section_player").style.display = "none";
-		document.getElementById("section_resources").style.display = "block";
 		
 		document.getElementById("button_stop").style.visibility = "hidden";
 		
@@ -1225,8 +1273,6 @@ function updatePlayerStatus(loopi, jsonObj)
 		document.getElementById("player").classList.remove("uk-label-warning");
 		document.getElementById("player").classList.remove("uk-label-danger");
 		
-		document.getElementById("section_player").style.display = "none";
-		document.getElementById("section_resources").style.display = "block";
 		
 		document.getElementById("card_resource").style.visibility = "hidden";
 		document.getElementById("card_playout").style.visibility = "hidden";
@@ -1242,8 +1288,6 @@ function updatePlayerStatus(loopi, jsonObj)
 		
 		showStopButton(loopi);
 		
-		document.getElementById("section_player").style.display = "block";
-		document.getElementById("section_resources").style.display = "none";
 		
 		document.getElementById("card_resource").style.visibility = "visible";
 		
@@ -1522,7 +1566,15 @@ function showStopButton(loopi)
 }
 
 
+
 function createPlaylistEntry()
+{
+	var sel =  document.getElementById('select_files');
+	doCreatePlaylistEntry(sel.options[sel.selectedIndex].text, sel.options[sel.selectedIndex].value, document.getElementById('playlist_file_loop').value); 
+}
+
+
+function doCreatePlaylistEntry(label, uid, loop)
 {
 	var row = document.getElementById('playlist_entry');
 	
@@ -1540,8 +1592,6 @@ function createPlaylistEntry()
 	td_action.className = "uk-background-muted";
 	
 	
-	var sel =  document.getElementById('select_files');
-	
 	var index = document.getElementById('playlist_count').value;
 	document.getElementById('playlist_count').value = index+1;
 	
@@ -1549,34 +1599,33 @@ function createPlaylistEntry()
 	
 	var span_label = document.createElement('span');
 	span_label.id = 'playlistEntryLabel_'+index;
-	span_label.innerHTML = sel.options[sel.selectedIndex].text;
+	span_label.innerHTML = label;
 	td_file.appendChild(span_label);
 	
 	
 	var input_file = document.createElement('input');
 	input_file.type = "hidden";
 	input_file.id = "playlistEntryUid_"+index;
-	input_file.value = sel.options[sel.selectedIndex].value;
+	input_file.value = uid;
 	td_file.appendChild(input_file);
 
 
 	var span_loop = document.createElement('span');
 	span_loop.id = 'playlistEntryLoopLabel_'+index;
-	span_loop.innerHTML = sel.options[sel.selectedIndex].text;
-	td_loop.appendChild(span_loop);
-	if(document.getElementById('playlist_file_loop').value >= 0)
+	if(loop >= 0)
 	{
-		span_loop.innerHTML = document.getElementById('playlist_file_loop').value;
+		span_loop.innerHTML = loop;
 	}
 	else
 	{
 		span_loop.innerHTML = "&infin;";
 	}
+	td_loop.appendChild(span_loop);
 		
 	var input_loop = document.createElement('input');
 	input_loop.type = "hidden";
 	input_loop.id = "playlistEntryLoop_"+index;
-	input_loop.value = document.getElementById('playlist_file_loop').value;
+	input_loop.value = loop;
 	td_loop.appendChild(input_loop);
 	
 	var buttonMod = document.createElement('button');
@@ -1616,7 +1665,8 @@ function removePlaylistEntry(e)
 
 function modifyPlaylistEntry(e)
 {
-	alert("need to remove all the modify buttons whilst modifying something!");
+	cancelPlaylistEntry();
+	
 	var index = e.target.id.split('_')[1];
 	
 	document.getElementById('playlist_edit').value = index;
@@ -1635,9 +1685,9 @@ function modifyPlaylistEntry(e)
 	td_loop.style.padding = '3px 6px';
 	td_action.style.padding = '3px 6px';
 	
-	td_file.className = "uk-background-muted";
-	td_loop.className = "uk-background-muted";
-	td_action.className = "uk-background-muted";
+	td_file.className = "loopi_edit";
+	td_loop.className = "loopi_edit";
+	td_action.className = "loopi_edit";
 	
 	
 		
@@ -1712,14 +1762,18 @@ function updatePlaylistEntry()
 
 function cancelPlaylistEntry()
 {
-	var index = document.getElementById('playlist_edit').value;
+	var mod =document.getElementById('mod_row');
+	if(mod !== null)
+	{
+		var index = document.getElementById('playlist_edit').value;
 	
-	var row = document.getElementById('playlistEntry_'+index);
-	row.style.display = '';
+		var row = document.getElementById('playlistEntry_'+index);
+		row.style.display = '';
 	
-	document.getElementById('mod_row').parentNode.removeChild(document.getElementById('mod_row'));
+		mod.parentNode.removeChild(document.getElementById('mod_row'));
 	
-	document.getElementById('playlist_edit').value = -1;
+		document.getElementById('playlist_edit').value = -1;
+	}
 }
 
 
@@ -1930,7 +1984,7 @@ function createPlaylist()
 		if(this.readyState == 4)
 		{
 			var jsonObj = JSON.parse(this.responseText);
-			if(this.status != 201)
+			if(this.status != 201 && this.status != 200)
 			{
 				UIkit.notification({message: jsonObj["reason"], status: 'danger', timeout: 2000})
 			}
@@ -1938,8 +1992,16 @@ function createPlaylist()
 	}		
 	
 	closePlaylist();
-
-	ajax.open('POST',"http://"+g_loopi_array[0].url+"/x-epi/playlists");
+	
+	var uid = document.getElementById('playlist_uid').value;
+	if(uid == "")
+	{
+		ajax.open('POST',"http://"+g_loopi_array[0].url+"/x-epi/playlists");
+	}
+	else
+	{
+		ajax.open('PUT',"http://"+g_loopi_array[0].url+"/x-epi/playlists/"+uid);
+	}
 	ajax.setRequestHeader("Content-type", "application/json");
 	ajax.send(JSON.stringify(jsonPost));
 }
@@ -2052,6 +2114,24 @@ function deleteResource(e)
 		ajaxDelete(0, "/x-epi/"+type+"/"+uid, handleDelete);
 	}, function () {
 	});
+}
+
+function modifyResource(e)
+{
+	e.stopPropagation();
+	var split = e.target.id.split('_');
+	var type = split[1];
+	var uid = split[2];
+			
+	console.log("modifyResource: "+type+" "+uid);
+	if(type == "playlists")
+	{
+		modifyPlaylist(uid);
+	}
+	else if(type == "schedules")
+	{
+		modifySchedule(uid);
+	}
 }
 
 	
@@ -2320,7 +2400,14 @@ function cron(event)
 		document.getElementById(sp[0]+'_all').classList.add('uk-button-default');
 		document.getElementById(sp[0]+'_all').classList.remove('uk-button-primary');
 	}
-	createReadableCron();
+	
+	document.getElementById('cron_text').innerHTML = createReadableCron(convertgCronToString());	
+	var mod = document.getElementById('schedule_mod_cron');
+	if(mod)
+	{
+		mod.innerHTML = document.getElementById('cron_text').innerHTML;
+	}
+		
 }
 
 function cronAll(event)
@@ -2339,10 +2426,15 @@ function cronAll(event)
 	document.getElementById(sp[0]+'_all').classList.remove('uk-button-default');
 	document.getElementById(sp[0]+'_all').classList.add('uk-button-primary');
 	
-	createReadableCron();
+	document.getElementById('cron_text').innerHTML = createReadableCron(convertgCronToString());	
+	var mod = document.getElementById('schedule_mod_cron');
+	if(mod)
+	{
+		mod.innerHTML = document.getElementById('cron_text').innerHTML;
+	}
 }
 
-function createReadableCron()
+function convertgCronToString()
 {
 	var cron = "";
 	
@@ -2376,80 +2468,123 @@ function createReadableCron()
 		}
 		cron += str;
 	}
-	
-	var readable = cronstrue.toString(cron, { use24HourTimeFormat: true});
-	
-	document.getElementById('cron_text').innerHTML = readable;	
-	return [cron, readable];
+	return cron;
+}
+
+function createReadableCron(cron)
+{
+	console.log('createReadableCron: '+cron);
+	return cronstrue.toString(cron, { use24HourTimeFormat: true});
 }
 
 
 function createScheduleEntry()
 {
+	var sel =  document.getElementById('schedule_select_files');
+	doCreateScheduleEntry(sel.options[sel.selectedIndex].text, sel.options[sel.selectedIndex].value, 
+	document.getElementById('schedule_file_loop').value,document.getElementById('schedule_file_shuffle').checked,
+	convertgCronToString(),
+	document.getElementById('cron_text').innerHTML);
+}
+
+function doCreateScheduleEntry(label, uid, loop, shuffle,cron, cronLabel)
+{
 	var row = document.getElementById('schedule_entry');
 	
+	var index = document.getElementById('schedule_count').value;
+	document.getElementById('schedule_count').value = index+1;
+	
 	var tr  = document.createElement('tr');
+	tr.id = 'scheduleEntry_'+index;
+	
+	var input_file = document.createElement('input');
+	input_file.type = "hidden";
+	input_file.id = "scheduleEntryUid_"+index;
+	input_file.value = uid;
+	
+	var input_cron = document.createElement('input');
+	input_cron.type = 'hidden';
+	input_cron.id="scheduleEntryCron_"+index;
+	input_cron.value = cron;
+	
+	var input_type = document.createElement('input');
+	input_type.type = 'hidden';
+	input_type.id="scheduleEntryType_"+index;
+	
+	var input_loop = document.createElement('input');
+	input_loop.type = 'hidden';
+	input_loop.id="scheduleEntryLoop_"+index;
+	input_loop.value = loop;
+	
+	tr.appendChild(input_file);
+	tr.append(input_cron);
+	tr.append(input_type);
+	tr.append(input_loop);
+	
 	var td_file =  document.createElement('td');
 	td_file.style.padding = '3px 6px';
 	td_file.className = "uk-background-muted";
+	td_file.id = 'scheduleEntryLabel_'+index;
+	td_file.innerHTML = label;
+		
 	
 	var td_loop =  td_file.cloneNode();
+	td_loop.id = "scheduleEntryLoopLabel_"+index;
+	
 	var td_shuffle =  td_file.cloneNode();
+	td_shuffle.id = "scheduleEntryShuffle_"+index;
+	
 	var td_cron =  td_file.cloneNode();
+	td_cron.id = "scheduleEntryCronReadable_"+index;
+	
+	
 	var td_action =  td_file.cloneNode();
 	
+	
 		
-	var sel =  document.getElementById('schedule_select_files');
-	
-	tr.id = "scheduleEntry_"+sel.options[sel.selectedIndex].value;
-				
-	td_file.innerHTML = sel.options[sel.selectedIndex].text;
-	
-	if(document.getElementById('schedule_file_loop').value >= 0)
+	if(loop >= 0)
 	{
-		td_loop.innerHTML = document.getElementById('schedule_file_loop').value;
+		td_loop.innerHTML = loop;
 	}
 	else
 	{
 		td_loop.innerHTML = "&infin;";
 	}
 	
-	td_shuffle.id = "scheduleEntryShuffle_"+sel.options[sel.selectedIndex].value;
 	
-	td_shuffle.innerHTML = document.getElementById('schedule_file_shuffle').checked;
-	td_cron.innerHTML = document.getElementById('cron_text').innerHTML;
 	
-	var input_cron = document.createElement('input');
-	input_cron.type = 'hidden';
-	input_cron.id="scheduleEntryCron_"+sel.options[sel.selectedIndex].value;
-	input_cron.value = createReadableCron()[0];
 	
-	var input_type = document.createElement('input');
-	input_type.type = 'hidden';
-	input_type.id="scheduleEntryType_"+sel.options[sel.selectedIndex].value
-	
-	var input_loop = document.createElement('input');
-	input_loop.type = 'hidden';
-	input_loop.id="scheduleEntryLoop_"+sel.options[sel.selectedIndex].value
-	input_loop.value = document.getElementById('schedule_file_loop').value;
-	
-	if(isPlaylist(sel.options[sel.selectedIndex].innerHTML))
+	if(isPlaylist(label))
 	{
 		input_type.value = "playlist";
 	}
 	
-	td_cron.append(input_cron);
-	td_cron.append(input_type);
-	td_cron.append(input_loop);
+	td_shuffle.innerHTML = shuffle;
+	td_cron.innerHTML = cronLabel;
+	
+	
+	
+	var buttonMod = document.createElement('button');
+	buttonMod.className = "uk-button";
+	buttonMod.classList.add("uk-button-small");
+	buttonMod.style.background = '#ffffff';
+	buttonMod.id = "scheduleEntryModify_"+index;
+	buttonMod.innerHTML = 'Modify';
+	buttonMod.addEventListener('click',modifyScheduleEntry, false);
+	td_action.appendChild(buttonMod);
+	
 	
 	var button = document.createElement('button');
 	button.className = "uk-button";
 	button.classList.add("uk-button-small");
 	button.style.background = '#ffffff';
-	button.id = "scheduleRemove_"+sel.options[sel.selectedIndex].value;
+	button.style.marginLeft = '5px';
+	button.id = "scheduleEntryRemove_"+index;
 	button.innerHTML = 'Remove';
 	button.addEventListener('click',removeScheduleEntry, false);
 	td_action.appendChild(button);
+	
+	
 	
 	tr.appendChild(td_file);
 	tr.appendChild(td_loop);
@@ -2462,10 +2597,16 @@ function createScheduleEntry()
 
 function removeScheduleEntry(e)
 {
-	var target = e.target.id.split('_')[1];
-	console.log(target);
-	var row = document.getElementById('scheduleEntry_'+target);
-	row.parentNode.removeChild(row);
+	if(document.getElementById('schedule_edit').value != -1)
+	{
+		cancelScheduleEntry();
+	}
+	else
+	{
+		var target = e.target.id.split('_')[1];
+		var row = document.getElementById('scheduleEntry_'+target);
+		row.parentNode.removeChild(row);
+	}
 }
 
 
@@ -2520,32 +2661,97 @@ function clearCron()
 		{
 			if(g_cron[cronSection][time])
 			{
-				document.getElementById(cronSection+'_'+time).classList.add('uk-button-default');
+				document.getElementById(cronSection+'_'+time).classList.add('loopi_cron_deselected');
 				document.getElementById(cronSection+'_'+time).classList.remove('uk-button-primary');
 			}
 		}
 		
-		document.getElementById(cronSection+'_all').classList.remove('uk-button-default');
+		document.getElementById(cronSection+'_all').classList.remove('loopi_cron_deselected');
 		document.getElementById(cronSection+'_all').classList.add('uk-button-primary');
     }
 	
 	g_cron = {'s': {'00' : true}, 'm': {}, 'h': {}, 'd': {}, 'M': {}, 'w': {}};
 	
+	setCron();
+	
+}
+
+function setCron()
+{
 	for(cronSection in g_cron)
 	{
 		for(time in g_cron[cronSection])
 		{
 			if(g_cron[cronSection][time])
 			{
-				document.getElementById(cronSection+'_'+time).classList.remove('uk-button-default');
-				document.getElementById(cronSection+'_'+time).classList.add('uk-button-primary');
+				if(document.getElementById(cronSection+'_'+time))
+				{
+					document.getElementById(cronSection+'_'+time).classList.remove('loopi_cron_deselected');
+					document.getElementById(cronSection+'_'+time).classList.add('uk-button-primary');
+				}
+				else
+				{
+					console.log(cronSection+'_'+time);
+				}
 				
-				document.getElementById(cronSection+'_all').classList.add('uk-button-default');
+				document.getElementById(cronSection+'_all').classList.add('loopi_cron_deselected');
 				document.getElementById(cronSection+'_all').classList.remove('uk-button-primary');
 			}
 		}
     }
+    document.getElementById('cron_text').innerHTML = createReadableCron(convertgCronToString())
+}
+
+function convertToCron(cronStr)
+{
+	var split = cronStr.split(' ');
 	
+	convertSingleCron(split[0],'s');
+	convertSingleCron(split[1],'m');
+	convertSingleCron(split[2],'h');
+	convertSingleCron(split[3],'d');
+	convertSingleCron(split[4],'M');
+	convertSingleCron(split[5],'w');
+	
+}
+
+function convertSingleCron(cronStr, key)
+{
+	if(cronStr == '*' || cronStr == '?')
+	{
+		g_cron[key] = {};
+	}
+	else
+	{
+		var split = cronStr.split(',');
+		
+		for(var i = 0; i < split.length; i++)
+		{
+			var range = split[i].split('-');
+			if(range.length == 1)
+			{
+				if(range[0].length < 2)
+				{
+					range[0] = '0'+range[0];
+				}
+				g_cron[key][range[0]] = true;
+			}
+			else
+			{
+				for(var i = range[0]; i <= range[1]; i++)
+				{
+					var value = i;
+					if(value < 10)
+					{
+						value = '0'+value;
+					}
+				
+					g_cron[key][value] = true;
+				
+				}
+			}
+		}
+	}		
 }
 
 
@@ -2581,17 +2787,20 @@ function createSchedule()
 			{
 				var loop = parseInt(document.getElementById('scheduleEntryLoop_'+sp[1]).value,10);
 				var aCron = document.getElementById('scheduleEntryCron_'+sp[1]).value+' *';		//add the year in
+				var uid = document.getElementById('scheduleEntryUid_'+sp[1]).value;
 				
 				if(document.getElementById('scheduleEntryType_'+sp[1]).value == "playlist")
 				{
 					var shuffle = (document.getElementById('scheduleEntryShuffle_'+sp[1]).value == "true");
 					
-					var jsonRow = {"uid" : row[i].id.split('_')[1], "times_to_play" : loop, "cron" : aCron, "shuffle" : shuffle};
+					
+					
+					var jsonRow = {"uid" : uid, "times_to_play" : loop, "cron" : aCron, "shuffle" : shuffle};
 					jsonPost.playlists.push(jsonRow);
 				}
 				else
 				{
-					var jsonRow = {"uid" : row[i].id.split('_')[1], "times_to_play" : loop, "cron" : aCron};
+					var jsonRow = {"uid" : uid, "times_to_play" : loop, "cron" : aCron};
 					jsonPost.files.push(jsonRow);
 				}
 			}
@@ -2608,18 +2817,338 @@ function createSchedule()
 		if(this.readyState == 4)
 		{
 			var jsonObj = JSON.parse(this.responseText);
-			if(this.status != 201)
+			if(this.status != 201 && this.status != 200)
 			{
 				UIkit.notification({message: jsonObj["reason"], status: 'danger', timeout: 2000})
 			}
 			else
 			{
+				console.log("createSchedule: "+this.status);
 				closeSchedule();
 			}
 		}
 	}		
-	
-	ajax.open('POST',"http://"+g_loopi_array[0].url+"/x-epi/schedules");
+
+	var uid = document.getElementById('schedule_uid').value;
+	if(uid == '')
+	{
+		ajax.open('POST',"http://"+g_loopi_array[0].url+"/x-epi/schedules");
+	}
+	else
+	{
+		ajax.open('PUT',"http://"+g_loopi_array[0].url+"/x-epi/schedules/"+uid);
+	}
 	ajax.setRequestHeader("Content-type", "application/json");
 	ajax.send(JSON.stringify(jsonPost));
+}
+
+
+function showPlaylistModal()
+{
+	document.getElementById('create_playlist_title').innerHTML = "Create New Playlist";
+	document.getElementById('playlist_label').value = '';
+	document.getElementById('playlist_description').value = '';
+	document.getElementById('playlist_uid').value = '';
+	document.getElementById('create_playlist_button').innerHTML = 'Create';
+
+	var tbody = document.getElementById('playlist_entries');
+	while(tbody.childElementCount > 1)
+	{
+		tbody.removeChild(tbody.firstChild);
+	}
+	
+	UIkit.modal(document.getElementById('playlist_modal')).show();
+}
+
+function modifyPlaylist(uid)
+{
+	var index = g_loopi_array[0].findPlaylist(uid);
+	if(index != -1)
+	{
+		document.getElementById('playlist_uid').value = uid;
+		document.getElementById('create_playlist_title').innerHTML = "Modify Playlist";
+		document.getElementById('playlist_label').value = g_loopi_array[0].playlists[index].details.label;
+		document.getElementById('playlist_description').value = g_loopi_array[0].playlists[index].details.description;
+		
+		document.getElementById('create_playlist_button').innerHTML = 'Save';
+		
+		for(var i = 0; i < g_loopi_array[0].playlists[index].details.files.length; i++)
+		{
+			var file = g_loopi_array[0].findFile(g_loopi_array[0].playlists[index].details.files[i].uid);
+			if(file != -1)
+			{
+				doCreatePlaylistEntry(g_loopi_array[0].files[file].label, g_loopi_array[0].playlists[index].details.files[i].uid, g_loopi_array[0].playlists[index].details.files[i].times_to_play);
+			}
+		}
+		
+		UIkit.modal(document.getElementById('playlist_modal')).show();
+	}
+	else
+	{
+		console.log("playlist not found");
+	}
+}
+
+
+function modifyScheduleEntry(e)
+{
+		
+	var index = e.target.id.split('_')[1];
+	
+	if(index == document.getElementById('schedule_edit').value)
+	{
+		updateScheduleEntry();
+	}
+	else
+	{
+		cancelScheduleEntry();
+		
+		document.getElementById('schedule_entry').style.display = 'none';
+				
+		
+		document.getElementById('schedule_edit').value = index;
+		
+		var row = document.getElementById('scheduleEntry_'+index);
+		row.style.display = 'none';
+	
+		//
+		var tr  = document.createElement('tr');
+		tr.id = 'mod_row';
+	
+		var td_file =  document.createElement('td');
+		var td_loop =  document.createElement('td');
+		var td_shuffle =  document.createElement('td');
+		var td_cron =  document.createElement('td');
+		var td_action =  document.createElement('td');
+	
+		td_file.style.padding = '3px 6px';
+		td_loop.style.padding = '3px 6px';
+		td_shuffle.style.padding = '3px 6px';
+		td_cron.style.padding = '3px 6px';
+		td_action.style.padding = '3px 6px';
+		
+		td_file.className = "loopi_edit";
+		td_loop.className = "loopi_edit";
+		td_shuffle.className = "loopi_edit";
+		td_cron.className = "loopi_edit";
+		td_action.className = "loopi_edit";
+	
+		var sel =  document.getElementById('select_files');
+		var selMod = sel.cloneNode(true);
+		selMod.value = document.getElementById('scheduleEntryUid_'+index).value;
+		selMod.id = 'schedule_mod_sel';
+		td_file.appendChild(selMod);
+	
+		var loopMod = document.getElementById('schedule_file_loop').cloneNode();
+		loopMod.id = 'schedule_mod_loop';
+		loopMod.value = document.getElementById('scheduleEntryLoop_'+index).value;
+		td_loop.appendChild(loopMod);
+	
+		
+		var shuffleMod = document.getElementById('schedule_file_shuffle').cloneNode();
+		shuffleMod.id = 'schedule_mod_shuffle';
+
+	
+		if(isPlaylist(document.getElementById('scheduleEntryLabel_'+index).innerHTML))
+		{
+			shuffleMod.style.visibility = 'visible';
+			shuffleInput.checked = (document.getElementById('scheduleEntryShuffle_'+index).innerHTML == 'true');
+		}
+		else
+		{
+			shuffleMod.style.visibility = 'hidden';
+		}
+		td_shuffle.appendChild(shuffleMod);
+				
+		td_cron.id = 'schedule_mod_cron';
+		td_cron.innerHTML = document.getElementById('scheduleEntryCronReadable_'+index).innerHTML;
+		
+	
+	
+		var buttonMod = document.createElement('button');
+		buttonMod.className = "uk-button";
+		buttonMod.classList.add("uk-button-small");
+		buttonMod.style.background = '#ffffff';
+		buttonMod.innerHTML = 'Update';
+		buttonMod.addEventListener('click',updateScheduleEntry, false);
+		td_action.appendChild(buttonMod);
+	
+		var button = document.createElement('button');
+		button.className = "uk-button";
+		button.classList.add("uk-button-small");
+		button.style.background = '#ffffff';
+		button.style.marginLeft = '5px';
+		button.innerHTML = 'Cancel';
+		button.addEventListener('click',cancelScheduleEntry, false);
+		td_action.appendChild(button);
+	
+		tr.appendChild(td_file);	
+		tr.appendChild(td_loop);	
+		tr.appendChild(td_shuffle);	
+		tr.appendChild(td_cron);	
+		tr.appendChild(td_action);
+		
+		row.parentNode.insertBefore(tr, row);	
+	
+		convertToCron(document.getElementById('scheduleEntryCron_'+index).value);
+		setCron();
+		
+		document.getElementById('add_schedule_entry').style.visibility = 'hidden';
+		
+		document.getElementById('schedule_cron_div').classList.add('loopi_edit');
+	}
+}
+
+
+function cancelScheduleEntry()
+{
+	var index = document.getElementById('schedule_edit').value;
+	if(index != -1)
+	{
+		document.getElementById('scheduleEntry_'+index).style.display = '';
+		document.getElementById('schedule_entry').style.display = '';
+		
+		
+		document.getElementById('scheduleEntryModify_'+index).innerHTML = "Modify";
+		document.getElementById('scheduleEntryRemove_'+index).innerHTML = "Remove";
+		
+		var row = document.getElementById('scheduleEntry_'+index);
+		for(var i = 0; i < row.cells.length; i++)
+		{
+			row.cells[i].className = "uk-background-muted";
+		}
+		
+		document.getElementById('schedule_edit').value = -1;
+		
+		document.getElementById('add_schedule_entry').style.visibility = 'visible';
+		
+		var mod =document.getElementById('mod_row');
+		if(mod !== null)
+		{
+			mod.parentNode.removeChild(document.getElementById('mod_row'));
+		}
+		
+		document.getElementById('schedule_cron_div').classList.remove('loopi_edit');
+	}
+}
+
+
+function updateScheduleEntry()
+{
+	var index = document.getElementById('schedule_edit').value;
+
+	
+	var sel =  document.getElementById('schedule_mod_sel');
+	var label = sel.options[sel.selectedIndex].text;
+	var uid = sel.options[sel.selectedIndex].value;
+	var loop =  document.getElementById('schedule_mod_loop').value;
+	var shuffle = document.getElementById('schedule_mod_shuffle').checked;
+	var cron_text = document.getElementById('schedule_mod_cron').innerHTML;
+	
+	
+	var input_file = document.getElementById('scheduleEntryUid_'+index);
+	var input_cron = document.getElementById("scheduleEntryCron_"+index);
+	var input_loop = document.getElementById("scheduleEntryLoop_"+index);
+	var input_type = document.getElementById("scheduleEntryType_"+index);
+	var td_file =  document.getElementById('scheduleEntryLabel_'+index);
+	var td_shuffle = document.getElementById("scheduleEntryShuffle_"+index);
+	var td_cron =  document.getElementById("scheduleEntryCronReadable_"+index);
+	var td_loop =  document.getElementById("scheduleEntryLoopLabel_"+index);
+	
+	input_file.value = uid;
+	
+	input_cron.value = convertgCronToString();
+	input_loop.value = loop;
+	
+	
+	td_file.innerHTML = label;
+	if(isPlaylist(label))
+	{
+		input_type.value = "playlist";
+	}	
+	
+		
+	if(loop >= 0)
+	{
+		td_loop.innerHTML = loop;
+	}
+	else
+	{
+		td_loop.innerHTML = "&infin;";
+	}
+	
+	td_shuffle.innerHTML = shuffle;
+	td_cron.innerHTML = cron_text;
+	
+	
+	cancelScheduleEntry();
+}
+
+
+function modifySchedule(uid)
+{
+	var index = g_loopi_array[0].findSchedule(uid);
+	if(index != -1)
+	{
+		document.getElementById('schedule_uid').value = uid;
+		document.getElementById('create_schedule_title').innerHTML = "Modify Schedule";
+		document.getElementById('schedule_label').value = g_loopi_array[0].schedules[index].details.label;
+		document.getElementById('schedule_description').value = g_loopi_array[0].schedules[index].details.description;
+		
+		document.getElementById('create_schedule_button').innerHTML = 'Save';
+		
+		for(var i = 0; i < g_loopi_array[0].schedules[index].details.files.length; i++)
+		{
+			var file = g_loopi_array[0].findFile(g_loopi_array[0].schedules[index].details.files[i].uid);
+			if(file != -1)
+			{
+				//label, uid, loop, shuffle, cron
+				doCreateScheduleEntry(g_loopi_array[0].files[file].label, 
+								      g_loopi_array[0].schedules[index].details.files[i].uid, 
+								      g_loopi_array[0].schedules[index].details.files[i].times_to_play,
+								      false, 
+								      g_loopi_array[0].schedules[index].details.files[i].cron,
+								      createReadableCron(g_loopi_array[0].schedules[index].details.files[i].cron));
+			}
+		}
+		
+		for(var i = 0; i < g_loopi_array[0].schedules[index].details.playlists.length; i++)
+		{
+			var playlist = g_loopi_array[0].findPlaylist(g_loopi_array[0].schedules[index].details.playlists[i].uid);
+			if(playlist != -1)
+			{
+				//label, uid, loop, shuffle, cron
+				doCreateScheduleEntry(g_loopi_array[0].playlists[playlist].label, 
+								      g_loopi_array[0].schedules[index].details.playlists[i].uid, 
+								      g_loopi_array[0].schedules[index].details.playlists[i].times_to_play,
+								      g_loopi_array[0].schedules[index].details.playlists[i].shuffle, 
+								      g_loopi_array[0].schedules[index].details.playlists[i].cron,
+								      createReadableCron(g_loopi_array[0].schedules[index].details.playlists[i].cron));
+			}
+		}
+		
+		UIkit.modal(document.getElementById('schedule_modal')).show();
+	}
+	else
+	{
+		console.log("schedule not found");
+	}
+}
+
+function showScheduleModal()
+{
+	document.getElementById('create_schedule_title').innerHTML = "Create New Schedule";
+	document.getElementById('schedule_label').value = '';
+	document.getElementById('schedule_description').value = '';
+	document.getElementById('schedule_uid').value = '';
+	document.getElementById('create_schedule_button').innerHTML = 'Create';
+
+	var tbody = document.getElementById('schedule_entries');
+	while(tbody.childElementCount > 1)
+	{
+		tbody.removeChild(tbody.firstChild);
+	}
+	clearCron();
+	
+	UIkit.modal(document.getElementById('schedule_modal')).show();
 }

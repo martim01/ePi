@@ -14,66 +14,9 @@ include ("../include/overview.inc");
 
 	
 
-	<div class="uk-section uk-section-xsmall uk-section-primary  uk-margin-medium" id="section_player" style="display: none">
-		<div class="uk-container">
-			<div class="uk-grid-match uk-child-width-expand@m" uk-grid>
-				<div>
-					<div class="uk-card uk-card-default uk-card-small" id="card_resource">
-						<div class="uk-card-header">Resource</div>
-						<div class="uk-card-body">
-							<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
-								<div class='uk-width-1-4'><span class='uk-text-bold'>Type:</span></div>
-								<div><span id='resource_type'>Unknown</span></div>
-							</div>
-							<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
-								<div class='uk-width-1-4'><span class='uk-text-bold'>Label:</span></div>
-								<div><span id='resource_label'>Unknown</span></div>
-							</div>
-							<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
-								<div class='uk-width-1-4'><span class='uk-text-bold'>Status:</span></div>
-								<div><span class='loopi_label' id='resource_status'>Unknown</span></div>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div>
-					<div class="uk-card uk-card-default uk-card-small" id="card_playout">
-						<div class="uk-card-header">Playout</div>
-						<div class="uk-card-body">
-							<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
-								<div class='uk-width-1-4'><span class='uk-text-bold'>Label:</span></div>
-								<div><span id='playout_label'>Unknown</span></div>
-							</div>
-							<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
-								<div class='uk-width-1-4'><span class='uk-text-bold'>Started:</span></div>
-								<div><span id='playout_started'>Unknown</span></div>
-							</div>
-							<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
-								<div class='uk-width-1-4'><span class='uk-text-bold'>Length:</span></div>
-								<div><span id='playout_length'>Unknown</span></div>
-							</div>
-							<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
-								<div class='uk-width-1-4'><span class='uk-text-bold'>Loop:</span></div>
-								<div><span id='playout_loop'>Unknown</span></div>
-							</div>
-							<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
-								<div class='uk-width-1-4'><span class='uk-text-bold'>Time:</span></div>
-								<div><span id='playout_time'>Unknown</span></div>
-							</div>
-							<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
-								<div class='uk-width-1-4'><span class='uk-text-bold'>SRC:</span></div>
-								<div><span class="loopi_label" id='playout_src'>Unknown</span></div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>  
 	
-	<div class="uk-section uk-section-xsmall uk-section-muted uk-margin-medium" id="section_resources" style="display: none">
-		<div class="uk-container">
+	<div class="uk-section uk-section-xsmall uk-section-muted uk-margin-medium" id="section_resources" >
+		<div class="uk-container uk-container-xlarge">
 			<ul uk-tab class="uk-subnav uk-subnav-pill">
 			<li><a href="#">Files</a></li>
 			<li><a href="#">Playlists</a></li>
@@ -91,14 +34,14 @@ include ("../include/overview.inc");
 					<div class="uk-card uk-card-default uk-card-small uk-card-body">
 						<ul uk-accordion id="resource_playlists" class="uk-list  uk-list-striped uk-list-collapse">>
 						</ul>
-						<a class="uk-button uk-button-default"  style="background: #c8efc8" href="#playlist_modal" uk-toggle>Create New Playlist</a>
+						<a class="uk-button uk-button-default"  style="background: #c8efc8" onclick="showPlaylistModal()">Create New Playlist</a>
 					</div>
 				</li>
 				<li>
 					<div class="uk-card uk-card-default uk-card-small uk-card-body">
 						<ul uk-accordion id="resource_schedules" class="uk-list  uk-list-striped uk-list-collapse">>
 						</ul>
-						<a class="uk-button uk-button-default"  style="background: #c8efc8" href="#schedule_modal" uk-toggle>Create New Schedule</a>
+						<a class="uk-button uk-button-default"  style="background: #c8efc8" onclick="showScheduleModal()">Create New Schedule</a>
 					</div>
 				</li>
 			</ul>
@@ -189,9 +132,10 @@ include ("../include/overview.inc");
 		<div class="uk-modal-dialog" style="width: 800px">
 			<button class="uk-modal-close-default" type="button" uk-close></button>
 			<div class="uk-modal-header">
-				<h3 class="uk-modal-title">Create New Playlist</h3>
+				<h3 class="uk-modal-title" id="create_playlist_title">Create New Playlist</h3>
 				<input type="hidden" id="playlist_count" value="0">
 				<input type="hidden" id="playlist_edit" value="-1">
+				<input type="hidden" id="playlist_uid" value="">
 			</div>
 			<div class="uk-modal-body">
 				<form class="uk-form-horizontal uk-margin-small" id="playlist_form">
@@ -226,7 +170,7 @@ include ("../include/overview.inc");
 			</div>
 			<div class="uk-modal-footer uk-text-right">
 				<button class="uk-button uk-button-default" type="button" onclick="closePlaylist()">Cancel</button>
-			<button class="uk-button uk-button-primary" type="button" onclick="createPlaylist()">Create</button>
+			<button class="uk-button uk-button-primary" type="button" onclick="createPlaylist()" id="create_playlist_button">Create</button>
 			</div>
 		</div>
 	</div>
@@ -234,7 +178,10 @@ include ("../include/overview.inc");
 		<div class="uk-modal-dialog" style="width: 1100px">
 			<button class="uk-modal-close-default" type="button" uk-close></button>
 			<div class="uk-modal-header">
-				<h3 class="uk-modal-title">Create New Schedule</h3>
+				<h3 class="uk-modal-title" id="create_schedule_title">Create New Schedule</h3>
+				<input type="hidden" id="schedule_count" value="0">
+				<input type="hidden" id="schedule_edit" value="-1">
+				<input type="hidden" id="schedule_uid" value="">
 			</div>
 			<div class="uk-modal-body">
 				<form class="uk-form-horizontal uk-margin-small" id="schedule_form">
@@ -255,33 +202,38 @@ include ("../include/overview.inc");
 					<caption>Entries</caption>
 					<thead>
 						<th class="uk-table-expand">Resource</th>
-						<th class="uk-table-shrink">Play</th>
+						<th style="width: 1%">Play</th>
 						<th class="uk-table-shrink">Shuffle</th>
 						<th class="uk-table-expand">Schedule To Play</th>
-						<td class="uk-table-shrink">&nbsp;</td>
+						<td style="width: 200px">&nbsp;</td>
 					</thead>
 					<tbody id="schedule_entries">
 						<tr id="schedule_entry">
 							<td class="loopi_entry_td"><select class="uk-select" id="schedule_select_files" onchange="scheduleSelectChange()"></select></td>
-							<td class="loopi_entry_td"><input class="uk-input uk-form-width-small" type="number" value="1" id="schedule_file_loop"></td>
+							<td class="loopi_entry_td"><input class="uk-input uk-form-width-xsmall" type="number" value="1" id="schedule_file_loop"></td>
 							<td class="loopi_entry_td"><input class="uk-checkbox" type="checkbox" id="schedule_file_shuffle" style="visibility: hidden"></td>
 							<td class="loopi_entry_td"><span id="cron_text"></span></td>
 							<td class="loopi_entry_td">&nbsp;</td>
 						</tr>
 					</tbody>
 				</table>
-				<div><span class="uk-text-muted loopi_subheading">SCHEDULE TO PLAY</span> <button class="uk-align-right uk-button uk-button-small uk-button-default" onclick="clearCron()">Reset</button></div>
+				<div class="uk-section uk-section-xsmall" id="schedule_cron_div">
+					<div>
+					<span class="uk-text-muted loopi_subheading">SCHEDULE TO PLAY</span> 
+					<button class="uk-align-right uk-button uk-button-small uk-button-default" onclick="clearCron()">Reset</button>
+					</div>
 				<?php
 				include("../include/cron.inc");
 				?>
 				<div class="uk-margin-small">
-					<button class="uk-button uk-button-default uk-align-center loopi_button_add" onclick="createScheduleEntry()">Add</button>
+					<button class="uk-button uk-align-center loopi_button_add" id="add_schedule_entry" onclick="createScheduleEntry()">Add</button>
 					
+				</div>
 				</div>
 			</div>
 			<div class="uk-modal-footer uk-text-right">
 				<button class="uk-button uk-button-default" type="button" onclick="closeSchedule()">Cancel</button>
-				<button class="uk-button uk-button-primary" type="button" onclick="createSchedule()">Create</button>
+				<button class="uk-button uk-button-primary" type="button" id="create_schedule_button" onclick="createSchedule()">Create</button>
 			</div>
 		</div>
 	</div>
