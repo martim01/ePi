@@ -2241,6 +2241,12 @@ function handleStatus_System(loopi, jsonObj)
 
 function handleUpdate_System(loopi, jsonObj)
 {
+	showVersion(loopi,jsonObj);
+	ws_connect(loopi, updateStatus_System, updateInfo_System, null);
+}
+
+function showVersion(loopi, jsonObj)
+{
 	if(jsonObj != null)
 	{
 		document.getElementById('server-version').innerHTML = jsonObj.server.version;
@@ -2255,7 +2261,6 @@ function handleUpdate_System(loopi, jsonObj)
 			document.getElementById('player67-date').innerHTML = jsonObj.player67.date;
 		}
 	}
-	ws_connect(loopi, updateStatus_System, updateInfo_System, null);
 }
 
 	
@@ -2371,10 +2376,13 @@ function doUpdate()
 			else if(jsonObj["restart"] == true)
 			{
 				UIkit.notification({message: document.getElementById('update_application').value+" has been updated but needs restarting.", status: 'danger', timeout: 3000});
+				
+				getUpdate(loopi, showVersion);
 			}
 			else
 			{
 				UIkit.notification({message: document.getElementById('update_application').value+" has been updated", status: 'danger', timeout: 3000});
+				getUpdate(loopi, showVersion);
 			}
 		}
 	}
