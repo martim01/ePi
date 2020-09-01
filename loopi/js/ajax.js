@@ -2363,9 +2363,6 @@ function doUpdate()
 		{
 			var jsonObj = JSON.parse(this.responseText);
 			
-			UIkit.modal(document.getElementById('progress_modal')).hide();
-			document.getElementById('uploading_label').innerHTML = '';
-			document.getElementById('progress').value = 0;
 			
 			if(this.status != 200)
 			{
