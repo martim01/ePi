@@ -2377,12 +2377,12 @@ function doUpdate()
 			{
 				UIkit.notification({message: document.getElementById('update_application').value+" has been updated but needs restarting.", status: 'danger', timeout: 3000});
 				
-				getUpdate(loopi, showVersion);
+				getUpdate(0, showVersion);
 			}
 			else
 			{
 				UIkit.notification({message: document.getElementById('update_application').value+" has been updated", status: 'danger', timeout: 3000});
-				getUpdate(loopi, showVersion);
+				getUpdate(0, showVersion);
 			}
 		}
 	}
