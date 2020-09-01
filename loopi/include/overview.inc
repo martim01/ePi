@@ -7,12 +7,12 @@
 					<div class="uk-card-body">
 						<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
 							<div class='uk-width-1-4'><div><span class='uk-text-bold'>System:</span></div></div>
-							<div><span class='uk-label' id='lock_0'>Unknown</span></div>
-							<div><button id="button_lock" class="uk-button uk-button-default uk-button-small" onclick="lock()">Lock</button></div>
+							<div><span class='loopi_label_danger' id='lock_0'>Unknown</span></div>
+							<div><button id="button_lock" class="uk-button uk-button-small" onclick="lock()">Lock</button></div>
 						</div>
 						<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
 							<div class='uk-width-1-4'><div><span class='uk-text-bold'>Player:</span></div></div>
-							<div><span  class='uk-label' id='player'>Unknown</span></div>
+							<div><span  class='' id='player'>Unknown</span></div>
 							<div id="button_stop" style="visibility: hidden"><button class="uk-button uk-button-danger uk-button-small" onclick="stop()">Stop</button></div>
 						</div>
 					</div>

@@ -1,7 +1,8 @@
 .loopi_label { padding-left: 5px; padding-top: 2px; padding-bottom: 2px; padding-right: 5px; color: #ffffff; background-color: #000000}
 .loopi_label_muted { background-color: #c8c8c8}
-.loopi_label_running { background-color: #32d296}
-.loopi_label_warning { background-color: #ffa800}
+.loopi_label_running { background-color: #32d296; padding: 5px}
+.loopi_label_warning { background-color: #ffa800; padding: 5px}
+.loopi_label_danger { background-color: #ee0000; padding: 5px}
 .loopi_button_warning { background-color: #ffa800; color: #ffffff}
 .loopi_button_update { background-color: #336faa; color: #ffffff}
 .loopi_subheading {text-decoration: underline}

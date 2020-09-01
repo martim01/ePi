@@ -471,9 +471,9 @@ function loopiOffline(loopi)
 	console.log("loopi "+loopi+" offline");
 	document.getElementById('loopi_'+loopi).style.backgroundColor = CLR_ERROR;
 	document.getElementById("lock_"+loopi).innerHTML = "OFFLINE";
-	document.getElementById("lock_"+loopi).classList.add("uk-label-danger");
-	document.getElementById("lock_"+loopi).classList.remove("uk-label-warning");
-	document.getElementById("lock_"+loopi).classList.remove("uk-label-success");
+	document.getElementById("lock_"+loopi).classList.add("loopi_label_danger");
+	document.getElementById("lock_"+loopi).classList.remove("loopi_label_warning");
+	document.getElementById("lock_"+loopi).classList.remove("loopi_label_running");
 	
 	g_loopi_array[loopi].connected = false;
 	
@@ -1221,6 +1221,15 @@ function updateConfig_Details(loopi, jsonObj)
 	
 }
 
+function showPlayButtons(mode)
+{
+	var playButtons = document.querySelectorAll('button[id^="play_"]');
+	console.log(playButtons);
+	for(var i = 0; i < playButtons.length; i++)
+	{
+		playButtons[i].style.visibility = mode;
+	}
+}
 
 function updateOverallStatus(loopi, jsonObj)
 {
@@ -1229,18 +1238,18 @@ function updateOverallStatus(loopi, jsonObj)
 		if(jsonObj["locked"] == false)
 		{
 			document.getElementById("lock_0").innerHTML = "Unlocked";
-			document.getElementById("lock_0").classList.remove("uk-label-danger");
-			document.getElementById("lock_0").classList.remove("uk-label-warning");
-			document.getElementById("lock_0").classList.add("uk-label-success");
+			document.getElementById("lock_0").classList.remove("loopi_label_danger");
+			document.getElementById("lock_0").classList.remove("loopi_label_warning");
+			document.getElementById("lock_0").classList.add("loopi_label_running");
 			document.getElementById("button_lock").innerHTML = "Lock";
 			
 		}
 		else if(jsonObj["locked"] == true)
 		{
 			document.getElementById("lock_0").innerHTML = "Locked";
-			document.getElementById("lock_0").classList.remove("uk-label-success");
-			document.getElementById("lock_0").classList.remove("uk-label-danger");
-			document.getElementById("lock_0").classList.add("uk-label-warning");
+			document.getElementById("lock_0").classList.remove("loopi_label_running");
+			document.getElementById("lock_0").classList.remove("loopi_label_danger");
+			document.getElementById("lock_0").classList.add("loopi_label_warning");
 			document.getElementById("button_lock").innerHTML = "Unlock";
 			
 			document.getElementById("button_stop").style.visibility = "hidden";
@@ -1258,9 +1267,9 @@ function updatePlayerStatus(loopi, jsonObj)
 	if(jsonObj["player"] === undefined)
 	{
 		document.getElementById("player").innerHTML = "Unknown";
-		document.getElementById("player").classList.remove("uk-label-success");
-		document.getElementById("player").classList.remove("uk-label-warning");
-		document.getElementById("player").classList.add("uk-label-danger");
+		document.getElementById("player").classList.remove("loopi_label_running");
+		document.getElementById("player").classList.remove("loopi_label_warning");
+		document.getElementById("player").classList.add("loopi_label_danger");
 		
 		document.getElementById("button_stop").style.visibility = "hidden";
 		
@@ -1268,32 +1277,41 @@ function updatePlayerStatus(loopi, jsonObj)
 	}
 	else if(jsonObj["player"] === "Stopped")
 	{
-		document.getElementById("player").innerHTML = "Stopped";
-		document.getElementById("player").classList.remove("uk-label-success");
-		document.getElementById("player").classList.remove("uk-label-warning");
-		document.getElementById("player").classList.remove("uk-label-danger");
-		
-		
-		document.getElementById("card_resource").style.visibility = "hidden";
-		document.getElementById("card_playout").style.visibility = "hidden";
-		
-		document.getElementById("button_stop").style.visibility = "hidden";
+		if(document.getElementById("player").innerHTML != "Stopped")
+		{
+			document.getElementById("player").innerHTML = "Stopped";
+			document.getElementById("player").classList.remove("loopi_label_running");
+			document.getElementById("player").classList.remove("loopi_label_warning");
+			document.getElementById("player").classList.remove("loopi_label_danger");
+			
+			
+			document.getElementById("card_resource").style.visibility = "hidden";
+			document.getElementById("card_playout").style.visibility = "hidden";
+			
+			document.getElementById("button_stop").style.visibility = "hidden";
+			
+			
+			showPlayButtons("visible");
+		}
 	}
 	else if(jsonObj["player"] === "Running")
 	{
-		document.getElementById("player").innerHTML = "Running";
-		document.getElementById("player").classList.add("uk-label-success");
-		document.getElementById("player").classList.remove("uk-label-warning");
-		document.getElementById("player").classList.remove("uk-label-danger");
+		if(document.getElementById("player").innerHTML != "Running")
+		{
+			document.getElementById("player").innerHTML = "Running";
+			document.getElementById("player").classList.add("loopi_label_running");
+			document.getElementById("player").classList.remove("loopi_label_-warning");
+			document.getElementById("player").classList.remove("loopi_label_-danger");
+			showStopButton(loopi);
+			showPlayButtons("hidden");
+				
 		
-		showStopButton(loopi);
-		
-		
-		document.getElementById("card_resource").style.visibility = "visible";
-		
-		document.getElementById('resource_type').innerHTML = jsonObj["resource"]["type"];
-		document.getElementById('resource_label').innerHTML = jsonObj["resource"]["label"];
-		
+			document.getElementById("card_resource").style.visibility = "visible";
+			
+			document.getElementById('resource_type').innerHTML = jsonObj["resource"]["type"];
+			document.getElementById('resource_label').innerHTML = jsonObj["resource"]["label"];
+		}
+			
 		document.getElementById('resource_status').innerHTML = jsonObj["status"]["action"];
 		if(jsonObj["status"]["action"] == "Idle")
 		{
@@ -1792,7 +1810,7 @@ function lock()
 		if(password !== null && password != "")
 		{
 			var play = { "command" : "lock", "lock" : lock, "password" : password};
-			ajaxPatch(0, "/x-epi/status", JSON.stringify(play), handleStatusPatch);
+			ajaxPatch(0, "/x-epi/status", JSON.stringify(play), handleStatusLockPatch);
 		}
 	});
 }
@@ -1876,6 +1894,18 @@ function handleStatusPatch(status, jsonObj)
 	//{
 	//	getStatus(0, handleStatus_Details);
 	//}
+}
+
+function handleStatusLockPatch(status, jsonObj)
+{
+	if(status != 200)
+	{
+		UIkit.notification({message: jsonObj["reason"], status: 'danger', timeout: 4000})
+	}
+	else
+	{
+		getStatus(0, handleStatus_Details);
+	}
 }
 
 
