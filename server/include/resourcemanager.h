@@ -84,7 +84,7 @@ class ResourceManager
         response ParseFile(const std::string& sUploadName, const std::string& sLabel, const std::string& sDescription);
         response ParseSchedule(const Json::Value& jsData);
 
-        response ParseScheduleItems(const Json::Value& jsItems, std::function<response(const std::string&)> pFind);
+        response ParseScheduleItems(const Json::Value& jsItems, std::function<response(const std::string&)> pFind, bool bCheckShuffle);
         response ParsePlaylist(const Json::Value& jsData);
 
 

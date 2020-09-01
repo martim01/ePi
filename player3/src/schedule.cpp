@@ -25,6 +25,7 @@ bool Schedule::Play()
 {
     if(!LoadSchedule())
     {
+
         return false;
     }
 
@@ -115,6 +116,24 @@ bool Schedule::CreateSchedule(const Json::Value& jsFiles, const Json::Value& jsP
     {
         for(size_t i = 0; i < jsSchedule["playlists"].size(); i++)
         {
+            if(jsSchedule["playlists"][i]["uid"].isString() == false)
+            {
+                pml::Log::Get() << "uid" << std::endl;
+            }
+            if(jsSchedule["playlists"][i]["times_to_play"].isInt() == false)
+            {
+                pml::Log::Get() << "times_to_play" << std::endl;
+            }
+            if(jsSchedule["playlists"][i]["cron"].isString() == false)
+            {
+                pml::Log::Get() << "cron" << std::endl;
+            }
+            if(jsSchedule["playlists"][i]["shuffle"].isBool() == false)
+            {
+                pml::Log::Get() << "shuffle" << std::endl;
+            }
+
+
             if(jsSchedule["playlists"][i]["uid"].isString() && jsSchedule["playlists"][i]["times_to_play"].isInt() && jsSchedule["playlists"][i]["cron"].isString() && jsSchedule["playlists"][i]["shuffle"].isBool())
             {
                 if(GetPlaylist(jsPlaylists, jsSchedule["playlists"][i]["uid"].asString()))

@@ -579,7 +579,7 @@ response Core::PutSchedule(mg_connection* pConnection, const query& theQuery, co
         theResponse = m_manager.ModifySchedule(vSplit.back(), ConvertToJson(theData.Get()));
         if(theResponse.nHttpCode == 200)
         {
-            ResourceModified(PLAYLIST, vSplit.back(), MODIFIED);
+            ResourceModified(SCHEDULE, vSplit.back(), MODIFIED);
         }
     }
     return theResponse;

@@ -84,7 +84,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option parameters="4 3 0 192.168.0.120 8080" />
+				<Option parameters="4 3 0 192.168.1.20 8080" />
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
 					<Add option="`wx-config --cxxflags`" />

@@ -830,11 +830,11 @@ response ResourceManager::ParseSchedule(const Json::Value& jsData)
 
     if(jsData["files"].isArray())
     {
-        theResponse = ParseScheduleItems(jsData["files"], std::bind(&ResourceManager::GetFile, this, _1));
+        theResponse = ParseScheduleItems(jsData["files"], std::bind(&ResourceManager::GetFile, this, _1), false);
     }
     if(theResponse.nHttpCode != 400 && jsData["playlists"].isArray())
     {
-        theResponse = ParseScheduleItems(jsData["playlists"], std::bind(&ResourceManager::GetPlaylist, this, _1));
+        theResponse = ParseScheduleItems(jsData["playlists"], std::bind(&ResourceManager::GetPlaylist, this, _1), true);
     }
 
     if(theResponse.nHttpCode == 400)    //got here and not okay
@@ -845,14 +845,15 @@ response ResourceManager::ParseSchedule(const Json::Value& jsData)
     return theResponse;
 }
 
-response ResourceManager::ParseScheduleItems(const Json::Value& jsItems, std::function<response(const std::string&)> pFind)
+response ResourceManager::ParseScheduleItems(const Json::Value& jsItems, std::function<response(const std::string&)> pFind, bool bCheckShuffle)
 {
     response theResponse;
     //now check the schedule is valid
     for(size_t i=0; i < jsItems.size(); i++)
     {
         if(jsItems[i].isObject() == false ||
-           jsItems[i]["cron"].isString() == false || jsItems[i]["uid"].isString() == false || jsItems[i]["times_to_play"].isInt() == false)
+           jsItems[i]["cron"].isString() == false || jsItems[i]["uid"].isString() == false || jsItems[i]["times_to_play"].isInt() == false
+           || (bCheckShuffle && jsItems[i]["shuffle"].isBool() == false))
         {
             theResponse.nHttpCode = 400;
             theResponse.jsonData["result"] = false;
