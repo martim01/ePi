@@ -2266,6 +2266,7 @@ function updateStatus_System(loopi, jsonObj)
 		g_loopi_array[loopi].setStatus(jsonObj);
 		
 		updateOverallStatus(loopi, jsonObj);
+		updatePlayerStatus(loopi, jsonObj);
 	}
 }
 
