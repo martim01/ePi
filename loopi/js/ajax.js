@@ -2259,18 +2259,6 @@ function clearElement(elm)
 }
 
 
-function setLinks()
-{
-	document.getElementById("a_system").href = "../system/?loopi="+endpoint;
-	document.getElementById("a_playlists").href = "../playlists/?loopi="+endpoint;
-	document.getElementById("a_schedules").href = "../schedules/?loopi="+endpoint;
-	document.getElementById("a_files").href = "../files/?loopi="+endpoint;
-	document.getElementById("a_control").href = "../status/?loopi="+endpoint;
-	document.getElementById("a_status").href = "../status/?loopi="+endpoint;
-}
-
-
-
 
 function getLoopiConfig_System()
 {
