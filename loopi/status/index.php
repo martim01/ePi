@@ -27,7 +27,7 @@ include ("../include/overview.inc");
 					<div class="uk-card uk-card-default uk-card-small uk-card-body">
 						<ul uk-accordion id="resource_files" class="uk-list  uk-list-striped uk-list-collapse">
 						</ul>
-						<a class="uk-button uk-button-default"  style="background: #c8efc8" href="#upload_modal" uk-toggle>Upload New Audio</a>
+						<a class="uk-button uk-button-default"  style="background: #c8efc8" onclick="showUploadModal()">Upload New Audio</a>
 					</div>
 				</li>
 				<li>
@@ -79,11 +79,11 @@ include ("../include/overview.inc");
 	</div>
 
 
-	<div id="upload_modal" uk-modal>
+	<div id="upload_modal" uk-modal="{'bg-close': false, 'stack': true}">
 		<div class="uk-modal-dialog">
 			<button class="uk-modal-close-default" type="button" uk-close></button>
 			<div class="uk-modal-header">
-				<h3 class="uk-modal-title">Upload New Audio</h3>
+				<h3 class="uk-modal-title" id="upload_title">Upload New Audio</h3>
 			</div>
 			<div class="uk-modal-body">
 				<form class="uk-form-horizontal uk-margin-small" id="upload_form">
@@ -93,6 +93,7 @@ include ("../include/overview.inc");
 							<div uk-form-custom="target: true">
 								<input type="file" id="upload_file" name="file" onchange="fileChosen()">
 								<input class="uk-input uk-form-width-medium" type="text" placeholder="Select file" disabled>
+								<input class="uk-input" type="hidden" name="uid" id="upload_uid">
 							</div>
 						</div>
 					</div>
@@ -111,13 +112,13 @@ include ("../include/overview.inc");
 				</form>
 			</div>
 			<div class="uk-modal-footer uk-text-right">
-				<button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
+			<button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
 			<button class="uk-button uk-button-primary" type="button" onclick="uploadFile()">Upload</button>
 			</div>
 		</div>
 	</div>
 	
-	<div id="progress_modal" uk-modal>
+	<div id="progress_modal" uk-modal='bg-close: false'>
 		<div class="uk-modal-dialog uk-margin-auto-vertical">
 			<div class="uk-modal-header">
 				<h3 class="uk-modal-title">Uploading <span id="uploading_label"></span></h3>
@@ -125,10 +126,13 @@ include ("../include/overview.inc");
 			<div class="uk-modal-body">
 				<progress class="uk-progress" value="0" max="100" id="progress"></progress>
 			</div>
+			<div class="uk-modal-footer uk-text-right">
+				<button class="uk-button uk-button-default" type="button" onclick="cancelUpload()">Cancel</button>
+			</div>
 		</div>
 	</div>
 
-	<div id="playlist_modal" uk-modal>
+	<div id="playlist_modal" uk-modal='{"bg-close" : false, "stack" : true}'>
 		<div class="uk-modal-dialog" style="width: 800px">
 			<button class="uk-modal-close-default" type="button" uk-close></button>
 			<div class="uk-modal-header">
@@ -174,7 +178,7 @@ include ("../include/overview.inc");
 			</div>
 		</div>
 	</div>
-	<div id="schedule_modal" uk-modal>
+	<div id="schedule_modal" uk-modal="{'bg-close': false, 'stack': true}">
 		<div class="uk-modal-dialog" style="width: 1100px">
 			<button class="uk-modal-close-default" type="button" uk-close></button>
 			<div class="uk-modal-header">
@@ -237,5 +241,36 @@ include ("../include/overview.inc");
 			</div>
 		</div>
 	</div>
+	
+	<div id="relabel_modal" uk-modal="{'bg-close': false, 'stack': true}">
+		<div class="uk-modal-dialog">
+			<button class="uk-modal-close-default" type="button" uk-close></button>
+			<div class="uk-modal-header">
+				<h3 class="uk-modal-title">Relabel Audio</h3>
+			</div>
+			<div class="uk-modal-body">
+				<form class="uk-form-horizontal uk-margin-small" id="relabel_form">
+					<div class="uk-margin uk-margin-small">
+						<label class="uk-form-label" for="relabel_label">Label</label>
+						<div class="uk-form-controls">
+							<input class="uk-input" type="text" name="label" id="relabel_label">
+						</div>
+					</div>
+					<div class="uk-margin uk-margin-small">
+						<label class="uk-form-label" for="relabel_description">Description</label>
+						<div class="uk-form-controls">
+							<input class="uk-input" type="text" name="description" id="relabel_description">
+							<input class="uk-input" type="hidden" name="uid" id="relabel_uid">
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="uk-modal-footer uk-text-right">
+			<button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
+			<button class="uk-button uk-button-primary" type="button" onclick="relabelFile()">Save</button>
+			</div>
+		</div>
+	</div>
+	
 	</body>
 </html>

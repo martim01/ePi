@@ -10,7 +10,6 @@ class loopi
 		this.playlists = [];
 		this.schedules = [];
 		this.connected = false;
-		
 	}
 	
 	setWebsocket(ws)
@@ -150,6 +149,8 @@ class loopi
 
 
 var g_loopi_array = new Array();
+var g_ajax = new XMLHttpRequest();
+	
 
 const CLR_PLAYING = "#92d14f";
 const CLR_IDLE = "#8db4e2";
@@ -215,7 +216,7 @@ function ws_connect(loopi, statusCallback, systemCallback, resourceCallback)
 {
 	g_loopi_array[loopi].setWebsocket(new WebSocket('ws://' + g_loopi_array[loopi].url));
 	g_loopi_array[loopi].ws.index = loopi;			
-	
+	g_loopi_array[loopi].ws.timeout = true;
 	g_loopi_array[loopi].ws.onopen = function(ev)  { this.tm = setTimeout(loopiOffline, 4000, this.index) };
 	g_loopi_array[loopi].ws.onerror = function(ev) { loopiOffline(this.index); };
 	g_loopi_array[loopi].ws.onclose = function(ev) { loopiOffline(this.index); };
@@ -224,7 +225,10 @@ function ws_connect(loopi, statusCallback, systemCallback, resourceCallback)
 	g_loopi_array[loopi].ws.onmessage = function(ev) 
 	{
 		clearTimeout(this.tm);
-		this.tm = setTimeout(loopiOffline, 4000, this.index);
+		if(this.timeout)
+		{
+			this.tm = setTimeout(loopiOffline, 4000, this.index);
+		}
 		
 		var jsonObj = JSON.parse(ev.data);
 		
@@ -244,7 +248,6 @@ function ws_connect(loopi, statusCallback, systemCallback, resourceCallback)
 		}
 		else
 		{
-			console.log(jsonObj);
 			if(Array.isArray(jsonObj) && resourceCallback !== null)
 			{
 				resourceCallback(this.index, jsonObj);
@@ -864,16 +867,30 @@ function createResourceLi(ul, resObj, type, clickFunction)
 	tableSpecific.appendChild(theadspecific);
 	tableSpecific.appendChild(tbodySpecificDetails);
 	div_content.appendChild(tableSpecific);
-		
+
 	var buttonMod = document.createElement('button');
 	buttonMod.className = "uk-button";
 	buttonMod.classList.add("uk-button-primary");
 	buttonMod.classList.add("uk-button-small");
 	buttonMod.style.marginLeft = '5px';
-	buttonMod.id = "delete_"+type+"_"+resObj["uid"];
-	buttonMod.innerHTML = 'Modify';
+	buttonMod.id = "modify_"+type+"_"+resObj["uid"];
 	buttonMod.addEventListener('click',modifyResource, false);
 	div_content.appendChild(buttonMod);
+	
+	if(type != 'files')
+	{
+		buttonMod.innerHTML = 'Modify';
+	}
+	else
+	{
+		buttonMod.innerHTML = 'Relabel';
+		var buttonReplace = buttonMod.cloneNode();
+		buttonReplace.style.marginLeft = '5px';
+		buttonReplace.innerHTML = 'Replace Audio';
+		buttonReplace.id = "replace_"+type+"_"+resObj["uid"];
+		buttonReplace.addEventListener('click',modifyResource, false);
+		div_content.appendChild(buttonReplace);
+	}
 		
 	li.appendChild(div_content);
 		
@@ -1470,7 +1487,7 @@ function updateFile_Details(loopi, jsonObj)
 	{
 		span.innerHTML = jsonObj["label"];
 	}
-	createFileDetails(loop, jsonObj);
+	createFileDetails(loopi, jsonObj);
 }
 
 function updatePlaylist_Details(loopi, jsonObj)
@@ -1884,7 +1901,7 @@ function handleDelete(status, jsonObj)
 	}
 }
 
-function handleStatusPatch(status, jsonObj)
+function handlePatchDefault(status, jsonObj)
 {
 	if(status != 200)
 	{
@@ -1911,8 +1928,10 @@ function handleStatusLockPatch(status, jsonObj)
 
 function fileChosen()
 {
-	var label = document.getElementById('upload_label');
-	label.value = document.getElementById('upload_file').files[0].name;
+	if(document.getElementById('upload_uid').value == '')
+	{
+		document.getElementById('upload_label').value = document.getElementById('upload_file').files[0].name;
+	}
 }
 
 
@@ -1932,40 +1951,72 @@ function uploadFile()
 	
 	var fd = new FormData(document.getElementById('upload_form'));
 	
-	var ajax = new XMLHttpRequest();
+
 
 		
-	ajax.upload.addEventListener('progress', function(e) {
+	g_ajax.upload.addEventListener('progress', function(e) {
 		var percent_complete = (e.loaded/e.total)*100;
 		document.getElementById('progress').value = percent_complete;
 		});
 
 
-	ajax.onreadystatechange = function()
+	g_ajax.onreadystatechange = function()
 	{
 		
 		if(this.readyState == 4)
 		{
-			var jsonObj = JSON.parse(this.responseText);
+			UIkit.modal(document.getElementById('progress_modal')).hide();
+			document.getElementById('uploading_label').innerHTML = '';
+			document.getElementById('progress').value = 0;
+			g_loopi_array[0].ws.timeout = true;
 			
+			if(this.status == 0)
+			{
+				UIkit.notification({message: "Upload canceled", status: 'danger', timeout: 2000})
+			}
+			else if(this.status != 201)
+			{
+				
+				var jsonObj = JSON.parse(this.responseText);
+				UIkit.notification({message: jsonObj["reason"], status: 'danger', timeout: 2000})
+			}
+		}
+		else if(this.readyState == 0 && this.status == 0)
+		{			
 			UIkit.modal(document.getElementById('progress_modal')).hide();
 			document.getElementById('uploading_label').innerHTML = '';
 			document.getElementById('progress').value = 0;
 			
-			if(this.status != 201)
-			{
-				UIkit.notification({message: jsonObj["reason"], status: 'danger', timeout: 2000})
-			}
+			g_loopi_array[0].ws.timeout = true;
 		}
+		
 	}
 
 	UIkit.modal(document.getElementById('upload_modal')).hide();
+
 	UIkit.modal(document.getElementById('progress_modal')).show();
 	document.getElementById('uploading_label').innerHTML = document.getElementById('upload_label').value;
+
+	//stop the websocket timeout
+	clearTimeout(g_loopi_array[0].ws.tm);
+	g_loopi_array[0].ws.timeout = false;
 	
+	var uid = document.getElementById('upload_uid').value;
+	if(uid == '')
+	{
+		g_ajax.open('POST',"http://"+g_loopi_array[0].url+"/x-epi/files");
+	}
+	else
+	{
+		g_ajax.open('PUT',"http://"+g_loopi_array[0].url+"/x-epi/files/"+uid);
+	}
+	g_ajax.send(fd);
 	
-	ajax.open('POST',"http://"+g_loopi_array[0].url+"/x-epi/files");
-	ajax.send(fd);
+}
+
+function cancelUpload()
+{
+	g_ajax.abort();
 	
 }
 
@@ -2125,7 +2176,7 @@ function doPlay()
 	
 	var play = { "command" : "play", "type" : type, "uid" : uid, "shuffle" : shuffle, "times_to_play" : loop};
 	
-	ajaxPatch(0, "/x-epi/status", JSON.stringify(play), handleStatusPatch);
+	ajaxPatch(0, "/x-epi/status", JSON.stringify(play), handlePatchDefault);
 	
 	UIkit.modal(document.getElementById('play_modal')).hide();
 			
@@ -2162,6 +2213,17 @@ function modifyResource(e)
 	{
 		modifySchedule(uid);
 	}
+	else if(type == "files")
+	{
+		if(split[0] == 'replace')
+		{
+			showReplaceModal(uid);
+		}
+		else
+		{
+			showRelabelModal(uid);
+		}
+	}
 }
 
 	
@@ -2181,7 +2243,7 @@ function playLoop(e)
 				
 			var play = { "command" : "play", "type" : type, "uid" : uid, "times_to_play" : parseInt(times_to_play,10), "shuffle" : false};
 		
-			ajaxPatch(0, "/x-epi/status", JSON.stringify(play), handleStatusPatch);
+			ajaxPatch(0, "/x-epi/status", JSON.stringify(play), handlePatchDefault);
 		}
 	})
 			
@@ -3118,6 +3180,61 @@ function updateScheduleEntry()
 	
 	
 	cancelScheduleEntry();
+}
+
+
+function showRelabelModal(uid)
+{
+	var index = g_loopi_array[0].findFile(uid);
+	if(index != -1)
+	{
+		document.getElementById('relabel_label').value = g_loopi_array[0].files[index].label;
+		document.getElementById('relabel_description').value = g_loopi_array[0].files[index].details.description;
+		document.getElementById('relabel_uid').value = uid;
+		UIkit.modal(document.getElementById('relabel_modal')).show();	
+		document.getElementById('relabel_label').focus();
+	}
+}
+
+function relabelFile()
+{
+	var patch = { "label" : document.getElementById('relabel_label').value, "description" : document.getElementById('relabel_description').value};
+	ajaxPatch(0, "/x-epi/files/"+document.getElementById('relabel_uid').value, JSON.stringify(patch), handleRelabelPatch);
+}
+
+function handleRelabelPatch(status, jsonObj)
+{
+	if(status != 200)
+	{
+		UIkit.notification({message: jsonObj["reason"], status: 'danger', timeout: 4000})
+	}
+	else
+	{
+		UIkit.modal(document.getElementById('relabel_modal')).hide();	
+	}
+}
+
+function showReplaceModal(uid)
+{
+	var index = g_loopi_array[0].findFile(uid);
+	if(index != -1)
+	{
+		document.getElementById('upload_title').innerHTML = 'Replace Audio';
+		document.getElementById('upload_label').value = g_loopi_array[0].files[index].label;
+		document.getElementById('upload_description').value = g_loopi_array[0].files[index].details.description;
+		document.getElementById('upload_uid').value = uid;
+		UIkit.modal(document.getElementById('upload_modal')).show();	
+	}
+}
+
+function showUploadModal()
+{
+	document.getElementById('upload_title').innerHTML = 'Upload New Audio';
+	document.getElementById('upload_label').value = "";
+	document.getElementById('upload_description').value = "";
+	document.getElementById('upload_uid').value = "";
+	document.getElementById('upload_file').value = "";
+	UIkit.modal(document.getElementById('upload_modal')).show();	
 }
 
 
