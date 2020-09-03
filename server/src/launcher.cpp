@@ -123,6 +123,16 @@ response Launcher::LaunchPlayer(std::string sType, std::string sUid, int nLoop, 
     }
     else
     {   //child
+
+        std::stringstream ssLoop;
+        ssLoop << nLoop;
+        std::string sLoop = ssLoop.str();
+
+        std::string sShuffle(bShuffle ? "1" : "0");
+
+        char* args[] = {&m_sPlayer[0], &m_sConfigPath[0], &sType[0], &sUid[0], &sLoop[0], &sShuffle[0], nullptr};
+
+
         close(m_nPipe[READ]);
         dup2(m_nPipe[WRITE],STDOUT_FILENO);
 
@@ -133,14 +143,6 @@ response Launcher::LaunchPlayer(std::string sType, std::string sUid, int nLoop, 
         }
 
 
-
-        std::stringstream ssLoop;
-        ssLoop << nLoop;
-        std::string sLoop = ssLoop.str();
-
-        std::string sShuffle(bShuffle ? "1" : "0");
-
-        char* args[] = {&m_sPlayer[0], &m_sConfigPath[0], &sType[0], &sUid[0], &sLoop[0], &sShuffle[0], nullptr};
         nError = execv(m_sPlayer.c_str(), args);
 
         if(nError)

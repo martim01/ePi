@@ -150,7 +150,7 @@ bool CronJob::GetList(const std::string& sElement, cron_element& element)
         for(size_t j = std::min(std::get<MIN>(rnge), static_cast<unsigned long>(element.vBits.size()));
             j <= std::min(std::get<MAX>(rnge),  static_cast<unsigned long>(element.vBits.size())); j++)
         {
-            element.vBits[i] = true;
+            element.vBits[j] = true;
         }
     }
 
