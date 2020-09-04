@@ -2,7 +2,8 @@
 
 function OutputNavBar($page, $loopiIp)
 {
-	$nav_array = array("Overview" => "../status", "Files" => "../files", "Schedules" => "../schedules", "Playlists" => "../playlists", "System" => "../system");
+	//$nav_array = array("Overview" => "../status", "Files" => "../files", "Schedules" => "../schedules", "Playlists" => "../playlists", "System" => "../system");
+	$nav_array = array("Overview" => "../status", "System" => "../system");
 ?>
 	<nav class="uk-navbar-container" uk-navbar style="background: #ffffff; border-bottom: 1px solid #a8a8d8">
 			<div class="uk-navbar-left">
