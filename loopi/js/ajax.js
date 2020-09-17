@@ -1319,7 +1319,7 @@ function updatePlayerStatus(loopi, jsonObj)
 			document.getElementById("player").classList.add("loopi_label_running");
 			document.getElementById("player").classList.remove("loopi_label_-warning");
 			document.getElementById("player").classList.remove("loopi_label_-danger");
-			showStopButton(loopi);
+			showStopButton(loopi, 'stop');
 			showPlayButtons("hidden");
 				
 		
@@ -1329,55 +1329,57 @@ function updatePlayerStatus(loopi, jsonObj)
 			document.getElementById('resource_label').innerHTML = jsonObj["resource"]["label"];
 		}
 			
-		document.getElementById('resource_status').innerHTML = jsonObj["status"]["action"];
-		if(jsonObj["status"]["action"] == "Idle")
+		if(jsonObj["status"] !== undefined)
 		{
-			document.getElementById('resource_status').classList.remove("loopi_label_running");
-			document.getElementById('resource_status').classList.add("loopi_label_idle");
-		}
-		else
-		{
-			document.getElementById('resource_status').classList.add("loopi_label_running");
-			document.getElementById('resource_status').classList.remove("loopi_label_idle");
-		}
-		
-		if(jsonObj["status"]["playing"] !== undefined)
-		{
-			document.getElementById("card_playout").style.visibility = "visible";
-			
-			var fileIndex = g_loopi_array[loopi].findFile(jsonObj["status"]["playing"]["uid"]);
-			if(fileIndex > -1)
+			document.getElementById('resource_status').innerHTML = jsonObj["status"]["action"];
+			if(jsonObj["status"]["action"] == "Idle")
 			{
+				document.getElementById('resource_status').classList.remove("loopi_label_running");
+				document.getElementById('resource_status').classList.add("loopi_label_idle");
+			}
+			else
+			{
+				document.getElementById('resource_status').classList.add("loopi_label_running");
+				document.getElementById('resource_status').classList.remove("loopi_label_idle");
+			}
+		
+			if(jsonObj["status"]["playing"] !== undefined)
+			{
+				document.getElementById("card_playout").style.visibility = "visible";
+				
+				var fileIndex = g_loopi_array[loopi].findFile(jsonObj["status"]["playing"]["uid"]);
+				if(fileIndex > -1)
+				{
 
-				document.getElementById('playout_label').innerHTML = g_loopi_array[loopi].files[fileIndex]["label"];
+					document.getElementById('playout_label').innerHTML = g_loopi_array[loopi].files[fileIndex]["label"];
+				}
+				else
+				{
+					document.getElementById('playout_label').innerHTML = jsonObj["status"]["playing"]["uid"];
+				}
+				
+				document.getElementById("playout_started").innerHTML = jsonObj["status"]["playing"]["started_at"];
+				document.getElementById("playout_length").innerHTML = millisecondsToTime(jsonObj["status"]["playing"]["length"]);
+				document.getElementById("playout_time").innerHTML = millisecondsToTime(jsonObj["status"]["playing"]["time"]);
+				document.getElementById("playout_loop").innerHTML = jsonObj["status"]["playing"]["loop"]
+				if(jsonObj["status"]["playing"]["resampler"] == true)
+				{
+					document.getElementById("playout_src").classList.remove("loopi_label_idle");
+					document.getElementById("playout_src").classList.add("loopi_label_warning");
+					document.getElementById("playout_src").innerHTML = "On";
+				}
+				else
+				{
+					document.getElementById("playout_src").classList.add("loopi_label_idle");
+					document.getElementById("playout_src").classList.remove("loopi_label_warning");
+					document.getElementById("playout_src").innerHTML = "Off";
+				}
 			}
 			else
 			{
-				document.getElementById('playout_label').innerHTML = jsonObj["status"]["playing"]["uid"];
+				document.getElementById("card_playout").style.visibility = "hidden";
 			}
-			
-			document.getElementById("playout_started").innerHTML = jsonObj["status"]["playing"]["started_at"];
-			document.getElementById("playout_length").innerHTML = millisecondsToTime(jsonObj["status"]["playing"]["length"]);
-			document.getElementById("playout_time").innerHTML = millisecondsToTime(jsonObj["status"]["playing"]["time"]);
-			document.getElementById("playout_loop").innerHTML = jsonObj["status"]["playing"]["loop"]
-			if(jsonObj["status"]["playing"]["resampler"] == true)
-			{
-				document.getElementById("playout_src").classList.remove("loopi_label_idle");
-				document.getElementById("playout_src").classList.add("loopi_label_warning");
-				document.getElementById("playout_src").innerHTML = "On";
 			}
-			else
-			{
-				document.getElementById("playout_src").classList.add("loopi_label_idle");
-				document.getElementById("playout_src").classList.remove("loopi_label_warning");
-				document.getElementById("playout_src").innerHTML = "Off";
-			}
-		}
-		else
-		{
-			document.getElementById("card_playout").style.visibility = "hidden";
-		}
-		
 	}
 	else if(jsonObj["player"] === "Orphaned")
 	{
@@ -1386,11 +1388,11 @@ function updatePlayerStatus(loopi, jsonObj)
 		document.getElementById("player").classList.add("uk-label-warning");
 		document.getElementById("player").classList.remove("uk-label-danger");
 		
-		document.getElementById("section_player").style.display = "none";
 		document.getElementById("card_resource").style.visibility = "hidden";
 		document.getElementById("card_playout").style.visibility = "hidden";
 		
-		showStopButton(loopi);
+		showStopButton(loopi, 'kill');
+		showPlayButtons("hidden");
 	}
 }
 
@@ -1588,11 +1590,12 @@ function updateSchedule_Details(loopi, jsonObj)
 }
 
 
-function showStopButton(loopi)
+function showStopButton(loopi, action)
 {
 	if(g_loopi_array[loopi].status.locked == false)
 	{
 		document.getElementById("button_stop").style.visibility = "visible";
+		document.getElementById("button_stop").setAttribute('action', action);
 	}
 	else
 	{
@@ -1834,9 +1837,12 @@ function lock()
 
 function stop()
 {	
-	var play = { "command" : "stop"};
-	ajaxPatch(0, "/x-epi/status", JSON.stringify(play), handleStatusPatch);
+	
+	var play = { "command" : document.getElementById('button_stop').getAttribute('action')};
+	ajaxPatch(0, "/x-epi/status", JSON.stringify(play), handlePatchDefault);
 }
+
+
 
 
 function ajaxPatch(loopi, endpoint, jsonData, callback)
@@ -2292,6 +2298,12 @@ function handleStatus_System(loopi, jsonObj)
 function handleUpdate_System(loopi, jsonObj)
 {
 	showVersion(loopi,jsonObj);
+	getFiles(loopi, storeFiles_System);
+}
+
+function storeFiles_System(loopi, jsonObj)
+{
+	g_loopi_array[loopi].setFiles(jsonObj);
 	ws_connect(loopi, updateStatus_System, updateInfo_System, null);
 }
 

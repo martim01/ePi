@@ -19,7 +19,7 @@
 				</div>
 			</div>
 				<div>
-					<div class="uk-card uk-card-default uk-card-small" id="card_resource">
+					<div class="uk-card uk-card-default uk-card-small" id="card_resource" style="visibility: hidden">
 						<div class="uk-card-header">Resource</div>
 						<div class="uk-card-body">
 							<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
@@ -39,7 +39,7 @@
 				</div>
 
 				<div>
-					<div class="uk-card uk-card-default uk-card-small" id="card_playout">
+					<div class="uk-card uk-card-default uk-card-small" id="card_playout" style="visibility: hidden">
 						<div class="uk-card-header">Playout</div>
 						<div class="uk-card-body">
 							<div class='uk-child-width-expand uk-grid-small uk-text-left' uk-grid>
