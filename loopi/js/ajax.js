@@ -155,6 +155,7 @@ var g_ajax = new XMLHttpRequest();
 const CLR_PLAYING = "#92d14f";
 const CLR_IDLE = "#8db4e2";
 const CLR_ERROR =  "#ff7777";
+const CLR_ORPHANED =  "#ffa000";
 const CLR_NO_FILE = "#a0a0a0"
 const CLR_CONNECTING = "#ffff00";
 
@@ -320,12 +321,22 @@ function updateStatus_Dashboard(loopi, jsonObj)
 		}
 	}
 	
-	if(jsonObj["player"] === undefined || jsonObj["player"] == "Stopped" || jsonObj["status"] == undefined)
+	if(jsonObj["player"] === undefined || jsonObj["player"] == "Stopped" || (jsonObj["status"] == undefined && jsonObj["player"] != "Orphaned"))
 	{
 		document.getElementById('status_'+loopi).innerHTML = 'Idle';
 		document.getElementById('label_'+loopi).innerHTML = '';		
 		
 		document.getElementById('loopi_'+loopi).style.backgroundColor = CLR_IDLE;		
+		document.getElementById('playout_'+loopi).innerHTML = "";
+		document.getElementById('playout_time_'+loopi).innerHTML = "";
+		
+	}
+	else if(jsonObj["player"] == "Orphaned")
+	{
+		document.getElementById('status_'+loopi).innerHTML = 'Orphaned';
+		document.getElementById('label_'+loopi).innerHTML = 'Unknown';		
+		
+		document.getElementById('loopi_'+loopi).style.backgroundColor = CLR_ORPHANED;		
 		document.getElementById('playout_'+loopi).innerHTML = "";
 		document.getElementById('playout_time_'+loopi).innerHTML = "";
 		
