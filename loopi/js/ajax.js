@@ -157,7 +157,10 @@ const CLR_IDLE = "#8db4e2";
 const CLR_ERROR =  "#ff7777";
 const CLR_ORPHANED =  "#ffa000";
 const CLR_NO_FILE = "#a0a0a0"
+const CLR_UNKNOWN = "#c8c8c8"
+const CLR_WARNING = "#ffa000"
 const CLR_CONNECTING = "#ffff00";
+const CLR_SYNC = "#008000";
 
 
 
@@ -706,7 +709,7 @@ function storeSchedules_Details(loopi, jsonObj)
 	
 	listResource_Details(jsonObj, "schedules", getScheduleDetails);
 	
-	ws_connect(loopi, updateStatus_Details, null, updateResources_Details);
+	ws_connect(loopi, updateStatus_Details, updateSystem_Details, updateResources_Details);
 	
 }
 
@@ -2386,9 +2389,18 @@ function updateInfo_System(loopi, jsonObj)
 		if(jsonObj.ntp.error !== undefined)
 		{
 			document.getElementById("ntp-sync").innerHTML = jsonObj.ntp.error;
+			document.getElementById("current_time").style.color = CLR_ERROR;
 		}
 		else
 		{
+			if(jsonObj.ntp.synchronised == true)
+			{
+				document.getElementById("current_time").style.color = CLR_SYNC;
+			}
+			else
+			{
+				document.getElementById("current_time").style.color = CLR_WARNING;
+			}
 			document.getElementById("ntp-sync").innerHTML = jsonObj.ntp.synchronised;
 			document.getElementById("ntp-clock").innerHTML = jsonObj.ntp.source;
 			document.getElementById("ntp-refid").innerHTML = jsonObj.ntp.refid;
@@ -2398,6 +2410,36 @@ function updateInfo_System(loopi, jsonObj)
 			document.getElementById("ntp-jitter").innerHTML = jsonObj.ntp.sys_jitter+"s";
 			document.getElementById("ntp-poll").innerHTML = Math.pow(2, jsonObj.ntp.tc)+"s";
 		}
+	}
+	else
+	{
+		document.getElementById("current_time").style.color = CLR_UNKNOWN;
+	}
+}
+
+function updateSystem_Details(loopi, jsonObj)
+{
+	if(jsonObj.ntp !== undefined)
+	{
+		if(jsonObj.ntp.error !== undefined)
+		{
+			document.getElementById("current_time").style.color = CLR_ERROR;
+		}
+		else
+		{
+			if(jsonObj.ntp.synchronised == true)
+			{
+				document.getElementById("current_time").style.color = CLR_SYNC;
+			}
+			else
+			{
+				document.getElementById("current_time").style.color = CLR_WARNING;
+			}
+		}
+	}
+	else
+	{
+		document.getElementById("current_time").style.color = CLR_UNKNOWN;
 	}
 }
 
