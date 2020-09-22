@@ -152,11 +152,6 @@ include ("../include/overview.inc");
 							</div>
 							
 						</div>
-						<div class="uk-card-footer">
-							<button class="uk-button uk-button-small loopi_button_update" onclick="showUpdate('episerver')">Update episerver</button>
-							<button class="uk-button uk-button-small loopi_button_update" onclick="showUpdate('player3')">Update player3</button>
-							<button class="uk-button uk-button-small loopi_button_update" onclick="showUpdate('player67')">Update player67</button>
-						</div>
 					</div>
 				</div>
 				
