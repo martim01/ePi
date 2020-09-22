@@ -128,6 +128,37 @@ include ("../include/overview.inc");
 						</div>
 					</div>
 				</div>
+				<div>
+					<div class="uk-card uk-card-default">
+						<div class="uk-card-header"> <h3 class="uk-card-title">NTP</h3></div>
+						<div class="uk-card-body uk-text-left">
+							<div class="uk-grid-small uk-text-left" uk-grid>
+								<div class="uk-width-1-2"><span class='uk-text-bold'>Synchronised:</span></div>
+								<div class="uk-width-expand"><span id="ntp-sync"></span></div>
+								<div class="uk-width-1-2"><span class='uk-text-bold'>Clock Type:</span></div>
+								<div class="uk-width-expand"><span id="ntp-clock"></span></div>
+								<div class="uk-width-1-2"><span class='uk-text-bold'>Clock Id:</span></div>
+								<div class="uk-width-expand"><span id="ntp-refid"></span></div>
+								<div class="uk-width-1-2"><span class='uk-text-bold'>Stratum:</span></div>
+								<div class="uk-width-expand"><span id="ntp-stratum"></span></div>
+								<div class="uk-width-1-2"><span class='uk-text-bold'>Precision:</span></div>
+								<div class="uk-width-expand"><span id="ntp-precision"></span></div>
+								<div class="uk-width-1-2"><span class='uk-text-bold'>Offset:</span></div>
+								<div class="uk-width-expand"><span id="ntp-offset"></span></div>
+								<div class="uk-width-1-2"><span class='uk-text-bold'>Jitter:</span></div>
+								<div class="uk-width-expand"><span id="ntp-jitter"></span></div>
+								<div class="uk-width-1-2"><span class='uk-text-bold'>Poll:</span></div>
+								<div class="uk-width-expand"><span id="ntp-poll"></span></div>
+							</div>
+							
+						</div>
+						<div class="uk-card-footer">
+							<button class="uk-button uk-button-small loopi_button_update" onclick="showUpdate('episerver')">Update episerver</button>
+							<button class="uk-button uk-button-small loopi_button_update" onclick="showUpdate('player3')">Update player3</button>
+							<button class="uk-button uk-button-small loopi_button_update" onclick="showUpdate('player67')">Update player67</button>
+						</div>
+					</div>
+				</div>
 				
 				<div>
 					<div class="uk-card uk-card-default">
