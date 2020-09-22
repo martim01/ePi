@@ -2381,20 +2381,23 @@ function updateInfo_System(loopi, jsonObj)
 	document.getElementById('system-ram-free').innerHTML = Math.round(jsonObj.system.ram.free/1048576);	
 	
 	
-	if(jsonObj.ntp.error !== undefined)
+	if(jsonObj.ntp !== undefined)
 	{
-		document.getElementById("ntp-sync").innerHTML = jsonObj.ntp.error;
-	}
-	else
-	{
-		document.getElementById("ntp-sync").innerHTML = jsonObj.ntp.synchronised;
-		document.getElementById("ntp-clock").innerHTML = jsonObj.ntp.source;
-		document.getElementById("ntp-refid").innerHTML = jsonObj.ntp.refid;
-		document.getElementById("ntp-stratum").innerHTML = jsonObj.ntp.stratum;
-		document.getElementById("ntp-precision").innerHTML = Math.round(Math.pow(2, jsonObj.ntp.precision)*1000000)+"us";
-		document.getElementById("ntp-offset").innerHTML = jsonObj.ntp.offset+"s";
-		document.getElementById("ntp-jitter").innerHTML = jsonObj.ntp.sys_jitter+"s";
-		document.getElementById("ntp-poll").innerHTML = Math.pow(2, jsonObj.ntp.tc)+"s";
+		if(jsonObj.ntp.error !== undefined)
+		{
+			document.getElementById("ntp-sync").innerHTML = jsonObj.ntp.error;
+		}
+		else
+		{
+			document.getElementById("ntp-sync").innerHTML = jsonObj.ntp.synchronised;
+			document.getElementById("ntp-clock").innerHTML = jsonObj.ntp.source;
+			document.getElementById("ntp-refid").innerHTML = jsonObj.ntp.refid;
+			document.getElementById("ntp-stratum").innerHTML = jsonObj.ntp.stratum;
+			document.getElementById("ntp-precision").innerHTML = Math.round(Math.pow(2, jsonObj.ntp.precision)*1000000)+"us";
+			document.getElementById("ntp-offset").innerHTML = jsonObj.ntp.offset+"s";
+			document.getElementById("ntp-jitter").innerHTML = jsonObj.ntp.sys_jitter+"s";
+			document.getElementById("ntp-poll").innerHTML = Math.pow(2, jsonObj.ntp.tc)+"s";
+		}
 	}
 }
 
