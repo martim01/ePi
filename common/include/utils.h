@@ -8,6 +8,9 @@
 extern std::vector<std::string> SplitString(std::string str, char cSplit, size_t nMax=0);
 extern void SplitString(std::queue<std::string>& qSplit, std::string str, char cSplit);
 
+extern std::string& ltrim(std::string& s);
+extern std::string& rtrim(std::string& s);
+extern std::string& trim(std::string& s);
 
 extern bool CmpNoCase(const std::string& str1, const std::string& str2);
 extern std::string CreatePath(std::string sPath);

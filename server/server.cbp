@@ -28,6 +28,7 @@
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option parameters="/var/ePi/config.ini" />
 				<Compiler>
 					<Add option="-O2" />
 					<Add option="-D__GNU__" />
