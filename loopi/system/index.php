@@ -155,7 +155,7 @@ include ("../include/overview.inc");
 					</div>
 				</div>
 				
-				<div>
+				<div class="uk-width-2-3">
 					<div class="uk-card uk-card-default">
 						<div class="uk-card-header"> <h3 class="uk-card-title">Versions</h3></div>
 						<div class="uk-card-body uk-text-left">
