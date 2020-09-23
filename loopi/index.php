@@ -48,7 +48,7 @@ $loopi_array = loadloopi();
         <?php
         for($i = 0; $i < count($loopi_array); $i++)
         {
-            echo "<div>\n";
+            echo "<div class='uk-width-1-3@s uk-width-1-4@xl'>\n";
             echo "<a class='uk-link-reset uk-display-block uk-width-large@l uk-width-medium@m uk-card uk-card-default uk-card-body uk-card-hover uk-card-small' id='loopi_$i'  href='status/?loopi=".$loopi_array[$i]."'>\n";
             echo "<div class='uk-card-header'>\n";
             echo "<h3 class='uk-card-title'><span id='host_$i'>".$loopi_array[$i]."</span></h3>\n";
