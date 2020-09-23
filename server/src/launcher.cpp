@@ -198,8 +198,6 @@ response Launcher::PausePlayer()
 
 void Launcher::PipeThread()
 {
-
-
     std::thread th([this]()
     {
         fd_set read_set;

@@ -106,6 +106,7 @@
 		<Unit filename="include/launcher.h" />
 		<Unit filename="include/mongooseserver.h" />
 		<Unit filename="include/mp3file.h" />
+		<Unit filename="include/ntpstatus.h" />
 		<Unit filename="include/proccheck.h" />
 		<Unit filename="include/resource.h" />
 		<Unit filename="include/resourcemanager.h" />
@@ -120,6 +121,7 @@
 		<Unit filename="src/main.cpp" />
 		<Unit filename="src/mongooseserver.cpp" />
 		<Unit filename="src/mp3file.cpp" />
+		<Unit filename="src/ntpstatus.cpp" />
 		<Unit filename="src/proccheck.cpp" />
 		<Unit filename="src/resource.cpp" />
 		<Unit filename="src/resourcemanager.cpp" />
