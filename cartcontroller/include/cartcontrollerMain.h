@@ -9,24 +9,30 @@
 
 #ifndef CONTROLLERMAIN_H
 #define CONTROLLERMAIN_H
+
+#include "uirect.h"
+#include <random>
 #include "websocketclient.h"
 #include "restfulclient.h"
 #include "json/json.h"
 #include <wx/datetime.h>
+#include <wx/panel.h>
+#include <vector>
+
 //(*Headers(controllerDialog)
 #include <wx/dialog.h>
 #include <wx/timer.h>
 //*)
-#include "uirect.h"
-#include <random>
 
+class pnlResource;
+class wmLabel;
 
 class cartcontrollerDialog: public wxDialog
 {
     public:
 
-        cartcontrollerDialog(wxWindow* parent, const wxPoint pntLayout, unsigned int nController, const wxString& sIpAddress, unsigned short nPort, wxWindowID id = -1);
-        virtual ~controllerDialog();
+        cartcontrollerDialog(wxWindow* parent, const wxString& sIpAddress, unsigned short nPort, wxWindowID id = -1);
+        virtual ~cartcontrollerDialog();
 
 
 
@@ -40,8 +46,8 @@ class cartcontrollerDialog: public wxDialog
 
         void OntimerConnectionTrigger(wxTimerEvent& event);
         void OntimerHoldTrigger(wxTimerEvent& event);
-        void OntimerStopTrigger(wxTimerEvent& event);
-        void OntimerMenuTrigger(wxTimerEvent& event);
+
+
 
 
         //(*Identifiers(controllerDialog)
@@ -50,15 +56,16 @@ class cartcontrollerDialog: public wxDialog
         static const long ID_TIMER_CONNECTION;
         static const long ID_TIMER_HOLD;
         static const long ID_TIMER_MENU;
-
+        static const long ID_PANEL1;
 
         //(*Declarations(controllerDialog)
         //*)
         wxTimer m_timerConnection;
-        wxTimer m_timerMenu;
-        wxTimer m_timerStop;
 
+        wxTimer m_timerStop;
         wxTimer m_timerCheck;
+        wxPanel* m_ppnlStatus;
+        wmLabel* m_plblHostname;
 
         void OnWebsocketConnection(const wxCommandEvent& event);
         void OnWebsocketHandshake(const wxCommandEvent& event);
@@ -67,6 +74,9 @@ class cartcontrollerDialog: public wxDialog
         void OnRestfulReply(const wxCommandEvent& event);
         void OnTimerTimeout(const wxTimerEvent& event);
 
+        void OnResourcePlay(const wxCommandEvent& event);
+        void OnResourceMenu(const wxCommandEvent& event);
+
         void OnTimerCheck(const wxTimerEvent& event);
         void UpdateLabels();
 
@@ -74,7 +84,7 @@ class cartcontrollerDialog: public wxDialog
         void ReplyFiles(const Json::Value& jsData);
         void UpdatePlayingStatus(const Json::Value& jsData);
 
-        void Play();
+        void Play(const wxString& sUid);
         void Stop();
 
         uiRect m_uiName;
@@ -96,8 +106,7 @@ class cartcontrollerDialog: public wxDialog
 
         enum {DISCONNECTED, CONNECTING, CONNECTED};
         int m_nConnected;
-        enum {STOPPED, PLAYING, ORPHANED};
-        int m_nPlaying;
+
         bool m_bCountUp;
 
         bool m_bIgnoreUp;
@@ -108,6 +117,8 @@ class cartcontrollerDialog: public wxDialog
         std::random_device m_rd;
         std::mt19937 m_gen;
         std::uniform_int_distribution<> m_dist;
+
+        std::vector<pnlResource*> m_vResourcePanels;
 
         DECLARE_EVENT_TABLE()
 

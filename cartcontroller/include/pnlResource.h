@@ -1,6 +1,10 @@
 #ifndef PNLRESOURCE_H
 #define PNLRESOURCE_H
 #include "uirect.h"
+#include <string>
+#include <wx/timer.h>
+#include "json/json.h"
+
 
 //(*Headers(pnlResource)
 #include <wx/panel.h>
@@ -16,6 +20,15 @@ class pnlResource: public wxPanel
 		//(*Declarations(pnlResource)
 		//*)
 
+		void SetResource(const std::string& sUid, const std::string& sLabel);
+
+		const wxString& GetUid() const
+		{
+            return m_sUid;
+		}
+
+		void UpdatePlayingStatus(const Json::Value& jsStatus);
+
 	protected:
 
 		//(*Identifiers(pnlResource)
@@ -29,10 +42,27 @@ class pnlResource: public wxPanel
 		void OnLeftUp(wxMouseEvent& event);
 		//*)
 
+		void OnSize(wxSizeEvent& event);
+		void OntimerMenuTrigger(wxTimerEvent& event);
+
+		void ColourUp();
+		void ColourIdle();
+
+		wxTimer m_timerMenu;
+
 		uiRect m_uiName;
         uiRect m_uiStatus;
 
+        wxString m_sUid;
+
 		DECLARE_EVENT_TABLE()
+
+		enum {STOPPED, PLAYING, ORPHANED};
+        int m_nPlaying;
+        bool m_bDown;
+        bool m_bIgnoreUp;
+
+        wxColour m_clrUp;
 
 		static const wxColour CLR_PLAYING;
         static const wxColour CLR_IDLE;
@@ -40,5 +70,8 @@ class pnlResource: public wxPanel
         static const wxColour CLR_ERROR;
         static const wxColour CLR_NO_FILE;
 };
+
+wxDECLARE_EXPORTED_EVENT(WXEXPORT, wxEVT_RESOURCE_PLAY, wxCommandEvent);
+wxDECLARE_EXPORTED_EVENT(WXEXPORT, wxEVT_RESOURCE_MENU, wxCommandEvent);
 
 #endif
