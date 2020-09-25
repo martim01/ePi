@@ -15,19 +15,22 @@
 			
 			var url = new URL(window.location.href);
 			var g_endpoint = url.searchParams.get("endpoint");
+			
+			
 			console.log(g_endpoint);
 			if(g_endpoint === null)
 			{
 				g_endpoint = prompt("Enter endpoint");
 			}
 			
-			//var g_endpoint = "192.168.0.101:8080";
 			var g_url = "http://"+g_endpoint+"/x-epi/";
 			
 			var g_files = [];
 			var g_schedules = [];
 			var g_playlists = [];
 			var g_ws = null;
+			var g_bOrphaned = false;
+			var g_show = 'files';
 			
 			function setElementText(elm, key, jsonObj)
 			{
@@ -181,6 +184,7 @@
 				}
 			}
 			
+			
 			function updateStatus(jsonObj)
 			{
 				document.getElementById("player").innerHTML = jsonObj["player"];
@@ -212,6 +216,7 @@
 				}
 				else
 				{
+					g_bOrphaned = (jsonObj["player"] == "Orphaned");
 					document.getElementById("stop").style.visibility = "visible";
 					
 					if(jsonObj["resource"] !== undefined)
@@ -905,7 +910,7 @@
 					ajax.send();
 				}
 				
-			}
+			}a
 			
 			
 						
@@ -923,7 +928,12 @@
 						console.log(jsonObj);
 					}
 				}
+				
 				var play = { "command" : "stop"};
+				if(g_bOrphaned)
+				{
+					play = { "command" : "kill"};
+				}
 				
 				console.log(play);
 				ajax.open("PATCH", g_url+"status",true);
@@ -931,7 +941,7 @@
 				ajax.send(JSON.stringify(play));
 			}
 			
-			var g_show = 'files';
+			
 			function show(event)
 			{
 				g_show = event.target.id;
@@ -1008,7 +1018,11 @@
 			{
 				g_jsonPost = {};
 				
-				document.getElementById('upload_'+g_show).className = 'popup';
+				var elm  = document.getElementById('upload_'+g_show);
+				if(elm)
+				{
+					elm.className = 'popup';
+				}
 				show_veil();
 				
 				
@@ -1027,7 +1041,11 @@
 			
 			function hideNew()
 			{
-				document.getElementById('upload_'+g_show).className = 'hide';
+				var elm = document.getElementById('upload_'+g_show);
+				if(elm)
+				{
+					elm.className = 'hide';
+				}
 				document.getElementById('veil').className = 'hide';
 			}
 			
@@ -1455,7 +1473,7 @@
 						next(0);
 					}
 				}
-				hideNew();
+				hideUpdate();
 				
 				document.getElementById('progress').className = 'popup';
 				document.getElementById('progress_label').innerHTML = document.getElementById('update_application').value;
@@ -1765,7 +1783,7 @@
 				<div class="grid_label grid_inset_more">Length</div><div id="playing_length" class="grid_value"></div>
 				<div class="grid_label grid_inset_more">Loop</div><div id="playing_loop" class="grid_value"></div>
 				<div class="grid_label grid_inset_more">Time</div><div id="playing_time" class="grid_value"></div>
-				<div class="grid_label grid_inset_more">Resampler</div><div id="resampler" class="grid_value"></div>
+				<div class="grid_label grid_inset_more">SRC</div><div id="resampler" class="grid_value"></div>
 				<div class="grid_value"><button id="lock" onclick="showLock()" style="padding: 5px;">Lock System</button></div><div class="grid_label"><button id="stop" onclick="stop()" style="padding: 5px; visibility: hidden">Stop Playout</button></div>
 			</div>
 			<div class="grid grid_system">
@@ -1836,7 +1854,7 @@
 					<li class="tab_label" id="file_title">New File</li>
 			</ul>
 			<div class="grid grid_upload">
-					<div class="grid_label">File</div><div><input type="file" name="file" id="new_file_file" onchange="file_chosen()"></div>
+					<div class="grid_label">File</div><div><input type="file" name="file" id="new_file_file" onchange="file_chosen()" accept=".wav"></div>
 					<div class="grid_label">Label</div><div><input type="text" name="label" id="new_file_label"></div>
 					<div class="grid_label">Description</div><div><input type="text" name="description" id="new_file_description"></div>
 					
@@ -1908,7 +1926,7 @@
 				<li class="tab_label" id="file_title">Update File</li>
 			</ul>
 			<div class="grid grid_upload">
-				<div class="grid_label">File</div><div><input type="file" name="file" id="update_file_file" onchange="file_chosen()"></div>
+				<div class="grid_label">File</div><div><input type="file" name="file" id="update_file_file" onchange="file_chosen()" accept="episerver"></div>
 				<div class="grid_label">&nbsp;</div><div><button onclick="update_file()">Upload</button></div>
 			</div>
 		</form>

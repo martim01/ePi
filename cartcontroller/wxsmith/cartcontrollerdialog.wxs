@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<wxsmith>
+	<object class="wxDialog" name="cartcontrollerDialog">
+		<title>wxWidgets app</title>
+		<object class="wxBoxSizer" variable="BoxSizer1" member="no">
+			<orient>wxVERTICAL</orient>
+			<object class="sizeritem">
+				<object class="wxPanel" name="ID_PANEL1" variable="m_ppnlStatus" member="yes" />
+				<flag>wxALL|wxEXPAND</flag>
+			</object>
+			<object class="sizeritem">
+				<object class="wxGridSizer" variable="GridSizer1" member="no">
+					<cols>8</cols>
+					<rows>6</rows>
+				</object>
+				<flag>wxALL|wxEXPAND</flag>
+				<option>1</option>
+			</object>
+		</object>
+	</object>
+</wxsmith>

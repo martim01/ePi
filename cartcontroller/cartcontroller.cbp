@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="cartcontroller" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/cartcontroller" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Option projectLinkerOptionsRelation="2" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-D__WXDEBUG__" />
+					<Add directory="$(#wx)/lib/gcc_dll/mswud" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(#wx)/lib/gcc_dll/mswud" />
+				</ResourceCompiler>
+				<Linker>
+					<Add library="libwxmsw30ud.a" />
+					<Add directory="$(#wx)/lib/gcc_dll" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/cartcontroller" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Option projectLinkerOptionsRelation="2" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add directory="$(#wx)/lib/gcc_dll/mswu" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(#wx)/lib/gcc_dll/mswu" />
+				</ResourceCompiler>
+				<Linker>
+					<Add option="-s" />
+					<Add library="libwxmsw30u.a" />
+					<Add directory="$(#wx)/lib/gcc_dll" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-std=c++14" />
+			<Add option="-pipe" />
+			<Add option="-mthreads" />
+			<Add option="-D__GNUWIN32__" />
+			<Add option="-D__WXMSW__" />
+			<Add option="-DWXUSINGDLL" />
+			<Add option="-DwxUSE_UNICODE" />
+			<Add directory="$(#wx)/include" />
+			<Add directory="./include" />
+			<Add directory="../common/include" />
+			<Add directory="../controller/include" />
+			<Add directory="../controller/icons" />
+			<Add directory="../external/jsoncpp/dist" />
+		</Compiler>
+		<ResourceCompiler>
+			<Add directory="$(#wx)/include" />
+		</ResourceCompiler>
+		<Linker>
+			<Add option="-mthreads" />
+		</Linker>
+		<Unit filename="../controller/src/constants.cpp" />
+		<Unit filename="../controller/src/dlgEdit.cpp" />
+		<Unit filename="../controller/src/dlgError.cpp" />
+		<Unit filename="../controller/src/dlgInfo.cpp" />
+		<Unit filename="../controller/src/dlgOptions.cpp" />
+		<Unit filename="../controller/src/dlgUpload.cpp" />
+		<Unit filename="../controller/src/dlgUsb.cpp" />
+		<Unit filename="../controller/src/multipartupload.cpp" />
+		<Unit filename="../controller/src/progress.cpp" />
+		<Unit filename="../controller/src/restfulclient.cpp" />
+		<Unit filename="../controller/src/uirect.cpp" />
+		<Unit filename="../controller/src/usbchecker.cpp" />
+		<Unit filename="../controller/src/websocketclient.cpp" />
+		<Unit filename="../controller/src/wmbutton.cpp" />
+		<Unit filename="../controller/src/wmedit.cpp" />
+		<Unit filename="../controller/src/wmfocusmanager.cpp" />
+		<Unit filename="../controller/src/wmkeyboard.cpp" />
+		<Unit filename="../controller/src/wmlabel.cpp" />
+		<Unit filename="../controller/src/wmlist.cpp" />
+		<Unit filename="src/cartcontrollerApp.cpp" />
+		<Unit filename="include/cartcontrollerApp.h" />
+		<Unit filename="src/cartcontrollerMain.cpp" />
+		<Unit filename="include/cartcontrollerMain.h" />
+		<Unit filename="src/pnlResource.cpp" />
+		<Unit filename="include/pnlResource.h" />
+		<Unit filename="resource.rc">
+			<Option compilerVar="WINDRES" />
+		</Unit>
+		<Unit filename="wxsmith/cartcontrollerdialog.wxs" />
+		<Unit filename="wxsmith/pnlResource.wxs" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<wxsmith version="1">
+				<gui name="wxWidgets" src="cartcontrollerApp.cpp" main="cartcontrollerDialog" init_handlers="necessary" language="CPP" />
+				<resources>
+					<wxDialog wxs="wxsmith/cartcontrollerdialog.wxs" src="src/cartcontrollerMain.cpp" hdr="include/cartcontrollerMain.h" fwddecl="0" i18n="1" name="cartcontrollerDialog" language="CPP" />
+					<wxPanel wxs="wxsmith/pnlResource.wxs" src="src/pnlResource.cpp" hdr="include/pnlResource.h" fwddecl="0" i18n="1" name="pnlResource" language="CPP" />
+				</resources>
+			</wxsmith>
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
