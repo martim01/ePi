@@ -27,11 +27,11 @@ A simple application that reads and ini file and launches 1 or more controllers 
 
 ### loopi
 A set of webpages written using PHP and javascript that allows full control of the episerver. Designed for using the ePi as a loop/barker player.
-## Prerequisites
 
 ### cart controller
 An application designed for a Raspberry Pi 7" touchscreen that implements a cart wall.
 
+## Prerequisites
 ### Core libraries required for the Server and Player3
 
 * [PortAudio](http://www.portaudio.com/download.html)
