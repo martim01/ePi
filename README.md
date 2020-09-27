@@ -3,10 +3,10 @@
 [![Code Grade](https://www.code-inspector.com/project/11011/score/svg)](https://www.code-inspector.com)
 [![Code Grade](https://www.code-inspector.com/project/11011/status/svg)](https://www.code-inspector.com)
 
-Raspberry Pi Emergency Audio Material and Loop Player
+Raspberry Pi Emergency Audio Material, Loop Player and Cart Player
 
 ## Introduction
-This is a project to create a broadcast standard audio loop player that can also be used as an emergency material player for radio transmission chains.
+This is a project to create a broadcast standard audio loop player that can also be used as an emergency material player for radio transmission chains and as a cart wall player
 
 The project consists of a number of applications
 
@@ -28,6 +28,9 @@ A simple application that reads and ini file and launches 1 or more controllers 
 ### loopi
 A set of webpages written using PHP and javascript that allows full control of the episerver. Designed for using the ePi as a loop/barker player.
 ## Prerequisites
+
+### cart controller
+An application designed for a Raspberry Pi 7" touchscreen that implements a cart wall.
 
 ### Core libraries required for the Server and Player3
 
