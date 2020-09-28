@@ -127,4 +127,5 @@ class Core
 
         size_t m_nLogToConsole;
         size_t m_nLogToFile;
+        bool m_bLoggedThisHour;
 };

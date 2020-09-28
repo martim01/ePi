@@ -16,16 +16,18 @@
 #include <sstream>
 
 #include <wx/display.h>
-#include "dlgOptions.h"
+#include "dlgfilemanager.h"
 #include "constants.h"
 #include "pnlResource.h"
 #include "wmlabel.h"
+#include "dlgsystem.h"
 
 const wxColour cartcontrollerDialog::CLR_PLAYING = wxColour(146,208,80);
 const wxColour cartcontrollerDialog::CLR_IDLE = wxColour(141,180,226);
 const wxColour cartcontrollerDialog::CLR_ERROR =  wxColour(255,0,0);
 const wxColour cartcontrollerDialog::CLR_NO_FILE = wxColour(160,160,160);
 const wxColour cartcontrollerDialog::CLR_CONNECTING = wxColour(255,255,0);
+const wxColour cartcontrollerDialog::CLR_OKAY = wxColour(0,128,64);
 
 
 const long cartcontrollerDialog::ID_TIMER_CONNECTION = wxNewId();
@@ -88,16 +90,22 @@ m_dist(500,1000)
     wxGridSizer* GridSizer1;
 
 
-    Create(parent, id, _("wxWidgets app"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE, _T("id"));
+    Create(parent, id, _("wxWidgets app"), wxDefaultPosition, wxDefaultSize, wxNO_BORDER, _T("id"));
 
 
     BoxSizer1 = new wxBoxSizer(wxVERTICAL);
-    m_ppnlStatus = new wxPanel(this, ID_PANEL1, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL, _T("ID_PANEL1"));
+    m_ppnlStatus = new wxPanel(this, ID_PANEL1, wxDefaultPosition, wxSize(800,40), wxTAB_TRAVERSAL, _T("ID_PANEL1"));
+    m_ppnlStatus->SetBackgroundColour(CLR_ERROR);
     BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
-    m_plblHostname = new wmLabel(m_ppnlStatus, wxNewId());
+    m_plblHostname = new wmLabel(m_ppnlStatus, wxNewId(), wxEmptyString, wxDefaultPosition, wxSize(-1, 40));
     m_plblHostname->SetBackgroundColour(CLR_ERROR);
+    m_plblHostname->SetForegroundColour(*wxWHITE);
+    m_plblHostname->SetFont(wxFont(20,wxFONTFAMILY_SWISS,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL,false,_T("Arial"),wxFONTENCODING_DEFAULT));
+    BoxSizer2->Add(m_plblHostname, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+    m_pbtnSystem = new wmButton(this, wxNewId(), wxT("System"), wxDefaultPosition, wxSize(-1,34));
+    m_pbtnSystem->SetForegroundColour(*wxWHITE);
+    BoxSizer2->Add(m_pbtnSystem, 0, wxRIGHT|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 10);
 
-    BoxSizer2->Add(m_plblHostname, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
     m_ppnlStatus->SetSizer(BoxSizer2);
 
     BoxSizer1->Add(m_ppnlStatus, 0, wxALL|wxEXPAND, 0);
@@ -106,7 +114,7 @@ m_dist(500,1000)
     m_vResourcePanels.resize(20);
     for(int i = 0; i < 20; i++)
     {
-        m_vResourcePanels[i] = new pnlResource(this, wxNewId(), wxDefaultPosition, wxSize(160,120));
+        m_vResourcePanels[i] = new pnlResource(this, wxNewId(), wxDefaultPosition, wxSize(160,110));
         GridSizer1->Add(m_vResourcePanels[i], 1, wxALL,0);
         //GridSizer1->Add(new wmLabel(this, wxNewId(), wxString::Format("%d",i )), 1, wxALL,2);
     }
@@ -132,6 +140,7 @@ m_dist(500,1000)
 
     Connect(wxID_ANY, wxEVT_RESOURCE_PLAY, (wxObjectEventFunction)&cartcontrollerDialog::OnResourcePlay);
     Connect(wxID_ANY, wxEVT_RESOURCE_MENU, (wxObjectEventFunction)&cartcontrollerDialog::OnResourceMenu);
+    Connect(wxID_ANY, wxEVT_RESOURCE_STOP, (wxObjectEventFunction)&cartcontrollerDialog::OnResourceStop);
 
 
     wxSetCursor(*wxSTANDARD_CURSOR);
@@ -144,6 +153,7 @@ m_dist(500,1000)
     Connect(wxID_ANY, wxEVT_WS_FINISHED, (wxObjectEventFunction)&cartcontrollerDialog::OnWebsocketFinished);
     Connect(wxID_ANY, wxEVT_R_REPLY, (wxObjectEventFunction)&cartcontrollerDialog::OnRestfulReply);
 
+    Connect(m_pbtnSystem->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, (wxObjectEventFunction)&cartcontrollerDialog::OnbtnSystem);
 
 
     m_timerCheck.SetOwner(this, wxNewId());
@@ -223,9 +233,16 @@ void cartcontrollerDialog::OnWebsocketFrame(const wxCommandEvent& event)
     m_timerTimeout.Start(5000, true);
 
     Json::Value jsValue(ConvertToJson(event.GetString().ToStdString()));
-    if(jsValue["player"].isString())
+    if(jsValue.isArray())
+    {
+        UpdateResources(jsValue);
+    }
+    else if(jsValue["player"].isString())
     {
         UpdatePlayingStatus(jsValue);
+    }
+    else if(jsValue["system"].isObject())
+    {
     }
 }
 
@@ -269,6 +286,12 @@ void cartcontrollerDialog::OnRestfulReply(const wxCommandEvent& event)
             break;
         case FILES:
             ReplyFiles(jsValue);
+            break;
+        case FILE_GET:
+            ReplyAddFile(jsValue);
+            break;
+        case FILE_UPDATE:
+            ReplyModifyFile(jsValue);
     }
 }
 
@@ -292,19 +315,27 @@ void cartcontrollerDialog::ReplyFiles(const Json::Value& jsData)
 
     if(jsData.isArray() && jsData.size() > 0)
     {
-
-        for(size_t i = 0; i < m_vResourcePanels.size(); i++)
+        std::map<std::string, std::string> mFiles;
+        for(size_t i = 0; i < jsData.size(); i++)
         {
-            if(i < jsData.size())
+            mFiles.insert(std::make_pair(jsData[i]["label"].asString(), jsData[i]["uid"].asString()));
+        }
+
+        size_t i = 0;
+        for(auto pairFile : mFiles)
+        {
+            if(i < m_vResourcePanels.size())
             {
-                m_vResourcePanels[i]->SetResource(jsData[i]["uid"].asString(), jsData[i]["label"].asString());
+                m_vResourcePanels[i]->SetResource(pairFile.second, pairFile.first);
             }
-            else
-            {
-                m_vResourcePanels[i]->SetResource("", "");
-            }
+            ++i;
+        }
+        for(; i < m_vResourcePanels.size(); i++)
+        {
+            m_vResourcePanels[i]->SetResource("", "");
         }
     }
+
    UpdateLabels();
 
 }
@@ -324,13 +355,14 @@ void cartcontrollerDialog::UpdateLabels()
             //m_uiStatus.SetLabel("Connecting");
             break;
         case CONNECTED:
-            clr = CLR_IDLE;
+            clr = CLR_OKAY;
             break;
         default:
             clr = CLR_ERROR;
             //m_uiStatus.SetLabel("Error");
     }
     m_plblHostname->SetBackgroundColour(clr);
+    m_ppnlStatus->SetBackgroundColour(clr);
 }
 
 
@@ -348,17 +380,17 @@ void cartcontrollerDialog::Play(const wxString& sUid)
     m_rClient.Patch((m_sUrl+STR_ENDPOINTS[STATUS]).ToStdString(), ss.str().data(), STATUS);
 }
 
-void cartcontrollerDialog::Stop()
+void cartcontrollerDialog::Stop(bool bKill)
 {
     Json::Value jsCommand;
-//    if(m_nPlaying == PLAYING)
+    if(!bKill)
     {
         jsCommand["command"] = "stop";
     }
-//    else
-//    {
-//        jsCommand["command"] = "kill";
-//    }
+    else
+    {
+        jsCommand["command"] = "kill";
+    }
 
     std::stringstream ss;
     epiWriter::Get().writeToSStream(jsCommand, ss);
@@ -372,11 +404,10 @@ void cartcontrollerDialog::Stop()
 
 void cartcontrollerDialog::OnTimerCheck(const wxTimerEvent& event)
 {
-    wxLogDebug("OnTimerCheck");
     //Ask for status and info...
     m_rClient.Get((m_sUrl+STR_ENDPOINTS[CONFIG]).ToStdString(), CONFIG);
     m_rClient.Get((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString(), FILES);
-    m_timerCheck.Start(10000, true);
+//    m_timerCheck.Start(10000, true);
 }
 
 
@@ -402,9 +433,15 @@ void cartcontrollerDialog::OnResourcePlay(const wxCommandEvent& event)
     }
 }
 
+void cartcontrollerDialog::OnResourceStop(const wxCommandEvent& event)
+{
+    Stop(event.GetInt());
+
+}
+
 void cartcontrollerDialog::OnResourceMenu(const wxCommandEvent& event)
 {
-    dlgOptions aDlg(this, m_wsClient, wxEmptyString, m_sIpAddress, m_sUrl, event.GetString().ToStdString(), wxNewId(), wxPoint(0,0), wxSize(800,480));
+    dlgFileManager aDlg(this, m_wsClient, m_plblHostname->GetLabel(), m_sIpAddress, m_sUrl, event.GetString().ToStdString(), wxNewId(), wxPoint(0,0), wxSize(800,480));
     if(aDlg.ShowModal() == wxID_CANCEL)
     {
         EndModal(wxID_OK);
@@ -412,5 +449,90 @@ void cartcontrollerDialog::OnResourceMenu(const wxCommandEvent& event)
     else
     {
         m_rClient.Get((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString(), FILES);
+    }
+}
+
+
+void cartcontrollerDialog::UpdateResources(Json::Value& jsResources)
+{
+    for(size_t i = 0; i < jsResources.size(); i++)
+    {
+        if(jsResources[i]["modification"].isString() && jsResources[i]["type"].isString() && jsResources[i]["uid"].isString())
+        {
+            if(jsResources[i]["modification"].asString() == "added")
+            {
+                AddResource(wxString::FromUTF8(jsResources[i]["uid"].asString().c_str()));
+            }
+            else if(jsResources[i]["modification"].asString() == "deleted")
+            {
+                DeleteResource(wxString::FromUTF8(jsResources[i]["uid"].asString().c_str()));
+            }
+            else if(jsResources[i]["modification"].asString() == "modified")
+            {
+                ModifyResource(wxString::FromUTF8(jsResources[i]["uid"].asString().c_str()));
+            }
+        }
+    }
+}
+
+void cartcontrollerDialog::AddResource(const wxString& sUid)
+{
+    m_rClient.Get((m_sUrl+STR_ENDPOINTS[FILES]+"/"+sUid).ToStdString(), FILE_GET);
+}
+
+void cartcontrollerDialog::DeleteResource(const wxString& sUid)
+{
+    for(size_t i =0; i < m_vResourcePanels.size(); i++)
+    {
+        if(m_vResourcePanels[i]->GetUid() == sUid)
+        {
+            m_vResourcePanels[i]->SetResource("", "");
+            break;
+        }
+    }
+}
+
+void cartcontrollerDialog::ModifyResource(const wxString& sUid)
+{
+    m_rClient.Get((m_sUrl+STR_ENDPOINTS[FILES]+"/"+sUid).ToStdString(), FILE_UPDATE);
+}
+
+
+void cartcontrollerDialog::ReplyAddFile(const Json::Value& jsData)
+{
+    if(jsData["uid"].isString() && jsData["label"].isString())
+    {
+        for(size_t i =0; i < m_vResourcePanels.size(); i++)
+        {
+            if(m_vResourcePanels[i]->GetUid().empty())
+            {
+                m_vResourcePanels[i]->SetResource(jsData["uid"].asString(),jsData["label"].asString());
+                break;
+            }
+        }
+    }
+}
+
+void cartcontrollerDialog::ReplyModifyFile(const Json::Value& jsData)
+{
+    if(jsData["uid"].isString() && jsData["label"].isString())
+    {
+        for(size_t i =0; i < m_vResourcePanels.size(); i++)
+        {
+            if(m_vResourcePanels[i]->GetUid().ToStdString() == jsData["uid"].asString())
+            {
+                m_vResourcePanels[i]->SetResource(jsData["uid"].asString(),jsData["label"].asString());
+                break;
+            }
+        }
+    }
+}
+
+void cartcontrollerDialog::OnbtnSystem(const wxCommandEvent& event)
+{
+    dlgSystem aDlg(this, m_wsClient, m_plblHostname->GetLabel(), m_sIpAddress, m_sUrl);
+    if(aDlg.ShowModal() == wxID_CANCEL)
+    {
+        EndModal(wxID_OK);
     }
 }

@@ -24,12 +24,16 @@
 				<Linker>
 					<Add directory="$(#wx)/lib/gcc_dll" />
 				</Linker>
+				<ExtraCommands>
+					<Add after="sudo setcap cap_sys_admin+ep /home/pi/ePi/cartcontroller/bin/Debug/cartcontroller" />
+				</ExtraCommands>
 			</Target>
 			<Target title="Release">
-				<Option output="bin/Release/cartcontroller" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/cartcontroller" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
+				<Option parameters="127.0.0.1 8080" />
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
 					<Add option="-O2" />
@@ -43,6 +47,9 @@
 					<Add option="-s" />
 					<Add directory="$(#wx)/lib/gcc_dll" />
 				</Linker>
+				<ExtraCommands>
+					<Add after="sudo setcap cap_sys_admin+ep /home/pi/ePi/bin/cartcontroller" />
+				</ExtraCommands>
 			</Target>
 		</Build>
 		<Compiler>
@@ -76,11 +83,11 @@
 		<Unit filename="../common/src/mongoose.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="../controller/include/restfulclient.h" />
 		<Unit filename="../controller/src/constants.cpp" />
 		<Unit filename="../controller/src/dlgEdit.cpp" />
 		<Unit filename="../controller/src/dlgError.cpp" />
 		<Unit filename="../controller/src/dlgInfo.cpp" />
-		<Unit filename="../controller/src/dlgOptions.cpp" />
 		<Unit filename="../controller/src/dlgUpload.cpp" />
 		<Unit filename="../controller/src/dlgUsb.cpp" />
 		<Unit filename="../controller/src/multipartupload.cpp" />
@@ -99,6 +106,8 @@
 		<Unit filename="../external/log/src/log.cpp" />
 		<Unit filename="include/cartcontrollerApp.h" />
 		<Unit filename="include/cartcontrollerMain.h" />
+		<Unit filename="include/dlgfilemanager.h" />
+		<Unit filename="include/dlgsystem.h" />
 		<Unit filename="include/pnlResource.h" />
 		<Unit filename="include/version.h" />
 		<Unit filename="resource.rc">
@@ -106,6 +115,8 @@
 		</Unit>
 		<Unit filename="src/cartcontrollerApp.cpp" />
 		<Unit filename="src/cartcontrollerMain.cpp" />
+		<Unit filename="src/dlgfilemanager.cpp" />
+		<Unit filename="src/dlgsystem.cpp" />
 		<Unit filename="src/pnlResource.cpp" />
 		<Unit filename="src/version.cpp" />
 		<Unit filename="wxsmith/cartcontrollerdialog.wxs" />

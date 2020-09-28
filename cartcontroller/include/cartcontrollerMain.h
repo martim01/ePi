@@ -26,6 +26,7 @@
 
 class pnlResource;
 class wmLabel;
+class wmButton;
 
 class cartcontrollerDialog: public wxDialog
 {
@@ -66,6 +67,7 @@ class cartcontrollerDialog: public wxDialog
         wxTimer m_timerCheck;
         wxPanel* m_ppnlStatus;
         wmLabel* m_plblHostname;
+        wmButton* m_pbtnSystem;
 
         void OnWebsocketConnection(const wxCommandEvent& event);
         void OnWebsocketHandshake(const wxCommandEvent& event);
@@ -76,6 +78,9 @@ class cartcontrollerDialog: public wxDialog
 
         void OnResourcePlay(const wxCommandEvent& event);
         void OnResourceMenu(const wxCommandEvent& event);
+        void OnResourceStop(const wxCommandEvent& event);
+
+        void OnbtnSystem(const wxCommandEvent& event);
 
         void OnTimerCheck(const wxTimerEvent& event);
         void UpdateLabels();
@@ -85,7 +90,14 @@ class cartcontrollerDialog: public wxDialog
         void UpdatePlayingStatus(const Json::Value& jsData);
 
         void Play(const wxString& sUid);
-        void Stop();
+        void Stop(bool bKill=false);
+
+        void UpdateResources(Json::Value& jsResources);
+        void AddResource(const wxString& sUid);
+        void DeleteResource(const wxString& sUid);
+        void ModifyResource(const wxString& sUid);
+        void ReplyAddFile(const Json::Value& jsData);
+        void ReplyModifyFile(const Json::Value& jsData);
 
         uiRect m_uiName;
         uiRect m_uiStatus;
@@ -127,6 +139,7 @@ class cartcontrollerDialog: public wxDialog
         static const wxColour CLR_CONNECTING;
         static const wxColour CLR_ERROR;
         static const wxColour CLR_NO_FILE;
+        static const wxColour CLR_OKAY;
 
 
 };

@@ -41,6 +41,7 @@ class MongooseServer
     public:
 
         MongooseServer();
+        ~MongooseServer();
 
         bool Init(const iniManager& iniConfig);
 

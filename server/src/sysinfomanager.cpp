@@ -6,7 +6,7 @@
 #include "version.h"
 #include <algorithm>
 #include "log.h"
-
+#include <unistd.h>
 
 
 SysInfoManager::SysInfoManager() :
@@ -46,6 +46,7 @@ Json::Value SysInfoManager::GetSysInfo()
         Json::Value jsHigh;
         jsHigh["total"] = static_cast<Json::UInt64>(info.totalhigh);
         jsHigh["free"] = static_cast<Json::UInt64>(info.freehigh);
+
 
         float fload = 1.f/(1 << SI_LOAD_SHIFT);
         fload *=100/get_nprocs();
@@ -105,6 +106,7 @@ Json::Value SysInfoManager::GetInfo()
     jsInfo["application"] = GetApplicationInfo();
     jsInfo["temperature"] = GetTemperature();
     jsInfo["ntp"] = m_ntp.GetStatus();
+    jsInfo["process"] = GetProcessMemUsage();
     return jsInfo;
 }
 
@@ -215,11 +217,50 @@ Json::Value SysInfoManager::GetTemperature()
             }
             catch(const std::invalid_argument& e)
             {
-                jsInfo["error"] = "Temp in invalid format";
             }
+        }
+        if(jsInfo["cpu"].isDouble() == false)
+        {
+            jsInfo["error"] = "Temp in invalid format";
         }
     }
     return jsInfo;
+}
+
+
+Json::Value SysInfoManager::GetProcessMemUsage()
+{
+   Json::Value jsValue;
+
+   // 'file' stat seems to give the most reliable results
+   //
+   std::ifstream stat_stream("/proc/self/stat",std::ios_base::in);
+
+   // dummy vars for leading entries in stat that we don't care about
+   //
+   std::string pid, comm, state, ppid, pgrp, session, tty_nr;
+   std::string tpgid, flags, minflt, cminflt, majflt, cmajflt;
+   std::string utime, stime, cutime, cstime, priority, nice;
+   std::string O, itrealvalue, starttime;
+
+   // the two fields we want
+   //
+   unsigned long vsize;
+   int rss;
+
+   stat_stream >> pid >> comm >> state >> ppid >> pgrp >> session >> tty_nr
+               >> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt
+               >> utime >> stime >> cutime >> cstime >> priority >> nice
+               >> O >> itrealvalue >> starttime >> vsize >> rss; // don't care about the rest
+
+   stat_stream.close();
+
+   int page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024; // in case x86-64 is configured to use 2MB pages
+
+   jsValue["vm"] = vsize / 1024.0;
+   jsValue["rs"] = rss * page_size_kb;
+
+   return jsValue;
 }
 
 

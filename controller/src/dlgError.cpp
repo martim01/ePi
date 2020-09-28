@@ -61,13 +61,16 @@ dlgError::dlgError(wxWindow* parent,const wxString& sMessage, const Json::Value&
 
 	Connect(m_pbtnClose->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, (wxObjectEventFunction)&dlgError::OnbtnCloseClick);
 
-	for(size_t i = 0; i < jsError["reason"].size(); i++)
+	if(jsError["reason"].isArray())
 	{
-        if(jsError["reason"][i].isString())
+        for(size_t i = 0; i < jsError["reason"].size(); i++)
         {
-            m_plstReasons->AddButton(wxString::FromUTF8(jsError["reason"][i].asString().c_str()));
+            if(jsError["reason"][i].isString())
+            {
+                m_plstReasons->AddButton(wxString::FromUTF8(jsError["reason"][i].asString().c_str()));
+            }
         }
-	}
+    }
 	m_plstReasons->Refresh();
 }
 

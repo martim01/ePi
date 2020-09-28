@@ -20,6 +20,8 @@
 #include <sys/reboot.h>
 #include "jsonutils.h"
 #include "proccheck.h"
+#include <chrono>
+
 
 using namespace std::placeholders;
 using namespace pml;
@@ -50,10 +52,11 @@ const url Core::EP_OUTPUTS     = url(EP_EPI.Get()+"/"+OUTPUTS);
 
 
 Core::Core() : m_manager(m_launcher, m_iniConfig),
+   m_jsResources(Json::arrayValue),
    m_nTimeSinceLastCall(0),
    m_nLogToConsole(0),
    m_nLogToFile(0),
-   m_jsResources(Json::arrayValue)
+   m_bLoggedThisHour(false)
 {
 
     GetInitialPlayerStatus();
@@ -490,6 +493,9 @@ void Core::ResourceModified(enumType eType, const std::string& sUid, enumModific
         case SCHEDULE:
             jsValue["type"] = "schedule";
             break;
+        default:
+            jsValue["type"] = "Unknown";
+            break;
     }
 
     jsValue["uid"] = sUid;
@@ -811,6 +817,21 @@ void Core::LoopCallback(int nTook)
             m_server.SendWebsocketMessage(m_jsStatus);
         }
         m_nTimeSinceLastCall = 0;
+    }
+
+    time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    tm local_time = *localtime(&now);
+    if(local_time.tm_min == 0 && local_time.tm_sec == 0)
+    {
+        if(m_bLoggedThisHour == false)
+        {
+            m_bLoggedThisHour = true;
+            pml::Log::Get() << GetCurrentTimeAsIsoString() << std::endl;
+        }
+    }
+    else
+    {
+        m_bLoggedThisHour = false;
     }
 }
 

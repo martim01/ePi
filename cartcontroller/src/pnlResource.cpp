@@ -19,12 +19,15 @@ const wxColour pnlResource::CLR_IDLE = wxColour(141,180,226);
 const wxColour pnlResource::CLR_ERROR =  wxColour(255,0,0);
 const wxColour pnlResource::CLR_NO_FILE = wxColour(160,160,160);
 const wxColour pnlResource::CLR_CONNECTING = wxColour(255,255,0);
+const wxColour pnlResource::CLR_ORPHANED = wxColour(255,128,0);
+
 
 wxDEFINE_EVENT(wxEVT_RESOURCE_PLAY, wxCommandEvent);
 wxDEFINE_EVENT(wxEVT_RESOURCE_MENU, wxCommandEvent);
+wxDEFINE_EVENT(wxEVT_RESOURCE_STOP, wxCommandEvent);
 
 pnlResource::pnlResource(wxWindow* parent,wxWindowID id,const wxPoint& pos,const wxSize& size) :
-m_nPlaying(STOPPED),
+m_nPlaying(NO_FILE),
 m_bDown(false),
 m_bIgnoreUp(false)
 {
@@ -63,17 +66,17 @@ void pnlResource::SetResource(const std::string& sUid, const std::string& sLabel
     m_sUid = wxString::FromUTF8(sUid.c_str());
     m_uiName.SetLabel(wxString::FromUTF8(sLabel.c_str()));
 
+
     if(m_sUid.empty() == false)
     {
-        m_uiName.SetBackgroundColour(CLR_IDLE);
-        m_uiStatus.SetBackgroundColour(CLR_IDLE);
+        m_nPlaying = STOPPED;
     }
     else
     {
-        m_uiName.SetBackgroundColour(CLR_NO_FILE);
-        m_uiStatus.SetBackgroundColour(CLR_NO_FILE);
+        m_nPlaying = NO_FILE;
     }
-    Refresh();
+
+    ColourRects();
 }
 
 void pnlResource::OnSize(wxSizeEvent& event)
@@ -101,20 +104,30 @@ void pnlResource::OnPaint(wxPaintEvent& event)
 void pnlResource::OnLeftDown(wxMouseEvent& event)
 {
     m_bDown = true;
-    m_clrUp = m_uiName.GetBackgroundColour();
+    m_nHoldCount = 0;
 
-    m_uiName.SetBackgroundColour(wxColour(255,128,0));
-    m_uiStatus.SetBackgroundColour(wxColour(255,128,0));
+    ColourDown();
+    m_timerMenu.Start(50,false);
+
+}
+
+void pnlResource::ColourDown()
+{
+    wxColour clr = wxColour(std::min(255, m_uiName.GetBackgroundColour().Red()+5),
+                            std::min(255, m_uiName.GetBackgroundColour().Green()+5),
+                            std::min(255, m_uiName.GetBackgroundColour().Blue()+5));
+
+    m_uiName.SetBackgroundColour(clr);
+    m_uiStatus.SetBackgroundColour(clr);
+
     Refresh();
-    m_timerMenu.Start(4000,true);
-
 }
 
 void pnlResource::OnLeftUp(wxMouseEvent& event)
 {
-    ColourUp();
-
+    ColourRects();
     m_timerMenu.Stop();
+
     if(m_bIgnoreUp)
     {
         m_bIgnoreUp = false;
@@ -129,69 +142,94 @@ void pnlResource::OnLeftUp(wxMouseEvent& event)
     m_bDown = false;
 }
 
-void pnlResource::ColourUp()
+void pnlResource::ColourRects()
 {
-    m_uiName.SetBackgroundColour(m_clrUp);
-    m_uiStatus.SetBackgroundColour(m_clrUp);
+    if(m_bDown == false)
+    {
+        wxColour clr;
+        switch(m_nPlaying)
+        {
+            case NO_FILE:
+                clr = CLR_NO_FILE;
+                m_uiStatus.SetLabel(wxEmptyString);
+                break;
+            case ORPHANED:
+                clr = CLR_ORPHANED;
+                m_uiStatus.SetLabel(wxEmptyString);
+                break;
+            case STOPPED:
+                clr = CLR_IDLE;
+                m_uiStatus.SetLabel(wxEmptyString);
+                break;
+            case PLAYING:
+                clr = CLR_PLAYING;
+                break;
+        }
+
+        m_uiName.SetBackgroundColour(clr);
+        m_uiStatus.SetBackgroundColour(clr);
+    }
     Refresh();
 }
 
 void pnlResource::OntimerMenuTrigger(wxTimerEvent& event)
 {
-    ColourUp();
-    m_bIgnoreUp = true;
-    m_bDown = false;
+    m_nHoldCount++;
+    ColourDown();
+    if(m_nHoldCount == 30)
+    {
+        m_timerMenu.Stop();
+        m_bIgnoreUp = false;
+        m_bDown = false;
 
-    wxCommandEvent resourceEvent(wxEVT_RESOURCE_MENU);
-    resourceEvent.SetString(m_sUid);
-    wxPostEvent(GetParent(), resourceEvent);
+        ColourRects();
 
-    /*
-
-    */
+        if(m_nPlaying == STOPPED || m_nPlaying == NO_FILE)
+        {
+            wxCommandEvent resourceEvent(wxEVT_RESOURCE_MENU);
+            resourceEvent.SetString(m_sUid);
+            wxPostEvent(GetParent(), resourceEvent);
+        }
+        else
+        {
+            wxCommandEvent resourceEvent(wxEVT_RESOURCE_STOP);
+            resourceEvent.SetString(m_sUid);
+            resourceEvent.SetInt((m_nPlaying==ORPHANED));
+            wxPostEvent(GetParent(), resourceEvent);
+        }
+    }
 }
 
 
 void pnlResource::UpdatePlayingStatus(const Json::Value& jsData)
 {
-    if(jsData["player"].asString() == "Running")
+    if(jsData["player"].isString())
     {
-        if(jsData["resource"]["uid"] == m_sUid.ToStdString())
+        if(jsData["player"].asString() == "Running")
         {
-            m_uiName.SetBackgroundColour(CLR_PLAYING);
-            m_uiStatus.SetBackgroundColour(CLR_PLAYING);
-            if(jsData["status"].isObject() && jsData["status"]["playing"].isObject())
+            if(jsData["resource"]["uid"] == m_sUid.ToStdString())
             {
-                m_uiStatus.SetLabel(wxTimeSpan(0,0,0, jsData["status"]["playing"]["time"].asInt()).Format("%H:%M:%S"));
+                m_nPlaying = PLAYING;
+                if(jsData["status"].isObject() && jsData["status"]["playing"].isObject())
+                {
+                    m_uiStatus.SetLabel(wxTimeSpan(0,0,0, jsData["status"]["playing"]["time"].asInt()).Format("%H:%M:%S"));
+                }
             }
+            else
+            {
+                m_nPlaying = (m_sUid.empty() ? NO_FILE : STOPPED);
+            }
+
         }
-        else
+        else if(jsData["player"].asString() == "Orphaned")
         {
-            ColourIdle();
+            m_nPlaying = ORPHANED;
         }
+        else if(jsData["player"].asString() == "Stopped")
+        {
+            m_nPlaying = (m_sUid.empty() ? NO_FILE : STOPPED);
+        }
+        ColourRects();
     }
-    else if(jsData["player"].asString() == "Orphaned")
-    {
-        m_uiName.
-       // m_nPlaying = ORPHANED;
-       // m_tsLength = wxTimeSpan(0);
-       // m_tsPosition = wxTimeSpan(0);
-    }
-    else if(jsData["player"].asString() == "Stopped")
-    {
-        ColourIdle();
-    }
-    Refresh();
 }
 
-void pnlResource::ColourIdle()
-{
-    wxColour clr(CLR_IDLE);
-    if(m_sUid.empty())
-    {
-        clr = CLR_NO_FILE;
-    }
-    m_uiStatus.SetLabel(wxEmptyString);
-    m_uiName.SetBackgroundColour(clr);
-    m_uiStatus.SetBackgroundColour(clr);
-}

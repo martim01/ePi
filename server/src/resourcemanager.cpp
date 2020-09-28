@@ -1217,11 +1217,22 @@ response ResourceManager::Play(const Json::Value& jsData)
     //check if already playing
     if(m_launcher.IsPlaying())
     {
-        response theResponse(409);
-        theResponse.jsonData["result"] = false;
-        theResponse.jsonData["reason"].append("Player already running");
-        pml::Log::Get(pml::Log::LOG_WARN) << "- Player already running" << std::endl;
-        return theResponse;
+        if(m_iniConfig.GetIniInt("playout", "autostop",0) == 0) //this means we have to manually stop before playing
+        {
+            response theResponse(409);
+            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["reason"].append("Player already running");
+            pml::Log::Get(pml::Log::LOG_WARN) << "- Player already running" << std::endl;
+            return theResponse;
+        }
+        else
+        {
+            response theResponse(Kill(jsData));
+            if(theResponse.nHttpCode != 200)
+            {
+                return theResponse;
+            }
+        }
     }
 
     //check if data is valid

@@ -13,6 +13,7 @@ class RestfulClient : public wxEvtHandler
 {
     public:
         RestfulClient(wxEvtHandler* pHandler);
+        ~RestfulClient();
         bool Get(const std::string& sEndpoint, int nUserId);
         bool Post(const std::string& sEndpoint, const char* pPostData, int nUserId);
         bool Patch(const std::string& sEndpoint, const char* pPostData, int nUserId);
@@ -58,6 +59,8 @@ class RestfulClient : public wxEvtHandler
 
         std::queue<task> m_qTasks;
         wxTimer m_timerTask;
+
+        bool m_bRunning;
 
 };
 

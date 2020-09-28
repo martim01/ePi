@@ -45,8 +45,8 @@ class pnlResource: public wxPanel
 		void OnSize(wxSizeEvent& event);
 		void OntimerMenuTrigger(wxTimerEvent& event);
 
-		void ColourUp();
-		void ColourIdle();
+		void ColourRects();
+		void ColourDown();
 
 		wxTimer m_timerMenu;
 
@@ -57,21 +57,24 @@ class pnlResource: public wxPanel
 
 		DECLARE_EVENT_TABLE()
 
-		enum {STOPPED, PLAYING, ORPHANED};
+		enum {NO_FILE, STOPPED, PLAYING, ORPHANED};
         int m_nPlaying;
         bool m_bDown;
         bool m_bIgnoreUp;
 
-        wxColour m_clrUp;
+        int m_nHoldCount;
 
 		static const wxColour CLR_PLAYING;
         static const wxColour CLR_IDLE;
         static const wxColour CLR_CONNECTING;
         static const wxColour CLR_ERROR;
         static const wxColour CLR_NO_FILE;
+        static const wxColour CLR_ORPHANED;
+        static const wxColour CLR_DOWN;
 };
 
 wxDECLARE_EXPORTED_EVENT(WXEXPORT, wxEVT_RESOURCE_PLAY, wxCommandEvent);
 wxDECLARE_EXPORTED_EVENT(WXEXPORT, wxEVT_RESOURCE_MENU, wxCommandEvent);
+wxDECLARE_EXPORTED_EVENT(WXEXPORT, wxEVT_RESOURCE_STOP, wxCommandEvent);
 
 #endif

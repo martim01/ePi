@@ -188,8 +188,10 @@ MongooseServer::MongooseServer() :
 {
 
     m_multipartData.itEndpoint = m_mEndpoints.end();
+}
 
-
+MongooseServer::~MongooseServer()
+{
 }
 
 bool MongooseServer::Init(const iniManager& iniConfig)

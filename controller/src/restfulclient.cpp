@@ -66,8 +66,12 @@ static void restful_handler(mg_connection* pConnection, int nEvent, void* pData)
 
 RestfulClient::RestfulClient(wxEvtHandler* pHandler) : m_pHandler(pHandler),
 m_bLoop(false),
-m_pManager(nullptr)
+m_bRunning(false)
 {
+    m_pManager = new mg_mgr;
+
+    mg_mgr_init(m_pManager, nullptr);
+
     Connect(wxID_ANY, wxEVT_R_CONNECTION, (wxObjectEventFunction)&RestfulClient::OnConnectionEvent);
     Connect(wxID_ANY, wxEVT_R_FINISHED, (wxObjectEventFunction)&RestfulClient::OnFinishedEvent);
 
@@ -75,6 +79,10 @@ m_pManager(nullptr)
     Connect(m_timerTask.GetId(), wxEVT_TIMER, (wxObjectEventFunction)&RestfulClient::OnTimerTask);
 }
 
+RestfulClient::~RestfulClient()
+{
+    mg_mgr_free(m_pManager);
+}
 
 bool RestfulClient::Get(const std::string& sEndpoint, int nUserId)
 {
@@ -134,14 +142,12 @@ bool RestfulClient::Delete(const std::string& sEndpoint,int nUserId)
 
 void RestfulClient::DoNextTask()
 {
-    if(m_pManager == nullptr)
+    if(!m_bRunning)
     {
-        m_pManager = new mg_mgr;
-
-        mg_mgr_init(m_pManager, nullptr);
         mg_connection* pConnection = mg_connect_http(m_pManager, restful_handler, m_qTasks.front().sEndpoint.c_str(), nullptr,m_qTasks.front().pPostData, METHOD[m_qTasks.front().nMethod].c_str());
         if(pConnection != nullptr)
         {
+            m_bRunning = true;
             mg_set_protocol_http_websocket(pConnection);
             pConnection->user_data = reinterpret_cast<void*>(this);
             m_bLoop = true;
@@ -151,8 +157,8 @@ void RestfulClient::DoNextTask()
                 {
                     mg_mgr_poll(m_pManager, 100);
                 }
-                mg_mgr_free(m_pManager);
-                m_pManager = nullptr;
+                m_bRunning = false;
+
             });
             th.detach();
         }
@@ -224,7 +230,6 @@ void RestfulClient::OnConnectionEvent(wxCommandEvent& event)
 
 void RestfulClient::OnFinishedEvent(wxCommandEvent& event)
 {
-
     m_qTasks.pop();
     m_timerTask.Start(250, true);
 }

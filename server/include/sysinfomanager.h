@@ -26,6 +26,7 @@ class SysInfoManager
         Json::Value GetCpuInfo();
         Json::Value GetApplicationInfo();
         Json::Value GetTemperature();
+        Json::Value GetProcessMemUsage();
 
         void ExtractTicks(const std::string& sLine);
 

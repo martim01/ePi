@@ -178,6 +178,7 @@ response Launcher::StopPlayer()
         else
         {
             theResponse.jsonData["result"] = true;
+            pml::Log::Get(pml::Log::LOG_INFO) << "- Signal sent to player" << std::endl;
         }
     }
     return theResponse;
