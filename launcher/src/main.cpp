@@ -11,9 +11,9 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-    if(argc < 2)
+    if(argc < 3)
     {
-        pml::Log::Get(pml::Log::LOG_INFO) << "Usage: launcher [config file full path]" << std::endl;
+        std::cout << "Usage: launcher [config file full path] [type 0=controller, 1=cartcontroller]" << std::endl;
         return -1;
     }
 
@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
     }
 
 
-    Launcher app(ini);
+    Launcher app(ini, argv[2]);
     app.Run();
 
 

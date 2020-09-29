@@ -47,11 +47,20 @@ bool ReadFromPipe(int nFd, Launcher::controller& aController)
 
 
 
-Launcher::Launcher(iniManager& ini) : m_ini(ini)
+Launcher::Launcher(iniManager& ini, const std::string& sType) : m_ini(ini), m_nType(CONTROLLER)
 {
     pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
-    m_sRows = m_ini.GetIniString("layout", "rows","1");
-    m_sColumns = m_ini.GetIniString("layout", "columns","1");
+
+    if(sType == "1")
+    {
+        m_nType = CARTCONTROLLER;
+    }
+
+    if(m_nType == CONTROLLER)
+    {
+        m_sRows = m_ini.GetIniString("layout", "rows","1");
+        m_sColumns = m_ini.GetIniString("layout", "columns","1");
+    }
 
     FD_ZERO(&m_master);
     FD_ZERO(&m_read);
@@ -65,7 +74,14 @@ bool Launcher::Run()
     {
         return false;
     }
-    LaunchAll();
+    if(m_nType == CONTROLLER)
+    {
+        LaunchAll();
+    }
+    else
+    {
+        LaunchCartController();
+    }
     Loop();
     return true;
 }
@@ -82,13 +98,23 @@ void Launcher::LaunchAll()
     }
 }
 
+bool Launcher::LaunchCartController()
+{
+    auto pSection = m_ini.GetSection("cartcontroller");
+    if(pSection)
+    {
+        return Launch(pSection);
+    }
+    return false;
+}
+
 bool Launcher::Launch(const iniSection* pSection)
 {
     std::string sPosition = pSection->GetString("position", "-1");
     std::string sIpAddress = pSection->GetString("address", "");
     std::string sPort = pSection->GetString("port", "");
 
-    if(sPosition != "-1" && sIpAddress.empty() == false && sPort.empty() == false)
+    if((m_nType == CARTCONTROLLER || sPosition != "-1") && sIpAddress.empty() == false && sPort.empty() == false)
     {
         pml::Log::Get(pml::Log::LOG_INFO) << "Launch: " << pSection->GetSectionName() << std::endl;
 
@@ -128,10 +154,22 @@ bool Launcher::Launch(const iniSection* pSection)
                 dup2(fderr, STDERR_FILENO);
             }
 
-           std::string sController("/usr/local/bin/controller");
+            std::string sController;
+            int nError(1);
+            if(m_nType == CONTROLLER)
+            {
+                sController = "/usr/local/bin/controller";
+                char* args[] = {&sController[0], &m_sColumns[0], &m_sRows[0], &sPosition[0], &sIpAddress[0], &sPort[0], nullptr};
+                nError = execv(sController.c_str(), args);
+            }
+            else
+            {
+                sController = "/usr/local/bin/cartcontroller";
+                char* args[] = {&sController[0], &sIpAddress[0], &sPort[0], nullptr};
+                nError = execv(sController.c_str(), args);
+            }
 
-            char* args[] = {&sController[0], &m_sColumns[0], &m_sRows[0], &sPosition[0], &sIpAddress[0], &sPort[0], nullptr};
-            int nError = execv(sController.c_str(), args);
+
             if(nError)
             {
                     pml::Log::Get(pml::Log::LOG_ERROR) << "Exec failed: " << sController << std::endl;

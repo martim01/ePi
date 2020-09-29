@@ -9,7 +9,7 @@ class iniSection;
 class Launcher
 {
     public:
-        Launcher(iniManager& ini);
+        Launcher(iniManager& ini, const std::string& sType);
         bool Run();
 
         struct controller
@@ -26,6 +26,7 @@ class Launcher
         bool InheritCapabilities();
         void LaunchAll();
         bool Launch(const iniSection* pSection);
+        bool LaunchCartController();
         void Loop();
 
         void CheckReadSet();
@@ -43,6 +44,8 @@ class Launcher
         int m_nMaxFd;
 
 
+        enum {CONTROLLER=0, CARTCONTROLLER};
+        int m_nType;
 
         std::map<int, controller> m_mControllers;
 
