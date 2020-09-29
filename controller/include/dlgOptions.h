@@ -22,7 +22,7 @@ class dlgOptions: public wxDialog
 {
 	public:
 
-		dlgOptions(wxWindow* parent,WebSocketClient& wsClient, const wxString& sHostname, const wxString& sIpAddress, const wxString& sUrl, const std::string& sUid, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
+		dlgOptions(wxWindow* parent, int nType, WebSocketClient& wsClient, const wxString& sHostname, const wxString& sIpAddress, const wxString& sUrl, const std::string& sUid, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
 		virtual ~dlgOptions();
 
 		wmButton* m_pbtnBack;
@@ -74,6 +74,7 @@ class dlgOptions: public wxDialog
 
 		wmButton* m_pbtnInfo;
 
+		enum {CONTROLLER, CART_FILE, CART_SYSTEM};
 
 	protected:
 
@@ -168,6 +169,8 @@ class dlgOptions: public wxDialog
 
         void UpdateApp(const wxString& sApp);
 
+
+        int m_nType;
         WebSocketClient& m_wsClient;
         wxString m_sIpAddress;
         wxString m_sUrl;

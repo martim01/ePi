@@ -76,7 +76,8 @@ BEGIN_EVENT_TABLE(dlgOptions,wxDialog)
 	//*)
 END_EVENT_TABLE()
 
-dlgOptions::dlgOptions(wxWindow* parent, WebSocketClient& wsClient, const wxString& sHostname, const wxString& sIpAddress, const wxString& sUrl, const std::string& sUid, wxWindowID id,const wxPoint& pos,const wxSize& size) :
+dlgOptions::dlgOptions(wxWindow* parent, int nType, WebSocketClient& wsClient, const wxString& sHostname, const wxString& sIpAddress, const wxString& sUrl, const std::string& sUid, wxWindowID id,const wxPoint& pos,const wxSize& size) :
+    m_nType(nType),
     m_wsClient(wsClient),
     m_sIpAddress(sIpAddress),
     m_sUrl(sUrl),
@@ -113,301 +114,320 @@ dlgOptions::dlgOptions(wxWindow* parent, WebSocketClient& wsClient, const wxStri
 	BoxSizer0->Add(m_pstHostname, 0, wxALL|wxEXPAND, 2);
 	BoxSizer3 = new wxBoxSizer(wxHORIZONTAL);
 	BoxSizer1 = new wxBoxSizer(wxVERTICAL);
-	StaticBoxSizer1 = new wxStaticBoxSizer(wxVERTICAL, this, wxEmptyString);
-	GridBagSizer1 = new wxGridBagSizer(0, 0);
-	StaticText1 = new wmLabel(this, ID_STATICTEXT1, _("UID:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT1"));
-	StaticText1->SetForegroundColour(wxColour(0,150,100));
-    GridBagSizer1->Add(StaticText1, wxGBPosition(0, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstUid = new wmLabel(this, ID_STATICTEXT2, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE, _T("ID_STATICTEXT2"));
-	m_pstUid->SetMinSize(wxSize(400,-1));
-	m_pstUid->SetForegroundColour(*wxBLACK);
-	m_pstUid->SetBackgroundColour(wxColour(255,255,255));
-	GridBagSizer1->Add(m_pstUid, wxGBPosition(0, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
-	StaticText2 = new wmLabel(this, ID_STATICTEXT3, _("Label:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT3"));
-	StaticText2->SetForegroundColour(wxColour(0,150,100));
-	GridBagSizer1->Add(StaticText2, wxGBPosition(1, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstLabel = new wmLabel(this, ID_STATICTEXT4, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE, _T("ID_STATICTEXT4"));
-	m_pstLabel->SetForegroundColour(wxColour(0,0,0));
-	m_pstLabel->SetBackgroundColour(wxColour(255,255,255));
-	GridBagSizer1->Add(m_pstLabel, wxGBPosition(1, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
-	StaticText3 = new wmLabel(this, ID_STATICTEXT5, _("Description:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT5"));
-	StaticText3->SetForegroundColour(wxColour(0,150,100));
-	StaticText3->SetMinSize(wxSize(80,-1));
-	GridBagSizer1->Add(StaticText3, wxGBPosition(2, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstDescription = new wmLabel(this, ID_STATICTEXT6, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT6"));
-	m_pstDescription->SetForegroundColour(wxColour(0,0,0));
-	m_pstDescription->SetBackgroundColour(wxColour(255,255,255));
-	GridBagSizer1->Add(m_pstDescription, wxGBPosition(2, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
-	m_pbtnUpdate = new wmButton(this, ID_BUTTON_UPDATE, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE"));
-	GridBagSizer1->Add(m_pbtnUpdate, wxGBPosition(1, 2), wxGBSpan(2, 1), wxALL, 2);
-	StaticText5 = new wmLabel(this, ID_STATICTEXT7, _("Created:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT7"));
-	StaticText5->SetForegroundColour(wxColour(0,150,100));
-	GridBagSizer1->Add(StaticText5, wxGBPosition(3, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstCreated = new wmLabel(this, ID_STATICTEXT8, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT8"));
-	m_pstCreated->SetForegroundColour(wxColour(0,0,0));
-	m_pstCreated->SetBackgroundColour(wxColour(255,255,255));
-	GridBagSizer1->Add(m_pstCreated, wxGBPosition(3, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
-	StaticText7 = new wmLabel(this, ID_STATICTEXT9, _("Modified:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT9"));
-	StaticText7->SetForegroundColour(wxColour(0, 150,100));
-	GridBagSizer1->Add(StaticText7, wxGBPosition(4, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstModified = new wmLabel(this, ID_STATICTEXT10, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT10"));
-	m_pstModified->SetForegroundColour(wxColour(0,0,0));
-	m_pstModified->SetBackgroundColour(wxColour(255,255,255));
-	GridBagSizer1->Add(m_pstModified, wxGBPosition(4, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
-	StaticBoxSizer1->Add(GridBagSizer1, 1, wxALL|wxEXPAND, 2);
-	GridBagSizer2 = new wxGridBagSizer(0, 0);
-	StaticText4 = new wmLabel(this, ID_STATICTEXT11, _("Channels:"), wxDefaultPosition, wxSize(100,-1), 0, _T("ID_STATICTEXT11"));
-	StaticText4->SetForegroundColour(wxColour(0,164,164));
-	GridBagSizer2->Add(StaticText4, wxGBPosition(0, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-	m_pstChannels = new wmLabel(this, ID_STATICTEXT12, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT12"));
-	m_pstChannels->SetMinSize(wxSize(50,-1));
-	m_pstChannels->SetForegroundColour(*wxBLACK);
-	m_pstChannels->SetBackgroundColour(*wxWHITE);
-	GridBagSizer2->Add(m_pstChannels, wxGBPosition(0, 1), wxDefaultSpan, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 0);
-	StaticText10 = new wmLabel(this, ID_STATICTEXT13, _("Sample Rate:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT13"));
-	StaticText10->SetForegroundColour(wxColour(0,164,164));
-    StaticText10->SetMinSize(wxSize(100,-1));
-	GridBagSizer2->Add(StaticText10, wxGBPosition(0, 2), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-	m_pstSampleRate = new wmLabel(this, ID_STATICTEXT17, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT17"));
-	m_pstSampleRate->SetMinSize(wxSize(50,-1));
-	m_pstSampleRate->SetForegroundColour(*wxBLACK);
-	m_pstSampleRate->SetBackgroundColour(*wxWHITE);
-	GridBagSizer2->Add(m_pstSampleRate, wxGBPosition(0, 3), wxDefaultSpan, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 0);
-	StaticText11 = new wmLabel(this, ID_STATICTEXT14, _("Format:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT14"));
-	StaticText11->SetForegroundColour(wxColour(0,164,164));
-	GridBagSizer2->Add(StaticText11, wxGBPosition(1, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-	m_pstType = new wmLabel(this, ID_STATICTEXT18, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT18"));
-	m_pstType->SetMinSize(wxSize(50,-1));
-	m_pstType->SetForegroundColour(*wxBLACK);
-	m_pstType->SetBackgroundColour(*wxWHITE);
-	GridBagSizer2->Add(m_pstType, wxGBPosition(1, 1), wxGBSpan(1,1), wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 0);
-	StaticText12 = new wmLabel(this, ID_STATICTEXT15, _("Length:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT15"));
-	StaticText12->SetForegroundColour(wxColour(0,164,164));
-	GridBagSizer2->Add(StaticText12, wxGBPosition(0, 4), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
-	m_pstSubType = new wmLabel(this, ID_STATICTEXT19, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT19"));
-	m_pstSubType->SetMinSize(wxSize(150,-1));
-	m_pstSubType->SetForegroundColour(*wxBLACK);
-	m_pstSubType->SetBackgroundColour(*wxWHITE);
-	GridBagSizer2->Add(m_pstSubType, wxGBPosition(1, 2), wxGBSpan(1, 2), wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstLength = new wmLabel(this, ID_STATICTEXT20, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT20"));
-	m_pstLength->SetMinSize(wxSize(100,-1));
-	m_pstLength->SetForegroundColour(*wxBLACK);
-	m_pstLength->SetBackgroundColour(*wxWHITE);
+	if(m_nType != CART_SYSTEM)
+	{
+        StaticBoxSizer1 = new wxStaticBoxSizer(wxVERTICAL, this, wxEmptyString);
+        GridBagSizer1 = new wxGridBagSizer(0, 0);
+        StaticText1 = new wmLabel(this, ID_STATICTEXT1, _("UID:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT1"));
+        StaticText1->SetForegroundColour(wxColour(0,150,100));
+        GridBagSizer1->Add(StaticText1, wxGBPosition(0, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
+        m_pstUid = new wmLabel(this, ID_STATICTEXT2, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE, _T("ID_STATICTEXT2"));
+        m_pstUid->SetMinSize(wxSize(400,-1));
+        m_pstUid->SetForegroundColour(*wxBLACK);
+        m_pstUid->SetBackgroundColour(wxColour(255,255,255));
+        GridBagSizer1->Add(m_pstUid, wxGBPosition(0, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
+        StaticText2 = new wmLabel(this, ID_STATICTEXT3, _("Label:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT3"));
+        StaticText2->SetForegroundColour(wxColour(0,150,100));
+        GridBagSizer1->Add(StaticText2, wxGBPosition(1, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
+        m_pstLabel = new wmLabel(this, ID_STATICTEXT4, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE, _T("ID_STATICTEXT4"));
+        m_pstLabel->SetForegroundColour(wxColour(0,0,0));
+        m_pstLabel->SetBackgroundColour(wxColour(255,255,255));
+        GridBagSizer1->Add(m_pstLabel, wxGBPosition(1, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
+        StaticText3 = new wmLabel(this, ID_STATICTEXT5, _("Description:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT5"));
+        StaticText3->SetForegroundColour(wxColour(0,150,100));
+        StaticText3->SetMinSize(wxSize(80,-1));
+        GridBagSizer1->Add(StaticText3, wxGBPosition(2, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
+        m_pstDescription = new wmLabel(this, ID_STATICTEXT6, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT6"));
+        m_pstDescription->SetForegroundColour(wxColour(0,0,0));
+        m_pstDescription->SetBackgroundColour(wxColour(255,255,255));
+        GridBagSizer1->Add(m_pstDescription, wxGBPosition(2, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
+        m_pbtnUpdate = new wmButton(this, ID_BUTTON_UPDATE, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE"));
+        GridBagSizer1->Add(m_pbtnUpdate, wxGBPosition(1, 2), wxGBSpan(2, 1), wxALL, 2);
+        StaticText5 = new wmLabel(this, ID_STATICTEXT7, _("Created:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT7"));
+        StaticText5->SetForegroundColour(wxColour(0,150,100));
+        GridBagSizer1->Add(StaticText5, wxGBPosition(3, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
+        m_pstCreated = new wmLabel(this, ID_STATICTEXT8, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT8"));
+        m_pstCreated->SetForegroundColour(wxColour(0,0,0));
+        m_pstCreated->SetBackgroundColour(wxColour(255,255,255));
+        GridBagSizer1->Add(m_pstCreated, wxGBPosition(3, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
+        StaticText7 = new wmLabel(this, ID_STATICTEXT9, _("Modified:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT9"));
+        StaticText7->SetForegroundColour(wxColour(0, 150,100));
+        GridBagSizer1->Add(StaticText7, wxGBPosition(4, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
+        m_pstModified = new wmLabel(this, ID_STATICTEXT10, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT10"));
+        m_pstModified->SetForegroundColour(wxColour(0,0,0));
+        m_pstModified->SetBackgroundColour(wxColour(255,255,255));
+        GridBagSizer1->Add(m_pstModified, wxGBPosition(4, 1), wxDefaultSpan, wxALL|wxEXPAND, 2);
+        StaticBoxSizer1->Add(GridBagSizer1, 1, wxALL|wxEXPAND, 2);
+        GridBagSizer2 = new wxGridBagSizer(0, 0);
+        StaticText4 = new wmLabel(this, ID_STATICTEXT11, _("Channels:"), wxDefaultPosition, wxSize(100,-1), 0, _T("ID_STATICTEXT11"));
+        StaticText4->SetForegroundColour(wxColour(0,164,164));
+        GridBagSizer2->Add(StaticText4, wxGBPosition(0, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+        m_pstChannels = new wmLabel(this, ID_STATICTEXT12, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT12"));
+        m_pstChannels->SetMinSize(wxSize(50,-1));
+        m_pstChannels->SetForegroundColour(*wxBLACK);
+        m_pstChannels->SetBackgroundColour(*wxWHITE);
+        GridBagSizer2->Add(m_pstChannels, wxGBPosition(0, 1), wxDefaultSpan, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 0);
+        StaticText10 = new wmLabel(this, ID_STATICTEXT13, _("Sample Rate:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT13"));
+        StaticText10->SetForegroundColour(wxColour(0,164,164));
+        StaticText10->SetMinSize(wxSize(100,-1));
+        GridBagSizer2->Add(StaticText10, wxGBPosition(0, 2), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+        m_pstSampleRate = new wmLabel(this, ID_STATICTEXT17, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT17"));
+        m_pstSampleRate->SetMinSize(wxSize(50,-1));
+        m_pstSampleRate->SetForegroundColour(*wxBLACK);
+        m_pstSampleRate->SetBackgroundColour(*wxWHITE);
+        GridBagSizer2->Add(m_pstSampleRate, wxGBPosition(0, 3), wxDefaultSpan, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 0);
+        StaticText11 = new wmLabel(this, ID_STATICTEXT14, _("Format:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT14"));
+        StaticText11->SetForegroundColour(wxColour(0,164,164));
+        GridBagSizer2->Add(StaticText11, wxGBPosition(1, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+        m_pstType = new wmLabel(this, ID_STATICTEXT18, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT18"));
+        m_pstType->SetMinSize(wxSize(50,-1));
+        m_pstType->SetForegroundColour(*wxBLACK);
+        m_pstType->SetBackgroundColour(*wxWHITE);
+        GridBagSizer2->Add(m_pstType, wxGBPosition(1, 1), wxGBSpan(1,1), wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 0);
+        StaticText12 = new wmLabel(this, ID_STATICTEXT15, _("Length:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT15"));
+        StaticText12->SetForegroundColour(wxColour(0,164,164));
+        GridBagSizer2->Add(StaticText12, wxGBPosition(0, 4), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 0);
+        m_pstSubType = new wmLabel(this, ID_STATICTEXT19, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT19"));
+        m_pstSubType->SetMinSize(wxSize(150,-1));
+        m_pstSubType->SetForegroundColour(*wxBLACK);
+        m_pstSubType->SetBackgroundColour(*wxWHITE);
+        GridBagSizer2->Add(m_pstSubType, wxGBPosition(1, 2), wxGBSpan(1, 2), wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 2);
+        m_pstLength = new wmLabel(this, ID_STATICTEXT20, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT20"));
+        m_pstLength->SetMinSize(wxSize(100,-1));
+        m_pstLength->SetForegroundColour(*wxBLACK);
+        m_pstLength->SetBackgroundColour(*wxWHITE);
 
-	GridBagSizer2->Add(m_pstLength, wxGBPosition(0, 5), wxDefaultSpan, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 0);
-	StaticBoxSizer1->Add(GridBagSizer2, 0, wxALL|wxEXPAND, 2);
-	BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
-	m_pbtnReplace = new wmButton(this, ID_BUTTON_REPLACE, _("Replace"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_REPLACE"));
-	BoxSizer2->Add(m_pbtnReplace, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
-	BoxSizer2->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
-	m_pbtnDelete = new wmButton(this, ID_BUTTON_DELETE, _("Delete"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_DELETE"));
-	BoxSizer2->Add(m_pbtnDelete, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
-	StaticBoxSizer1->Add(BoxSizer2, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 0);
-	BoxSizer1->Add(StaticBoxSizer1, 1, wxLEFT|wxEXPAND, 5);
-	StaticBoxSizer2 = new wxStaticBoxSizer(wxHORIZONTAL, this, wxEmptyString);
-	GridBagSizer3 = new wxGridBagSizer(0, 0);
-	StaticText9 = new wmLabel(this, ID_STATICTEXT16, _("episerver:"), wxDefaultPosition, wxSize(100,-1), 0, _T("ID_STATICTEXT16"));
-	StaticText9->SetForegroundColour(wxColour(255,0,128));
-	GridBagSizer3->Add(StaticText9, wxGBPosition(0, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstVersionEpiServer = new wmLabel(this, ID_STATICTEXT25, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT25"));
-	m_pstVersionEpiServer->SetMinSize(wxSize(100,-1));
-	m_pstVersionEpiServer->SetForegroundColour(wxColour(0,0,0));
-	m_pstVersionEpiServer->SetBackgroundColour(wxColour(255,255,255));
-	GridBagSizer3->Add(m_pstVersionEpiServer, wxGBPosition(0, 1), wxDefaultSpan, wxALL|wxALIGN_CENTER_VERTICAL, 2);
-	m_pbtnUpdateEpiServer = new wmButton(this, ID_BUTTON_UPDATE_EPISERVER, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_EPISERVER"));
-	GridBagSizer3->Add(m_pbtnUpdateEpiServer, wxGBPosition(0, 2), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
-	StaticText13 = new wmLabel(this, ID_STATICTEXT21, _("player3:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT21"));
-	StaticText13->SetForegroundColour(wxColour(255,0,128));
-	GridBagSizer3->Add(StaticText13, wxGBPosition(1, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstVersionPlayer3 = new wmLabel(this, ID_STATICTEXT26, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT26"));
-	m_pstVersionPlayer3->SetMinSize(wxSize(100,-1));
-	m_pstVersionPlayer3->SetForegroundColour(wxColour(0,0,0));
-	m_pstVersionPlayer3->SetBackgroundColour(wxColour(255,255,255));
-	GridBagSizer3->Add(m_pstVersionPlayer3, wxGBPosition(1, 1), wxDefaultSpan, wxALL|wxALIGN_CENTER_VERTICAL, 2);
-	m_pbtnUpdatePlayer3 = new wmButton(this, ID_BUTTON_UPDATE_PLAYER3, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_PLAYER3"));
-	GridBagSizer3->Add(m_pbtnUpdatePlayer3, wxGBPosition(1, 2), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
-	StaticText14 = new wmLabel(this, ID_STATICTEXT22, _("player67:"), wxDefaultPosition, wxSize(100,-1), 0, _T("ID_STATICTEXT22"));
-	StaticText14->SetForegroundColour(wxColour(255,0,128));
-	GridBagSizer3->Add(StaticText14, wxGBPosition(1, 3), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstVersionPlayer67 = new wmLabel(this, ID_STATICTEXT27, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT27"));
-	m_pstVersionPlayer67->SetMinSize(wxSize(100,-1));
-	m_pstVersionPlayer67->SetForegroundColour(wxColour(0,0,0));
-	m_pstVersionPlayer67->SetBackgroundColour(wxColour(255,255,255));
-	GridBagSizer3->Add(m_pstVersionPlayer67, wxGBPosition(1, 4), wxDefaultSpan, wxALL|wxALIGN_CENTER_VERTICAL, 2);
-	m_pbtnUpdatePlayer67 = new wmButton(this, ID_BUTTON_UPDATE_PLAYER67, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_PLAYER67"));
-	GridBagSizer3->Add(m_pbtnUpdatePlayer67, wxGBPosition(1, 5), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
-	StaticText15 = new wmLabel(this, ID_STATICTEXT23, _("controller:"), wxDefaultPosition, wxSize(100,-1), 0, _T("ID_STATICTEXT23"));
-	StaticText15->SetForegroundColour(wxColour(255,0,128));
-	GridBagSizer3->Add(StaticText15, wxGBPosition(2, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstVersionController = new wmLabel(this, ID_STATICTEXT28, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT28"));
-	m_pstVersionController->SetMinSize(wxSize(100,-1));
-	m_pstVersionController->SetForegroundColour(wxColour(0,0,0));
-	m_pstVersionController->SetBackgroundColour(wxColour(255,255,255));
-	GridBagSizer3->Add(m_pstVersionController, wxGBPosition(2, 1), wxDefaultSpan, wxALL|wxALIGN_CENTER_VERTICAL, 2);
-	m_pbtnUpdateController = new wmButton(this, ID_BUTTON_UPDATE_CONTROLLER, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_CONTROLLER"));
-	GridBagSizer3->Add(m_pbtnUpdateController, wxGBPosition(2, 2), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
-	StaticText16 = new wmLabel(this, ID_STATICTEXT24, _("launcher:"), wxDefaultPosition, wxSize(100,-1), 0, _T("ID_STATICTEXT24"));
-	StaticText16->SetForegroundColour(wxColour(255,0,128));
-	GridBagSizer3->Add(StaticText16, wxGBPosition(2, 3), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-	m_pstVersionLauncher = new wmLabel(this, ID_STATICTEXT29, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT29"));
-	m_pstVersionLauncher->SetMinSize(wxSize(100,-1));
-	m_pstVersionLauncher->SetForegroundColour(wxColour(0,0,0));
-	m_pstVersionLauncher->SetBackgroundColour(wxColour(255,255,255));
-	GridBagSizer3->Add(m_pstVersionLauncher, wxGBPosition(2, 4), wxDefaultSpan, wxALL|wxALIGN_CENTER_VERTICAL, 2);
-	m_pbtnUpdateLauncher = new wmButton(this, ID_BUTTON_UPDATE_LAUNCHER, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_LAUNCHER"));
-	m_pbtnUpdateLauncher->Hide();
-	GridBagSizer3->Add(m_pbtnUpdateLauncher, wxGBPosition(2, 5), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+        GridBagSizer2->Add(m_pstLength, wxGBPosition(0, 5), wxDefaultSpan, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 0);
+        StaticBoxSizer1->Add(GridBagSizer2, 0, wxALL|wxEXPAND, 2);
+        BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
+        m_pbtnReplace = new wmButton(this, ID_BUTTON_REPLACE, _("Replace"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_REPLACE"));
+        BoxSizer2->Add(m_pbtnReplace, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
+        BoxSizer2->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
+        m_pbtnDelete = new wmButton(this, ID_BUTTON_DELETE, _("Delete"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_DELETE"));
+        BoxSizer2->Add(m_pbtnDelete, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
+        StaticBoxSizer1->Add(BoxSizer2, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 0);
 
-	m_pbtnInfo = new wmButton(this, wxNewId(), _("Server Info"), wxDefaultPosition, wxSize(150,-1), 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_LAUNCHER"));
-	GridBagSizer3->Add(m_pbtnInfo, wxGBPosition(0, 3), wxGBSpan(1,2), wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+        GridBagSizer1->AddGrowableCol(1);
+        GridBagSizer1->AddGrowableRow(2);
 
-	StaticBoxSizer2->Add(GridBagSizer3, 1, wxALL|wxEXPAND, 0);
-	BoxSizer1->Add(StaticBoxSizer2, 0, wxBOTTOM|wxLEFT|wxEXPAND, 5);
-	BoxSizer3->Add(BoxSizer1, 1, wxALL|wxEXPAND, 0);
-	StaticBoxSizer3 = new wxStaticBoxSizer(wxVERTICAL, this, wxEmptyString);
-	m_pbtnRestartServer = new wmButton(this, ID_BUTTON_RESTART_SERVER, _("Restart\nServer"), wxDefaultPosition, wxSize(100,40), wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_RESTART_SERVER"));
-	m_pbtnRestartServer->SetForegroundColour(wxColour(255,255,255));
-	m_pbtnRestartServer->SetBackgroundColour(wxColour(128,0,0));
-	StaticBoxSizer3->Add(m_pbtnRestartServer, 1, wxALL|wxEXPAND,2);
-	m_pbtnRestartOS = new wmButton(this, ID_BUTTON_RESTART_OS, _("Restart\nServer OS"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_RESTART_OS"));
-	m_pbtnRestartOS->SetForegroundColour(wxColour(255,255,255));
-	m_pbtnRestartOS->SetBackgroundColour(wxColour(128,0,0));
-	StaticBoxSizer3->Add(m_pbtnRestartOS, 1, wxALL|wxEXPAND,2);
-	m_pbtnShutdownOS = new wmButton(this, ID_BUTTON_SHUTDOWN_OS, _("Shutdown\nServer OS"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_SHUTDOWN_OS"));
-	m_pbtnShutdownOS->SetForegroundColour(wxColour(255,255,255));
-	m_pbtnShutdownOS->SetBackgroundColour(wxColour(128,0,0));
-	StaticBoxSizer3->Add(m_pbtnShutdownOS, 1, wxALL|wxEXPAND,2);
+        if(nType == CART_FILE)
+        {
+            BoxSizer3->Add(StaticBoxSizer1, 1, wxLEFT|wxBOTTOM|wxEXPAND, 5);
+        }
+        else
+        {
+            BoxSizer1->Add(StaticBoxSizer1, 1, wxLEFT|wxEXPAND, 5);
+        }
+	}
 
-	m_pbtnStopController = new wmButton(this, wxNewId(), _("Restart\nController"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_SHUTDOWN_OS"));
-	m_pbtnStopController->SetForegroundColour(wxColour(255,255,255));
-	m_pbtnStopController->SetBackgroundColour(wxColour(128,0,0));
-	StaticBoxSizer3->Add(m_pbtnStopController, 1, wxALL|wxEXPAND,2);
+    StaticBoxSizer3 = new wxStaticBoxSizer(wxVERTICAL, this, wxEmptyString);
 
-	m_pbtnRestartAll = new wmButton(this, wxNewId(), _("Restart\nAll"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_SHUTDOWN_OS"));
-	m_pbtnRestartAll->SetForegroundColour(wxColour(255,255,255));
-	m_pbtnRestartAll->SetBackgroundColour(wxColour(128,0,0));
-	StaticBoxSizer3->Add(m_pbtnRestartAll, 1, wxALL|wxEXPAND,2);
+    if(nType == CONTROLLER || nType == CART_SYSTEM)
+	{
 
-	StaticBoxSizer3->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+        StaticBoxSizer2 = new wxStaticBoxSizer(wxHORIZONTAL, this, wxEmptyString);
+        GridBagSizer3 = new wxGridBagSizer(0, 0);
+        StaticText9 = new wmLabel(this, ID_STATICTEXT16, _("episerver:"), wxDefaultPosition, wxSize(100,-1), 0, _T("ID_STATICTEXT16"));
+        StaticText9->SetForegroundColour(wxColour(255,0,128));
+        GridBagSizer3->Add(StaticText9, wxGBPosition(0, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
+        m_pstVersionEpiServer = new wmLabel(this, ID_STATICTEXT25, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT25"));
+        m_pstVersionEpiServer->SetMinSize(wxSize(100,-1));
+        m_pstVersionEpiServer->SetForegroundColour(wxColour(0,0,0));
+        m_pstVersionEpiServer->SetBackgroundColour(wxColour(255,255,255));
+        GridBagSizer3->Add(m_pstVersionEpiServer, wxGBPosition(0, 1), wxDefaultSpan, wxALL|wxALIGN_CENTER_VERTICAL, 2);
+        m_pbtnUpdateEpiServer = new wmButton(this, ID_BUTTON_UPDATE_EPISERVER, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_EPISERVER"));
+        GridBagSizer3->Add(m_pbtnUpdateEpiServer, wxGBPosition(0, 2), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+        StaticText13 = new wmLabel(this, ID_STATICTEXT21, _("player3:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT21"));
+        StaticText13->SetForegroundColour(wxColour(255,0,128));
+        GridBagSizer3->Add(StaticText13, wxGBPosition(1, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
+        m_pstVersionPlayer3 = new wmLabel(this, ID_STATICTEXT26, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT26"));
+        m_pstVersionPlayer3->SetMinSize(wxSize(100,-1));
+        m_pstVersionPlayer3->SetForegroundColour(wxColour(0,0,0));
+        m_pstVersionPlayer3->SetBackgroundColour(wxColour(255,255,255));
+        GridBagSizer3->Add(m_pstVersionPlayer3, wxGBPosition(1, 1), wxDefaultSpan, wxALL|wxALIGN_CENTER_VERTICAL, 2);
+        m_pbtnUpdatePlayer3 = new wmButton(this, ID_BUTTON_UPDATE_PLAYER3, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_PLAYER3"));
+        GridBagSizer3->Add(m_pbtnUpdatePlayer3, wxGBPosition(1, 2), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
+        StaticText14 = new wmLabel(this, ID_STATICTEXT22, _("player67:"), wxDefaultPosition, wxSize(100,-1), 0, _T("ID_STATICTEXT22"));
+        StaticText14->SetForegroundColour(wxColour(255,0,128));
+        GridBagSizer3->Add(StaticText14, wxGBPosition(1, 3), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
+        m_pstVersionPlayer67 = new wmLabel(this, ID_STATICTEXT27, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT27"));
+        m_pstVersionPlayer67->SetMinSize(wxSize(100,-1));
+        m_pstVersionPlayer67->SetForegroundColour(wxColour(0,0,0));
+        m_pstVersionPlayer67->SetBackgroundColour(wxColour(255,255,255));
+        GridBagSizer3->Add(m_pstVersionPlayer67, wxGBPosition(1, 4), wxDefaultSpan, wxALL|wxALIGN_CENTER_VERTICAL, 2);
+        m_pbtnUpdatePlayer67 = new wmButton(this, ID_BUTTON_UPDATE_PLAYER67, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_PLAYER67"));
+        GridBagSizer3->Add(m_pbtnUpdatePlayer67, wxGBPosition(1, 5), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+        StaticText15 = new wmLabel(this, ID_STATICTEXT23, _("controller:"), wxDefaultPosition, wxSize(100,-1), 0, _T("ID_STATICTEXT23"));
+        StaticText15->SetForegroundColour(wxColour(255,0,128));
+        GridBagSizer3->Add(StaticText15, wxGBPosition(2, 0), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
+        m_pstVersionController = new wmLabel(this, ID_STATICTEXT28, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT28"));
+        m_pstVersionController->SetMinSize(wxSize(100,-1));
+        m_pstVersionController->SetForegroundColour(wxColour(0,0,0));
+        m_pstVersionController->SetBackgroundColour(wxColour(255,255,255));
+        GridBagSizer3->Add(m_pstVersionController, wxGBPosition(2, 1), wxDefaultSpan, wxALL|wxALIGN_CENTER_VERTICAL, 2);
+        m_pbtnUpdateController = new wmButton(this, ID_BUTTON_UPDATE_CONTROLLER, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_CONTROLLER"));
+        GridBagSizer3->Add(m_pbtnUpdateController, wxGBPosition(2, 2), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
+        StaticText16 = new wmLabel(this, ID_STATICTEXT24, _("launcher:"), wxDefaultPosition, wxSize(100,-1), 0, _T("ID_STATICTEXT24"));
+        StaticText16->SetForegroundColour(wxColour(255,0,128));
+        GridBagSizer3->Add(StaticText16, wxGBPosition(2, 3), wxDefaultSpan, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
+        m_pstVersionLauncher = new wmLabel(this, ID_STATICTEXT29, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxSTATIC_BORDER, _T("ID_STATICTEXT29"));
+        m_pstVersionLauncher->SetMinSize(wxSize(100,-1));
+        m_pstVersionLauncher->SetForegroundColour(wxColour(0,0,0));
+        m_pstVersionLauncher->SetBackgroundColour(wxColour(255,255,255));
+        GridBagSizer3->Add(m_pstVersionLauncher, wxGBPosition(2, 4), wxDefaultSpan, wxALL|wxALIGN_CENTER_VERTICAL, 2);
+        m_pbtnUpdateLauncher = new wmButton(this, ID_BUTTON_UPDATE_LAUNCHER, _("Update"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_LAUNCHER"));
+        m_pbtnUpdateLauncher->Hide();
+        GridBagSizer3->Add(m_pbtnUpdateLauncher, wxGBPosition(2, 5), wxDefaultSpan, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+
+        m_pbtnInfo = new wmButton(this, wxNewId(), _("Server Info"), wxDefaultPosition, wxSize(150,-1), 0, wxDefaultValidator, _T("ID_BUTTON_UPDATE_LAUNCHER"));
+        GridBagSizer3->Add(m_pbtnInfo, wxGBPosition(0, 3), wxGBSpan(1,2), wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+
+        StaticBoxSizer2->Add(GridBagSizer3, 1, wxALL|wxEXPAND, 0);
+        BoxSizer1->Add(StaticBoxSizer2, 0, wxBOTTOM|wxLEFT|wxEXPAND, 5);
+        BoxSizer3->Add(BoxSizer1, 1, wxALL|wxEXPAND, 0);
+        m_pbtnRestartServer = new wmButton(this, ID_BUTTON_RESTART_SERVER, _("Restart\nServer"), wxDefaultPosition, wxSize(100,40), wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_RESTART_SERVER"));
+        m_pbtnRestartServer->SetForegroundColour(wxColour(255,255,255));
+        m_pbtnRestartServer->SetBackgroundColour(wxColour(128,0,0));
+        StaticBoxSizer3->Add(m_pbtnRestartServer, 1, wxALL|wxEXPAND,2);
+        m_pbtnRestartOS = new wmButton(this, ID_BUTTON_RESTART_OS, _("Restart\nServer OS"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_RESTART_OS"));
+        m_pbtnRestartOS->SetForegroundColour(wxColour(255,255,255));
+        m_pbtnRestartOS->SetBackgroundColour(wxColour(128,0,0));
+        StaticBoxSizer3->Add(m_pbtnRestartOS, 1, wxALL|wxEXPAND,2);
+        m_pbtnShutdownOS = new wmButton(this, ID_BUTTON_SHUTDOWN_OS, _("Shutdown\nServer OS"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_SHUTDOWN_OS"));
+        m_pbtnShutdownOS->SetForegroundColour(wxColour(255,255,255));
+        m_pbtnShutdownOS->SetBackgroundColour(wxColour(128,0,0));
+        StaticBoxSizer3->Add(m_pbtnShutdownOS, 1, wxALL|wxEXPAND,2);
+
+        m_pbtnStopController = new wmButton(this, wxNewId(), _("Restart\nController"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_SHUTDOWN_OS"));
+        m_pbtnStopController->SetForegroundColour(wxColour(255,255,255));
+        m_pbtnStopController->SetBackgroundColour(wxColour(128,0,0));
+        StaticBoxSizer3->Add(m_pbtnStopController, 1, wxALL|wxEXPAND,2);
+
+        if(m_nType == CONTROLLER)
+        {
+            m_pbtnRestartAll = new wmButton(this, wxNewId(), _("Restart\nAll"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_SHUTDOWN_OS"));
+            m_pbtnRestartAll->SetForegroundColour(wxColour(255,255,255));
+            m_pbtnRestartAll->SetBackgroundColour(wxColour(128,0,0));
+            StaticBoxSizer3->Add(m_pbtnRestartAll, 1, wxALL|wxEXPAND,2);
+        }
+	}
+
+    StaticBoxSizer3->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
 
 
+	if(m_nType != CART_FILE)
+	{
+        m_pbtnSSH = new wmButton(this, ID_BUTTON_SSH, _("SSH"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_SSH"));
+        m_pbtnSSH->SetForegroundColour(wxColour(255,255,255));
+        m_pbtnSSH->SetBackgroundColour(wxColour(68,1,158));
+        StaticBoxSizer3->Add(m_pbtnSSH, 1, wxALL|wxEXPAND,2);
+        StaticBoxSizer3->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+    }
 
-	m_pbtnSSH = new wmButton(this, ID_BUTTON_SSH, _("SSH"), wxDefaultPosition, wxDefaultSize, wmButton::STYLE_HOLD, wxDefaultValidator, _T("ID_BUTTON_SSH"));
-	m_pbtnSSH->SetForegroundColour(wxColour(255,255,255));
-	m_pbtnSSH->SetBackgroundColour(wxColour(68,1,158));
-	StaticBoxSizer3->Add(m_pbtnSSH, 1, wxALL|wxEXPAND,2);
-	StaticBoxSizer3->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
 	m_pbtnBack = new wmButton(this, ID_BUTTON_BACK, _("Back"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_BACK"));
 	m_pbtnBack->SetForegroundColour(wxColour(255,255,255));
 	m_pbtnBack->SetBackgroundColour(wxColour(0,128,0));
-	StaticBoxSizer3->Add(m_pbtnBack, 1, wxALL|wxEXPAND,2);
+	StaticBoxSizer3->Add(m_pbtnBack, 0, wxALL|wxEXPAND,2);
 	BoxSizer3->Add(StaticBoxSizer3, 0, wxBOTTOM|wxRIGHT|wxEXPAND, 5);
 	BoxSizer0->Add(BoxSizer3, 1, wxALL|wxEXPAND, 0);
 	SetSizer(BoxSizer0);
 	BoxSizer0->Fit(this);
 	BoxSizer0->SetSizeHints(this);
 
-	Connect(ID_BUTTON_UPDATE,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnFileUpdateClick);
-	Connect(ID_BUTTON_REPLACE,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnReplaceClick);
-	Connect(ID_BUTTON_DELETE,wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnDeleteClick);
-	Connect(ID_BUTTON_UPDATE_EPISERVER,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnUpdateEpiServerClick);
-	Connect(ID_BUTTON_UPDATE_PLAYER3,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnUpdatePlayer3Click);
-	Connect(ID_BUTTON_UPDATE_PLAYER67,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnUpdatePlayer67Click);
-	Connect(ID_BUTTON_UPDATE_CONTROLLER,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnUpdateControllerClick);
-	Connect(ID_BUTTON_UPDATE_LAUNCHER,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnUpdateLauncherClick);
-	Connect(ID_BUTTON_RESTART_SERVER,wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnRestartServerClick);
-	Connect(ID_BUTTON_RESTART_OS,wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnRestartOSClick);
-	Connect(ID_BUTTON_SHUTDOWN_OS,wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnShutdownOSClick);
-	Connect(m_pbtnStopController->GetId(),wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnShutdownControllerClick);
-	Connect(m_pbtnRestartAll->GetId(),wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnRestartAllClick);
-	Connect(ID_BUTTON_SSH,wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnSSHClick);
 	Connect(ID_BUTTON_BACK,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnBackClick);
-	Connect(m_pbtnInfo->GetId(),wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnInfoClick);
+
+	if(m_nType != CART_SYSTEM)
+	{
+        Connect(ID_BUTTON_UPDATE,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnFileUpdateClick);
+        Connect(ID_BUTTON_REPLACE,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnReplaceClick);
+        Connect(ID_BUTTON_DELETE,wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnDeleteClick);
+    }
+
+	if(m_nType != CART_FILE)
+	{
+        Connect(ID_BUTTON_UPDATE_EPISERVER,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnUpdateEpiServerClick);
+        Connect(ID_BUTTON_UPDATE_PLAYER3,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnUpdatePlayer3Click);
+        Connect(ID_BUTTON_UPDATE_PLAYER67,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnUpdatePlayer67Click);
+        Connect(ID_BUTTON_UPDATE_CONTROLLER,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnUpdateControllerClick);
+        Connect(ID_BUTTON_UPDATE_LAUNCHER,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnUpdateLauncherClick);
+        Connect(ID_BUTTON_RESTART_SERVER,wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnRestartServerClick);
+        Connect(ID_BUTTON_RESTART_OS,wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnRestartOSClick);
+        Connect(ID_BUTTON_SHUTDOWN_OS,wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnShutdownOSClick);
+        Connect(m_pbtnStopController->GetId(),wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnShutdownControllerClick);
+        Connect(ID_BUTTON_SSH,wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnSSHClick);
+        Connect(m_pbtnInfo->GetId(),wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnInfoClick);
+
+        if(m_nType == CONTROLLER)
+        {
+            Connect(m_pbtnRestartAll->GetId(),wxEVT_BUTTON_HELD,(wxObjectEventFunction)&dlgOptions::OnbtnRestartAllClick);
+        }
+        m_pbtnUpdateController->SetBackgroundColour(wxColour(0,30,100));
+	    m_pbtnUpdateEpiServer->SetBackgroundColour(wxColour(0,30,100));
+	    m_pbtnUpdateLauncher->SetBackgroundColour(wxColour(0,30,100));
+	    m_pbtnUpdatePlayer3->SetBackgroundColour(wxColour(0,30,100));
+	    m_pbtnUpdatePlayer67->SetBackgroundColour(wxColour(0,30,100));
+	    m_pbtnUpdateController->SetColourDisabled(wxColour(140,140,140));
+	    m_pbtnUpdateEpiServer->SetColourDisabled(wxColour(140,140,140));
+	    m_pbtnUpdatePlayer3->SetColourDisabled(wxColour(140,140,140));
+	    m_pbtnUpdatePlayer67->SetColourDisabled(wxColour(140,140,140));
+        m_pbtnRestartServer->SetColourDisabled(wxColour(140,140,140));
+        m_pbtnRestartOS->SetColourDisabled(wxColour(140,140,140));
+        m_pbtnShutdownOS->SetColourDisabled(wxColour(140,140,140));
+
+        StaticText9->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+        StaticText13->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+        StaticText14->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+        StaticText15->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+        StaticText16->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+        m_pstVersionController->SetBorderState(uiRect::BORDER_FLAT);
+        m_pstVersionEpiServer->SetBorderState(uiRect::BORDER_FLAT);
+        m_pstVersionLauncher->SetBorderState(uiRect::BORDER_FLAT);
+        m_pstVersionPlayer3->SetBorderState(uiRect::BORDER_FLAT);
+        m_pstVersionPlayer67->SetBorderState(uiRect::BORDER_FLAT);
+
+        ShowConnectedButtons(false);
+
+	}
+    m_pstHostname->SetTextAlign(wxALIGN_CENTER);
+
+    if(m_nType != CART_SYSTEM)
+	{
+        m_pbtnUpdate->SetBackgroundColour(wxColour(128,128,0));
+        m_pbtnReplace->SetBackgroundColour(wxColour(0,80,0));
+        m_pbtnDelete->SetBackgroundColour(wxColour(0,80,0));
+        m_pbtnUpdate->SetColourDisabled(wxColour(140,140,140));
+        m_pbtnReplace->SetColourDisabled(wxColour(140,140,140));
+        m_pbtnDelete->SetColourDisabled(wxColour(140,140,140));
+        StaticText1->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+        StaticText2->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+        StaticText3->SetTextAlign(wxALIGN_TOP|wxALIGN_RIGHT);
+        StaticText4->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+        StaticText5->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+        StaticText7->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+        StaticText10->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+        StaticText11->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+        StaticText12->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
 
 
-	m_pbtnUpdate->SetBackgroundColour(wxColour(128,128,0));
-	m_pbtnInfo->SetBackgroundColour(wxColour(0,128,128));
+        m_pstUid->SetTextAlign(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
+        m_pstCreated->SetTextAlign(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
+        m_pstLabel->SetTextAlign(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
+        m_pstDescription->SetTextAlign(wxALIGN_LEFT | wxALIGN_TOP);
+        m_pstModified->SetTextAlign(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
 
-	m_pbtnReplace->SetBackgroundColour(wxColour(0,80,0));
-    m_pbtnDelete->SetBackgroundColour(wxColour(0,80,0));
+        m_pstUid->SetBorderState(uiRect::BORDER_FLAT);
+        m_pstCreated->SetBorderState(uiRect::BORDER_FLAT);
+        m_pstLabel->SetBorderState(uiRect::BORDER_FLAT);
+        m_pstDescription->SetBorderState(uiRect::BORDER_FLAT);
+        m_pstModified->SetBorderState(uiRect::BORDER_FLAT);
+        m_pstChannels->SetBorderState(uiRect::BORDER_FLAT);
+        m_pstSampleRate->SetBorderState(uiRect::BORDER_FLAT);
+        m_pstLength->SetBorderState(uiRect::BORDER_FLAT);
+        m_pstType->SetBorderState(uiRect::BORDER_FLAT);
+        m_pstSubType->SetBorderState(uiRect::BORDER_FLAT);
 
-    m_pbtnUpdateController->SetBackgroundColour(wxColour(0,30,100));
-    m_pbtnUpdateEpiServer->SetBackgroundColour(wxColour(0,30,100));
-    m_pbtnUpdateLauncher->SetBackgroundColour(wxColour(0,30,100));
-    m_pbtnUpdatePlayer3->SetBackgroundColour(wxColour(0,30,100));
-    m_pbtnUpdatePlayer67->SetBackgroundColour(wxColour(0,30,100));
+    }
 
-    m_pbtnUpdate->SetColourDisabled(wxColour(140,140,140));
-    m_pbtnReplace->SetColourDisabled(wxColour(140,140,140));
-    m_pbtnDelete->SetColourDisabled(wxColour(140,140,140));
-    m_pbtnUpdateController->SetColourDisabled(wxColour(140,140,140));
-    m_pbtnUpdateEpiServer->SetColourDisabled(wxColour(140,140,140));
-    m_pbtnUpdatePlayer3->SetColourDisabled(wxColour(140,140,140));
-    m_pbtnUpdatePlayer67->SetColourDisabled(wxColour(140,140,140));
-
-    m_pbtnRestartServer->SetColourDisabled(wxColour(140,140,140));
-    m_pbtnRestartOS->SetColourDisabled(wxColour(140,140,140));
-    m_pbtnShutdownOS->SetColourDisabled(wxColour(140,140,140));
-
-	m_pstHostname->SetTextAlign(wxALIGN_CENTER);
-	StaticText1->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-    StaticText2->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-    StaticText3->SetTextAlign(wxALIGN_TOP|wxALIGN_RIGHT);
-    StaticText4->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-    StaticText5->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-    StaticText7->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-    StaticText9->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-    StaticText10->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-    StaticText11->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-    StaticText12->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-    StaticText13->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-    StaticText14->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-    StaticText15->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-    StaticText16->SetTextAlign(wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-
-
-    m_pstUid->SetTextAlign(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
-    m_pstCreated->SetTextAlign(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
-    m_pstLabel->SetTextAlign(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
-    m_pstDescription->SetTextAlign(wxALIGN_LEFT | wxALIGN_TOP);
-    m_pstModified->SetTextAlign(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
-
-    m_pstUid->SetBorderState(uiRect::BORDER_FLAT);
-    m_pstCreated->SetBorderState(uiRect::BORDER_FLAT);
-    m_pstLabel->SetBorderState(uiRect::BORDER_FLAT);
-    m_pstDescription->SetBorderState(uiRect::BORDER_FLAT);
-    m_pstModified->SetBorderState(uiRect::BORDER_FLAT);
-    m_pstChannels->SetBorderState(uiRect::BORDER_FLAT);
-    m_pstSampleRate->SetBorderState(uiRect::BORDER_FLAT);
-    m_pstLength->SetBorderState(uiRect::BORDER_FLAT);
-    m_pstType->SetBorderState(uiRect::BORDER_FLAT);
-    m_pstSubType->SetBorderState(uiRect::BORDER_FLAT);
-    m_pstVersionController->SetBorderState(uiRect::BORDER_FLAT);
-    m_pstVersionEpiServer->SetBorderState(uiRect::BORDER_FLAT);
-    m_pstVersionLauncher->SetBorderState(uiRect::BORDER_FLAT);
-    m_pstVersionPlayer3->SetBorderState(uiRect::BORDER_FLAT);
-    m_pstVersionPlayer67->SetBorderState(uiRect::BORDER_FLAT);
-
-    ShowConnectedButtons(false);
-
-	/*
-	Connect(ID_BUTTON_UPDATE,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnFileUpdateClick);
-	Connect(ID_BUTTON_REPLACE,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnReplaceClick);
-	Connect(ID_BUTTON_DELETE,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnDeleteClick);
-	Connect(ID_BUTTON_UPDATE_EPISERVER,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnUpdateEpiServerClick);
-	Connect(ID_BUTTON_UPDATE_PLAYER3,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnUpdatePlayer3Click);
-	Connect(ID_BUTTON_UPDATE_PLAYER67,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnUpdatePlayer67Click);
-	Connect(ID_BUTTON_UPDATE_CONTROLLER,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnUpdateControllerClick);
-	Connect(ID_BUTTON_UPDATE_LAUNCHER,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnUpdateLauncherClick);
-	Connect(ID_BUTTON_RESTART_SERVER,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnRestartServerClick);
-	Connect(ID_BUTTON_RESTART_OS,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnRestartOSClick);
-	Connect(ID_BUTTON_SHUTDOWN_OS,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnShutdownOSClick);
-	Connect(ID_BUTTON_SSH,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnSSHClick);
-	Connect(ID_BUTTON_BACK,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&dlgOptions::OnbtnBackClick);
-	*/
-
-	GridBagSizer1->AddGrowableCol(1);
-	GridBagSizer1->AddGrowableRow(2);
 
 	Center();
 	Move(wxPoint(0,0));
@@ -417,9 +437,15 @@ dlgOptions::dlgOptions(wxWindow* parent, WebSocketClient& wsClient, const wxStri
 	m_pstHostname->SetLabel(sHostname);
 	Connect(wxID_ANY, wxEVT_R_REPLY, (wxObjectEventFunction)&dlgOptions::OnRestfulReply);
 
-	GetFileDetails();
+	if(m_nType != CART_SYSTEM)
+	{
+        GetFileDetails();
+    }
 
-	m_client.Get((m_sUrl+STR_ENDPOINTS[UPDATE]).ToStdString(), UPDATE);
+	if(m_nType != CART_FILE)
+	{
+        m_client.Get((m_sUrl+STR_ENDPOINTS[UPDATE]).ToStdString(), UPDATE);
+    }
 
 }
 
@@ -461,10 +487,14 @@ void dlgOptions::OnbtnReplaceClick(wxCommandEvent& event)
             {
                 ShowError("Failed to upload file", aDlg.m_jsReply);
             }
-            else
+            else if(aDlg.m_jsReply["uid"].isString())
             {
                 m_sUid = aDlg.m_jsReply["uid"].asString();
                 GetFileDetails();
+            }
+            else
+            {
+                ShowError("Uploaded but odd response", aDlg.m_jsReply);
             }
         }
     }
@@ -522,7 +552,17 @@ void dlgOptions::OnbtnUpdateControllerClick(wxCommandEvent& event)
             {
                 buffer[nBytes] = '\0';
                 //rename the controller app
-                int nResult = rename(buffer, "/tmp/controller.old");
+                int nResult;
+
+                if(m_nType == CONTROLLER)
+                {
+                    nResult = rename(buffer, "/tmp/controller.old");
+                }
+                else
+                {
+                    nResult = rename(buffer, "/tmp/cartcontroller.old");
+                }
+
 
                 std::cout << buffer << std::endl;
 
@@ -769,7 +809,10 @@ void dlgOptions::FileDeleteReply(const Json::Value& jsData)
     else
     {
         ShowFileDetails(jsData);    //clear the file details
-        m_client.Get((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString(), FILES);   //see if any other files on the server
+        if(m_nType == CONTROLLER)
+        {
+            m_client.Get((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString(), FILES);   //see if any other files on the server
+        }
     }
 }
 
@@ -781,7 +824,7 @@ void dlgOptions::FilesReply(const Json::Value& jsData)
     }
     else
     {
-    m_sUid = "";
+        m_sUid = "";
     }
     GetFileDetails();
 }
@@ -799,6 +842,7 @@ void dlgOptions::GetFileDetails()
     {
         m_pbtnDelete->Hide();
 	    m_pbtnReplace->SetLabel("Upload");
+	    m_pbtnUpdate->Show(false);
     }
 }
 
@@ -827,16 +871,20 @@ void dlgOptions::OnbtnInfoClick(const wxCommandEvent& event)
 
 void dlgOptions::ShowConnectedButtons(bool bConnected)
 {
-    m_pbtnUpdate->Enable(bConnected);
-    m_pbtnReplace->Enable(bConnected);
-    m_pbtnDelete->Enable(bConnected);
-    m_pbtnUpdateController->Enable(bConnected);
-    m_pbtnUpdateEpiServer->Enable(bConnected);
-    m_pbtnUpdatePlayer3->Enable(bConnected);
-    m_pbtnUpdatePlayer67->Enable(bConnected);
-
-    m_pbtnRestartServer->Enable(bConnected);
-    m_pbtnRestartOS->Enable(bConnected);
-    m_pbtnShutdownOS->Enable(bConnected);
-
+    if(m_nType != CART_SYSTEM)
+    {
+        m_pbtnUpdate->Enable(bConnected);
+        m_pbtnReplace->Enable(bConnected);
+        m_pbtnDelete->Enable(bConnected);
+    }
+    if(m_nType != CART_FILE)
+    {
+        m_pbtnUpdateController->Enable(bConnected);
+        m_pbtnUpdateEpiServer->Enable(bConnected);
+        m_pbtnUpdatePlayer3->Enable(bConnected);
+        m_pbtnUpdatePlayer67->Enable(bConnected);
+        m_pbtnRestartServer->Enable(bConnected);
+        m_pbtnRestartOS->Enable(bConnected);
+        m_pbtnShutdownOS->Enable(bConnected);
+	}
 }

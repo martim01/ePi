@@ -16,7 +16,7 @@
 #include <sstream>
 
 #include <wx/display.h>
-#include "dlgfilemanager.h"
+#include "dlgOptions.h"
 #include "constants.h"
 #include "pnlResource.h"
 #include "wmlabel.h"
@@ -441,7 +441,7 @@ void cartcontrollerDialog::OnResourceStop(const wxCommandEvent& event)
 
 void cartcontrollerDialog::OnResourceMenu(const wxCommandEvent& event)
 {
-    dlgFileManager aDlg(this, m_wsClient, m_plblHostname->GetLabel(), m_sIpAddress, m_sUrl, event.GetString().ToStdString(), wxNewId(), wxPoint(0,0), wxSize(800,480));
+    dlgOptions aDlg(this, dlgOptions::CART_FILE, m_wsClient, m_plblHostname->GetLabel(), m_sIpAddress, m_sUrl, event.GetString().ToStdString(), wxNewId(), wxPoint(0,0), wxSize(800,480));
     if(aDlg.ShowModal() == wxID_CANCEL)
     {
         EndModal(wxID_OK);
@@ -530,7 +530,7 @@ void cartcontrollerDialog::ReplyModifyFile(const Json::Value& jsData)
 
 void cartcontrollerDialog::OnbtnSystem(const wxCommandEvent& event)
 {
-    dlgSystem aDlg(this, m_wsClient, m_plblHostname->GetLabel(), m_sIpAddress, m_sUrl);
+    dlgOptions aDlg(this, dlgOptions::CART_SYSTEM, m_wsClient, m_plblHostname->GetLabel(), m_sIpAddress, m_sUrl, "");
     if(aDlg.ShowModal() == wxID_CANCEL)
     {
         EndModal(wxID_OK);
