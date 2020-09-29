@@ -83,11 +83,13 @@
 		<Unit filename="../common/src/mongoose.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="../controller/include/dlgOptions.h" />
 		<Unit filename="../controller/include/restfulclient.h" />
 		<Unit filename="../controller/src/constants.cpp" />
 		<Unit filename="../controller/src/dlgEdit.cpp" />
 		<Unit filename="../controller/src/dlgError.cpp" />
 		<Unit filename="../controller/src/dlgInfo.cpp" />
+		<Unit filename="../controller/src/dlgOptions.cpp" />
 		<Unit filename="../controller/src/dlgUpload.cpp" />
 		<Unit filename="../controller/src/dlgUsb.cpp" />
 		<Unit filename="../controller/src/multipartupload.cpp" />
@@ -106,8 +108,6 @@
 		<Unit filename="../external/log/src/log.cpp" />
 		<Unit filename="include/cartcontrollerApp.h" />
 		<Unit filename="include/cartcontrollerMain.h" />
-		<Unit filename="include/dlgfilemanager.h" />
-		<Unit filename="include/dlgsystem.h" />
 		<Unit filename="include/pnlResource.h" />
 		<Unit filename="include/version.h" />
 		<Unit filename="resource.rc">
@@ -115,8 +115,6 @@
 		</Unit>
 		<Unit filename="src/cartcontrollerApp.cpp" />
 		<Unit filename="src/cartcontrollerMain.cpp" />
-		<Unit filename="src/dlgfilemanager.cpp" />
-		<Unit filename="src/dlgsystem.cpp" />
 		<Unit filename="src/pnlResource.cpp" />
 		<Unit filename="src/version.cpp" />
 		<Unit filename="wxsmith/cartcontrollerdialog.wxs" />

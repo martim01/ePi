@@ -212,7 +212,12 @@ void pnlResource::UpdatePlayingStatus(const Json::Value& jsData)
                 m_nPlaying = PLAYING;
                 if(jsData["status"].isObject() && jsData["status"]["playing"].isObject())
                 {
-                    m_uiStatus.SetLabel(wxTimeSpan(0,0,0, jsData["status"]["playing"]["time"].asInt()).Format("%H:%M:%S"));
+                    wxTimeSpan tsLength = wxTimeSpan(0,0,0, jsData["status"]["playing"]["length"].asInt());
+                    wxTimeSpan tsPosition = wxTimeSpan(0,0,0, jsData["status"]["playing"]["time"].asInt());
+                    if(jsData["status"]["playing"]["length"].asInt() > 0)
+                    {
+                        m_uiStatus.SetLabel((tsLength-tsPosition).Format("%H:%M:%S"));
+                    }
                 }
             }
             else

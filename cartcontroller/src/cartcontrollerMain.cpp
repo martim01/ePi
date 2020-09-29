@@ -20,7 +20,6 @@
 #include "constants.h"
 #include "pnlResource.h"
 #include "wmlabel.h"
-#include "dlgsystem.h"
 
 const wxColour cartcontrollerDialog::CLR_PLAYING = wxColour(146,208,80);
 const wxColour cartcontrollerDialog::CLR_IDLE = wxColour(141,180,226);
@@ -144,7 +143,7 @@ m_dist(500,1000)
 
 
     wxSetCursor(*wxSTANDARD_CURSOR);
-    //wxSetCursor(wxNullCursor);
+    wxSetCursor(wxNullCursor);  //and hide the cursor
 
 
     Connect(wxID_ANY, wxEVT_WS_CONNECTION, (wxObjectEventFunction)&cartcontrollerDialog::OnWebsocketConnection);
