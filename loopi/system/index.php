@@ -115,7 +115,7 @@ include ("../include/overview.inc");
 					<div class="uk-card uk-card-default">
 						<div class="uk-card-header"> <h3 class="uk-card-title">Memory</h3></div>
 						<div class="uk-card-body">
-							<div class="uk-grid-small uk-text-left uk-child-width-1-6" uk-grid>
+							<div class="uk-grid-small uk-text-left uk-child-width-1-4" uk-grid>
 								<div><span class='uk-text-bold'>Total:</span></div>
 								<div><span id="system-ram-total"></span>MB</div>
 								<div><span class='uk-text-bold'>Buffered:</span></div>
@@ -124,13 +124,9 @@ include ("../include/overview.inc");
 								<div><span id="system-ram-shared"></span>MB</div>
 								<div><span class='uk-text-bold'>Free:</span></div>
 								<div><span id="system-ram-free"></span>MB</div>
-								<div><span class='uk-text-bold'>&nbsp;</span></div>
-								<div><span></span>&nbsp;</div>
-								<div><span class='uk-text-bold'>&nbsp;</span></div>
-								<div><span></span>&nbsp;</div>
-								<div><span class='uk-text-bold'>Process RAM:</span></div>
+								<div><span class='uk-text-bold'>episerver RAM:</span></div>
 								<div><span id="process-rs"></span>MB</div>
-								<div><span class='uk-text-bold'>Process VM:</span></div>
+								<div><span class='uk-text-bold'>episerver VM:</span></div>
 								<div><span id="process-vm"></span>MB</div>
 								
 							</div>

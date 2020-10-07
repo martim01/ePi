@@ -2385,8 +2385,8 @@ function updateInfo_System(loopi, jsonObj)
 	
 	if(jsonObj.process !== undefined)
 	{
-		document.getElementById('process-rs').innerHTML = Math.round(jsonObj.process.rs/1048576);
-		document.getElementById('process-vm').innerHTML = Math.round(jsonObj.process.vm/1048576);
+		document.getElementById('process-rs').innerHTML = Math.round(jsonObj.process.rs/1024);
+		document.getElementById('process-vm').innerHTML = Math.round(jsonObj.process.vm/1024);
 	}
 	
 	
