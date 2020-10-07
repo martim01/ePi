@@ -124,6 +124,15 @@ include ("../include/overview.inc");
 								<div><span id="system-ram-shared"></span>MB</div>
 								<div><span class='uk-text-bold'>Free:</span></div>
 								<div><span id="system-ram-free"></span>MB</div>
+								<div><span class='uk-text-bold'>&nbsp;</span></div>
+								<div><span></span>&nbsp;</div>
+								<div><span class='uk-text-bold'>&nbsp;</span></div>
+								<div><span></span>&nbsp;</div>
+								<div><span class='uk-text-bold'>Process RAM:</span></div>
+								<div><span id="process-rs"></span>MB</div>
+								<div><span class='uk-text-bold'>Process VM:</span></div>
+								<div><span id="process-vm"></span>MB</div>
+								
 							</div>
 						</div>
 					</div>

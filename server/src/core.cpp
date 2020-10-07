@@ -800,6 +800,7 @@ void Core::ExitCallback(int nExit)
 
 void Core::LoopCallback(int nTook)
 {
+
     m_nTimeSinceLastCall += nTook;
 
     if(m_jsResources.size() > 0)
@@ -811,6 +812,10 @@ void Core::LoopCallback(int nTook)
     if(m_nTimeSinceLastCall > 2000)
     {
         m_server.SendWebsocketMessage(m_info.GetInfo());
+
+        //lock as jsStatus can be called by pipe thread and server thread
+        std::lock_guard<std::mutex> lg(m_mutex);
+
         if(m_jsStatus["player"].asString() != "Playing")
         {
             m_jsStatus["current_time"] = GetCurrentTimeAsIsoString();
