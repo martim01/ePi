@@ -231,7 +231,7 @@ void NtpStatus::InterpretMessage(const ntp& ntpmsg)
             double dValue;
             if(ConvertToLongLong(vKeyValue[1], nValue))
             {
-                m_jsStatus[vKeyValue[0]] = nValue;
+                m_jsStatus[vKeyValue[0]] = Json::Int64(nValue);
             }
             else if(ConvertToDouble(vKeyValue[1], dValue))
             {

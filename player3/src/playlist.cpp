@@ -52,7 +52,7 @@ bool Playlist::LoadPlaylist()
 {
     if(Resources::Get().IsValid())
     {
-        for(size_t i = 0; i < Resources::Get().GetJson()["playlists"].size(); i++)
+        for(Json::ArrayIndex i = 0; i < Resources::Get().GetJson()["playlists"].size(); i++)
         {
             if(Resources::Get().GetJson()["playlists"][i]["uid"].asString() == m_sUid)
             {
@@ -74,7 +74,7 @@ bool Playlist::CreatePlaylist(const Json::Value& jsFiles, const Json::Value& jsP
 
     m_vPlaylist.reserve(jsPlaylist["files"].size());
 
-    for(size_t i = 0; i < jsPlaylist["files"].size(); i++)
+    for(Json::ArrayIndex i = 0; i < jsPlaylist["files"].size(); i++)
     {
         if(jsPlaylist["files"][i]["uid"].isString() && jsPlaylist["files"][i]["times_to_play"].isInt())
         {
@@ -94,7 +94,7 @@ bool Playlist::CreatePlaylist(const Json::Value& jsFiles, const Json::Value& jsP
 
 int Playlist::GetFile(const Json::Value& jsFiles, const std::string& sUid)
 {
-    for(size_t i = 0; i < jsFiles.size(); i++)
+    for(Json::ArrayIndex i = 0; i < jsFiles.size(); i++)
     {
         if(jsFiles[i]["uid"].isString() && jsFiles[i]["uid"].asString() == sUid)
         {

@@ -18,7 +18,7 @@ add_executable(episerver
  "src/launcher.cpp"
  "src/main.cpp"
  "src/version.cpp"
- "../common/src/mongoose.c" "src/mongooseserver.cpp" "src/mp3file.cpp" "src/proccheck.cpp" "src/resource.cpp"
+ "../common/src/mongoose.c" "src/mongooseserver.cpp" "src/mp3file.cpp" "src/proccheck.cpp" "src/resource.cpp" "src/ntpstatus.cpp"
  "src/resourcemanager.cpp" "src/sysinfomanager.cpp" "src/uidutils.cpp" "src/wavfile.cpp" "../external/log/src/log.cpp" "../common/src/logtofile.cpp")
 
 

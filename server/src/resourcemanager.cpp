@@ -849,7 +849,7 @@ response ResourceManager::ParseScheduleItems(const Json::Value& jsItems, std::fu
 {
     response theResponse;
     //now check the schedule is valid
-    for(size_t i=0; i < jsItems.size(); i++)
+    for(Json::ArrayIndex i=0; i < jsItems.size(); i++)
     {
         if(jsItems[i].isObject() == false ||
            jsItems[i]["cron"].isString() == false || jsItems[i]["uid"].isString() == false || jsItems[i]["times_to_play"].isInt() == false
@@ -909,7 +909,7 @@ response ResourceManager::ParsePlaylist(const Json::Value& jsData)
         return theResponse;
 
     //now check the schedule is valid
-    for(size_t i=0; i < jsData["files"].size(); i++)
+    for(Json::ArrayIndex i=0; i < jsData["files"].size(); i++)
     {
         if(jsData["files"][i].isObject() == false || jsData["files"][i]["uid"].isString() == false)
         {
@@ -995,7 +995,7 @@ bool ResourceManager::LoadResources()
 
     if(jsResources["files"].isArray())
     {
-        for(size_t i = 0; i < jsResources["files"].size(); i++)
+        for(Json::ArrayIndex i = 0; i < jsResources["files"].size(); i++)
         {
             if(jsResources["files"][i]["type"].asString() == "wavfile")
             {
@@ -1012,7 +1012,7 @@ bool ResourceManager::LoadResources()
 
     if(jsResources["schedules"].isArray())
     {
-        for(size_t i = 0; i < jsResources["schedules"].size(); i++)
+        for(Json::ArrayIndex i = 0; i < jsResources["schedules"].size(); i++)
         {
             m_mSchedules.insert(std::make_pair(jsResources["schedules"][i]["uid"].asString(), std::make_shared<Resource>(jsResources["schedules"][i])));
         }
@@ -1020,7 +1020,7 @@ bool ResourceManager::LoadResources()
 
     if(jsResources["playlists"].isArray())
     {
-        for(size_t i = 0; i < jsResources["playlists"].size(); i++)
+        for(Json::ArrayIndex i = 0; i < jsResources["playlists"].size(); i++)
         {
             m_mPlaylists.insert(std::make_pair(jsResources["playlists"][i]["uid"].asString(), std::make_shared<Resource>(jsResources["playlists"][i])));
         }
@@ -1117,7 +1117,7 @@ void ResourceManager::LockResource(const std::string& sUid, bool bLock)
         {
             itPlaylist->second->Lock(bLock);
             //lock all the files in the playlist as well....
-            for(size_t i = 0; i < itPlaylist->second->GetJson()["files"].size(); i++)
+            for(Json::ArrayIndex i = 0; i < itPlaylist->second->GetJson()["files"].size(); i++)
             {
                 LockResource(itPlaylist->second->GetJson()["files"][i]["uid"].asString(), bLock);
             }
@@ -1128,7 +1128,7 @@ void ResourceManager::LockResource(const std::string& sUid, bool bLock)
             if(itSchedule != m_mSchedules.end())
             {
                 itSchedule->second->Lock(bLock);
-                for(size_t i = 0; i < itSchedule->second->GetJson()["files"].size(); i++)
+                for(Json::ArrayIndex i = 0; i < itSchedule->second->GetJson()["files"].size(); i++)
                 {
                     LockResource(itSchedule->second->GetJson()["files"][i]["uid"].asString(), bLock);
                 }
@@ -1469,7 +1469,7 @@ Json::Value ResourceManager::GetResourcesFileIn(const std::string& sUid, std::ma
     Json::Value jsResources(Json::arrayValue);
     for(auto pairResource : mResource)
     {
-        for(size_t i = 0; i < pairResource.second->GetJson()["files"].size(); i++)
+        for(Json::ArrayIndex i = 0; i < pairResource.second->GetJson()["files"].size(); i++)
         {
             if(pairResource.second->GetJson()["files"][i]["uid"] == sUid)
             {
