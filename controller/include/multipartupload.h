@@ -7,7 +7,7 @@
 #include "namedtype.h"
 #include <map>
 #include <fstream>
-
+#include <thread>
 
 struct mg_mgr;
 struct mg_connection;
@@ -91,6 +91,8 @@ class MultipartUpload : public wxEvtHandler
         wxTimer m_timerTask;
 
         double m_dSent;
+
+        std::unique_ptr<std::thread> m_pThread;
 
         static const std::string BOUNDARY;
         static const std::string CRLF;

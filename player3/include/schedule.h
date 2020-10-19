@@ -4,6 +4,8 @@
 #include "json/json.h"
 #include "epicron.h"
 #include <atomic>
+#include <thread>
+#include <memory>
 
 class Playout;
 class iniManager;
@@ -14,6 +16,7 @@ class Schedule
 {
     public:
         Schedule(Playout& player, const iniManager& iniConfig, const std::string& sUid);
+        ~Schedule();
         bool Play();
 
     private:
@@ -54,5 +57,8 @@ class Schedule
 
         std::unique_ptr<FileSource> m_pSource;
         std::unique_ptr<Playlist> m_pPlaylist;
+
+        std::unique_ptr<std::thread> m_pThread;
+        std::atomic<bool> m_bRun;
 };
 

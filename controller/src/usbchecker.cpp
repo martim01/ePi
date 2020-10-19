@@ -15,10 +15,29 @@ wxDEFINE_EVENT(wxEVT_USB_FINISHED, wxCommandEvent);
 wxDEFINE_EVENT(wxEVT_USB_ERROR, wxCommandEvent);
 
 
+UsbChecker::~UsbChecker()
+{
+    Abort();
+}
+
+void UsbChecker::Abort()
+{
+    if(m_pThread)
+    {
+        m_pThread->join();
+        m_pThread = nullptr;
+    }
+}
 
 void UsbChecker::RunCheck(const wxString& sFilename)
 {
-    std::thread th([this, sFilename](){
+    if(m_pThread != nullptr)
+    {
+        Abort();
+    }
+
+    m_pThread = std::make_unique<std::thread>([this, sFilename]()
+    {
         wxArrayString asFiles;
         //look through /dev/disk/by-id for drives starting usb-
         wxDir::GetAllFiles("/dev/disk/by-id", &asFiles, "usb*");
@@ -38,8 +57,6 @@ void UsbChecker::RunCheck(const wxString& sFilename)
         wxCommandEvent* pEventFinished = new wxCommandEvent(wxEVT_USB_FINISHED);
         wxQueueEvent(m_pHandler, pEventFinished);
     });
-
-    th.detach();
 }
 
 int UsbChecker::UnmountDevice()

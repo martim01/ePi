@@ -66,7 +66,8 @@ static void restful_handler(mg_connection* pConnection, int nEvent, void* pData)
 
 RestfulClient::RestfulClient(wxEvtHandler* pHandler) : m_pHandler(pHandler),
 m_bLoop(false),
-m_bRunning(false)
+m_bRunning(false),
+m_pThread(nullptr)
 {
     m_pManager = new mg_mgr;
 
@@ -81,7 +82,12 @@ m_bRunning(false)
 
 RestfulClient::~RestfulClient()
 {
+    m_bLoop = false;
+    m_pThread->join();
+
     mg_mgr_free(m_pManager);
+
+
 }
 
 bool RestfulClient::Get(const std::string& sEndpoint, int nUserId)
@@ -144,6 +150,12 @@ void RestfulClient::DoNextTask()
 {
     if(!m_bRunning)
     {
+        if(m_pThread)   //thread has finished but is waiting for us to join and let it exit
+        {
+            m_pThread->join();
+            m_pThread = nullptr;
+        }
+
         mg_connection* pConnection = mg_connect_http(m_pManager, restful_handler, m_qTasks.front().sEndpoint.c_str(), nullptr,m_qTasks.front().pPostData, METHOD[m_qTasks.front().nMethod].c_str());
         if(pConnection != nullptr)
         {
@@ -152,7 +164,7 @@ void RestfulClient::DoNextTask()
             pConnection->user_data = reinterpret_cast<void*>(this);
             m_bLoop = true;
 
-            std::thread th([this](){
+            m_pThread = std::make_unique<std::thread>([this](){
                 while(m_bLoop)
                 {
                     mg_mgr_poll(m_pManager, 100);
@@ -160,7 +172,6 @@ void RestfulClient::DoNextTask()
                 m_bRunning = false;
 
             });
-            th.detach();
         }
     }
 }

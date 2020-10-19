@@ -184,7 +184,8 @@ MongooseServer::MongooseServer() :
     m_pConnection(nullptr),
     m_nPollTimeout(100),
     m_loopCallback(nullptr),
-    m_bLoop(true)
+    m_bLoop(true),
+    m_pThread(nullptr)
 {
 
     m_multipartData.itEndpoint = m_mEndpoints.end();
@@ -192,6 +193,11 @@ MongooseServer::MongooseServer() :
 
 MongooseServer::~MongooseServer()
 {
+    if(m_pThread)
+    {
+        m_bLoop = false;
+        m_pThread->join();
+    }
 }
 
 bool MongooseServer::Init(const iniManager& iniConfig)
@@ -264,8 +270,7 @@ void MongooseServer::Run(bool bThread, unsigned int nTimeoutMs)
 
         if(bThread)
         {
-            thread th(&MongooseServer::Loop, this);
-            th.detach();
+            m_pThread = std::make_unique<std::thread>(&MongooseServer::Loop, this);
         }
         else
         {

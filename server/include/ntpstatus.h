@@ -2,13 +2,15 @@
 #include "json/json.h"
 #include <mutex>
 #include <atomic>
+#include <thread>
 
 class NtpStatus
 {
     public:
         NtpStatus();
+        ~NtpStatus();
         void Start();
-        void Stop() { m_bRun = false; }
+        void Stop();
         const Json::Value& GetStatus();
 
 
@@ -25,6 +27,7 @@ class NtpStatus
         std::mutex m_mutex;
         std::atomic<bool> m_bRun;
         Json::Value m_jsStatus;
+        std::unique_ptr<std::thread> m_pThread;
 
         int m_sd;
 

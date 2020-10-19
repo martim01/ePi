@@ -52,10 +52,21 @@ bool ReadFromPipe(int nFd, std::string& sBuffer, std::vector<std::string>& vLine
 Launcher::Launcher()
 : m_pid(0),
 m_sPlayer(""),
+m_pThread(nullptr),
+m_bRun(true),
 m_statusCallback(nullptr),
 m_exitCallback(nullptr)
 {
 
+}
+
+Launcher::~Launcher()
+{
+    if(m_pThread)
+    {
+        m_bRun = false;
+        m_pThread->join();
+    }
 }
 
 void Launcher::SetPlayer(const std::string& sPath, const std::string& sPlayer, const std::string& sConfigPath)
@@ -199,7 +210,14 @@ response Launcher::PausePlayer()
 
 void Launcher::PipeThread()
 {
-    std::thread th([this]()
+    if(m_pThread)
+    {
+        m_bRun = false;
+        m_pThread->join();
+        m_bRun = true;
+        m_pThread = nullptr;
+    }
+    m_pThread = std::make_unique<std::thread>([this]()
     {
         fd_set read_set;
         memset(&read_set, 0, sizeof(read_set));
@@ -211,7 +229,7 @@ void Launcher::PipeThread()
         std::vector<std::string> vOut;
         std::vector<std::string> vError;
 
-        while(true)
+        while(m_bRun)
         {
             FD_SET(m_nPipe[READ], &read_set);
 
@@ -259,16 +277,18 @@ void Launcher::PipeThread()
                 break;
             }
         }
-        int nStatus;
-        waitpid(m_pid, &nStatus,0);
-        m_pid = 0;
-        if(m_exitCallback)
+        if(m_bRun)  //if we are exiting the application don't wait for the player to exit
         {
-            m_exitCallback(nStatus);
+            int nStatus;
+            waitpid(m_pid, &nStatus,0);
+            m_pid = 0;
+            if(m_exitCallback)
+            {
+                m_exitCallback(nStatus);
+            }
         }
 
     });
-    th.detach();
 }
 
 

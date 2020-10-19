@@ -16,9 +16,20 @@ Schedule::Schedule(Playout& player, const iniManager& iniConfig, const std::stri
   m_iniConfig(iniConfig),
   m_sUid(sUid),
   m_pSource(nullptr),
-  m_pPlaylist(nullptr)
+  m_pPlaylist(nullptr),
+  m_pThread(nullptr),
+  m_bRun(true)
 {
 
+}
+
+Schedule::~Schedule()
+{
+    if(m_pThread)
+    {
+        m_bRun = false;
+        m_pThread->join();
+    }
 }
 
 bool Schedule::Play()
@@ -33,8 +44,8 @@ bool Schedule::Play()
 
     //launch thread to do the actual schedule...
 
-    std::thread th([this]() {
-        while(true)
+    m_pThread = std::make_unique<std::thread>([this]() {
+        while(m_bRun)
         {
             auto now = std::chrono::system_clock::now();
             for(size_t i = 0; i < m_vSchedule.size(); i++)
@@ -47,10 +58,9 @@ bool Schedule::Play()
             std::this_thread::sleep_until(now+std::chrono::seconds(1));
         }
     });
-    th.detach();
 
 
-    while(true)
+    while(m_bRun)
     {
         if(m_nCurrentItem < m_vSchedule.size())
         {
