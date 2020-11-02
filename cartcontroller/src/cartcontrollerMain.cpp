@@ -81,6 +81,7 @@ m_nConnected(DISCONNECTED),
 m_bCountUp(true),
 m_bIgnoreUp(false),
 m_bDown(false),
+m_nPageOffset(0),
 m_gen(m_rd()),
 m_dist(500,1000)
 {
@@ -96,6 +97,20 @@ m_dist(500,1000)
     m_ppnlStatus = new wxPanel(this, ID_PANEL1, wxDefaultPosition, wxSize(800,40), wxTAB_TRAVERSAL, _T("ID_PANEL1"));
     m_ppnlStatus->SetBackgroundColour(CLR_ERROR);
     BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
+    m_pbtnPrev = new wmButton(this, wxNewId(), wxT("Previous"), wxDefaultPosition, wxSize(-1,34));
+    m_pbtnPrev->SetForegroundColour(*wxWHIT
+    m_pbtnPrev->SetBackgroundColour(wxColour(0,60,140));
+
+    BoxSizer2->Add(m_pbtnPrev, 0, wxLEFT|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 10);
+    m_plblPage = new wmLabel(m_ppnlStatus, wxNewId(), wxEmptyString, wxDefaultPosition, wxSize(-1, 40));
+    m_plblPage->SetBackgroundColour(CLR_ERROR);
+    m_plblPage->SetForegroundColour(*wxWHITE);
+    BoxSizer2->Add(m_plblPage, 0, wxLEFT|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
+    m_pbtnNext = new wmButton(this, wxNewId(), wxT("Next"), wxDefaultPosition, wxSize(-1,34));
+    m_pbtnNext->SetForegroundColour(*wxWHITE);
+    m_pbtnNext->SetBackgroundColour(wxColour(0,60,140));
+    BoxSizer2->Add(m_pbtnNext, 0, wxLEFT|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
+
     m_plblHostname = new wmLabel(m_ppnlStatus, wxNewId(), wxEmptyString, wxDefaultPosition, wxSize(-1, 40));
     m_plblHostname->SetBackgroundColour(CLR_ERROR);
     m_plblHostname->SetForegroundColour(*wxWHITE);
@@ -153,6 +168,10 @@ m_dist(500,1000)
     Connect(wxID_ANY, wxEVT_R_REPLY, (wxObjectEventFunction)&cartcontrollerDialog::OnRestfulReply);
 
     Connect(m_pbtnSystem->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, (wxObjectEventFunction)&cartcontrollerDialog::OnbtnSystem);
+
+    Connect(m_pbtnPrev->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, (wxObjectEventFunction)&cartcontrollerDialog::OnbtnPrevious);
+    Connect(m_pbtnNext->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, (wxObjectEventFunction)&cartcontrollerDialog::OnbtnNext);
+
 
 
     m_timerCheck.SetOwner(this, wxNewId());
@@ -311,32 +330,46 @@ void cartcontrollerDialog::ReplyConfig(const Json::Value& jsData)
 
 void cartcontrollerDialog::ReplyFiles(const Json::Value& jsData)
 {
-
+    m_mFiles.clear();
     if(jsData.isArray() && jsData.size() > 0)
     {
-        std::map<std::string, std::string> mFiles;
+
         for(size_t i = 0; i < jsData.size(); i++)
         {
-            mFiles.insert(std::make_pair(jsData[i]["label"].asString(), jsData[i]["uid"].asString()));
+            m_mFiles.insert(std::make_pair(jsData[i]["label"].asString(), jsData[i]["uid"].asString()));
         }
 
-        size_t i = 0;
-        for(auto pairFile : mFiles)
-        {
-            if(i < m_vResourcePanels.size())
-            {
-                m_vResourcePanels[i]->SetResource(pairFile.second, pairFile.first);
-            }
-            ++i;
-        }
-        for(; i < m_vResourcePanels.size(); i++)
-        {
-            m_vResourcePanels[i]->SetResource("", "");
-        }
+        UpdatePanel();
     }
 
    UpdateLabels();
 
+}
+
+void cartcontrollerDialog::UpdatePanel()
+{
+
+    m_plblPage->SetLabel(wxString::Format("Page %02u/%02u", (m_nPageOffset/20)+1, (m_mFiles.size()/20+2)));
+
+    size_t nAssigned = 0;
+    size_t nCount = 0;
+
+    for(auto pairFile : m_mFiles)
+    {
+        if(nCount >= m_nPageOffset)
+        {
+            if(nAssigned < m_vResourcePanels.size())
+            {
+                m_vResourcePanels[nAssigned]->SetResource(pairFile.second, pairFile.first);
+            }
+            ++nAssigned;
+        }
+        ++nCount;
+    }
+    for(; nAssigned < m_vResourcePanels.size(); nAssigned++)
+    {
+        m_vResourcePanels[nAssigned]->SetResource("", "");
+    }
 }
 
 void cartcontrollerDialog::UpdateLabels()
@@ -361,6 +394,7 @@ void cartcontrollerDialog::UpdateLabels()
             //m_uiStatus.SetLabel("Error");
     }
     m_plblHostname->SetBackgroundColour(clr);
+    m_plblPage->SetBackgroundColour(clr);
     m_ppnlStatus->SetBackgroundColour(clr);
 }
 
@@ -534,4 +568,30 @@ void cartcontrollerDialog::OnbtnSystem(const wxCommandEvent& event)
     {
         EndModal(wxID_OK);
     }
+}
+
+void cartcontrollerDialog::OnbtnPrevious(const wxCommandEvent& event)
+{
+    if(m_nPageOffset >= 20)
+    {
+        m_nPageOffset -= 20;
+    }
+    else
+    {
+        m_nPageOffset = 20+(m_mFiles.size()/20)*20;
+    }
+    UpdatePanel();
+}
+
+void cartcontrollerDialog::OnbtnNext(const wxCommandEvent& event)
+{
+    if(m_nPageOffset < m_mFiles.size())
+    {
+        m_nPageOffset += 20;
+    }
+    else
+    {
+        m_nPageOffset = 0;
+    }
+    UpdatePanel();
 }

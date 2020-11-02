@@ -83,8 +83,10 @@ m_pThread(nullptr)
 RestfulClient::~RestfulClient()
 {
     m_bLoop = false;
-    m_pThread->join();
-
+    if(m_pThread)
+    {
+        m_pThread->join();
+    }
     mg_mgr_free(m_pManager);
 
 
