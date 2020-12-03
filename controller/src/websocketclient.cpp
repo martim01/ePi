@@ -17,14 +17,20 @@ static void ev_handler(mg_connection* pConnection, int nEvent, void* pData)
 
 WebSocketClient::WebSocketClient() :
 m_pConnection(nullptr),
-m_bLoop(false)
+m_bLoop(false),
+m_pThread(nullptr)
 {
+}
+
+WebSocketClient::~WebSocketClient()
+{
+    Stop();
 }
 
 
 bool WebSocketClient::Connect(const std::string& sEndpoint)
 {
-    if(m_bLoop)
+    if(m_pThread != nullptr)
         return false;
 
     m_pManager = new mg_mgr;
@@ -40,14 +46,14 @@ bool WebSocketClient::Connect(const std::string& sEndpoint)
     m_bLoop = true;
 
 
-    std::thread th([this](){
+    m_pThread = std::make_unique<std::thread>([this]()
+    {
         while(m_bLoop)
         {
             mg_mgr_poll(m_pManager, 100);
         }
         mg_mgr_free(m_pManager);
     });
-    th.detach();
 
     return true;
 }
@@ -140,4 +146,9 @@ void WebSocketClient::RemoveHandler(wxEvtHandler* pHandler)
 void WebSocketClient::Stop()
 {
     m_bLoop = false;
+    if(m_pThread)
+    {
+        m_pThread->join();
+        m_pThread = nullptr;
+    }
 }

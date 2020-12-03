@@ -16,6 +16,7 @@
 #include <map>
 #include <list>
 #include <atomic>
+#include <thread>
 
 using method = NamedType<std::string, struct MethodParameter>;
 using url = NamedType<std::string, struct UrlParameter>;
@@ -156,4 +157,5 @@ class MongooseServer
         bool m_bThreaded;
 
         std::atomic<bool> m_bLoop;
+        std::unique_ptr<std::thread> m_pThread;
 };

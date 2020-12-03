@@ -16,9 +16,20 @@ Schedule::Schedule(Playout& player, const iniManager& iniConfig, const std::stri
   m_iniConfig(iniConfig),
   m_sUid(sUid),
   m_pSource(nullptr),
-  m_pPlaylist(nullptr)
+  m_pPlaylist(nullptr),
+  m_pThread(nullptr),
+  m_bRun(true)
 {
 
+}
+
+Schedule::~Schedule()
+{
+    if(m_pThread)
+    {
+        m_bRun = false;
+        m_pThread->join();
+    }
 }
 
 bool Schedule::Play()
@@ -33,8 +44,8 @@ bool Schedule::Play()
 
     //launch thread to do the actual schedule...
 
-    std::thread th([this]() {
-        while(true)
+    m_pThread = std::make_unique<std::thread>([this]() {
+        while(m_bRun)
         {
             auto now = std::chrono::system_clock::now();
             for(size_t i = 0; i < m_vSchedule.size(); i++)
@@ -47,10 +58,9 @@ bool Schedule::Play()
             std::this_thread::sleep_until(now+std::chrono::seconds(1));
         }
     });
-    th.detach();
 
 
-    while(true)
+    while(m_bRun)
     {
         if(m_nCurrentItem < m_vSchedule.size())
         {
@@ -75,7 +85,7 @@ bool Schedule::LoadSchedule()
 
     if(Resources::Get().IsValid())
     {
-        for(size_t i = 0; i < Resources::Get().GetJson()["schedules"].size(); i++)
+        for(Json::ArrayIndex i = 0; i < Resources::Get().GetJson()["schedules"].size(); i++)
         {
             if(Resources::Get().GetJson()["schedules"][i]["uid"].asString() == m_sUid)
             {
@@ -94,7 +104,7 @@ bool Schedule::CreateSchedule(const Json::Value& jsFiles, const Json::Value& jsP
 
     if(jsSchedule["files"].isArray())
     {
-        for(size_t i = 0; i < jsSchedule["files"].size(); i++)
+        for(Json::ArrayIndex i = 0; i < jsSchedule["files"].size(); i++)
         {
             if(jsSchedule["files"][i]["uid"].isString() && jsSchedule["files"][i]["times_to_play"].isInt() && jsSchedule["files"][i]["cron"].isString())
             {
@@ -114,7 +124,7 @@ bool Schedule::CreateSchedule(const Json::Value& jsFiles, const Json::Value& jsP
     }
     if(jsSchedule["playlists"].isArray())
     {
-        for(size_t i = 0; i < jsSchedule["playlists"].size(); i++)
+        for(Json::ArrayIndex i = 0; i < jsSchedule["playlists"].size(); i++)
         {
             if(jsSchedule["playlists"][i]["uid"].isString() == false)
             {
@@ -152,7 +162,7 @@ bool Schedule::CreateSchedule(const Json::Value& jsFiles, const Json::Value& jsP
 
 int Schedule::GetFile(const Json::Value& jsFiles, const std::string& sUid)
 {
-    for(size_t i = 0; i < jsFiles.size(); i++)
+    for(Json::ArrayIndex i = 0; i < jsFiles.size(); i++)
     {
         if(jsFiles[i]["uid"].isString() && jsFiles[i]["uid"].asString() == sUid)
         {
@@ -175,7 +185,7 @@ int Schedule::GetFile(const Json::Value& jsFiles, const std::string& sUid)
 
 bool Schedule::GetPlaylist(const Json::Value& jsPlaylists, const std::string& sUid)
 {
-    for(size_t i = 0; i < jsPlaylists.size(); i++)
+    for(Json::ArrayIndex i = 0; i < jsPlaylists.size(); i++)
     {
         if(jsPlaylists[i]["uid"].isString() && jsPlaylists[i]["uid"].asString() == sUid)
         {

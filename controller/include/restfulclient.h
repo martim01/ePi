@@ -4,6 +4,7 @@
 #include <queue>
 #include <string>
 #include <wx/timer.h>
+#include <thread>
 
 struct mg_mgr;
 struct mg_connection;
@@ -61,6 +62,7 @@ class RestfulClient : public wxEvtHandler
         wxTimer m_timerTask;
 
         bool m_bRunning;
+        std::unique_ptr<std::thread> m_pThread;
 
 };
 

@@ -23,7 +23,8 @@ static void upload_handler(mg_connection* pConnection, int nEvent, void* pData)
 }
 
 MultipartUpload::MultipartUpload(wxEvtHandler* pHandler) : m_pHandler(pHandler),
-m_bLoop(false)
+m_bLoop(false),
+m_pThread(nullptr)
 {
     m_timerTask.SetOwner(this, wxNewId());
     Connect(m_timerTask.GetId(), wxEVT_TIMER, (wxObjectEventFunction)&MultipartUpload::OnTimerTask);
@@ -56,36 +57,36 @@ bool MultipartUpload::Put(const std::string& sIpAddress, const std::string& sEnd
 
 void MultipartUpload::DoNextTask()
 {
-        wxLogDebug("MultipartUpload::DoNextTask = '%s'", wxString::FromUTF8(m_qTasks.front().sHost.c_str()).c_str());
-
-    m_pManager = new mg_mgr;
-
-    mg_mgr_init(m_pManager, nullptr);
-    mg_connection* pConnection = mg_connect(m_pManager, m_qTasks.front().sHost.c_str(), upload_handler);
-    if(pConnection != nullptr)
+    if(m_pThread == nullptr)
     {
-        pConnection->user_data = reinterpret_cast<void*>(this);
-        m_bLoop = true;
+        m_pManager = new mg_mgr;
 
-        std::thread th([this](){
-            while(m_bLoop)
-            {
-                mg_mgr_poll(m_pManager, 100);
-            }
-            mg_mgr_free(m_pManager);
+        mg_mgr_init(m_pManager, nullptr);
+        mg_connection* pConnection = mg_connect(m_pManager, m_qTasks.front().sHost.c_str(), upload_handler);
+        if(pConnection != nullptr)
+        {
+            pConnection->user_data = reinterpret_cast<void*>(this);
+            m_bLoop = true;
 
-            if(m_pHandler)
-            {
-                wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_R_FINISHED);
-                wxQueueEvent(this, pEvent);
-            }
-        });
-        th.detach();
-    }
-    else
-    {
-        wxLogDebug("MultipartUpload::DoNextTask: Failed");
+            m_pThread = std::make_unique<std::thread>([this](){
+                while(m_bLoop)
+                {
+                    mg_mgr_poll(m_pManager, 100);
+                }
+                mg_mgr_free(m_pManager);
 
+                if(m_pHandler)
+                {
+                    wxCommandEvent* pEvent = new wxCommandEvent(wxEVT_R_FINISHED);
+                    wxQueueEvent(this, pEvent);
+                }
+            });
+        }
+        else
+        {
+            wxLogDebug("MultipartUpload::DoNextTask: Failed");
+
+        }
     }
 }
 
@@ -324,6 +325,8 @@ void MultipartUpload::DataReceived(const wxString& sData)
 
 void MultipartUpload::OnFinishedEvent(const wxCommandEvent& event)
 {
+    m_pThread->join();  //make sure finished
+    m_pThread = nullptr;
     m_qTasks.pop();
     m_timerTask.Start(250, true);
 }

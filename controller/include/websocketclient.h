@@ -3,7 +3,8 @@
 #include <atomic>
 #include <set>
 #include <mutex>
-
+#include <thread>
+#include <memory>
 
 struct mg_mgr;
 struct mg_connection;
@@ -14,6 +15,7 @@ class WebSocketClient
 {
     public:
         WebSocketClient();
+        ~WebSocketClient();
         bool Connect(const std::string& sEndpoint);
 
         /** Handles an event
@@ -41,6 +43,7 @@ class WebSocketClient
         mg_connection* m_pConnection;
         std::atomic<bool> m_bLoop;
         std::mutex m_mutex;
+        std::unique_ptr<std::thread> m_pThread;
 };
 
 

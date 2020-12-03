@@ -2,11 +2,15 @@
 #include "json/json.h"
 #include "response.h"
 #include <functional>
+#include <memory>
+#include <thread>
+#include <atomic>
 
 class Launcher
 {
     public:
         Launcher();
+        ~Launcher();
         void SetPlayer(const std::string& sPath, const std::string& sPlayer, const std::string& sConfigPath);
 
         void AddCallbacks(std::function<void(const std::string&)> statusCallback, std::function<void(int)> m_exitCallback);
@@ -30,6 +34,8 @@ class Launcher
 
         std::string m_sPlayer;
         std::string m_sConfigPath;
+        std::unique_ptr<std::thread> m_pThread;
+        std::atomic<bool> m_bRun;
 
         std::function<void(const std::string&)> m_statusCallback;
         std::function<void(int)> m_exitCallback;

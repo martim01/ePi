@@ -18,6 +18,8 @@
 #include <wx/datetime.h>
 #include <wx/panel.h>
 #include <vector>
+#include <map>
+
 
 //(*Headers(controllerDialog)
 #include <wx/dialog.h>
@@ -68,6 +70,9 @@ class cartcontrollerDialog: public wxDialog
         wxPanel* m_ppnlStatus;
         wmLabel* m_plblHostname;
         wmButton* m_pbtnSystem;
+        wmButton* m_pbtnPrev;
+        wmButton* m_pbtnNext;
+        wmLabel* m_plblPage;
 
         void OnWebsocketConnection(const wxCommandEvent& event);
         void OnWebsocketHandshake(const wxCommandEvent& event);
@@ -81,6 +86,8 @@ class cartcontrollerDialog: public wxDialog
         void OnResourceStop(const wxCommandEvent& event);
 
         void OnbtnSystem(const wxCommandEvent& event);
+        void OnbtnPrevious(const wxCommandEvent& event);
+        void OnbtnNext(const wxCommandEvent& event);
 
         void OnTimerCheck(const wxTimerEvent& event);
         void UpdateLabels();
@@ -98,6 +105,8 @@ class cartcontrollerDialog: public wxDialog
         void ModifyResource(const wxString& sUid);
         void ReplyAddFile(const Json::Value& jsData);
         void ReplyModifyFile(const Json::Value& jsData);
+
+        void UpdatePanel();
 
         uiRect m_uiName;
         uiRect m_uiStatus;
@@ -126,11 +135,15 @@ class cartcontrollerDialog: public wxDialog
 
         wxTimer m_timerTimeout;
 
+        size_t m_nPageOffset;
+
         std::random_device m_rd;
         std::mt19937 m_gen;
         std::uniform_int_distribution<> m_dist;
 
         std::vector<pnlResource*> m_vResourcePanels;
+
+        std::map<std::string, std::string> m_mFiles;
 
         DECLARE_EVENT_TABLE()
 

@@ -9,7 +9,7 @@ namespace version
     extern const unsigned long PATCH;
     extern const unsigned long BUILD;
     extern const unsigned long DATE;
-};
+}
 
 
 

@@ -24,14 +24,30 @@ const std::string NtpStatus::clksrcname[10] = {  /* Refer RFC-1305, Appendix B, 
     "modem"};         /* 9 */
 
 
-NtpStatus::NtpStatus() : m_bRun(true)
+NtpStatus::NtpStatus() : m_bRun(true), m_pThread(nullptr)
 {
 }
 
+NtpStatus::~NtpStatus()
+{
+    Stop();
+}
+
+
 void NtpStatus::Start()
 {
-    std::thread th(&NtpStatus::Thread, this);
-    th.detach();
+    Stop();
+    m_pThread = std::make_unique<std::thread>(&NtpStatus::Thread, this);
+}
+
+void NtpStatus::Stop()
+{
+    if(m_pThread)
+    {
+        m_bRun = false;
+        m_pThread->join();
+        m_pThread = nullptr;
+    }
 }
 
 const Json::Value& NtpStatus::GetStatus()
@@ -231,7 +247,7 @@ void NtpStatus::InterpretMessage(const ntp& ntpmsg)
             double dValue;
             if(ConvertToLongLong(vKeyValue[1], nValue))
             {
-                m_jsStatus[vKeyValue[0]] = nValue;
+                m_jsStatus[vKeyValue[0]] = Json::Int64(nValue);
             }
             else if(ConvertToDouble(vKeyValue[1], dValue))
             {
@@ -279,3 +295,5 @@ bool NtpStatus::ConvertToLongLong(const std::string& sValue, long long& n)
     }
     return false;
 }
+
+
