@@ -147,7 +147,7 @@ class loopi
 
 var g_loopi_array = new Array();
 var g_ajax = new XMLHttpRequest();
-	
+g_ajax.timeout = 300;
 
 const CLR_PLAYING = "#92d14f";
 const CLR_IDLE = "#8db4e2";
@@ -231,7 +231,8 @@ function ws_connect(loopi, statusCallback, systemCallback, resourceCallback)
 		}
 		
 		var jsonObj = JSON.parse(ev.data);
-		
+		console.log(jsonObj);
+
 		if(jsonObj["player"] !== undefined)
 		{
 			if(statusCallback !== null)
@@ -439,6 +440,7 @@ function getOutputs(loopi, callback)
 
 function ajaxGet(loopi, endpoint, callback)
 {
+	console.log("ajaxGet "+endpoint);
 	var ajax = new XMLHttpRequest();
 	ajax.timeout = 2000;
 	
@@ -446,10 +448,11 @@ function ajaxGet(loopi, endpoint, callback)
 	{
 		if(this.readyState == 4)
 		{
+			console.log(this.responseText);
+
 			if(this.status === 200)
 			{
 				g_loopi_array[loopi].connected = true;
-
 				callback(loopi, JSON.parse(this.responseText));
 			}
 			else
@@ -1968,18 +1971,21 @@ function uploadFile()
 	
 	var fd = new FormData(document.getElementById('upload_form'));
 	
+	var g_ajax = new XMLHttpRequest();
 
-
-		
 	g_ajax.upload.addEventListener('progress', function(e) {
 		var percent_complete = (e.loaded/e.total)*100;
-		document.getElementById('progress').value = percent_complete;
+		var prog = document.getElementById('progress');
+		if(prog)
+		{
+			prog.value = percent_complete;
+		}
 		});
 
 
 	g_ajax.onreadystatechange = function()
 	{
-		
+		console.log("Ready: "+this.readyState+" state: "+this.status+" "+this.statusText);
 		if(this.readyState == 4)
 		{
 			UIkit.modal(document.getElementById('progress_modal')).hide();
@@ -1989,13 +1995,16 @@ function uploadFile()
 			
 			if(this.status == 0)
 			{
+				UIkit.modal(document.getElementById('progress_modal')).hide();
 				UIkit.notification({message: "Upload canceled", status: 'danger', timeout: 2000})
+				console.log('cancelled');
 			}
 			else if(this.status != 201)
 			{
 				
 				var jsonObj = JSON.parse(this.responseText);
 				UIkit.notification({message: jsonObj["reason"], status: 'danger', timeout: 2000})
+				UIkit.modal(document.getElementById('progress_modal')).hide();
 			}
 		}
 		else if(this.readyState == 0 && this.status == 0)
@@ -2021,6 +2030,7 @@ function uploadFile()
 	var uid = document.getElementById('upload_uid').value;
 	if(uid == '')
 	{
+		console.log("http://"+g_loopi_array[0].url+"/x-epi/files");
 		g_ajax.open('POST',"http://"+g_loopi_array[0].url+"/x-epi/files");
 	}
 	else
@@ -2033,6 +2043,7 @@ function uploadFile()
 
 function cancelUpload()
 {
+	console.log("cancelUpload");
 	g_ajax.abort();
 	
 }

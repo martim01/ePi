@@ -86,7 +86,7 @@ include ("../include/overview.inc");
 				<h3 class="uk-modal-title" id="upload_title">Upload New Audio</h3>
 			</div>
 			<div class="uk-modal-body">
-				<form class="uk-form-horizontal uk-margin-small" id="upload_form">
+				<form class="uk-form-horizontal uk-margin-small" id="upload_form" enctype="multipart/form-data" onsubmit="return false;">
 					<div class="uk-margin uk-margin-small">
 						<label class="uk-form-label" for="upload_file">File</label>
 						<div class="uk-form-controls">
@@ -113,7 +113,7 @@ include ("../include/overview.inc");
 			</div>
 			<div class="uk-modal-footer uk-text-right">
 			<button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
-			<button class="uk-button uk-button-primary" type="button" onclick="uploadFile()">Upload</button>
+			<input type="button" class="uk-button uk-button-primary" value="Upload" onclick="uploadFile()"/>
 			</div>
 		</div>
 	</div>

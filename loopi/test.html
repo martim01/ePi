@@ -1,0 +1,1975 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 5.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<HTML>
+	<head>
+		<meta name="description" content="" >
+		<meta name="author" content="Matthew Martin">
+		<meta name="keywords" content="" >
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+		<meta http-equiv="Expires" content="Mon, 26 Jul 1980 05:00:00 GMT">
+		<meta http-equiv="Expires" content="0">
+		<meta http-equiv="pragma" content="no-cache">
+		<meta http-equiv="Cache-Control" content="no-cache, must-revalidate, post-check=0, pre-check=0">
+		<meta http-equiv="Cache-Control" content="max-age=0">
+		<title>ePI</title>
+		<script type="text/javascript" language="javascript">
+			
+			var url = new URL(window.location.href);
+			var g_endpoint = url.searchParams.get("endpoint");
+			
+			
+			console.log(g_endpoint);
+			if(g_endpoint === null)
+			{
+				g_endpoint = prompt("Enter endpoint");
+			}
+			
+			var g_url = "http://"+g_endpoint+"/x-epi/";
+			
+			var g_files = [];
+			var g_schedules = [];
+			var g_playlists = [];
+			var g_ws = null;
+			var g_bOrphaned = false;
+			var g_show = 'files';
+			
+			function setElementText(elm, key, jsonObj)
+			{
+				if(document.getElementById(elm))
+				{
+					if(jsonObj[key] !== undefined)
+					{
+						document.getElementById(elm).innerHTML = jsonObj[key];
+					}
+
+					else
+					{
+						document.getElementById(elm).innerHTML = "";
+					}
+				}
+				else
+				{
+					console.log(elm);
+				}
+			}
+			function clearElementText(elm)
+			{
+				document.getElementById(elm).innerHTML = "";
+			}
+
+			function FindResource(uid, resObj)
+			{
+				for(var i =0; i < resObj.length; i++)
+				{
+					if(resObj[i]["uid"] == uid)
+					{
+						return resObj[i];
+					}
+				}
+				return null;
+				
+			}
+			
+			function millisecondsToTime(milliseconds)
+			{
+				var seconds = Math.floor(milliseconds/1000)%60;
+				var minutes = Math.floor(milliseconds/(1000*60))%60;
+				var hours = Math.floor(milliseconds/(1000*3600));
+				
+				return toString(hours)+":"+toString(minutes)+":"+toString(seconds);
+			}
+			
+			function toString(value)
+			{
+				if(value == 0)
+				{
+					return '00';
+				}
+				else if(value < 10)
+				{
+					return '0'+value;
+				}
+				return value;
+			}
+
+
+
+			function ws_connect()
+			{
+				
+				g_ws = new WebSocket('ws://' + g_endpoint);
+				
+				g_ws.onopen = function(ev)  { console.log(ev); };
+				g_ws.onerror = function(ev) { console.log(ev); };
+				g_ws.onclose = function(ev) { console.log(ev); alert("Server has closed");};
+				g_ws.filter = function(jsonObj){};
+	
+							
+				g_ws.onmessage = function(ev) 
+				{
+					var jsonObj = JSON.parse(ev.data);
+					
+					
+					if(jsonObj["application"] !== undefined)
+					{
+						setElementText("application_start_time", "start_time", jsonObj["application"]);
+						document.getElementById('application_up_time').innerHTML = millisecondsToTime(jsonObj["application"]["up_time"]*1000);
+
+						setElementText("application_version", "version", jsonObj["application"]);
+					}
+					if(jsonObj["cpu"] !== undefined)
+					{
+						setElementText("cpu_overall", "cpu", jsonObj["cpu"]);
+						setElementText("cpu_cpu0", "cpu0", jsonObj["cpu"]);
+						setElementText("cpu_cpu1", "cpu1", jsonObj["cpu"]);
+						setElementText("cpu_cpu2", "cpu2", jsonObj["cpu"]);
+						setElementText("cpu_cpu3", "cpu3", jsonObj["cpu"]);
+					}
+					if(jsonObj["disk"] !== undefined)
+					{
+						setElementText("disk_bytes_available", "available", jsonObj["disk"]["bytes"]);
+						setElementText("disk_bytes_total", "total", jsonObj["disk"]["bytes"]);
+						setElementText("disk_inodes_available", "available", jsonObj["disk"]["inodes"]);
+						setElementText("disk_inodes_total", "total", jsonObj["disk"]["inodes"]);
+					}
+					if(jsonObj["system"] !== undefined)
+					{
+						document.getElementById('system_uptime').innerHTML = millisecondsToTime(jsonObj["system"]["uptime"]*1000);
+						setElementText("system_ram_free", "free", jsonObj["system"]["ram"]);
+						setElementText("system_load", "1", jsonObj["system"]["loads"]);
+					}
+					if(jsonObj["temperature"] !== undefined)
+					{
+						setElementText("system_temp", "cpu", jsonObj["temperature"]);
+
+					}
+					
+					console.log(jsonObj);
+					
+					if(jsonObj["player"] !== undefined)
+					{
+						updateStatus(jsonObj);
+					}	
+
+						
+					if(jsonObj["exit"] !== undefined)
+					{
+						
+						if(jsonObj["exit"]["code"] !== undefined)
+						{
+							setElementText("exit_code", "code", jsonObj["exit"]);
+						}
+						else
+						{
+							clearElementText("exit_code");
+						}
+						
+						if(jsonObj["exit"]["signal"] !== undefined)
+						{
+							setElementText("exit_signal", "code", jsonObj["exit"]["signal"]);
+							setElementText("exit_signal_description", "description", jsonObj["exit"]["signal"]);
+						}
+						else
+						{
+							clearElementText("exit_signal");
+							clearElementText("exit_signal_description");
+						}
+					}
+					else
+					{
+						clearElementText("exit_signal");
+						clearElementText("exit_signal_description");
+						clearElementText("exit_code");
+					}
+
+				}
+			}
+			
+			
+			function updateStatus(jsonObj)
+			{
+				document.getElementById("player").innerHTML = jsonObj["player"];
+				
+				if(jsonObj["locked"] == false)
+				{
+					document.getElementById("lock").innerHTML = "Lock System";
+				}
+				else
+				{
+					document.getElementById("lock").innerHTML = "Unlock System";
+				}
+				
+				if(jsonObj["player"] == "Stopped" || jsonObj["status"] === undefined)
+				{
+					document.getElementById("stop").style.visibility = "hidden";
+					clearElementText("playing_uid");
+					clearElementText("playing_label");
+					clearElementText("playing_started_at");
+					clearElementText("playing_length");
+					clearElementText("playing_loop");
+					clearElementText("playing_time");
+					clearElementText("resampler");
+					clearElementText("status_action");
+					clearElementText("status_time");
+					clearElementText("status_type");
+					clearElementText("status_label");
+				
+				}
+				else
+				{
+					g_bOrphaned = (jsonObj["player"] == "Orphaned");
+					document.getElementById("stop").style.visibility = "visible";
+					
+					if(jsonObj["resource"] !== undefined)
+					{
+						setElementText("status_type", "type", jsonObj["resource"]);
+						setElementText("status_label", "label", jsonObj["resource"]);
+					}
+					else
+					{
+						clearElementText("status_type");
+						clearElementText("status_label");
+					}
+					
+					jsonObj = jsonObj["status"];
+				
+					setElementText("status_action", "action", jsonObj);
+					setElementText("status_time", "time", jsonObj);
+					
+					
+					if(jsonObj["playing"] !== undefined)
+					{
+						setElementText("playing_uid", "uid", jsonObj["playing"]);
+						var resObj = FindResource(jsonObj["playing"]["uid"], g_files);
+						if(resObj !== null)
+						{
+							document.getElementById("playing_label").innerHTML = resObj["label"];
+						}
+						setElementText("playing_started_at", "started_at", jsonObj["playing"]);
+						setElementText("playing_loop", "loop", jsonObj["playing"]);
+						document.getElementById("playing_length").innerHTML = millisecondsToTime(jsonObj["playing"]["length"]);
+						document.getElementById("playing_time").innerHTML = millisecondsToTime(jsonObj["playing"]["time"]);
+						if(jsonObj["playing"]["resampler"] == true)
+						{
+							document.getElementById("resampler").innerHTML = "On";
+						}
+						else
+						{
+							document.getElementById("resampler").innerHTML = "Off";
+						}
+						
+					}
+				}
+			}
+			
+			
+			function startup()
+			{
+				next(0);
+			}
+			
+			function next(index, resObj)
+			{
+				console.log("next("+index+")");
+				switch(index)
+				{
+					case 0: 
+						getConfig(index);
+						break;
+					case 1:
+						getStatus(index);
+					case 2:
+						getResource("files","div_files", index);
+						break;
+					case 3:
+						g_files = resObj;
+						getResource("schedules","div_schedules", index);
+						break;
+					case 4:
+						g_schedules = resObj;
+						getResource("playlists","div_playlists", index);
+						break;
+					case 5:
+						g_playlists = resObj;
+						if(g_ws === null)
+						{
+							ws_connect();
+						}
+						if(g_details !== null)
+						{
+							showdetails();
+						}
+				}
+			}
+			
+			function getStatus(index)
+			{
+				var ajax = new XMLHttpRequest();
+				ajax.onreadystatechange = function()
+				{
+					if(this.readyState == 4)
+					{
+						var resObj = JSON.parse(this.responseText);
+						if(resObj !== null)
+						{
+							updateStatus(resObj);
+						}
+						next(index+1);
+					}
+				}
+				ajax.open("GET", g_url+"status",true);
+				ajax.send();
+			}
+			
+			function getConfig(index)
+			{
+				var ajax = new XMLHttpRequest();
+				ajax.onreadystatechange = function()
+				{
+					if(this.readyState == 4)
+					{
+						var resObj = JSON.parse(this.responseText);
+						if(resObj !== null)
+						{
+							document.title = resObj["server"]["hostname"];
+							document.getElementById("hostname").innerHTML = resObj["server"]["hostname"];
+						}
+						next(index+1);
+					}
+				}
+				ajax.open("GET", g_url+"config",true);
+				ajax.send();
+			}
+			
+			function getResource(endpoint, div, index)
+			{
+				var ajax = new XMLHttpRequest();
+				ajax.onreadystatechange = function()
+				{
+					console.log(this.readyState);
+					if(this.readyState == 4)
+					{
+						console.log(this.responseText);
+						var resObj = JSON.parse(this.responseText);
+						if(resObj !== null)
+						{
+							//create a list sorted by label...
+							resObj.sort(function(a,b) { 
+								var x = a.label.toLowerCase();
+								var y = b.label.toLowerCase();
+								if(x < y) return -1;
+								if(y < x) return 1;
+								return 0;
+							});
+						}
+						listResources(resObj, div, endpoint);
+						next(index+1, resObj);
+					}
+				}
+				ajax.open("GET", g_url+endpoint,true);
+				ajax.send();
+			}
+			
+			function listResources(resObj, elm, type)
+			{
+				var div = document.getElementById(elm);
+				if(div === null)
+				{
+					return;
+				}
+				while(div.firstChild)
+				{
+					div.removeChild(div.firstChild);
+				}
+				
+				var div_label = document.createElement('div');
+				div_label.innerHTML = "Label";
+				div_label.className = "grid_title";
+				
+				var div_action = document.createElement('div');
+				div_action.innerHTML = "Action";
+				div_action.className = "grid_title";
+				
+				div.appendChild(div_label);
+				div.appendChild(div_action);
+				
+				if(resObj === null)
+					return;
+					
+
+				
+				for(var i = 0; i < resObj.length; i++)
+				{
+					div_label = document.createElement('div');
+					div_label.innerHTML = resObj[i]["label"];
+					div_label.className = "grid_resource";
+					div_label.id = "label_"+type+"_"+resObj[i]["uid"];
+					div_label.addEventListener('click',details, false);
+						
+					div_action = document.createElement('div');
+					div_action.className = "grid_label";
+
+					var button_play = document.createElement('button');
+					button_play.innerHTML = "Play";
+					button_play.id = "play_"+type+"_"+resObj[i]["uid"];
+					button_play.addEventListener('click',play, false);
+					
+								
+					
+					div_action.appendChild(button_play);
+					
+					div.appendChild(div_label);
+					div.appendChild(div_action);
+				}
+			}
+
+			
+			function postSchedule()
+			{
+				
+				
+				var ajax = new XMLHttpRequest();
+				ajax.onreadystatechange = function()
+				{
+					
+					if(this.readyState == 4)
+					{
+						var jsonObj = JSON.parse(this.responseText);
+						console.log(jsonObj);
+					}
+				}
+				var schedule = { "label" : "usher2", "description" : "Usher", "files" : [ { "uid" : "1b77ce42-fa03-3ab8-8570-da65c8909a9d", "times_to_play" : 1, "cron" : "0 52 15 * * ? *"}, { "uid" : "3745251b-dce9-30c8-bc9c-17678ed2c001", "times_to_play" : 1, "cron" : "0 54 15 * * ? *" },{ "uid" : "9da24e0a-e14c-3cb0-91df-26af522c3f22", "times_to_play" : 1, "cron" : "0 55 15 * * ? *" }] };
+				console.log(schedule);
+				ajax.open("POST", g_url+"schedules",true);
+				ajax.setRequestHeader("Content-type", "application/json");
+				ajax.send(JSON.stringify(schedule));
+			}
+			
+			function upload_file()
+			{
+				if(document.getElementById('new_file_label').value == '')
+				{
+					alert("You must enter a label for the file");
+					return;
+				}
+				
+				if(document.getElementById('new_file_description').value == '')
+				{
+					alert("You must enter a description for the file");
+					return;
+				}
+				
+				var fd = new FormData(document.getElementById('upload_form'));
+				console.log("fd");
+				console.log(fd);
+
+
+				var ajax = new XMLHttpRequest();
+				ajax.onreadystatechange = function()
+				{
+					console.log("Ready="+this.readyState+" status="+this.status);	
+					
+					if(this.readyState == 4)
+					{
+						var jsonObj = JSON.parse(this.responseText);
+						document.getElementById('progress').className = 'hide';
+						document.getElementById('veil').className = 'hide';
+						
+						if(this.status != 201)
+						{
+							alert(jsonObj["reason"]);
+						}
+						
+						next(0);
+					}
+				}
+				hideNew();
+				
+				document.getElementById('progress').className = 'popup';
+				document.getElementById('progress_label').innerHTML = document.getElementById('new_file_label').value;
+				
+				show_veil();
+				
+				ajax.upload.addEventListener('progress', function(e) {
+					var percent_complete = (e.loaded/e.total)*100;
+					document.getElementById('progress_percentage').innerHTML = percent_complete+'%';
+					console.log(percent_complete);
+					});
+					
+					
+				
+				ajax.open('POST',g_url+"files");
+				ajax.send(fd);
+				
+				
+			}
+			function play(e)
+			{
+				var split = e.target.id.split('_');
+				var type = split[1];
+				var uid = split[2];
+				
+				type = type.substring(0, type.length-1);	//remove the s
+				
+				var ajax = new XMLHttpRequest();
+				ajax.onreadystatechange = function()
+				{
+					
+					if(this.readyState == 4)
+					{
+						var jsonObj = JSON.parse(this.responseText);
+						
+						if(this.status != 200)
+						{
+							alert(jsonObj["reason"]);
+						}
+					}
+				}
+				var play = { "command" : "play", "type" : type, "uid" : uid, "times_to_play" : 1, "shuffle" : false};
+				
+				ajax.open("PATCH", g_url+"status",true);
+				ajax.setRequestHeader("Content-type", "application/json");
+				ajax.send(JSON.stringify(play));
+			}
+			
+			var g_details = null;
+			function details(e)
+			{
+				if(g_details !== null)
+				{
+					g_details.className = "grid_resource";
+				}
+				g_details = e.target;
+				g_details.className = "grid_resource_selected";
+				
+				showdetails();
+			}
+			
+			function showdetails()
+			{
+				var split = g_details.id.split('_');
+				var type = split[1];
+				var uid = split[2];
+				
+								
+				var ajax = new XMLHttpRequest();
+				ajax.onreadystatechange = function()
+				{
+					if(this.readyState == 4)
+					{
+						var jsonObj = JSON.parse(this.responseText);
+						setElementText("details_uid", "uid", jsonObj);
+						setElementText("details_label", "label", jsonObj);
+						setElementText("details_description", "description", jsonObj);
+						setElementText("details_created", "created", jsonObj);
+						setElementText("details_locked", "locked", jsonObj);
+						
+						document.getElementById("detail_action").className = "grid grid_details_files";
+						
+						if(type == "files")
+						{
+							showFileDetails(jsonObj);
+						}
+						else if(type == "schedules")
+						{
+							showScheduleDetails(jsonObj);
+						}
+						else if(type == "playlists")
+						{
+							showPlaylistDetails(jsonObj);
+						}
+						
+					}
+				}
+				ajax.open("GET", g_url+type+"/"+uid,true);
+				ajax.send();
+			}
+			
+			
+			function cleardetails()
+			{
+				clearElementText("details_uid");
+				clearElementText("details_label");
+				clearElementText("details_description");
+				clearElementText("details_created");
+				clearElementText("details_locked");
+						
+				document.getElementById("detail_action").className = 'hide';
+						
+						
+				document.getElementById("details_files").className="hide";
+				document.getElementById("details_schedules").className="hide";
+				document.getElementById("details_playlists").className="hide";
+			}
+			
+			function showFileDetails(jsonObj)
+			{
+				document.getElementById("details_files").className="grid grid_details_files";
+				document.getElementById("details_schedules").className="hide";
+				document.getElementById("details_playlists").className="hide";
+				
+				setElementText("details_files_channels", "channels", jsonObj);
+				setElementText("details_files_samplerate", "samplerate", jsonObj);
+				if(jsonObj["format"] !== undefined)
+				{
+					setElementText("details_files_format", "subtype", jsonObj["format"]);
+					setElementText("details_files_type", "type", jsonObj["format"]);
+				}
+				document.getElementById("details_files_length").innerHTML = millisecondsToTime(jsonObj["length"]);
+			}
+			
+			function showPlaylistDetails(jsonObj)
+			{
+				document.getElementById("details_files").className="hide";
+				document.getElementById("details_schedules").className="hide";
+				
+				var div = document.getElementById("details_playlists");
+				div.className="grid grid_details_playlists";
+				
+				while(div.firstChild)
+				{
+					div.removeChild(div.firstChild);
+				}
+				var divFile = document.createElement('div');
+				divFile.className = "grid_title";
+				divFile.innerHTML = "File";
+				div.appendChild(divFile);
+				
+				var divLoop = document.createElement('div');
+				divLoop.className = "grid_title";
+				divLoop.innerHTML = "Times To Play";
+				div.appendChild(divLoop);
+				
+				for(var i = 0; i < jsonObj["files"].length; i++)
+				{
+					var jsonFile = FindResource(jsonObj["files"][i]["uid"], g_files);
+					if(jsonFile !== null)
+					{
+						var divLabel = document.createElement('div');
+						divLabel.className = "grid_label";
+						divLabel.innerHTML = jsonFile["label"];
+						div.appendChild(divLabel);
+						
+						var divTimes = document.createElement('div');
+						divTimes.className = "grid_label";
+						divTimes.innerHTML = jsonObj["files"][i]["times_to_play"];
+						div.appendChild(divTimes);
+					}
+				}
+				
+			}
+			
+			function showScheduleDetails(jsonObj)
+			{
+				document.getElementById("details_files").className="hide";
+				document.getElementById("details_playlists").className="hide";
+				
+				var div = document.getElementById("details_schedules");
+				div.className="grid grid_details_schedules";
+				
+				while(div.firstChild)
+				{
+					div.removeChild(div.firstChild);
+				}
+				var divType = document.createElement('div');
+				divType.className = "grid_title";
+				divType.innerHTML = "Type";
+				div.appendChild(divType);
+				
+				var divLabel = document.createElement('div');
+				divLabel.className = "grid_title";
+				divLabel.innerHTML = "Label";
+				div.appendChild(divLabel);
+				
+				var divTimes = document.createElement('div');
+				divTimes.className = "grid_title";
+				divTimes.innerHTML = "Times To Play";
+				div.appendChild(divTimes);
+				
+				var divCron = document.createElement('div');
+				divCron.className = "grid_title";
+				divCron.innerHTML = "Cron";
+				div.appendChild(divCron);
+				
+				if(jsonObj["files"] !== undefined)
+				{
+					for(var i = 0; i < jsonObj["files"].length; i++)
+					{
+						var jsonFile = FindResource(jsonObj["files"][i]["uid"], g_files);
+						if(jsonFile !== null)
+						{
+							showScheduleEntry(jsonFile, jsonObj["files"][i]["cron"], "File", div);
+						}
+						else
+						{
+							var jsonFile = FindResource(jsonObj["files"][i]["uid"], g_playlists);
+							if(jsonFile !== null)
+							{
+								showScheduleEntry(jsonFile, jsonObj["files"][i]["times_to_play"], jsonObj["files"][i]["cron"], "File", div);
+							}
+						}
+					}	
+				}
+				if(jsonObj["playlists"] !== undefined)
+			    {
+					for(var i = 0; i < jsonObj["playlists"].length; i++)
+					{
+						var jsonFile = FindResource(jsonObj["playlists"][i]["uid"], g_files);
+						if(jsonFile !== null)
+						{
+							showScheduleEntry(jsonFile, jsonObj["playlists"][i]["cron"], "File", div);
+						}
+						else
+						{
+							var jsonFile = FindResource(jsonObj["playlists"][i]["uid"], g_playlists);
+							if(jsonFile !== null)
+							{
+								showScheduleEntry(jsonFile, jsonObj["playlists"][i]["times_to_play"],  jsonObj["playlists"][i]["cron"], "Playlist", div);
+							}
+						}
+					}					
+				}
+			}
+			
+			function showScheduleEntry(jsonObj, times_to_play, cron, type, divContainer)
+			{
+				var divType = document.createElement('div');
+				divType.className = "grid_label";
+				divType.innerHTML = type;
+				divContainer.appendChild(divType);
+				
+				var divLabel = document.createElement('div');
+				divLabel.className = "grid_label";
+				divLabel.innerHTML = jsonObj["label"];
+				divContainer.appendChild(divLabel);
+				
+				var divTimes = document.createElement('div');
+				divTimes.className = "grid_label";
+				divTimes.innerHTML = times_to_play;
+				divContainer.appendChild(divTimes);
+				
+				var divCron = document.createElement('div');
+				divCron.className = "grid_label";
+				divCron.innerHTML = cron;
+				divContainer.appendChild(divCron);
+			}
+			
+			g_uid = "";
+			function update(e)
+			{
+				if(g_details)
+				{
+					var split = g_details.id.split('_');
+					var type = split[1];
+					g_uid = split[2];
+				
+					var ajax = new XMLHttpRequest();
+					ajax.onreadystatechange = function()
+					{
+						if(this.readyState == 4)
+						{
+							var jsonObj = JSON.parse(this.responseText);
+							
+							if(type == "files")
+							{
+								showUpdateFile(jsonObj);
+							}
+							else if(type == "schedules")
+							{
+								showUpdateSchedule(jsonObj);
+							}
+							else if(type == "playlists")
+							{
+								showUpdatePlaylist(jsonObj);
+							}
+							
+						}
+					}
+					ajax.open("GET", g_url+type+"/"+g_uid,true);
+					ajax.send();
+				}
+			}
+			
+			function showUpdatePlaylist(jsonObj)
+			{
+				console.log(jsonObj);
+				showNew();
+				document.getElementById('playlist_title').innerHTML="Modify Playlist";
+						
+				document.getElementById('new_playlist_label').value = jsonObj['label'];
+				document.getElementById('new_playlist_description').value = jsonObj['description'];
+				for(var i = 0; i < jsonObj['files'].length; i++)
+				{
+					var fileObj = FindResource(jsonObj['files'][i]['uid'], g_files);
+					addPlaylistFile(jsonObj['files'][i]['uid'], fileObj['label'], jsonObj['files'][i]['times_to_play']);
+				}
+			}
+			
+			function showUpdateSchedule(jsonObj)
+			{
+				console.log(jsonObj);
+				showNew();
+				document.getElementById('schedule_title').innerHTML="Modify Schedule";
+						
+				document.getElementById('new_schedule_label').value = jsonObj['label'];
+				document.getElementById('new_schedule_description').value = jsonObj['description'];
+				
+				if(jsonObj["files"] !== undefined)
+				{
+					for(var i = 0; i < jsonObj['files'].length; i++)
+					{
+						var fileObj = FindResource(jsonObj['files'][i]['uid'], g_files);
+						addScheduleFile(jsonObj['files'][i]['uid'], '[file] '+fileObj['label'], jsonObj['files'][i]['times_to_play'], jsonObj['files'][i]['cron']);
+					}
+				}
+				if(jsonObj["playlists"] !== undefined)
+				{
+					for(var i = 0; i < jsonObj['playlists'].length; i++)
+					{
+						var fileObj = FindResource(jsonObj['playlists'][i]['uid'], g_playlists);
+						addScheduleFile(jsonObj['playlists'][i]['uid'], '[playlist] '+fileObj['label'], jsonObj['playlists'][i]['times_to_play'], jsonObj['playlists'][i]['cron']);
+					}
+				}
+			}
+			
+			function showUpdateFile(jsonObj)
+			{
+				console.log(jsonObj);
+				g_jsonPost = {};
+				
+				document.getElementById('update_files').className = 'popup';
+				show_veil();
+				
+				document.getElementById('update_file_label').value = jsonObj['label'];
+				document.getElementById('update_file_description').value = jsonObj['description'];
+				
+			}
+			
+			function hideUpdateFile()
+			{
+				document.getElementById('update_files').className = 'hide';
+				document.getElementById('veil').className = 'hide';
+			}
+			
+			function update_fileMeta()
+			{
+				if(g_uid)
+				{
+					g_jsonPost['label'] = document.getElementById('update_file_label').value;
+					g_jsonPost['description'] = document.getElementById('update_file_description').value;
+					
+					var ajax = new XMLHttpRequest();
+					ajax.onreadystatechange = function()
+					{
+						
+						if(this.readyState == 4)
+						{
+							var jsonObj = JSON.parse(this.responseText);
+							if(this.status != 200)
+							{
+								alert(jsonObj["reason"]);
+							}
+							else
+							{
+								next(0);
+							}
+						}
+					}
+					hideUpdateFile();
+					ajax.open("PATCH", g_url+"files/"+g_uid,true);
+					ajax.setRequestHeader("Content-type", "application/json");
+					ajax.send(JSON.stringify(g_jsonPost));
+					
+					
+				}
+			}
+			
+			function deleteResource(e)
+			{
+				if(g_details)
+				{
+					var split = g_details.id.split('_');
+					var type = split[1];
+					var uid = split[2];
+					
+					var ajax = new XMLHttpRequest();
+					ajax.onreadystatechange = function()
+					{
+						
+						if(this.readyState == 4)
+						{
+							var jsonObj = JSON.parse(this.responseText);
+							console.log(jsonObj);
+							g_details = null;
+							cleardetails();
+							if(this.status != 200)
+							{
+								alert(jsonObj["reason"]);
+							}
+							next(0);
+						}
+					}
+					console.log(g_url+type+"/"+uid);
+					ajax.open("DELETE", g_url+type+"/"+uid,true);
+					ajax.setRequestHeader("Content-type", "application/json");
+					ajax.send();
+				}
+				
+			}a
+			
+			
+						
+			function stop()
+			{
+				console.log("stop");
+				
+				var ajax = new XMLHttpRequest();
+				ajax.onreadystatechange = function()
+				{
+					
+					if(this.readyState == 4)
+					{
+						var jsonObj = JSON.parse(this.responseText);
+						console.log(jsonObj);
+					}
+				}
+				
+				var play = { "command" : "stop"};
+				if(g_bOrphaned)
+				{
+					play = { "command" : "kill"};
+				}
+				
+				console.log(play);
+				ajax.open("PATCH", g_url+"status",true);
+				ajax.setRequestHeader("Content-type", "application/json");
+				ajax.send(JSON.stringify(play));
+			}
+			
+			
+			function show(event)
+			{
+				g_show = event.target.id;
+				document.getElementById('div_files').className = 'hide';
+				document.getElementById('div_playlists').className = 'hide';
+				document.getElementById('div_schedules').className = 'hide';
+				document.getElementById('div_'+event.target.id).className = 'grid_resources';
+				
+				document.getElementById('files').className = 'tab_label';
+				document.getElementById('playlists').className = 'tab_label';
+				document.getElementById('schedules').className = 'tab_label';
+				event.target.className = 'tab_label_selected';
+			}
+			function update_popups()
+			{
+				document.getElementById('new_file_file').value = '';
+				document.getElementById('new_file_label').value = '';
+				document.getElementById('new_file_description').value = '';
+				document.getElementById('new_playlist_label').value = '';
+				document.getElementById('new_playlist_description').value = '';
+				document.getElementById('playlist_title').innerHTML="New Playlist";
+				document.getElementById('file_title').innerHTML="New File";
+				document.getElementById('schedule_title').innerHTML="New Schedule";
+				
+				var div = document.getElementById('new_playlist_files')
+				while(div.firstChild)
+				{
+					div.removeChild(div.firstChild);
+				}
+				div = document.getElementById('new_schedule_files')
+				while(div.firstChild)
+				{
+					div.removeChild(div.firstChild);
+				}
+				
+			
+				var selP = document.getElementById('possible_playlist_files');
+				var selS = document.getElementById('possible_schedule_files');
+				while(selP.options.length > 0)
+				{
+					selP.remove(0);
+				}
+				while(selS.options.length > 0)
+				{
+					selS.remove(0);
+				}
+				for(var i = 0; i < g_files.length; i++)
+				{
+					var opt = document.createElement('option');
+					opt.value = g_files[i].uid;
+					opt.text = g_files[i].label;
+					selP.add(opt);
+				}
+				for(var i = 0; i < g_files.length; i++)
+				{
+					var opt = document.createElement('option');
+					opt.value = g_files[i].uid;
+					opt.text = '[file] '+g_files[i].label;
+					selS.add(opt);
+				}
+				for(var i = 0; i < g_playlists.length; i++)
+				{
+					var opt = document.createElement('option');
+					opt.value = g_playlists[i].uid;
+					opt.text = '[playlist] '+g_playlists[i].label;
+					selS.add(opt);
+				}
+				
+				
+				
+			}
+			var g_jsonPost = {};
+			function showNew(newResource)
+			{
+				g_jsonPost = {};
+				
+				var elm  = document.getElementById('upload_'+g_show);
+				if(elm)
+				{
+					elm.className = 'popup';
+				}
+				show_veil();
+				
+				
+				update_popups();
+			}
+			function show_veil()
+			{	
+				var veil = document.getElementById('veil');
+				
+				veil.className = 'veil';
+				veil.style.width = Math.max(document.documentElement.clientWidth, document.documentElement.offsetWidth, document.documentElement.scrollWidth, document.body.clientWidth, document.body.offsetWidth, document.body.scrollWidth,1200)+'px';
+				veil.style.height = Math.max(document.documentElement.clientHeight, document.documentElement.offsetHeight, document.documentElement.scrollHeight, document.body.clientHeight, document.body.offsetHeight, document.body.scrollHeight,900)+'px';
+											
+				console.log(veil.style.width+','+veil.style.height);
+			}
+			
+			function hideNew()
+			{
+				var elm = document.getElementById('upload_'+g_show);
+				if(elm)
+				{
+					elm.className = 'hide';
+				}
+				document.getElementById('veil').className = 'hide';
+			}
+			
+			function showLock()
+			{
+				document.getElementById('lock_title').innerHTML = document.getElementById('lock').innerHTML;
+				document.getElementById('lock_password').value = '';
+				document.getElementById('lock_popup').className = 'popup';
+				show_veil();
+				
+			}
+			
+			function hideLock()
+			{
+				document.getElementById('lock_popup').className = 'hide';
+				document.getElementById('veil').className = 'hide';
+			}
+			
+			function doLock()
+			{
+				var ajax = new XMLHttpRequest();
+				ajax.onreadystatechange = function()
+				{
+					
+					if(this.readyState == 4)
+					{
+						var jsonObj = JSON.parse(this.responseText);
+						
+						if(this.status != 200)
+						{
+							alert(jsonObj["reason"]);
+						}
+						else
+						{
+							getStatus();
+						}
+					}
+				}
+				var lock = false;
+				if(document.getElementById('lock_title').innerHTML == "Lock System")
+				{
+					lock = true;
+				}
+				hideLock();
+				var play = { "command" : "lock", "lock" : lock, "password" :document.getElementById('lock_password').value};
+				
+				ajax.open("PATCH", g_url+"status",true);
+				ajax.setRequestHeader("Content-type", "application/json");
+				ajax.send(JSON.stringify(play));
+			}
+			
+			function add_playlist_file()
+			{
+				var sel =  document.getElementById('possible_playlist_files');
+				addPlaylistFile(sel.options[sel.selectedIndex].value, sel.options[sel.selectedIndex].text, document.getElementById('possible_times_to_play').value);
+			}
+			
+			function addPlaylistFile(uid, label, times_to_play)
+			{
+				var div  = document.getElementById('new_playlist_files');
+				
+				
+				var divRemove = document.createElement('div');
+				divRemove.className = 'grid_value';
+				divRemove.id = 'remove_'+uid;
+				
+				var buttonRemove = document.createElement('button');
+				buttonRemove.innerHTML = 'Remove';
+				buttonRemove.id = 'button_'+uid;
+				buttonRemove.addEventListener('click',remove_playlist_file,false);
+				divRemove.appendChild(buttonRemove);
+				
+				var divTimes = document.createElement('div');
+				divTimes.className = 'grid_value';
+				divTimes.id = 'times_'+uid;
+				divTimes.innerHTML = times_to_play;
+								
+				var divFile = document.createElement('div');
+				divFile.className = 'grid_value';
+				divFile.innerHTML = label;
+				divFile.id = 'uid_'+uid;
+				
+				div.appendChild(divFile);
+				div.appendChild(divTimes);
+				div.appendChild(divRemove);
+				
+				
+				
+				document.getElementById('possible_times_to_play').value = 1;
+				
+				if(g_jsonPost["files"] === undefined)
+				{
+					g_jsonPost["files"] = [];
+				}
+				g_jsonPost["files"].push({"uid" : uid, "times_to_play" : parseInt(times_to_play)});
+			}
+			function remove_playlist_file(event)
+			{
+				var id = event.target.id.split('_')[1];
+				var div  = document.getElementById('new_playlist_files');
+				div.removeChild(document.getElementById('uid_'+id));
+				div.removeChild(document.getElementById('times_'+id));
+				div.removeChild(document.getElementById('remove_'+id));
+				
+				for(var i = 0; i < g_jsonPost["files"].length; i++)
+				{
+					if(g_jsonPost["files"][i]["uid"] == id)
+					{
+						g_jsonPost["files"].splice(i,1);
+					}
+				}
+			}
+			
+			function upload_playlist()
+			{
+				if(document.getElementById('new_playlist_label').value == '')
+				{
+					alert("You must enter a label for the playlist");
+					return;
+				}
+				g_jsonPost["label"] = document.getElementById('new_playlist_label').value;
+				
+				if(document.getElementById('new_playlist_description').value == '')
+				{
+					alert("You must enter a description for the playlist");
+					return;
+				}
+				g_jsonPost["description"] = document.getElementById('new_playlist_description').value;
+				
+				if(g_jsonPost["files"] === undefined || g_jsonPost["files"].length == 0)
+				{
+					alert("You must enter some files for the playlist");
+					return;
+				}
+				
+				
+				var ajax = new XMLHttpRequest();
+				ajax.onreadystatechange = function()
+				{
+					console.log(this.readyState+"="+this.responseText);
+					
+					if(this.readyState == 4)
+					{
+						var jsonObj = JSON.parse(this.responseText);
+						if(g_uid == "")
+						{
+							if(this.status != 201)
+							{
+								alert(jsonObj["reason"]);
+							}
+						}
+						else
+						{
+							if(this.status != 200)
+							{
+								alert(jsonObj["reason"]);
+							}
+							g_uid = "";
+						}
+						
+						next(0);
+					}
+				}
+				
+				if(g_uid == "")
+				{
+					ajax.open("POST", g_url+"playlists",true);
+				}
+				else
+				{
+					console.log(g_jsonPost);
+					ajax.open("PUT", g_url+"playlists/"+g_uid,true);
+				}
+				ajax.setRequestHeader("Content-type", "application/json");
+				ajax.send(JSON.stringify(g_jsonPost));
+				hideNew();
+			}	
+			function file_chosen()
+			{
+				var label = document.getElementById('new_file_label');
+				label.value = document.getElementById('new_file_file').files[0].name;
+			}
+			
+			
+			
+			function add_schedule_file()
+			{
+				var sel =  document.getElementById('possible_schedule_files');
+				var cron = document.getElementById('cron_seconds').value + " " +
+						   document.getElementById('cron_minutes').value + " " +
+						   document.getElementById('cron_hours').value + " " +
+						   document.getElementById('cron_dom').value + " " +
+						   document.getElementById('cron_month').value + " " +
+						   document.getElementById('cron_dow').value + " " +
+						   document.getElementById('cron_year').value;
+						   
+				
+				addScheduleFile(sel.options[sel.selectedIndex].value, sel.options[sel.selectedIndex].text, document.getElementById('possible_schedule_times_to_play').value, cron);
+			}
+			
+			function addScheduleFile(uid, label, times_to_play, cron)
+			{
+				var div  = document.getElementById('new_schedule_files');
+				
+				
+				var divRemove = document.createElement('div');
+				divRemove.className = 'grid_value';
+				divRemove.id = 'remove_'+uid;
+				
+				var buttonRemove = document.createElement('button');
+				buttonRemove.innerHTML = 'Remove';
+				buttonRemove.id = 'button_'+uid;
+				buttonRemove.addEventListener('click',remove_schedule_file,false);
+				divRemove.appendChild(buttonRemove);
+				
+				var divCron = document.createElement('div');
+				divCron.className = 'grid_value';
+				divCron.id = 'cron_'+uid;
+				divCron.innerHTML = cron;
+				
+				var divTimes = document.createElement('div');
+				divTimes.className = 'grid_value';
+				divTimes.id = 'times_'+uid;
+				divTimes.innerHTML = times_to_play;
+								
+				var divFile = document.createElement('div');
+				divFile.className = 'grid_value';
+				divFile.innerHTML = label;
+				divFile.id = 'uid_'+uid;
+				
+				div.appendChild(divFile);
+				div.appendChild(divTimes);
+				div.appendChild(divCron);
+				div.appendChild(divRemove);
+				
+							
+				document.getElementById('possible_schedule_times_to_play').value = 1;
+				document.getElementById('cron_seconds').value = "*";
+				document.getElementById('cron_minutes').value = "*";
+				document.getElementById('cron_hours').value = "*";
+				document.getElementById('cron_dom').value =" *";
+				document.getElementById('cron_month').value = "*";
+				document.getElementById('cron_dow').value = "*";
+				document.getElementById('cron_year').value = "*";
+		
+				if(label.substr(0,2) == '[f')
+				{
+					if(g_jsonPost["files"] === undefined)
+					{
+						g_jsonPost["files"] = [];
+					}
+					g_jsonPost["files"].push({"uid" : uid, "times_to_play" : parseInt(times_to_play), "cron" : cron});
+				}
+				else
+				{
+					if(g_jsonPost["playlists"] === undefined)
+					{
+						g_jsonPost["playlists"] = [];
+					}
+					g_jsonPost["playlists"].push({"uid" : uid, "times_to_play" : parseInt(times_to_play), "cron" : cron});
+				}
+			}
+			function remove_schedule_file(event)
+			{
+				var id = event.target.id.split('_')[1];
+				var div  = document.getElementById('new_schedule_files');
+				div.removeChild(document.getElementById('uid_'+id));
+				div.removeChild(document.getElementById('times_'+id));
+				div.removeChild(document.getElementById('cron_'+id));
+				div.removeChild(document.getElementById('remove_'+id));
+				
+				if(g_jsonPost["files"] !== undefined)
+				{
+					for(var i = 0; i < g_jsonPost["files"].length; i++)
+					{
+						if(g_jsonPost["files"][i]["uid"] == id)
+						{
+							g_jsonPost["files"].splice(i,1);
+						}
+					}
+				}
+				if(g_jsonPost["playlists"] !== undefined)
+				{
+					for(var i = 0; i < g_jsonPost["playlists"].length; i++)
+					{
+						if(g_jsonPost["playlists"][i]["uid"] == id)
+						{
+							g_jsonPost["playlists"].splice(i,1);
+						}
+					}
+				}
+			}
+
+			function upload_schedule()
+			{
+				if(document.getElementById('new_schedule_label').value == '')
+				{
+					alert("You must enter a label for the schedule");
+					return;
+				}
+				g_jsonPost["label"] = document.getElementById('new_schedule_label').value;
+				
+				if(document.getElementById('new_schedule_description').value == '')
+				{
+					alert("You must enter a description for the schedule");
+					return;
+				}
+				g_jsonPost["description"] = document.getElementById('new_schedule_description').value;
+				
+				if((g_jsonPost["files"] === undefined || g_jsonPost["files"].length == 0) && (g_jsonPost["playlists"] === undefined || g_jsonPost["playlists"].length == 0))
+				{
+					alert("You must enter some items for the schedule");
+					return;
+				}
+				
+				
+				var ajax = new XMLHttpRequest();
+				ajax.onreadystatechange = function()
+				{
+					console.log(this.readyState+"="+this.responseText);
+					
+					if(this.readyState == 4)
+					{
+						var jsonObj = JSON.parse(this.responseText);
+						if(g_uid == "")
+						{
+							if(this.status != 201)
+							{
+								alert(jsonObj["reason"]);
+							}
+						}
+						else
+						{
+							if(this.status != 200)
+							{
+								alert(jsonObj["reason"]);
+							}
+							g_uid = "";
+						}
+						
+						next(0);
+					}
+				}
+				
+				if(g_uid == "")
+				{
+					ajax.open("POST", g_url+"schedules",true);
+				}
+				else
+				{
+					console.log(g_jsonPost);
+					ajax.open("PUT", g_url+"schedules/"+g_uid,true);
+				}
+				ajax.setRequestHeader("Content-type", "application/json");
+				ajax.send(JSON.stringify(g_jsonPost));
+				hideNew();
+			}
+			
+			function restart(command)
+			{
+				var ajax = new XMLHttpRequest();
+				ajax.onreadystatechange = function()
+				{
+					
+					if(this.readyState == 4)
+					{
+						var jsonObj = JSON.parse(this.responseText);
+						
+						if(this.status != 200)
+						{
+							alert(jsonObj["reason"]);
+						}
+					}
+				}
+				var play = { "command" : command};
+				
+				ajax.open("PUT", g_url+"power",true);
+				ajax.setRequestHeader("Content-type", "application/json");
+				ajax.send(JSON.stringify(play));
+			}
+			
+			function showUpdate(type)
+			{
+							
+				document.getElementById('update').className = 'popup';
+				document.getElementById('update_title').innerHTML = 'Update '+type;
+				document.getElementById('update_file').value = "";
+				document.getElementById('update_application').value = type;
+				
+				show_veil();
+			}
+			function hideUpdate()
+			{
+				document.getElementById('update').className = 'hide';
+				document.getElementById('veil').className = 'hide';
+			}
+			
+			function updateApp()
+			{
+				var fd = new FormData(document.getElementById('update_form'));
+				
+				var ajax = new XMLHttpRequest();
+				ajax.onreadystatechange = function()
+				{
+					console.log("Ready="+this.readyState+" status="+this.status);	
+					if(this.readyState == 4)
+					{
+						var jsonObj = JSON.parse(this.responseText);
+						document.getElementById('progress').className = 'hide';
+						document.getElementById('veil').className = 'hide';
+						
+						if(this.status != 200)
+						{
+							alert(jsonObj["reason"]);
+						}
+						else if(jsonObj["restart"] == true)
+						{
+							alert(document.getElementById('update_application').value+" has been updated but needs restarting.");
+						}
+						else
+						{
+							alert(document.getElementById('update_application').value+" has been updated");
+						}
+						
+						next(0);
+					}
+				}
+				hideUpdate();
+				
+				document.getElementById('progress').className = 'popup';
+				document.getElementById('progress_label').innerHTML = document.getElementById('update_application').value;
+				
+				show_veil();
+				
+				ajax.upload.addEventListener('progress', function(e) {
+					var percent_complete = (e.loaded/e.total)*100;
+					document.getElementById('progress_percentage').innerHTML = percent_complete+'%';
+					console.log(percent_complete);
+					});
+					
+					
+				
+				ajax.open('PUT',g_url+"update");
+				ajax.send(fd);
+				
+			}
+			
+		</script>
+		<style>
+			.veil {position: absolute; left: 0px; top: 0px; z-index: 995; opacity: 0.15; background: #778877}
+			.popup
+			{
+				margin-left: -450px;
+				margin-top: -300px;
+				top: 50%;
+				left: 50%;
+				width: 900px;
+				max-height: 800px;
+				position: fixed;
+				z-index: 999;
+				border: 2px solid #0000aa;
+				border-radius: 5px;
+				background-color: #ffffff;
+				padding: 10px;
+			}
+			
+			button
+			{
+				padding: 3px;
+				background-color: #ffffff;
+				color: #6677ff;
+				border: 1px solid #5555aa;
+				border-radius: 3px;
+				margin-right: 5px;
+			}
+			button:hover
+			{
+				background-color: #ffaa33;
+			}
+			
+			
+			.grid
+			{
+				display: inline-grid;
+				grid-column-gap: 10px;
+				grid-row-gap: 1px;
+			}
+
+			.grid_status
+			{
+				grid-template-columns: 850px 800px	
+			}
+			
+			.grid_details
+			{
+				grid-template-columns: 100px auto	
+			}
+			.grid_details_files
+			{
+				margin-top: 5px;
+				padding-top: 5px;
+				border-top: 1px dotted #777777;
+				grid-template-columns: 100px 200px 100px 200px	
+			}
+			
+			.grid_details_playlists
+			{
+				margin-top: 5px;
+				padding-top: 5px;
+				border-top: 1px dotted #777777;
+				grid-template-columns: 300px 400px	
+			}
+			
+			.grid_details_schedules
+			{
+				margin-top: 5px;
+				padding-top: 5px;
+				border-top: 1px dotted #777777;
+				grid-template-columns: 100px 300px 100px 250px	
+			}
+			
+			.grid_resources
+			{
+				display: inline-grid;
+				grid-column-gap: 10px;
+				grid-row-gap: 1px;
+				padding: 10px;
+				grid-template-columns: 400px 300px;	
+			}
+			
+			.grid_upload
+			{
+				width: 500px;
+				padding: 10px;
+				margin-top: -2px;
+				border: 2px solid #000088;
+				border-radius: 0px 0px 10px 10px;
+				grid-template-columns: 130px 300px	
+			}
+			.grid_upload_files
+			{
+				grid-column: 1/3;
+				width: 630px;
+				padding: 10px;
+				margin-bottom: 5px;
+				border-top: 1px dotted #777777;
+				border-bottom: 1px dotted #777777;
+				grid-template-columns: 430px 100px 100px	
+			}
+			.grid_upload_schedule_files
+			{
+				grid-column: 1/3;
+				width: 830px;
+				padding: 10px;
+				margin-bottom: 5px;
+				border-top: 1px dotted #777777;
+				border-bottom: 1px dotted #777777;
+				grid-template-columns: 330px 100px 250px 90px	
+			}
+			.grid_upload_playlist
+			{
+				width: 880px;
+				padding: 10px;
+				margin-top: -2px;
+				border: 2px solid #000088;
+				border-radius: 0px 0px 10px 10px;
+				grid-template-columns: 130px 300px	
+			}
+			
+			.grid_upload_schedule
+			{
+				width: 880px;
+				padding: 10px;
+				margin-top: -2px;
+				border: 2px solid #000088;
+				border-radius: 0px 0px 10px 10px;
+				grid-template-columns: 130px 300px	
+			}
+			.grid_player
+			{
+				padding: 10px;
+				border: 10px solid #aaabaa;
+				border-radius: 10px 10px 10px 10px;
+				grid-template-columns: 130px 300px	
+			}
+			.grid_system
+			{
+				padding: 10px;
+				border: 10px solid #abaaaa;
+				border-radius: 10px 10px 10px 10px;
+				grid-template-columns: 150px 230px 150px 150px
+			}
+			.grid_inset_more
+			{
+				padding-left: 30px;
+			}
+			.grid_title
+			{
+				font-weight: 750;
+				color: #0000aa;
+				user-select:none;
+			}
+			.grid_label
+			{
+				font-weight: 500;
+				user-select:none;
+			}
+			.grid_label_selected
+			{
+				font-weight: 500;
+				user-select:none;
+				background-color: #ffaa88;
+			}
+
+
+			.grid_resource
+			{
+				font-weight: 500;
+				user-select:none;
+			}
+		
+			.grid_resource:hover
+			{
+				background-color: #ffaa00;
+			}
+
+			.grid_resource_selected
+			{
+				font-weight: 500;
+				user-select:none;
+				background-color: #ffaa00;
+			}
+			.grid_value
+			{
+				font-weight: 600;
+				user-select:none;
+			}
+			}
+			.grid_title
+			{
+				font-weight: 700;
+				color: #000000;
+				user-select: none;
+			}
+			.panel_container
+			{
+				width: 800px;
+			}
+			.tab_label {
+				  width: auto;
+				  padding: 8px 15px;
+				  background: #555599;
+				  cursor: pointer;
+				  font-size: 14px;
+				  color: #ffffff;
+				  transition: background 0.2s, color 0.2s;
+				  border-radius: 15px 15px 0px 0px;
+				  border-top: 2px solid #444499;
+				  border-left: 2px solid #444499;
+				  border-right: 2px solid #444499;
+				  border-bottom: 2px solid #444499;
+				  margin-left: 15px;
+				  margin-top: 5px;
+				  text-decoration: none;
+				  list-style: none;
+				  display: inline;
+				}
+
+			.tab_label:hover {
+				  background: #f8f8f8;
+				  color: #7f7fff;
+				 transition: all 0.5s;
+				}
+
+			.tab_label_selected {
+				  width: auto;
+				  padding: 8px 15px;
+				  background: #ee9900;
+				  cursor: pointer;
+				  font-size: 14px;
+				  color: #ffffff;
+				  transition: background 0.2s, color 0.2s;
+				  border-radius: 15px 15px 0px 0px;
+				  border-top: 2px solid #444499;
+				  border-left: 2px solid #444499;
+				  border-right: 2px solid #444499;
+				  border-bottom: 2px solid #ee9900;
+				  margin-left: 15px;
+				  margin-top: 5px;
+				  text-decoration: none;
+				  list-style: none;
+				  display: inline;
+				}
+
+			.tabs {
+				  background: #ffffff;
+				  box-shadow: 0 48px 80px -32px rgba(0,0,0,0.3);
+				  border-bottom: 2px solid #444499;
+				  padding: 8px 0;
+				  margin-bottom: 0px;
+				  width: 814px;
+				}
+
+			.tab_panel_container
+				{
+					width: 800px;
+					padding: 5px;
+					border-bottom: 2px solid #444499;
+					border-left: 2px solid #444499;
+					border-right: 2px solid #444499;
+					background: #ffffff;
+					border-radius: 0px 0px 10px 10px;
+				}
+			.hide{ display: none; };
+		</style>
+	</head>
+	<body onload="startup()">
+		<h1 id="hostname"></h1>
+		<div class="grid grid_status"> 
+			<div class="grid grid_player">
+				<div class="grid_title">Player3</div><div>&nbsp;</div>
+				<div class="grid_label grid_inset_more">Status</div><div id="player" class="grid_value"></div>				
+				<div class="grid_label grid_inset_more">Exit Code</div><div id="exit_code" class="grid_value"></div>				
+				<div class="grid_label grid_inset_more">Exit Signal Code</div><div id="exit_signal" class="grid_value"></div>				
+				<div class="grid_label grid_inset_more">Exit Signal</div><div id="exit_signal_description" class="grid_value"></div>				
+				
+				<div class="grid_label">Action</div><div id="status_action" class="grid_value"></div>
+				<div class="grid_label">Time</div><div id="status_time" class="grid_value"></div>
+				<div class="grid_label">Type</div><div id="status_type" class="grid_value"></div>
+				<div class="grid_label">Label</div><div id="status_label" class="grid_value"></div>
+				<div class="grid_title">Playout</div><div>&nbsp;</div>
+				<div class="grid_label grid_inset_more">Label</div><div id="playing_label" class="grid_value"></div>
+				<div class="grid_label grid_inset_more">Uid</div><div id="playing_uid" class="grid_value"></div>
+				<div class="grid_label grid_inset_more">Started</div><div id="playing_started_at" class="grid_value"></div>
+				<div class="grid_label grid_inset_more">Length</div><div id="playing_length" class="grid_value"></div>
+				<div class="grid_label grid_inset_more">Loop</div><div id="playing_loop" class="grid_value"></div>
+				<div class="grid_label grid_inset_more">Time</div><div id="playing_time" class="grid_value"></div>
+				<div class="grid_label grid_inset_more">SRC</div><div id="resampler" class="grid_value"></div>
+				<div class="grid_value"><button id="lock" onclick="showLock()" style="padding: 5px;">Lock System</button></div><div class="grid_label"><button id="stop" onclick="stop()" style="padding: 5px; visibility: hidden">Stop Playout</button></div>
+			</div>
+			<div class="grid grid_system">
+				<div class="grid_title">Server</div><div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>
+				<div class="grid_label grid_inset_more">Start Time</div><div id="application_start_time" class="grid_value">&nbsp;</div><div class="grid_label grid_inset_more">Up Time</div><div id="application_up_time" class="grid_value">&nbsp;</div>
+				<div class="grid_label grid_inset_more">Version</div><div id="application_version" class="grid_value">&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>
+				<div class="grid_title">CPU</div><div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>
+				<div class="grid_label grid_inset_more">Overall</div><div id="cpu_overall" class="grid_value">&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>
+				<div class="grid_label grid_inset_more">cpu0</div><div id="cpu_cpu0" class="grid_value">&nbsp;</div><div class="grid_label grid_inset_more">cpu1</div><div id="cpu_cpu1" class="grid_value">&nbsp;</div>
+				<div class="grid_label grid_inset_more">cpu2</div><div id="cpu_cpu2" class="grid_value">&nbsp;</div><div class="grid_label grid_inset_more">cpu3</div><div id="cpu_cpu3" class="grid_value">&nbsp;</div>
+				<div class="grid_title">Disk</div><div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>
+				<div class="grid_label grid_inset_more">Bytes Available</div><div id="disk_bytes_available" class="grid_value">&nbsp;</div><div class="grid_label grid_inset_more">Bytes Total</div><div id="disk_bytes_total" class="grid_value">&nbsp;</div>
+				<div class="grid_label grid_inset_more">Indodes Available</div><div id="disk_inodes_available" class="grid_value">&nbsp;</div><div class="grid_label grid_inset_more">Indodes Total</div><div id="disk_inodes_total" class="grid_value">&nbsp;</div>
+				<div class="grid_title">System</div><div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>
+				<div class="grid_label grid_inset_more">Uptime</div><div id="system_uptime" class="grid_value">&nbsp;</div><div class="grid_label grid_inset_more">Temperature</div><div id="system_temp" class="grid_value">&nbsp;</div>
+				<div class="grid_label grid_inset_more">Ram</div><div id="system_ram_free" class="grid_value">&nbsp;</div><div class="grid_label grid_inset_more">Load</div><div id="system_load" class="grid_value">&nbsp;</div>
+				<div class="grid_label" style="grid-column:1/3"><button onclick="restart('restart server')">Restart Server</button>&nbsp;<button onclick="restart('restart os')">Restart OS</button>&nbsp;<button onclick="restart('shutdown')">Shutdown</button></div>
+				<div class="grid_label" style="grid-column:3/5"><button onclick="showUpdate('episerver')">Update Server</button>&nbsp;<button onclick="showUpdate('player3')">Update Player3</button></div>
+			</div>
+		</div>
+		<div class="grid grid_status"> 
+			<div class="panel_container">
+				<ul class="tabs">
+					<li class="tab_label_selected" id="files" onclick="show(event)">Files</li>
+					<li class="tab_label" id="playlists" onclick="show(event)">Playlists</li>
+					<li class="tab_label" id="schedules" onclick="show(event)">Schedules</li>
+				</ul>
+				<div class="tab_panel_container">
+					<div class="grid_resources" id="div_files">&nbsp;</div>
+					<div class="hide" id="div_playlists">&nbsp;</div>
+					<div class="hide" id="div_schedules">&nbsp;</div>
+					<div><button onclick="showNew(true)">New</button></div>
+				</div>
+			</div>
+			<div class="panel_container">
+				<ul class="tabs">
+					<li class="tab_label">Details</li>
+				</ul>
+				<div class="tab_panel_container">
+					<div class="grid grid_details">
+						<div class="grid_label">UID:</div><div id="details_uid" class="grid_value"></div>
+						<div class="grid_label">Label:</div><div id="details_label" class="grid_value"></div>
+						<div class="grid_label">Description:</div><div id="details_description" class="grid_value"></div>
+						<div class="grid_label">Created:</div><div id="details_created" class="grid_value"></div>
+						<div class="grid_label">Locked:</div><div id="details_locked" class="grid_value"></div>
+					</div>
+					<div class="hide" id="details_files">
+						<div class="grid_label">Channels:</div><div id="details_files_channels" class="grid_value"></div>
+						<div class="grid_label">Sample Rate:</div><div id="details_files_samplerate" class="grid_value"></div>
+						<div class="grid_label">Type:</div><div id="details_files_type" class="grid_value"></div>
+						<div class="grid_label">Format:</div><div id="details_files_format" class="grid_value"></div>
+						<div class="grid_label">Length:</div><div id="details_files_length" class="grid_value"></div>
+					</div>
+					<div class="hide" id="details_playlists">
+					</div>
+					<div class="hide" id="details_schedules">
+					</div>
+					<div class="hide" id="detail_action">
+						<div><button onclick="update(event)">Modify</button></div>
+						<div><button onclick="deleteResource(event)">Delete</button></div>
+					</div>
+				</div>
+			</div>
+	</div>
+	<div id="upload_files" class="hide">
+		<form id="upload_form" enctype="multipart/form-data" onsubmit="return false;">	
+			<ul class="tabs" style="width: 500px">
+					<li class="tab_label" id="file_title">New File</li>
+			</ul>
+			<div class="grid grid_upload">
+					<div class="grid_label">File</div><div><input type="file" name="file" id="new_file_file" onchange="file_chosen()" accept=".wav"></div>
+					<div class="grid_label">Label</div><div><input type="text" name="label" id="new_file_label"></div>
+					<div class="grid_label">Description</div><div><input type="text" name="description" id="new_file_description"></div>
+					
+					<div class="grid_label"><button onclick="hideNew()">Cancel</button></div><div><button onclick="upload_file()">Upload</button></div>
+			</div>
+		</form>
+	</div>
+	<div id="upload_playlists" class="hide">
+		<ul class="tabs" style="width: 900px">
+			<li class="tab_label" id="playlist_title">New Playlist</li>
+		</ul>
+		<div class="grid grid_upload_playlist">
+			<div class="grid_label">Label</div><div><input type="text" id="new_playlist_label"></div>
+			<div class="grid_label">Description</div><div><input type="text" id="new_playlist_description"></div>
+			<div class="grid grid_upload_files">
+				<div class="grid_title">File</div>
+				<div class="grid_title">Play</div>
+				<div>&nbsp;</div>
+			</div>
+			<div class="grid grid_upload_files" id="new_playlist_files">
+			</div>
+			<div class="grid grid_upload_files">
+			<div id="playlist_file_input" class="grid_label">
+					<select id="possible_playlist_files"></select>
+				</div>
+				<div><input type="number" id="possible_times_to_play" style="width: 75px" value="1"></div>
+				<div><button onclick="add_playlist_file()">Add</button></div>
+			</div>
+			<div class="grid_label"><button onclick="hideNew()">Cancel</button></div><div><button onclick="upload_playlist()">Upload</button></div>
+		</div>
+	</div>
+	
+	<div id="upload_schedules" class="hide">
+		<ul class="tabs" style="width: 900px">
+			<li class="tab_label" id="schedule_title">New Schedule</li>
+		</ul>
+		<div class="grid grid_upload_schedule">
+			<div class="grid_label">Label</div><div><input type="text" id="new_schedule_label"></div>
+			<div class="grid_label">Description</div><div><input type="text" id="new_schedule_description"></div>
+			<div class="grid grid_upload_schedule_files">
+				<div class="grid_title">File</div>
+				<div class="grid_title">Play</div>
+				<div class="grid_title">Cron</div>
+				<div>&nbsp;</div>
+			</div>
+			<div class="grid grid_upload_schedule_files" id="new_schedule_files">
+			</div>
+			<div class="grid grid_upload_schedule_files">
+			<div id="schedule_file_input" class="grid_label">
+					<select id="possible_schedule_files"></select>
+				</div>
+				<div><input type="number" id="possible_schedule_times_to_play" style="width: 75px" value="1"></div>
+				<div><input type="text" id="cron_seconds" style="width: 20px" value="*">
+					 <input type="text" id="cron_minutes" style="width: 20px" value="*">
+					 <input type="text" id="cron_hours" style="width: 20px" value="*">
+					 <input type="text" id="cron_dom" style="width: 20px" value="*">
+					 <input type="text" id="cron_month" style="width: 20px" value="*">
+					 <input type="text" id="cron_dow" style="width: 20px" value="*">
+					 <input type="text" id="cron_year" style="width: 20px" value="*"></div>
+				<div><button onclick="add_schedule_file()">Add</button></div>
+			</div>
+			<div class="grid_label"><button onclick="hideNew()">Cancel</button></div><div><button onclick="upload_schedule()">Upload</button></div>
+		</div>
+	</div>
+	
+	<div id="update_files" class="hide">
+		<form id="upload_form" enctype="multipart/form-data" onsubmit="return false;">	
+			<ul class="tabs" style="width: 500px">
+				<li class="tab_label" id="file_title">Update File</li>
+			</ul>
+			<div class="grid grid_upload">
+				<div class="grid_label">File</div><div><input type="file" name="file" id="update_file_file" onchange="file_chosen()" accept="episerver"></div>
+				<div class="grid_label">&nbsp;</div><div><button onclick="update_file()">Upload</button></div>
+			</div>
+		</form>
+			<div class="grid grid_upload">
+				<div class="grid_label">Label</div><div><input type="text" name="label" id="update_file_label"></div>
+				<div class="grid_label">Description</div><div><input type="text" name="description" id="update_file_description"></div>
+					
+				<div class="grid_label"><button onclick="hideUpdateFile()">Cancel</button></div><div><button onclick="update_fileMeta()">Update</button></div>
+			</div>
+	</div>
+	
+	<div id="progress" class="hide">
+		<ul class="tabs" style="width: 500px">
+			<li class="tab_label" id="title">Uploading</li>
+		</ul>
+		<div class="grid grid_upload">
+			<div class="grid_label">Label:</div><div class="grid_value" id="progress_label"></div>
+			<div class="grid_label">Uploaded:</div><div class="grid_value" id="progress_percentage"></div>
+		</div>
+	</div>
+	<div id="lock_popup" class="hide">
+		<ul class="tabs" style="width: 500px">
+			<li class="tab_label" id="lock_title">Lock</li>
+		</ul>
+		<div class="grid grid_upload">
+			<div class="grid_label">Password:</div><div class="grid_value"><input type="password" id="lock_password"></div>
+			<div class="grid_label"><button onclick="hideLock()">Cancel</button></div><div><button onclick="doLock()">Ok</button></div>
+		</div>
+	</div>
+	<div id="update" class="hide">
+		<form id="update_form" enctype="multipart/form-data" onsubmit="return false;">	
+			<ul class="tabs" style="width: 500px">
+					<li class="tab_label" id="update_title">Update</li>
+			</ul>
+			<div class="grid grid_upload">
+					<div class="grid_label">File</div><div><input type="file" name="file" id="update_file"><input type="hidden" id="update_application" name="application"></div>
+					<div class="grid_label"><button onclick="hideUpdate()">Cancel</button></div><div><button onclick="updateApp()">Update</button></div>
+			</div>
+		</form>
+	</div>
+	<div id="veil"></div>
+</body>
