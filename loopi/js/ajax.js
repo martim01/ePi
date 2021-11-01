@@ -58,7 +58,6 @@ class loopi
 		{
 			this.files[i].details = jsonObj;
 			
-			console.log(this.files[i]);
 		}
 	}
 	
@@ -69,7 +68,6 @@ class loopi
 		{
 			this.playlists[i].details = jsonObj;
 			
-			console.log(this.playlists[i]);
 		}
 	}
 	
@@ -80,7 +78,6 @@ class loopi
 		{
 			this.schedules[i].details = jsonObj;
 			
-			console.log(this.schedules[i]);
 		}
 	}
 	
@@ -177,7 +174,6 @@ function getLoopiConfig_Dashboard(loopi)
 	
 	if(g_loopi_array[loopi].connected == false)
 	{
-		console.log("Checking loopi #"+loopi);
 		getConfig(loopi, handleConfig_Dashboard)
 	}
 	else
@@ -458,7 +454,6 @@ function ajaxGet(loopi, endpoint, callback)
 			}
 			else
 			{
-				console.log("ajax status="+this.status);
 				loopiOffline(loopi);
 				callback(loopi, JSON.parse(this.responseText));
 			}
@@ -466,17 +461,14 @@ function ajaxGet(loopi, endpoint, callback)
 	}
 	ajax.onerror = function(e)
 	{
-		console.log("ajax error");
 		loopiOffline(loopi);
 		callback(loopi, null);
 	}
 	ajax.ontimeout = function(e)
 	{
-		console.log("ajax timeout");
 		loopiOffline(loopi);
 		callback(loopi, null);
 	}
-	console.log("http://"+g_loopi_array[loopi].url+endpoint);
 	ajax.open("GET", "http://"+g_loopi_array[loopi].url+endpoint, true);
 	ajax.send();
 }
@@ -485,7 +477,6 @@ function ajaxGet(loopi, endpoint, callback)
 
 function loopiOffline(loopi)
 {
-	console.log("loopi "+loopi+" offline");
 	document.getElementById('loopi_'+loopi).style.backgroundColor = CLR_ERROR;
 	document.getElementById("lock_"+loopi).innerHTML = "OFFLINE";
 	document.getElementById("lock_"+loopi).classList.add("loopi_label_danger");
@@ -535,7 +526,6 @@ function addLoopi()
 			{
 				if(this.readyState == 4)
 				{
-					console.log(this.responseText);
 					if(this.status === 200)
 					{
 						var jsonObj = JSON.parse(this.responseText);
@@ -1257,7 +1247,6 @@ function updateConfig_Details(loopi, jsonObj)
 function showPlayButtons(mode)
 {
 	var playButtons = document.querySelectorAll('button[id^="play_"]');
-	console.log(playButtons);
 	for(var i = 0; i < playButtons.length; i++)
 	{
 		playButtons[i].style.visibility = mode;
@@ -1335,7 +1324,6 @@ function updatePlayerStatus(loopi, jsonObj)
 			document.getElementById("player").classList.add("loopi_label_running");
 			document.getElementById("player").classList.remove("loopi_label_-warning");
 			document.getElementById("player").classList.remove("loopi_label_-danger");
-			showStopButton(loopi, 'stop');
 			showPlayButtons("hidden");
 				
 		
@@ -1344,7 +1332,7 @@ function updatePlayerStatus(loopi, jsonObj)
 			document.getElementById('resource_type').innerHTML = jsonObj["resource"]["type"];
 			document.getElementById('resource_label').innerHTML = jsonObj["resource"]["label"];
 		}
-			
+		showStopButton(loopi,'stop');
 		if(jsonObj["status"] !== undefined)
 		{
 			document.getElementById('resource_status').innerHTML = jsonObj["status"]["action"];
@@ -1376,7 +1364,8 @@ function updatePlayerStatus(loopi, jsonObj)
 				
 				document.getElementById("playout_started").innerHTML = jsonObj["status"]["playing"]["started_at"];
 				document.getElementById("playout_length").innerHTML = millisecondsToTime(jsonObj["status"]["playing"]["length"]);
-				document.getElementById("playout_time").innerHTML = millisecondsToTime(jsonObj["status"]["playing"]["time"]);
+				document.getElementById("playout_time").innerHTML = 
+millisecondsToTime(jsonObj["status"]["playing"]["time"])+" (-"+millisecondsToTime((jsonObj["status"]["playing"]["length"]-jsonObj["status"]["playing"]["time"]))+")";
 				document.getElementById("playout_loop").innerHTML = jsonObj["status"]["playing"]["loop"]
 				if(jsonObj["status"]["playing"]["resampler"] == true)
 				{
@@ -1427,7 +1416,6 @@ function updateStatus_Details(loopi, jsonObj)
 
 function updateResources_Details(loopi, jsonObj)
 {
-	console.log("updateResources_Details");
 	for(var i = 0; i < jsonObj.length; i++)
 	{
 		updateResource_Details(loopi, jsonObj[i]);
@@ -1720,7 +1708,6 @@ function doCreatePlaylistEntry(label, uid, loop)
 function removePlaylistEntry(e)
 {
 	var target = e.target.id.split('_')[1];
-	console.log(target);
 	var row = document.getElementById('playlistEntry_'+target);
 	row.parentNode.removeChild(row);
 }
@@ -1882,7 +1869,6 @@ function ajaxPatch(loopi, endpoint, jsonData, callback)
 			callback(this.status, jsonObj);
 		}
 	}
-	console.log("PATCH: "+"http://"+g_loopi_array[0].url+endpoint+" "+jsonData);
 	
 	ajax.open("PATCH", "http://"+g_loopi_array[0].url+endpoint, true);
 	ajax.setRequestHeader("Content-type", "application/json");
@@ -2175,7 +2161,6 @@ function play(e)
 
 function doPlay()
 {
-	console.log('doPlay');
 	
 	var uid = document.getElementById('play_uid').value;
 	var type = document.getElementById('play_type').value;
@@ -2235,7 +2220,6 @@ function modifyResource(e)
 	var type = split[1];
 	var uid = split[2];
 			
-	console.log("modifyResource: "+type+" "+uid);
 	if(type == "playlists")
 	{
 		modifyPlaylist(uid);
@@ -2658,7 +2642,6 @@ function convertgCronToString()
 
 function createReadableCron(cron)
 {
-	console.log('createReadableCron: '+cron);
 	return cronstrue.toString(cron, { use24HourTimeFormat: true});
 }
 
@@ -2802,7 +2785,6 @@ function scheduleSelectChange()
 
 	if(isPlaylist(sel.options[sel.selectedIndex].innerHTML))
 	{
-		console.log("playlist");
 		document.getElementById('schedule_file_shuffle').style.visibility = 'visible';
 	}
 	else
@@ -3016,7 +2998,6 @@ function createSchedule()
 			}
 			else
 			{
-				console.log("createSchedule: "+this.status);
 				closeSchedule();
 			}
 		}
