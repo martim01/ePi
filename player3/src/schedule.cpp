@@ -64,7 +64,7 @@ bool Schedule::Play()
     {
         if(m_nCurrentItem < m_vSchedule.size())
         {
-            PlayItem();
+            PlayItem(); //this sets m_nCurrentItem to m_vSchedule.size() so is only called once
         }
         else
         {

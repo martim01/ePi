@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 5.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+s<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 5.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
 <HTML>
 	<head>
 		<meta name="description" content="" >
@@ -693,13 +693,14 @@
 						var jsonFile = FindResource(jsonObj["files"][i]["uid"], g_files);
 						if(jsonFile !== null)
 						{
-							showScheduleEntry(jsonFile, jsonObj["files"][i]["cron"], "File", div);
+							showScheduleEntry(jsonFile, jsonObj["files"][i]["times_to_play"], jsonObj["files"][i]["cron"], "File", div);
 						}
 						else
 						{
 							var jsonFile = FindResource(jsonObj["files"][i]["uid"], g_playlists);
 							if(jsonFile !== null)
 							{
+								console.log(div);
 								showScheduleEntry(jsonFile, jsonObj["files"][i]["times_to_play"], jsonObj["files"][i]["cron"], "File", div);
 							}
 						}
@@ -712,6 +713,7 @@
 						var jsonFile = FindResource(jsonObj["playlists"][i]["uid"], g_files);
 						if(jsonFile !== null)
 						{
+							console.log(div);
 							showScheduleEntry(jsonFile, jsonObj["playlists"][i]["cron"], "File", div);
 						}
 						else
@@ -719,6 +721,7 @@
 							var jsonFile = FindResource(jsonObj["playlists"][i]["uid"], g_playlists);
 							if(jsonFile !== null)
 							{
+								console.log(div);
 								showScheduleEntry(jsonFile, jsonObj["playlists"][i]["times_to_play"],  jsonObj["playlists"][i]["cron"], "Playlist", div);
 							}
 						}
@@ -728,6 +731,7 @@
 			
 			function showScheduleEntry(jsonObj, times_to_play, cron, type, divContainer)
 			{
+				divContainer = document.getElementById("details_schedules");
 				var divType = document.createElement('div');
 				divType.className = "grid_label";
 				divType.innerHTML = type;

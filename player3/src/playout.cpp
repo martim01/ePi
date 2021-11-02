@@ -106,6 +106,7 @@ Playout::~Playout()
 
 void Playout::OutputCallback(float* pBuffer, size_t nFrameCount, double dPlayoutLatency, int nFlags)
 {
+    pml::Log::Get(pml::Log::LOG_TRACE) << "OutputCallback";
 
     std::lock_guard<std::mutex> lg(m_mutex);
     size_t nUnderrun(0);

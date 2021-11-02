@@ -89,8 +89,7 @@ static const int DEBUG=6;
 
 
 int main(int argc, char* argv[])
-{
-    //make sure got all the arguments
+{    //make sure got all the arguments
     if(argc < DEBUG && argc != 2)
     {
         return ErrorAndExit("Not enough arguments sent.");
@@ -124,7 +123,9 @@ int main(int argc, char* argv[])
     if(argc == DEBUG+1)
     {
         pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
-    }
+        pml::Log::Get().SetOutputLevel(pml::Log::LOG_TRACE);
+        pml::Log::Get() << "Logging to console!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+    };
     if(iniConfig.GetIniInt("logging", "file", 0) == 1)
     {
         pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new LogToFile(CreatePath(iniConfig.GetIniString("paths","logs","."))+"player3")));

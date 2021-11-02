@@ -2604,7 +2604,8 @@ function cronAll(event)
 		}
 	}
 	
-	document.getElementById(sp[0]+'_all').style.backgroundColor = '#ffffff';
+	document.getElementById(sp[0]+'_all').style.backgroundColor = '#aaaaff';
+	document.getElementById(sp[0]+'_all').style.color = '#ffffff';
 	
 	document.getElementById('cron_text').innerHTML = createReadableCron(convertgCronToString());	
 	var mod = document.getElementById('schedule_mod_cron');

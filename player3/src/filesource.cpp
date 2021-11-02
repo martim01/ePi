@@ -6,6 +6,8 @@
 #include "epiwriter.h"
 #include "utils.h"
 #include "inimanager.h"
+#include "log.h"
+
 
 FileSource::FileSource(Playout& player, const iniManager& iniConfig, const std::string& sUid, unsigned long nTimesToPlay, bool bMp3) :
     m_player(player),
@@ -81,6 +83,7 @@ bool FileSource::Play()
 
 bool FileSource::PlayOnce()
 {
+    std::cout << "PlayOnce" << std::endl;
     m_pFile->GoToStart();
 
 
@@ -117,6 +120,7 @@ bool FileSource::PlayOnce()
                 m_player.AddSamples(vRead);
             }
         }
+        std::cout << "PlayOnce: Wait" << std::endl;
 
         //wait for player to say it needs more samples
         std::unique_lock<std::mutex> lck(m_player.GetMutex());

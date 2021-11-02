@@ -172,7 +172,11 @@ void MongooseServer::HandleEvent(mg_connection *pConnection, int nEvent, void* p
         case MG_EV_HTTP_MULTIPART_REQUEST_END:
             MultipartEnd(pConnection, reinterpret_cast<mg_http_multipart_part*>(pData));
             break;
-
+        case MG_EV_RECV:
+            {
+                std::string str(pConnection->recv_mbuf.buf, pConnection->recv_mbuf.len);
+                Log::Get(Log::LOG_TRACE) << str << std::endl;
+            }
         case 0:
             break;
     }
@@ -520,6 +524,7 @@ void MongooseServer::SendOptions(mg_connection* pConnection, const std::string& 
     if(itOption == m_mmOptions.upper_bound(sUrl))
     {
         SendError(pConnection, "Not Found", 404);
+        Log::Get(Log::LOG_WARN) << sUrl << " failed pre-flight";
     }
     else
     {
