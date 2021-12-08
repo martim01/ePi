@@ -95,8 +95,8 @@ s<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 5.0 Transitional//EN" "http://www.w3.or
 
 			function ws_connect()
 			{
-				
-				g_ws = new WebSocket('ws://' + g_endpoint);
+				console.log("ws_connect: "+ g_endpoint+"/ws");
+				g_ws = new WebSocket('ws://' + g_endpoint+"/ws");
 				
 				g_ws.onopen = function(ev)  { console.log(ev); };
 				g_ws.onerror = function(ev) { console.log(ev); };
@@ -107,7 +107,7 @@ s<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 5.0 Transitional//EN" "http://www.w3.or
 				g_ws.onmessage = function(ev) 
 				{
 					var jsonObj = JSON.parse(ev.data);
-					
+					console.log(jsonObj);
 					
 					if(jsonObj["application"] !== undefined)
 					{
@@ -126,10 +126,16 @@ s<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 5.0 Transitional//EN" "http://www.w3.or
 					}
 					if(jsonObj["disk"] !== undefined)
 					{
-						setElementText("disk_bytes_available", "available", jsonObj["disk"]["bytes"]);
-						setElementText("disk_bytes_total", "total", jsonObj["disk"]["bytes"]);
-						setElementText("disk_inodes_available", "available", jsonObj["disk"]["inodes"]);
-						setElementText("disk_inodes_total", "total", jsonObj["disk"]["inodes"]);
+						if(jsonObj["disk"]["bytes"] !== undefined)
+						{
+							setElementText("disk_bytes_available", "available", jsonObj["disk"]["bytes"]);
+							setElementText("disk_bytes_total", "total", jsonObj["disk"]["bytes"]);
+						}
+						if(jsonObj["disk"]["inodes"] !== undefined)
+						{
+							setElementText("disk_inodes_available", "available", jsonObj["disk"]["inodes"]);
+							setElementText("disk_inodes_total", "total", jsonObj["disk"]["inodes"]);
+						}
 					}
 					if(jsonObj["system"] !== undefined)
 					{

@@ -2,7 +2,6 @@
 #include "resourcemanager.h"
 #include "inimanager.h"
 
-#include "mongooseserver.h"
 #include <memory>
 #include "core.h"
 #include "sysinfomanager.h"

@@ -3,7 +3,7 @@
 #include "sysinfomanager.h"
 #include <functional>
 #include <vector>
-#include "utils.h"
+#include "epiutils.h"
 #include "json/json.h"
 #include <sstream>
 #include "log.h"
@@ -37,18 +37,42 @@ const std::string Core::FILES       = "files";          //GET
 const std::string Core::INFO        = "info";        //GET
 const std::string Core::UPDATE      = "update";        //GET PUT
 const std::string Core::OUTPUTS     = "outputs";        //GET PUT
+const std::string Core::WS          = "ws";        //GET PUT
 
-const url Core::EP_ROOT        = url(ROOT);
-const url Core::EP_EPI         = url(ROOT+EPI);
-const url Core::EP_STATUS      = url(EP_EPI.Get()+"/"+STATUS);
-const url Core::EP_POWER       = url(EP_EPI.Get()+"/"+POWER);
-const url Core::EP_CONFIG      = url(EP_EPI.Get()+"/"+CONFIG);
-const url Core::EP_SCHEDULES   = url(EP_EPI.Get()+"/"+SCHEDULES);
-const url Core::EP_PLAYLISTS   = url(EP_EPI.Get()+"/"+PLAYLISTS);
-const url Core::EP_FILES       = url(EP_EPI.Get()+"/"+FILES);
-const url Core::EP_INFO        = url(EP_EPI.Get()+"/"+INFO);
-const url Core::EP_UPDATE      = url(EP_EPI.Get()+"/"+UPDATE);
-const url Core::EP_OUTPUTS     = url(EP_EPI.Get()+"/"+OUTPUTS);
+const endpoint Core::EP_ROOT        = endpoint(ROOT);
+const endpoint Core::EP_EPI         = endpoint(ROOT+EPI);
+const endpoint Core::EP_STATUS      = endpoint(EP_EPI.Get()+"/"+STATUS);
+const endpoint Core::EP_POWER       = endpoint(EP_EPI.Get()+"/"+POWER);
+const endpoint Core::EP_CONFIG      = endpoint(EP_EPI.Get()+"/"+CONFIG);
+const endpoint Core::EP_SCHEDULES   = endpoint(EP_EPI.Get()+"/"+SCHEDULES);
+const endpoint Core::EP_PLAYLISTS   = endpoint(EP_EPI.Get()+"/"+PLAYLISTS);
+const endpoint Core::EP_FILES       = endpoint(EP_EPI.Get()+"/"+FILES);
+const endpoint Core::EP_INFO        = endpoint(EP_EPI.Get()+"/"+INFO);
+const endpoint Core::EP_UPDATE      = endpoint(EP_EPI.Get()+"/"+UPDATE);
+const endpoint Core::EP_OUTPUTS     = endpoint(EP_EPI.Get()+"/"+OUTPUTS);
+const endpoint Core::EP_WS          = endpoint(ROOT+WS);
+
+response ConvertPostDataToJson(const postData& theData)
+{
+    response resp(404, "No data sent or incorrect data sent");
+    if(theData.size() == 1)
+    {
+        resp.nHttpCode = 200;
+        resp.jsonData = ConvertToJson(std::string(theData[0].vData.begin(), theData[0].vData.end()));
+    }
+    else if(theData.size() > 1)
+    {
+        resp.nHttpCode = 200;
+        for(size_t i = 0; i < theData.size(); i++)
+        {
+            if(theData[i].sName.empty() == false)
+            {
+                resp.jsonData[theData[i].sName] = std::string(theData[i].vData.begin(), theData[i].vData.end());
+            }
+        }
+    }
+    return resp;
+}
 
 
 Core::Core() : m_manager(m_launcher, m_iniConfig),
@@ -79,21 +103,21 @@ void Core::InitLogging()
 {
     if(m_iniConfig.GetIniInt("logging", "console",0) == 1 && m_nLogToConsole == 0)
     {
-        m_nLogToConsole = pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
+        m_nLogToConsole = pmlLog().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
     }
     else if(m_nLogToConsole != 0)
     {
-        pml::Log::Get().RemoveOutput(m_nLogToConsole);
+        pmlLog().RemoveOutput(m_nLogToConsole);
         m_nLogToConsole = 0;
     }
 
     if(m_iniConfig.GetIniInt("logging", "file",0) == 1 &&  m_nLogToFile == 0)
     {
-        m_nLogToFile = pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new LogToFile(CreatePath(m_iniConfig.GetIniString("paths","logs","."))+"episerver")));
+        m_nLogToFile = pmlLog().AddOutput(std::unique_ptr<pml::LogOutput>(new LogToFile(CreatePath(m_iniConfig.GetIniString("paths","logs","."))+"episerver")));
     }
     else if(m_nLogToFile != 0)
     {
-        pml::Log::Get().RemoveOutput(m_nLogToFile);
+        pmlLog().RemoveOutput(m_nLogToFile);
         m_nLogToFile = 0;
     }
 
@@ -104,19 +128,19 @@ void Core::Run(const std::string& sConfigFile)
 
     if(m_iniConfig.ReadIniFile(sConfigFile) == false)
     {
-        pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
-        pml::Log::Get(pml::Log::LOG_CRITICAL) << "Could not open '" << sConfigFile << "' exiting.";
+        pmlLog().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
+        pmlLog(pml::LOG_CRITICAL) << "Could not open '" << sConfigFile << "' exiting.";
         return;
     }
 
     InitLogging();
 
-    pml::Log::Get() << "Core\tStart" << std::endl;
+    pmlLog() << "Core\tStart" ;
 
     m_manager.Init();
     m_info.SetDiskPath(m_manager.GetAudioPath());
 
-    if(m_server.Init(m_iniConfig))
+    if(m_server.Init(m_iniConfig.GetIniString("api", "sslCert", ""), m_iniConfig.GetIniString("api", "ssKey", ""), m_iniConfig.GetIniInt("api", "port", 8080), "", true))
     {
         //add server callbacks
         CreateEndpoints();
@@ -132,61 +156,66 @@ void Core::Run(const std::string& sConfigFile)
 bool Core::CreateEndpoints()
 {
 
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "CreateEndpoints" << std::endl;
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "CreateEndpoints" ;
 
-    m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_ROOT), std::bind(&Core::GetRoot, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_EPI), std::bind(&Core::GetEpi, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_STATUS), std::bind(&Core::GetStatus, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_POWER), std::bind(&Core::GetPower, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_CONFIG), std::bind(&Core::GetConfig, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_SCHEDULES), std::bind(&Core::GetSchedules, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_PLAYLISTS), std::bind(&Core::GetPlaylists, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_FILES), std::bind(&Core::GetFiles, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_INFO), std::bind(&Core::GetInfo, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_UPDATE), std::bind(&Core::GetUpdate, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(endpoint(MongooseServer::GET, EP_OUTPUTS), std::bind(&Core::GetOutputs, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_ROOT), std::bind(&Core::GetRoot, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_EPI), std::bind(&Core::GetEpi, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_STATUS), std::bind(&Core::GetStatus, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_POWER), std::bind(&Core::GetPower, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_CONFIG), std::bind(&Core::GetConfig, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_SCHEDULES), std::bind(&Core::GetSchedules, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_PLAYLISTS), std::bind(&Core::GetPlaylists, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_FILES), std::bind(&Core::GetFiles, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_INFO), std::bind(&Core::GetInfo, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_UPDATE), std::bind(&Core::GetUpdate, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_OUTPUTS), std::bind(&Core::GetOutputs, this, _1,_2,_3,_4));
 
-    m_server.AddEndpoint(endpoint(MongooseServer::PATCH, EP_STATUS), std::bind(&Core::PatchStatus, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(endpoint(MongooseServer::PATCH, EP_CONFIG), std::bind(&Core::PatchConfig, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(RestGoose::PATCH, EP_STATUS), std::bind(&Core::PatchStatus, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(RestGoose::PATCH, EP_CONFIG), std::bind(&Core::PatchConfig, this, _1,_2,_3,_4));
 
-    m_server.AddEndpoint(endpoint(MongooseServer::PUT, EP_POWER), std::bind(&Core::PutPower, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(endpoint(MongooseServer::PUT, EP_UPDATE), std::bind(&Core::PutUpdate, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(RestGoose::PUT, EP_POWER), std::bind(&Core::PutPower, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(RestGoose::PUT, EP_UPDATE), std::bind(&Core::PutUpdate, this, _1,_2,_3,_4));
 
-    m_server.AddEndpoint(endpoint(MongooseServer::POST, EP_SCHEDULES), std::bind(&Core::PostSchedule, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(endpoint(MongooseServer::POST, EP_PLAYLISTS), std::bind(&Core::PostPlaylist, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(endpoint(MongooseServer::POST, EP_FILES), std::bind(&Core::PostFile, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(RestGoose::POST, EP_SCHEDULES), std::bind(&Core::PostSchedule, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(RestGoose::POST, EP_PLAYLISTS), std::bind(&Core::PostPlaylist, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(RestGoose::POST, EP_FILES), std::bind(&Core::PostFile, this, _1,_2,_3,_4));
 
 
-    //now add all the dynamic endpoints
+    //now add all the dynamic methodpoints
     for(auto itFile = m_manager.GetFilesBegin(); itFile != m_manager.GetFilesEnd(); ++itFile)
     {
-        url theUrl(url(EP_FILES.Get()+"/"+itFile->first));
+        endpoint theEndpoint(endpoint(EP_FILES.Get()+"/"+itFile->first));
 
-        m_server.AddEndpoint(endpoint(MongooseServer::GET, theUrl), std::bind(&Core::GetFile, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::PATCH, theUrl), std::bind(&Core::PatchFile, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::PUT, theUrl), std::bind(&Core::PutFile, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::DELETE, theUrl), std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(methodpoint(RestGoose::GET, theEndpoint), std::bind(&Core::GetFile, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(methodpoint(RestGoose::PATCH, theEndpoint), std::bind(&Core::PatchFile, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(methodpoint(RestGoose::PUT, theEndpoint), std::bind(&Core::PutFile, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(methodpoint(RestGoose::HTTP_DELETE, theEndpoint), std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
     }
 
     for(auto itPlaylist = m_manager.GetPlaylistsBegin(); itPlaylist != m_manager.GetPlaylistsEnd(); ++itPlaylist)
     {
-        url theUrl(url(EP_PLAYLISTS.Get()+"/"+itPlaylist->first));
+        endpoint theEndpoint(endpoint(EP_PLAYLISTS.Get()+"/"+itPlaylist->first));
 
-        m_server.AddEndpoint(endpoint(MongooseServer::GET, theUrl), std::bind(&Core::GetPlaylist, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::PUT, theUrl), std::bind(&Core::PutPlaylist, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::DELETE, theUrl), std::bind(&Core::DeletePlaylist, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(methodpoint(RestGoose::GET, theEndpoint), std::bind(&Core::GetPlaylist, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(methodpoint(RestGoose::PUT, theEndpoint), std::bind(&Core::PutPlaylist, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(methodpoint(RestGoose::HTTP_DELETE, theEndpoint), std::bind(&Core::DeletePlaylist, this, _1,_2,_3,_4));
     }
 
 
     for(auto itSchedule = m_manager.GetSchedulesBegin(); itSchedule != m_manager.GetSchedulesEnd(); ++itSchedule)
     {
-        url theUrl(url(EP_SCHEDULES.Get()+"/"+itSchedule->first));
+        endpoint theEndpoint(endpoint(EP_SCHEDULES.Get()+"/"+itSchedule->first));
 
-        m_server.AddEndpoint(endpoint(MongooseServer::GET, theUrl), std::bind(&Core::GetSchedule, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::PUT, theUrl), std::bind(&Core::PutSchedule, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(endpoint(MongooseServer::DELETE, theUrl), std::bind(&Core::DeleteSchedule, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(methodpoint(RestGoose::GET, theEndpoint), std::bind(&Core::GetSchedule, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(methodpoint(RestGoose::PUT, theEndpoint), std::bind(&Core::PutSchedule, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(methodpoint(RestGoose::HTTP_DELETE, theEndpoint), std::bind(&Core::DeleteSchedule, this, _1,_2,_3,_4));
     }
 
+    if(m_server.AddWebsocketEndpoint(EP_WS, std::bind(&Core::WebsocketAuthenticate, this, _1,_2,_3), std::bind(&Core::WebsocketMessage, this, _1,_2),
+                                  std::bind(&Core::WebsocketClosed, this, _1,_2)) == false)
+    {
+        pmlLog(pml::LOG_ERROR) << "Failed to add websocket endpoints";
+    }
 
     //Add the loop callback function
     m_server.SetLoopCallback(std::bind(&Core::LoopCallback, this, _1));
@@ -194,17 +223,17 @@ bool Core::CreateEndpoints()
     return true;
 }
 
-response Core::GetRoot(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::GetRoot(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetRoot" << std::endl;
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetRoot" ;
     response theResponse;
     theResponse.jsonData.append(EPI);
     return theResponse;
 }
 
-response Core::GetEpi(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::GetEpi(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetEpi" << std::endl;
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetEpi" ;
     response theResponse;
     theResponse.jsonData.append(FILES);
     theResponse.jsonData.append(PLAYLISTS);
@@ -218,27 +247,27 @@ response Core::GetEpi(mg_connection* pConnection, const query& theQuery, const p
     return theResponse;
 }
 
-response Core::GetFiles(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::GetFiles(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetFiles" << std::endl;
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetFiles" ;
     return m_manager.GetFiles();
 }
 
-response Core::GetPlaylists(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::GetPlaylists(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetPlaylists" << std::endl;
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetPlaylists" ;
     return m_manager.GetPlaylists();
 }
 
-response Core::GetSchedules(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::GetSchedules(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetSchedules" << std::endl;
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetSchedules" ;
     return m_manager.GetSchedules();
 }
 
-response Core::GetConfig(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::GetConfig(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetConfig" << std::endl;
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetConfig" ;
     response theResponse;
 
     char host[256];
@@ -262,10 +291,10 @@ response Core::GetConfig(mg_connection* pConnection, const query& theQuery, cons
     return theResponse;
 }
 
-response Core::GetUpdate(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::GetUpdate(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
     //get all the version numbers...
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetUpdate" << std::endl;
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetUpdate" ;
     response theResponse;
     std::stringstream ssVersion;
     ssVersion << version::MAJOR << "." << version::MINOR << "." << version::PATCH << "." << version::BUILD;
@@ -273,33 +302,33 @@ response Core::GetUpdate(mg_connection* pConnection, const query& theQuery, cons
     theResponse.jsonData["server"]["date"] = ConvertTimeToIsoString(std::time_t(version::DATE));
 
 
-    theResponse.jsonData["player3"] = ConvertToJson(exec(CreatePath(m_iniConfig.GetIniString("paths", "player","/home/pi/ePi/bin"))+"player3 -v"));
+    theResponse.jsonData["player3"] = ConvertToJson(Exec(CreatePath(m_iniConfig.GetIniString("paths", "player","/home/pi/ePi/bin"))+"player3 -v"));
 
 
     //get versions of other applications...
     return theResponse;
 }
 
-response Core::GetOutputs(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::GetOutputs(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
     //get all the version numbers...
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetOutputs" << std::endl;
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetOutputs" ;
     response theResponse;
 
-    //Log::Get(Log::LOG_DEBUG) << "
-    theResponse.jsonData = ConvertToJson(exec(CreatePath(m_iniConfig.GetIniString("paths", "player","."))+"player3 -d"));
+    //pmlLog(pml::LOG_DEBUG) << "
+    theResponse.jsonData = ConvertToJson(Exec(CreatePath(m_iniConfig.GetIniString("paths", "player","."))+"player3 -d"));
 
 
     //get versions of other applications...
     return theResponse;
 }
 
-response Core::GetStatus(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::GetStatus(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
     //lock as jsStatus can be called by pipe thread and server thread
     std::lock_guard<std::mutex> lg(m_mutex);
 
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetStatus" << std::endl;
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetStatus" ;
     m_jsStatus["locked"] = (m_iniConfig.GetIniInt("restricted", "locked", 0)==1);
 
     response theResponse;
@@ -308,9 +337,9 @@ response Core::GetStatus(mg_connection* pConnection, const query& theQuery, cons
 }
 
 
-response Core::GetInfo(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::GetInfo(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetInfo" << std::endl;
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetInfo" ;
 
     response theResponse;
     theResponse.jsonData = m_info.GetInfo();
@@ -319,56 +348,59 @@ response Core::GetInfo(mg_connection* pConnection, const query& theQuery, const 
     return theResponse;
 }
 
-response Core::GetPower(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::GetPower(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetPower" << std::endl;
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetPower" ;
     response theResponse;
     theResponse.jsonData["status"] = "On";
 
     return theResponse;
 }
 
-response Core::GetFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::GetFile(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetFile" << std::endl;
-    std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetFile" ;
+    std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
     return m_manager.GetFile(vSplit.back());
 }
 
-response Core::GetPlaylist(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::GetPlaylist(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetPlaylist" << std::endl;
-    std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetPlaylist" ;
+    std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
 
     return m_manager.GetPlaylist(vSplit.back());
 }
 
-response Core::GetSchedule(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::GetSchedule(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "GetSchedule" << std::endl;
-    std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetSchedule" ;
+    std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
 
     return m_manager.GetSchedule(vSplit.back());
 }
 
 
-response Core::PatchStatus(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::PatchStatus(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PatchStatus" << std::endl;
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PatchStatus" ;
 
-    Json::Value jsData(ConvertToJson(theData.Get()));
-    response theResponse(m_manager.ModifyStatus(jsData));
-
-    if(CmpNoCase(jsData["command"].asString(), "kill"))
+    auto theResponse = ConvertPostDataToJson(theData);
+    if(theResponse.nHttpCode == 200)
     {
-        GetInitialPlayerStatus();   //see if the players have been killed
+        theResponse = m_manager.ModifyStatus(theResponse.jsonData);
+
+        if(theResponse.jsonData.isMember("commad") && CmpNoCase(theResponse.jsonData["command"].asString(), "kill"))
+        {
+            GetInitialPlayerStatus();   //see if the players have been killed
+        }
     }
     return theResponse;
 }
 
-response Core::PutPower(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::PutPower(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutPower: " << theData.Get() << std::endl;
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PutPower: ";
 
     response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode == 423)
@@ -376,30 +408,34 @@ response Core::PutPower(mg_connection* pConnection, const query& theQuery, const
         return theResponse;
     }
 
+    theResponse = ConvertPostDataToJson(theData);
+    if(theResponse.nHttpCode != 200)
+    {
+        return theResponse;
+    }
 
-    Json::Value jsData(ConvertToJson(theData.Get()));
-    if(jsData["command"].isString() == false)
+    if(theResponse.jsonData.isMember("command") == false || theResponse.jsonData["command"].isString() == false)
     {
         theResponse.nHttpCode = 400;
         theResponse.jsonData["result"] = "No command sent";
-        Log::Get(Log::LOG_ERROR) << " no command sent" << std::endl;
+        pmlLog(pml::LOG_ERROR) << " no command sent" ;
     }
-    else if(CmpNoCase(jsData["command"].asString(), "restart server"))
+    else if(CmpNoCase(theResponse.jsonData["command"].asString(), "restart server"))
     {
         // send a message to "main" to exit the loop
-        Log::Get(Log::LOG_INFO) << " restart server" << std::endl;
+        pmlLog(pml::LOG_INFO) << " restart server" ;
         m_server.Stop();
     }
-    else if(CmpNoCase(jsData["command"].asString(), "restart os"))
+    else if(CmpNoCase(theResponse.jsonData["command"].asString(), "restart os"))
     {
-        Log::Get(Log::LOG_INFO) << " restart os" << std::endl;
+        pmlLog(pml::LOG_INFO) << " restart os" ;
 
         theResponse = Reboot(LINUX_REBOOT_CMD_RESTART);
 
     }
-    else if(CmpNoCase(jsData["command"].asString(), "shutdown"))
+    else if(CmpNoCase(theResponse.jsonData["command"].asString(), "shutdown"))
     {
-        Log::Get(Log::LOG_INFO) << " shutdown" << std::endl;
+        pmlLog(pml::LOG_INFO) << " shutdown" ;
 
         theResponse = Reboot(LINUX_REBOOT_CMD_POWER_OFF);
     }
@@ -408,22 +444,26 @@ response Core::PutPower(mg_connection* pConnection, const query& theQuery, const
         theResponse.nHttpCode = 400;
         theResponse.jsonData["result"] = false;
         theResponse.jsonData["reason"].append("Invalid command sent");
-        Log::Get(Log::LOG_ERROR) << "'" << jsData["command"].asString() <<"' is not a valid command" << std::endl;
+        pmlLog(pml::LOG_ERROR) << "'" << theResponse.jsonData["command"].asString() <<"' is not a valid command" ;
     }
 
     return theResponse;
 }
 
-response Core::PatchConfig(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::PatchConfig(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PatchConfig" << std::endl;
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PatchConfig" ;
 
-    Json::Value jsData(ConvertToJson(theData.Get()));
+    auto theResponse = ConvertPostDataToJson(theData);
+    if(theResponse.nHttpCode != 200)
+    {
+        return theResponse;
+    }
 
-    response theResponse(m_manager.IsLocked());
+    theResponse = m_manager.IsLocked();
     if(theResponse.nHttpCode != 423)
     {
-        if(jsData.isObject() == false)
+        if(theResponse.jsonData.isObject() == false)
         {
             theResponse.nHttpCode  = 400;
             theResponse.jsonData["result"] = false;
@@ -433,24 +473,24 @@ response Core::PatchConfig(mg_connection* pConnection, const query& theQuery, co
         {
             m_iniConfig.ReReadIniFile();    //sync with on disk version
 
-            for(auto const& sSection : jsData.getMemberNames())
+            for(auto const& sSection : theResponse.jsonData.getMemberNames())
             {
-                if(jsData[sSection].isObject())
+                if(theResponse.jsonData[sSection].isObject())
                 {
                     if(sSection == "server")
                     {
-                        PatchServerConfig(jsData[sSection]);
+                        PatchServerConfig(theResponse.jsonData[sSection]);
                     }
                     else if(sSection != "restricted" && sSection != "remove")
                     {
                         iniSection* pSection = m_iniConfig.GetSection(sSection);
                         if(pSection)
                         {
-                            for(auto const& sKey : jsData[sSection].getMemberNames())
+                            for(auto const& sKey : theResponse.jsonData[sSection].getMemberNames())
                             {
-                                if(pSection->FindData(sKey) != pSection->GetDataEnd() && jsData[sSection][sKey].isConvertibleTo(Json::stringValue))
+                                if(pSection->FindData(sKey) != pSection->GetDataEnd() && theResponse.jsonData[sSection][sKey].isConvertibleTo(Json::stringValue))
                                 {
-                                    pSection->SetValue(sKey, jsData[sSection][sKey].asString());
+                                    pSection->SetValue(sKey, theResponse.jsonData[sSection][sKey].asString());
                                 }
                             }
                         }
@@ -460,7 +500,7 @@ response Core::PatchConfig(mg_connection* pConnection, const query& theQuery, co
             m_iniConfig.WriteIniFile();
             InitLogging();  //change logging if necessary
             m_manager.InitPaths();  //change paths if necessary
-            theResponse = GetConfig(pConnection, theQuery, theData, theUrl);
+            theResponse = GetConfig(theQuery, theData, theEndpoint, theUser);
             theResponse.jsonData["result"] = true;
         }
     }
@@ -515,17 +555,54 @@ void Core::ResourceModified(enumType eType, const std::string& sUid, enumModific
     m_jsResources.append(jsValue);
 }
 
-response Core::PatchFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::PatchFile(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PatchFile" << std::endl;
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PatchFile" ;
 
     response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode != 423)
     {
+        std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
 
-        std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
+        theResponse = ConvertPostDataToJson(theData);
+        if(theResponse.nHttpCode == 200)
+        {
+            theResponse = m_manager.ModifyFileMeta(vSplit.back(), theResponse.jsonData);
 
-        theResponse = m_manager.ModifyFileMeta(vSplit.back(), ConvertToJson(theData.Get()));
+            if(theResponse.nHttpCode == 200)
+            {
+                ResourceModified(FILE, vSplit.back(), MODIFIED);
+            }
+        }
+    }
+    return theResponse;
+}
+
+response Core::PutFile(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+{
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PutFile" ;
+
+    response theResponse(m_manager.IsLocked());
+    if(theResponse.nHttpCode != 423)
+    {
+        std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
+
+        if(theData.empty() == false)
+        {
+            response resp(404);
+            resp.jsonData["result"] = "No data sent or incorrect data sent";
+            return resp;
+        }
+        Json::Value jsData;
+        for(size_t i = 0; i < theData.size(); i++)
+        {
+            if(theData[i].sName.empty() == false)
+            {
+                jsData[theData[i].sName] = std::string(theData[i].vData.begin(), theData[i].vData.end());
+            }
+        }
+        //@todo put file
+        //theResponse = m_manager.ModifyFile(vSplit.back(), jsData);
 
         if(theResponse.nHttpCode == 200)
         {
@@ -535,80 +612,66 @@ response Core::PatchFile(mg_connection* pConnection, const query& theQuery, cons
     return theResponse;
 }
 
-response Core::PutFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::PutPlaylist(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PatchFile" << std::endl;
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PutPlaylist" ;
 
     response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode != 423)
     {
-
-        std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
-
-        theResponse = m_manager.ModifyFile(vSplit.back(), ConvertToJson(theData.Get()));
-
+        std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
+        theResponse = ConvertPostDataToJson(theData);
         if(theResponse.nHttpCode == 200)
         {
-            ResourceModified(FILE, vSplit.back(), MODIFIED);
+            theResponse = m_manager.ModifyPlaylist(vSplit.back(), theResponse.jsonData);
+            if(theResponse.nHttpCode == 200)
+            {
+                ResourceModified(PLAYLIST, vSplit.back(), MODIFIED);
+            }
         }
     }
     return theResponse;
 }
 
-response Core::PutPlaylist(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::PutSchedule(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutPlaylist" << std::endl;
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PutSchedule" ;
 
     response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode != 423)
     {
-        std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
-
-        theResponse = m_manager.ModifyPlaylist(vSplit.back(), ConvertToJson(theData.Get()));
+        std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
+        theResponse = ConvertPostDataToJson(theData);
         if(theResponse.nHttpCode == 200)
         {
-            ResourceModified(PLAYLIST, vSplit.back(), MODIFIED);
-        }
-    }
-    return theResponse;
-}
-
-response Core::PutSchedule(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
-{
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutSchedule" << std::endl;
-
-    response theResponse(m_manager.IsLocked());
-    if(theResponse.nHttpCode != 423)
-    {
-        std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
-
-        theResponse = m_manager.ModifySchedule(vSplit.back(), ConvertToJson(theData.Get()));
-        if(theResponse.nHttpCode == 200)
-        {
-            ResourceModified(SCHEDULE, vSplit.back(), MODIFIED);
+            theResponse = m_manager.ModifySchedule(vSplit.back(), theResponse.jsonData);
+            if(theResponse.nHttpCode == 200)
+            {
+                ResourceModified(SCHEDULE, vSplit.back(), MODIFIED);
+            }
         }
     }
     return theResponse;
 }
 
 
-response Core::DeleteFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::DeleteFile(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "DeleteFile" << std::endl;
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "DeleteFile" ;
 
     response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode != 423)
     {
-        std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
+        std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
 
         theResponse = m_manager.DeleteFile(vSplit.back());
         if(theResponse.nHttpCode == 200)
         {
-            url aUrl(url(EP_FILES.Get()+"/"+vSplit.back()));
+            endpoint aUrl(endpoint(EP_FILES.Get()+"/"+vSplit.back()));
 
-            m_server.DeleteEndpoint(endpoint(MongooseServer::GET, aUrl));
-            m_server.DeleteEndpoint(endpoint(MongooseServer::PATCH, aUrl));
-            m_server.DeleteEndpoint(endpoint(MongooseServer::DELETE, aUrl));
+            m_server.DeleteEndpoint(methodpoint(RestGoose::GET, aUrl));
+            m_server.DeleteEndpoint(methodpoint(RestGoose::PATCH, aUrl));
+            m_server.DeleteEndpoint(methodpoint(RestGoose::HTTP_DELETE, aUrl));
 
             ResourceModified(FILE, vSplit.back(), DELETED);
         }
@@ -617,23 +680,23 @@ response Core::DeleteFile(mg_connection* pConnection, const query& theQuery, con
     return theResponse;
 }
 
-response Core::DeletePlaylist(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::DeletePlaylist(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "DeletePlaylist" << std::endl;
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "DeletePlaylist" ;
     response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode != 423)
     {
-        std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
+        std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
 
         theResponse = m_manager.DeletePlaylist(vSplit.back());
 
         if(theResponse.nHttpCode == 200)
         {
-            url aUrl(url(EP_PLAYLISTS.Get()+"/"+vSplit.back()));
+            endpoint aUrl(endpoint(EP_PLAYLISTS.Get()+"/"+vSplit.back()));
 
-            m_server.DeleteEndpoint(endpoint(MongooseServer::GET, aUrl));
-            m_server.DeleteEndpoint(endpoint(MongooseServer::PATCH, aUrl));
-            m_server.DeleteEndpoint(endpoint(MongooseServer::DELETE, aUrl));
+            m_server.DeleteEndpoint(methodpoint(RestGoose::GET, aUrl));
+            m_server.DeleteEndpoint(methodpoint(RestGoose::PATCH, aUrl));
+            m_server.DeleteEndpoint(methodpoint(RestGoose::HTTP_DELETE, aUrl));
 
             ResourceModified(PLAYLIST, vSplit.back(), DELETED);
         }
@@ -641,10 +704,10 @@ response Core::DeletePlaylist(mg_connection* pConnection, const query& theQuery,
     return theResponse;
 }
 
-response Core::DeleteSchedule(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::DeleteSchedule(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "DeleteSchedule" << std::endl;
-    std::vector<std::string> vSplit(SplitString(theUrl.Get(), '/'));
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "DeleteSchedule" ;
+    std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
 
     response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode != 423)
@@ -653,11 +716,11 @@ response Core::DeleteSchedule(mg_connection* pConnection, const query& theQuery,
 
         if(theResponse.nHttpCode == 200)
         {
-            url aUrl(url(EP_SCHEDULES.Get()+"/"+vSplit.back()));
+            endpoint aUrl(endpoint(EP_SCHEDULES.Get()+"/"+vSplit.back()));
 
-            m_server.DeleteEndpoint(endpoint(MongooseServer::GET, aUrl));
-            m_server.DeleteEndpoint(endpoint(MongooseServer::PATCH, aUrl));
-            m_server.DeleteEndpoint(endpoint(MongooseServer::DELETE, aUrl));
+            m_server.DeleteEndpoint(methodpoint(RestGoose::GET, aUrl));
+            m_server.DeleteEndpoint(methodpoint(RestGoose::PATCH, aUrl));
+            m_server.DeleteEndpoint(methodpoint(RestGoose::HTTP_DELETE, aUrl));
 
             ResourceModified(SCHEDULE, vSplit.back(), DELETED);
         }
@@ -666,71 +729,79 @@ response Core::DeleteSchedule(mg_connection* pConnection, const query& theQuery,
 }
 
 
-response Core::PostFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::PostFile(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PostFile" << std::endl;
-    Json::Value jsonData(ConvertToJson(theData.Get()));
+    //@todo PostFile
+    //pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PostFile " << theData;
+    //Json::Value jsonData(ConvertToJson(theData.Get()));
+
+//    response theResponse(m_manager.IsLocked());
+//    if(theResponse.nHttpCode != 423)
+//    {
+//        theResponse = m_manager.AddFiles(jsonData);
+//        pmlLog() << theResponse.jsonData ;
+//        pmlLog() << theResponse.nHttpCode ;
+//
+//        if(theResponse.nHttpCode == 201)
+//        {
+//            endpoint aUrl(endpoint(EP_FILES.Get()+"/"+theResponse.jsonData["uid"].asString()));
+//
+//            m_server.AddEndpoint(methodpoint(RestGoose::GET, aUrl), std::bind(&Core::GetFile, this, _1,_2,_3,_4));
+//            m_server.AddEndpoint(methodpoint(RestGoose::PATCH, aUrl), std::bind(&Core::PatchFile, this, _1,_2,_3,_4));
+//            m_server.AddEndpoint(methodpoint(RestGoose::PUT, aUrl), std::bind(&Core::PutFile, this, _1,_2,_3,_4));
+//            m_server.AddEndpoint(methodpoint(RestGoose::HTTP_DELETE, aUrl), std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
+//
+//            ResourceModified(FILE, theResponse.jsonData["uid"].asString(), ADDED);
+//        }
+//    }
+//    return theResponse;
+}
+
+response Core::PostPlaylist(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+{
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PostPlaylist" ;
 
     response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode != 423)
     {
-        theResponse = m_manager.AddFiles(jsonData);
-        Log::Get() << theResponse.jsonData << std::endl;
-        Log::Get() << theResponse.nHttpCode << std::endl;
-
-        if(theResponse.nHttpCode == 201)
+        theResponse = ConvertPostDataToJson(theData);
+        if(theResponse.nHttpCode == 200)
         {
-            url aUrl(url(EP_FILES.Get()+"/"+theResponse.jsonData["uid"].asString()));
+            theResponse = m_manager.AddPlaylist(theResponse.jsonData);
+            if(theResponse.nHttpCode == 201)
+            {
+                endpoint aUrl(endpoint(EP_PLAYLISTS.Get()+"/"+theResponse.jsonData["uid"].asString()));
 
-            m_server.AddEndpoint(endpoint(MongooseServer::GET, aUrl), std::bind(&Core::GetFile, this, _1,_2,_3,_4));
-            m_server.AddEndpoint(endpoint(MongooseServer::PATCH, aUrl), std::bind(&Core::PatchFile, this, _1,_2,_3,_4));
-            m_server.AddEndpoint(endpoint(MongooseServer::PUT, aUrl), std::bind(&Core::PutFile, this, _1,_2,_3,_4));
-            m_server.AddEndpoint(endpoint(MongooseServer::DELETE, aUrl), std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
+                m_server.AddEndpoint(methodpoint(RestGoose::GET, aUrl), std::bind(&Core::GetPlaylist, this, _1,_2,_3,_4));
+                m_server.AddEndpoint(methodpoint(RestGoose::PATCH, aUrl), std::bind(&Core::PutPlaylist, this, _1,_2,_3,_4));
+                m_server.AddEndpoint(methodpoint(RestGoose::HTTP_DELETE, aUrl), std::bind(&Core::DeletePlaylist, this, _1,_2,_3,_4));
 
-            ResourceModified(FILE, theResponse.jsonData["uid"].asString(), ADDED);
+                ResourceModified(PLAYLIST, theResponse.jsonData["uid"].asString(), ADDED);
+            }
         }
     }
     return theResponse;
 }
 
-response Core::PostPlaylist(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::PostSchedule(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PostPlaylist" << std::endl;
-
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PostSchedule" ;
     response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode != 423)
     {
-
-        theResponse = m_manager.AddPlaylist(ConvertToJson(theData.Get()));
-        if(theResponse.nHttpCode == 201)
+        theResponse = ConvertPostDataToJson(theData);
+        if(theResponse.nHttpCode == 200)
         {
-            url aUrl(url(EP_PLAYLISTS.Get()+"/"+theResponse.jsonData["uid"].asString()));
+            theResponse = m_manager.AddSchedule(theResponse.jsonData);
+            if(theResponse.nHttpCode == 201)
+            {
+                endpoint aUrl(endpoint(EP_SCHEDULES.Get()+"/"+theResponse.jsonData["uid"].asString()));
+                m_server.AddEndpoint(methodpoint(RestGoose::GET, aUrl), std::bind(&Core::GetSchedule, this, _1,_2,_3,_4));
+                m_server.AddEndpoint(methodpoint(RestGoose::PUT, aUrl), std::bind(&Core::PutSchedule, this, _1,_2,_3,_4));
+                m_server.AddEndpoint(methodpoint(RestGoose::HTTP_DELETE,aUrl), std::bind(&Core::DeleteSchedule, this, _1,_2,_3,_4));
 
-            m_server.AddEndpoint(endpoint(MongooseServer::GET, aUrl), std::bind(&Core::GetPlaylist, this, _1,_2,_3,_4));
-            m_server.AddEndpoint(endpoint(MongooseServer::PATCH, aUrl), std::bind(&Core::PutPlaylist, this, _1,_2,_3,_4));
-            m_server.AddEndpoint(endpoint(MongooseServer::DELETE, aUrl), std::bind(&Core::DeletePlaylist, this, _1,_2,_3,_4));
-
-            ResourceModified(PLAYLIST, theResponse.jsonData["uid"].asString(), ADDED);
-        }
-    }
-    return theResponse;
-}
-
-response Core::PostSchedule(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
-{
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PostSchedule" << std::endl;
-    response theResponse(m_manager.IsLocked());
-    if(theResponse.nHttpCode != 423)
-    {
-        theResponse = m_manager.AddSchedule(ConvertToJson(theData.Get()));
-        if(theResponse.nHttpCode == 201)
-        {
-            url aUrl(url(EP_SCHEDULES.Get()+"/"+theResponse.jsonData["uid"].asString()));
-            m_server.AddEndpoint(endpoint(MongooseServer::GET, aUrl), std::bind(&Core::GetSchedule, this, _1,_2,_3,_4));
-            m_server.AddEndpoint(endpoint(MongooseServer::PUT, aUrl), std::bind(&Core::PutSchedule, this, _1,_2,_3,_4));
-            m_server.AddEndpoint(endpoint(MongooseServer::DELETE,aUrl), std::bind(&Core::DeleteSchedule, this, _1,_2,_3,_4));
-
-            ResourceModified(SCHEDULE, theResponse.jsonData["uid"].asString(), ADDED);
+                ResourceModified(SCHEDULE, theResponse.jsonData["uid"].asString(), ADDED);
+            }
         }
     }
     return theResponse;
@@ -757,12 +828,12 @@ void Core::StatusCallback(const std::string& sData)
     m_jsStatus["player"] ="Running";
     m_jsStatus["status"] = ConvertToJson(sData);
     m_jsStatus["current_time"] = GetCurrentTimeAsIsoString();
-    m_server.SendWebsocketMessage(m_jsStatus);
+    m_server.SendWebsocketMessage({EP_WS}, m_jsStatus);
 }
 
 void Core::ExitCallback(int nExit)
 {
-    pml::Log::Get() << "Player exited" << std::endl;
+    pmlLog() << "Player exited" ;
     // unlock resources
     m_manager.LockPlayingResource(false);
 
@@ -794,7 +865,7 @@ void Core::ExitCallback(int nExit)
         m_jsStatus["resumed"]["signal"] = WSTOPSIG(nExit);
     }
 
-    m_server.SendWebsocketMessage(m_jsStatus);
+    m_server.SendWebsocketMessage({EP_WS}, m_jsStatus);
 }
 
 
@@ -805,13 +876,13 @@ void Core::LoopCallback(int nTook)
 
     if(m_jsResources.size() > 0)
     {
-        m_server.SendWebsocketMessage(m_jsResources);
+        m_server.SendWebsocketMessage({EP_WS}, m_jsResources);
         m_jsResources.clear();
     }
 
     if(m_nTimeSinceLastCall > 2000)
     {
-        m_server.SendWebsocketMessage(m_info.GetInfo());
+        m_server.SendWebsocketMessage({EP_WS}, m_info.GetInfo());
 
         //lock as jsStatus can be called by pipe thread and server thread
         std::lock_guard<std::mutex> lg(m_mutex);
@@ -819,7 +890,7 @@ void Core::LoopCallback(int nTook)
         if(m_jsStatus["player"].asString() != "Playing")
         {
             m_jsStatus["current_time"] = GetCurrentTimeAsIsoString();
-            m_server.SendWebsocketMessage(m_jsStatus);
+            m_server.SendWebsocketMessage({EP_WS}, m_jsStatus);
         }
         m_nTimeSinceLastCall = 0;
     }
@@ -831,7 +902,7 @@ void Core::LoopCallback(int nTook)
         if(m_bLoggedThisHour == false)
         {
             m_bLoggedThisHour = true;
-            pml::Log::Get() << GetCurrentTimeAsIsoString() << std::endl;
+            pmlLog() << GetCurrentTimeAsIsoString() ;
         }
     }
     else
@@ -841,19 +912,24 @@ void Core::LoopCallback(int nTook)
 }
 
 
-response Core::PutUpdate(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl)
+response Core::PutUpdate(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
 {
-    Log::Get(Log::LOG_DEBUG) << "Endpoints\t" << "PutUpdate" << std::endl;
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PutUpdate" ;
     response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode == 423)
     {
         return theResponse;
     }
 
-
-    Json::Value jsonData(ConvertToJson(theData.Get()));
-    return m_manager.UpdateApplication(jsonData);
-
+    theResponse = ConvertPostDataToJson(theData);
+    if(theResponse.nHttpCode == 200)
+    {
+        return m_manager.UpdateApplication(theResponse.jsonData);
+    }
+    else
+    {
+        return theResponse;
+    }
 }
 
 
@@ -876,3 +952,21 @@ response Core::Reboot(int nCommand)
     }
     return theResponse;
 }
+
+bool Core::WebsocketAuthenticate(const endpoint& theEndpoint, const userName& theUser, const ipAddress& peer)
+{
+    pmlLog() << "Websocket connection request from " << peer;
+    return true;
+}
+
+bool Core::WebsocketMessage(const endpoint& theEndpoint, const Json::Value& jsData)
+{
+    pmlLog() << "Websocket message '" << jsData << "'";
+    return true;
+}
+
+void Core::WebsocketClosed(const endpoint& theEndpoint, const ipAddress& peer)
+{
+    pmlLog() << "Websocket closed from " << peer;
+}
+

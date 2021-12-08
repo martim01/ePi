@@ -70,7 +70,7 @@ string iniSection::ReadSection(std::ifstream* pif)
 		size_t nEqualPos = sLine.find("=");
 		if(nEqualPos == std::string::npos)
 		{
-			pml::Log::Get(pml::Log::LOG_ERROR) << "line: "	<< sLine	<< endl;
+			pmlLog(pml::LOG_ERROR) << "line: "	<< sLine	<< endl;
 			return "";
 		}
 

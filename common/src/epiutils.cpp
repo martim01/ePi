@@ -5,14 +5,15 @@
 #include <iomanip>
 #include <string.h>
 #include <syslog.h>
-#include "utils.h"
+#include "epiutils.h"
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
 #include <netinet/ip.h>
 #include <arpa/inet.h>
 #include <algorithm>
-
+#include <sys/stat.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -188,7 +189,7 @@ std::string GetIpAddress(const std::string& sInterface)
 }
 
 
-std::string exec(const std::string& sCmd)
+std::string Exec(const std::string& sCmd)
 {
     std::array<char, 128> buffer;
     std::string sResult;

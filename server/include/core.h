@@ -1,11 +1,10 @@
 #pragma once
 #include "response.h"
-#include "mongooseserver.h"
 #include "resourcemanager.h"
 #include "sysinfomanager.h"
 #include "launcher.h"
 #include "json/json.h"
-
+#include "RestGoose.h"
 
 class Core
 {
@@ -16,53 +15,57 @@ class Core
 
 
 
-        response GetRoot(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response GetEpi(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response GetRoot(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response GetEpi(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
 
-        response GetFiles(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response GetPlaylists(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response GetSchedules(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response GetConfig(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response GetInfo(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response GetPower(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response GetFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response GetPlaylist(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response GetSchedule(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response GetStatus(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response GetUpdate(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response GetOutputs(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-
-
-        response PatchStatus(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response PatchConfig(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response PatchFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-
-        response PutFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-
-        response PutPlaylist(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response PutSchedule(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response PutPower(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response PutUpdate(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response GetFiles(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response GetPlaylists(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response GetSchedules(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response GetConfig(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response GetInfo(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response GetPower(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response GetFile(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response GetPlaylist(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response GetSchedule(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response GetStatus(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response GetUpdate(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response GetOutputs(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
 
 
-        response DeleteFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response DeletePlaylist(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response DeleteSchedule(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response PatchStatus(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response PatchConfig(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response PatchFile(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
 
-        response PostFile(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response PostPlaylist(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
-        response PostSchedule(mg_connection* pConnection, const query& theQuery, const postData& theData, const url& theUrl);
+        response PutFile(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+
+        response PutPlaylist(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response PutSchedule(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response PutPower(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response PutUpdate(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+
+
+        response DeleteFile(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response DeletePlaylist(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response DeleteSchedule(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+
+        response PostFile(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response PostPlaylist(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response PostSchedule(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
 
 
         void StatusCallback(const std::string& sData);
         void ExitCallback(int nPid);
         void LoopCallback(int nData);
 
+        bool WebsocketAuthenticate(const endpoint& theEndpoint, const userName& theUser, const ipAddress& peer);
+        bool WebsocketMessage(const endpoint& theEndpoint, const Json::Value& jsData);
+        void WebsocketClosed(const endpoint& theEndpoint, const ipAddress& peer);
+
 
     private:
         Launcher m_launcher;
         ResourceManager m_manager;
-        MongooseServer m_server;
+        RestGoose m_server;
         SysInfoManager m_info;
         iniManager m_iniConfig;
 
@@ -97,17 +100,18 @@ class Core
         x-epi/info                          GET
         **/
 
-        static const url EP_ROOT;
-        static const url EP_EPI;
-        static const url EP_STATUS;
-        static const url EP_POWER;
-        static const url EP_CONFIG;
-        static const url EP_SCHEDULES;
-        static const url EP_PLAYLISTS;
-        static const url EP_FILES;
-        static const url EP_INFO;
-        static const url EP_UPDATE;
-        static const url EP_OUTPUTS;
+        static const endpoint EP_ROOT;
+        static const endpoint EP_EPI;
+        static const endpoint EP_STATUS;
+        static const endpoint EP_POWER;
+        static const endpoint EP_CONFIG;
+        static const endpoint EP_SCHEDULES;
+        static const endpoint EP_PLAYLISTS;
+        static const endpoint EP_FILES;
+        static const endpoint EP_INFO;
+        static const endpoint EP_UPDATE;
+        static const endpoint EP_OUTPUTS;
+        static const endpoint EP_WS;
 
         static const std::string ROOT;
         static const std::string EPI;
@@ -120,6 +124,7 @@ class Core
         static const std::string INFO;
         static const std::string UPDATE;
         static const std::string OUTPUTS;
+        static const std::string WS;
 
         std::mutex m_mutex;
 

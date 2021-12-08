@@ -8,9 +8,8 @@ add_executable(episerver
  "../common/src/epicron.cpp" 
  "../common/src/inimanager.cpp" 
  "../common/src/inisection.cpp" 
- "../common/src/utils.cpp" 
- "../common/src/jsonutils.cpp"
- "../external/jsoncpp/dist/jsoncpp.cpp" 
+ "../common/src/epiutils.cpp" 
+ "../common/src/jsonutils.cpp" 
  "../external/uuid/guid.cpp" 
  "../external/uuid/md5.cpp" 
  "src/audiofile.cpp"
@@ -18,8 +17,8 @@ add_executable(episerver
  "src/launcher.cpp"
  "src/main.cpp"
  "src/version.cpp"
- "../common/src/mongoose.c" "src/mongooseserver.cpp" "src/mp3file.cpp" "src/proccheck.cpp" "src/resource.cpp" "src/ntpstatus.cpp"
- "src/resourcemanager.cpp" "src/sysinfomanager.cpp" "src/uidutils.cpp" "src/wavfile.cpp" "../external/log/src/log.cpp" "../common/src/logtofile.cpp")
+ "src/mp3file.cpp" "src/proccheck.cpp" "src/resource.cpp" "src/ntpstatus.cpp"
+ "src/resourcemanager.cpp" "src/sysinfomanager.cpp" "src/uidutils.cpp" "src/wavfile.cpp" "../common/src/logtofile.cpp")
 
 
 list(APPEND flags "-fPIC" "-Wall" "-fpermissive" "-O3" "-pthread")
@@ -33,13 +32,14 @@ if(TARGET PkgConfig::sndfile)
 	target_link_libraries(episerver PkgConfig::sndfile)
 endif()
 
-include_directories(${PROJECT_SOURCE_DIR}/../external/jsoncpp/dist)
-include_directories(${PROJECT_SOURCE_DIR}/../external/log/include)
+include_directories(${DIR_JSON}/dist)
+include_directories(${DIR_LOG}/include)
+include_directories(${DIR_RESTGOOSE}/include)
 include_directories(${PROJECT_SOURCE_DIR}/../external/uuid)
 include_directories(${PROJECT_SOURCE_DIR}/../common/include)
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-target_link_libraries(episerver pthread sndfile ssl crypto)
+target_link_libraries(episerver pthread sndfile ssl crypto restgoose)
 
 set_target_properties(episerver PROPERTIES RUNTIME_OUTPUT_DIRECTORY "../../bin/")
 

@@ -68,6 +68,14 @@ Json::Value ConvertToJson(const std::string& str)
         std::cout << e.what() << std::endl;
         std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
     }
+    catch(const Json::LogicError& e)
+    {
+        std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+        std::cout << str << std::endl;
+        std::cout << e.what() << std::endl;
+        std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+    }
 
     return jsData;
 }
+

@@ -1,5 +1,5 @@
 #include "launcher.h"
-#include "utils.h"
+#include "epiutils.h"
 #include "resource.h"
 #include <unistd.h>
 #include <string>
@@ -37,11 +37,11 @@ bool ReadFromPipe(int nFd, std::string& sBuffer, std::vector<std::string>& vLine
     }
 //    else if(nRead == 0)
 //    {
-//        pml::Log::Get(pml::Log::LOG_INFO) << "Pipe read EOF" << std::endl;
+//        pmlLog(pml::LOG_INFO) << "Pipe read EOF" << std::endl;
 //    }
 //    else
 //    {
-//        pml::Log::Get(pml::Log::LOG_ERROR) << "Pipe read error: " << nRead << "=" << strerror(nRead) << std::endl;
+//        pmlLog(pml::LOG_ERROR) << "Pipe read error: " << nRead << "=" << strerror(nRead) << std::endl;
 //    }
 
     return false;
@@ -90,7 +90,7 @@ bool Launcher::IsPlaying() const
 
 response Launcher::LaunchPlayer(std::string sType, std::string sUid, int nLoop, bool bShuffle)
 {
-    pml::Log::Get(pml::Log::LOG_DEBUG) << "Launcher\tLaunchPlayer: ";
+    pmlLog(pml::LOG_DEBUG) << "Launcher\tLaunchPlayer: ";
 
     int nError = pipe(m_nPipe);
     if(nError != 0)
@@ -100,7 +100,7 @@ response Launcher::LaunchPlayer(std::string sType, std::string sUid, int nLoop, 
         theResponse.jsonData["error_code"] = nError;
         theResponse.jsonData["error"] = strerror(nError);
 
-        pml::Log::Get(pml::Log::LOG_ERROR) << "could not open pipe: " << strerror(nError) << std::endl;
+        pmlLog(pml::LOG_ERROR) << "could not open pipe: " << strerror(nError) << std::endl;
 
         return theResponse;
     }
@@ -116,7 +116,7 @@ response Launcher::LaunchPlayer(std::string sType, std::string sUid, int nLoop, 
         theResponse.jsonData["error_code"] = nError;
         theResponse.jsonData["error"] = strerror(nError);
 
-        pml::Log::Get(pml::Log::LOG_ERROR) << "could not fork: " << strerror(nError) << std::endl;
+        pmlLog(pml::LOG_ERROR) << "could not fork: " << strerror(nError) << std::endl;
 
         return theResponse;
     }
@@ -174,7 +174,7 @@ response Launcher::StopPlayer()
         theResponse.nHttpCode = 409;
         theResponse.jsonData["result"] = false;
         theResponse.jsonData["reason"].append("Player not running");
-        pml::Log::Get(pml::Log::LOG_WARN) << "- Player not running" << std::endl;
+        pmlLog(pml::LOG_WARN) << "- Player not running" << std::endl;
     }
     else
     {
@@ -184,12 +184,12 @@ response Launcher::StopPlayer()
             theResponse.nHttpCode = 500;
             theResponse.jsonData["result"] = "Could not send signal to player";
             theResponse.jsonData["reason"] = strerror(nError);
-            pml::Log::Get(pml::Log::LOG_ERROR) << "- Could not send signal to player" << std::endl;
+            pmlLog(pml::LOG_ERROR) << "- Could not send signal to player" << std::endl;
         }
         else
         {
             theResponse.jsonData["result"] = true;
-            pml::Log::Get(pml::Log::LOG_INFO) << "- Signal sent to player" << std::endl;
+            pmlLog(pml::LOG_INFO) << "- Signal sent to player" << std::endl;
         }
     }
     return theResponse;
@@ -203,7 +203,7 @@ response Launcher::PausePlayer()
         theResponse.nHttpCode = 409;
         theResponse.jsonData["result"] = false;
         theResponse.jsonData["reason"].append("Player not running");
-        pml::Log::Get(pml::Log::LOG_WARN) << "- Player not running" << std::endl;
+        pmlLog(pml::LOG_WARN) << "- Player not running" << std::endl;
     }
     return theResponse;
 }
@@ -242,7 +242,7 @@ void Launcher::PipeThread()
                 FD_CLR(m_nPipe[READ], &read_set);
                 close(m_nPipe[READ]);
                 m_nPipe[READ] = -1;
-                pml::Log::Get(pml::Log::LOG_ERROR) << "PipeThread\tTimeout" << std::endl;
+                pmlLog(pml::LOG_ERROR) << "PipeThread\tTimeout" << std::endl;
                 break;
             }
             else if(nSelect > 0)
@@ -264,7 +264,7 @@ void Launcher::PipeThread()
                         FD_CLR(m_nPipe[READ], &read_set);
                         close(m_nPipe[READ]);
                         m_nPipe[READ] = -1;
-                        pml::Log::Get() << "PipeThread\tEOF or Read Error" << std::endl;
+                        pmlLog() << "PipeThread\tEOF or Read Error" << std::endl;
                         break;
 
                     }
@@ -273,7 +273,7 @@ void Launcher::PipeThread()
             }
             else    //error
             {
-                pml::Log::Get() << "PipeThread\tSelect Error" << std::endl;
+                pmlLog() << "PipeThread\tSelect Error" << std::endl;
                 break;
             }
         }

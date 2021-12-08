@@ -1,5 +1,5 @@
 #include "resource.h"
-#include "utils.h"
+#include "epiutils.h"
 #include "jsonutils.h"
 
 Resource::Resource(const std::string& sType, const std::string& sUid, const std::string& sLabel, const std::string& sDescription) :

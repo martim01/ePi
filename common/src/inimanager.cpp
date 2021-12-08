@@ -72,7 +72,7 @@ bool iniManager::ReadIniFile(const string& sFilename)
 	m_if.open(m_sFilename.c_str(),ios::in);
 	if(!m_if.is_open())
 	{
-	    pml::Log::Get(pml::Log::LOG_ERROR) << "IniManager file '" << m_sFilename << "' does not exist" << endl;
+	    pmlLog(pml::LOG_ERROR) << "IniManager file '" << m_sFilename << "' does not exist" << endl;
 		return false;
 	}
 
@@ -90,7 +90,7 @@ bool iniManager::ReadIniFile(const string& sFilename)
 			size_t nClosePos = sLine.find("]");
 			if(nClosePos == std::string::npos)	//this is an error
             {
-                pml::Log::Get(pml::Log::LOG_ERROR) << "IniManager file '" << m_sFilename << "' invalid section" << endl;
+                pmlLog(pml::LOG_ERROR) << "IniManager file '" << m_sFilename << "' invalid section" << endl;
                 return false;
             }
 			string sSection(getlower(sLine.substr(1,nClosePos-1)));

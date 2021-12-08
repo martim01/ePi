@@ -2,7 +2,7 @@
 #include <sys/sysinfo.h>
 #include <sys/statvfs.h>
 #include <fstream>
-#include "utils.h"
+#include "epiutils.h"
 #include "version.h"
 #include <algorithm>
 #include "log.h"

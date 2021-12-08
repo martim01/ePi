@@ -9,7 +9,7 @@
 #include <error.h>
 #include <unistd.h>
 #include <algorithm>
-#include "utils.h"
+#include "epiutils.h"
 
 const std::string NtpStatus::clksrcname[10] = {  /* Refer RFC-1305, Appendix B, Section 2.2.1 */
     "unspecified",    /* 0 */

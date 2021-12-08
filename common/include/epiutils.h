@@ -30,6 +30,6 @@ extern std::string GetCurrentTimeAsIsoString();
 
 
 extern std::string GetIpAddress(const std::string& sInterface);
-extern std::string exec(const std::string& sCmd);
+extern std::string Exec(const std::string& sCmd);
 
 

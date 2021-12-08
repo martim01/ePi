@@ -1,5 +1,5 @@
 #include "epicron.h"
-#include "utils.h"
+#include "epiutils.h"
 #include "log.h"
 
 CronJob::CronJob(const std::string& sCron) : m_vElement(6), m_bGMT(false), m_bLast(true), m_bNext(true)
@@ -60,7 +60,7 @@ bool CronJob::ParseString(const std::string& sCron)
             {
                 if(GetList(vCron[nElement], m_vElement[nElement]) == false)
                 {
-                    pml::Log::Get(pml::Log::LOG_ERROR) << nElement << ": " << vCron[nElement] << " is incorrect";
+                    pmlLog(pml::LOG_ERROR) << nElement << ": " << vCron[nElement] << " is incorrect";
                     return false;
                 }
 
@@ -69,7 +69,7 @@ bool CronJob::ParseString(const std::string& sCron)
 
         if(!ParseYears(vCron[YEARS]))
         {
-            pml::Log::Get(pml::Log::LOG_ERROR) << "YEAR: " << vCron[YEARS] << " is incorrect";
+            pmlLog(pml::LOG_ERROR) << "YEAR: " << vCron[YEARS] << " is incorrect";
             return false;
         }
     }
@@ -83,16 +83,16 @@ bool CronJob::ParseString(const std::string& sCron)
         {
             if(i == DOMS && j == 31)
             {
-                pml::Log::Get(pml::Log::LOG_DEBUG) << "[";
+                pmlLog(pml::LOG_DEBUG) << "[";
             }
-            pml::Log::Get(pml::Log::LOG_DEBUG) << m_vElement[i].vBits[j];
+            pmlLog(pml::LOG_DEBUG) << m_vElement[i].vBits[j];
             if(i == DOMS && j == 31)
             {
-                pml::Log::Get(pml::Log::LOG_DEBUG) << "]";
+                pmlLog(pml::LOG_DEBUG) << "]";
             }
         }
     }
-    pml::Log::Get(pml::Log::LOG_DEBUG) << std::endl;
+    pmlLog(pml::LOG_DEBUG) << std::endl;
     #endif
 
     return true;

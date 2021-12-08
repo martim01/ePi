@@ -27,7 +27,7 @@ pid_t FindProc(const std::string& sProc, bool bKill)
 
     if (!(dir = opendir("/proc")))
     {
-        Log::Get(Log::LOG_ERROR) << "can't open /proc" << std::endl;
+        pmlLog(pml::LOG_ERROR) << "can't open /proc" << std::endl;
         return true;
     }
 
