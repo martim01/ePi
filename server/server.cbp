@@ -102,7 +102,6 @@
 		<Unit filename="include/proccheck.h" />
 		<Unit filename="include/resource.h" />
 		<Unit filename="include/resourcemanager.h" />
-		<Unit filename="include/response.h" />
 		<Unit filename="include/sysinfomanager.h" />
 		<Unit filename="include/uidutils.h" />
 		<Unit filename="include/version.h" />

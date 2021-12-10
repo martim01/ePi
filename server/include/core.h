@@ -15,42 +15,42 @@ class Core
 
 
 
-        response GetRoot(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-        response GetEpi(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response GetRoot(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        response GetEpi(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
 
-        response GetFiles(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-        response GetPlaylists(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-        response GetSchedules(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-        response GetConfig(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-        response GetInfo(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-        response GetPower(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-        response GetFile(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-        response GetPlaylist(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-        response GetSchedule(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-        response GetStatus(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-        response GetUpdate(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-        response GetOutputs(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-
-
-        response PatchStatus(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-        response PatchConfig(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-        response PatchFile(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-
-        response PutFile(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-
-        response PutPlaylist(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-        response PutSchedule(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-        response PutPower(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-        response PutUpdate(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response GetFiles(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        response GetPlaylists(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        response GetSchedules(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        response GetConfig(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        response GetInfo(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        response GetPower(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        response GetFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        response GetPlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        response GetSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        response GetStatus(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        response GetUpdate(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        response GetOutputs(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
 
 
-        response DeleteFile(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-        response DeletePlaylist(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-        response DeleteSchedule(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response PatchStatus(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        response PatchConfig(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        response PatchFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
 
-        response PostFile(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-        response PostPlaylist(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
-        response PostSchedule(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser);
+        response PutFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+
+        response PutPlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        response PutSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        response PutPower(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        response PutUpdate(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+
+
+        response DeleteFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        response DeletePlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        response DeleteSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+
+        response PostFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        response PostPlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        response PostSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
 
 
         void StatusCallback(const std::string& sData);

@@ -79,7 +79,7 @@ class ResourceManager
 
 
 
-        response ParseFiles(const Json::Value& jsData);
+        response ParseFileData(const Json::Value& jsData);
         response ParseResource(const Json::Value& jsData);
         response ParseFile(const std::string& sUploadName, const std::string& sLabel, const std::string& sDescription);
         response ParseSchedule(const Json::Value& jsData);

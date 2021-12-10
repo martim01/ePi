@@ -52,22 +52,22 @@ const endpoint Core::EP_UPDATE      = endpoint(EP_EPI.Get()+"/"+UPDATE);
 const endpoint Core::EP_OUTPUTS     = endpoint(EP_EPI.Get()+"/"+OUTPUTS);
 const endpoint Core::EP_WS          = endpoint(ROOT+WS);
 
-response ConvertPostDataToJson(const postData& theData)
+response ConvertPostDataToJson(const postData& vData)
 {
     response resp(404, "No data sent or incorrect data sent");
-    if(theData.size() == 1)
+    if(vData.size() == 1)
     {
         resp.nHttpCode = 200;
-        resp.jsonData = ConvertToJson(std::string(theData[0].vData.begin(), theData[0].vData.end()));
+        resp.jsonData = ConvertToJson(vData[0].sData);
     }
-    else if(theData.size() > 1)
+    else if(vData.size() > 1)
     {
         resp.nHttpCode = 200;
-        for(size_t i = 0; i < theData.size(); i++)
+        for(size_t i = 0; i < vData.size(); i++)
         {
-            if(theData[i].sName.empty() == false)
+            if(vData[i].sName.empty() == false)
             {
-                resp.jsonData[theData[i].sName] = std::string(theData[i].vData.begin(), theData[i].vData.end());
+                resp.jsonData[vData[i].sName] = vData[i].sData;
             }
         }
     }
@@ -223,7 +223,7 @@ bool Core::CreateEndpoints()
     return true;
 }
 
-response Core::GetRoot(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::GetRoot(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetRoot" ;
     response theResponse;
@@ -231,7 +231,7 @@ response Core::GetRoot(const query& theQuery, const postData& theData, const end
     return theResponse;
 }
 
-response Core::GetEpi(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::GetEpi(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetEpi" ;
     response theResponse;
@@ -247,25 +247,25 @@ response Core::GetEpi(const query& theQuery, const postData& theData, const endp
     return theResponse;
 }
 
-response Core::GetFiles(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::GetFiles(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetFiles" ;
     return m_manager.GetFiles();
 }
 
-response Core::GetPlaylists(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::GetPlaylists(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetPlaylists" ;
     return m_manager.GetPlaylists();
 }
 
-response Core::GetSchedules(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::GetSchedules(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetSchedules" ;
     return m_manager.GetSchedules();
 }
 
-response Core::GetConfig(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::GetConfig(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetConfig" ;
     response theResponse;
@@ -291,7 +291,7 @@ response Core::GetConfig(const query& theQuery, const postData& theData, const e
     return theResponse;
 }
 
-response Core::GetUpdate(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::GetUpdate(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     //get all the version numbers...
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetUpdate" ;
@@ -309,7 +309,7 @@ response Core::GetUpdate(const query& theQuery, const postData& theData, const e
     return theResponse;
 }
 
-response Core::GetOutputs(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::GetOutputs(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     //get all the version numbers...
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetOutputs" ;
@@ -323,7 +323,7 @@ response Core::GetOutputs(const query& theQuery, const postData& theData, const 
     return theResponse;
 }
 
-response Core::GetStatus(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::GetStatus(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     //lock as jsStatus can be called by pipe thread and server thread
     std::lock_guard<std::mutex> lg(m_mutex);
@@ -337,7 +337,7 @@ response Core::GetStatus(const query& theQuery, const postData& theData, const e
 }
 
 
-response Core::GetInfo(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::GetInfo(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetInfo" ;
 
@@ -348,7 +348,7 @@ response Core::GetInfo(const query& theQuery, const postData& theData, const end
     return theResponse;
 }
 
-response Core::GetPower(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::GetPower(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetPower" ;
     response theResponse;
@@ -357,14 +357,14 @@ response Core::GetPower(const query& theQuery, const postData& theData, const en
     return theResponse;
 }
 
-response Core::GetFile(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::GetFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetFile" ;
     std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
     return m_manager.GetFile(vSplit.back());
 }
 
-response Core::GetPlaylist(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::GetPlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetPlaylist" ;
     std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
@@ -372,7 +372,7 @@ response Core::GetPlaylist(const query& theQuery, const postData& theData, const
     return m_manager.GetPlaylist(vSplit.back());
 }
 
-response Core::GetSchedule(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::GetSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetSchedule" ;
     std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
@@ -381,11 +381,11 @@ response Core::GetSchedule(const query& theQuery, const postData& theData, const
 }
 
 
-response Core::PatchStatus(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::PatchStatus(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PatchStatus" ;
 
-    auto theResponse = ConvertPostDataToJson(theData);
+    auto theResponse = ConvertPostDataToJson(vData);
     if(theResponse.nHttpCode == 200)
     {
         theResponse = m_manager.ModifyStatus(theResponse.jsonData);
@@ -398,7 +398,7 @@ response Core::PatchStatus(const query& theQuery, const postData& theData, const
     return theResponse;
 }
 
-response Core::PutPower(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::PutPower(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PutPower: ";
 
@@ -408,7 +408,7 @@ response Core::PutPower(const query& theQuery, const postData& theData, const en
         return theResponse;
     }
 
-    theResponse = ConvertPostDataToJson(theData);
+    theResponse = ConvertPostDataToJson(vData);
     if(theResponse.nHttpCode != 200)
     {
         return theResponse;
@@ -450,11 +450,11 @@ response Core::PutPower(const query& theQuery, const postData& theData, const en
     return theResponse;
 }
 
-response Core::PatchConfig(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::PatchConfig(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PatchConfig" ;
 
-    auto theResponse = ConvertPostDataToJson(theData);
+    auto theResponse = ConvertPostDataToJson(vData);
     if(theResponse.nHttpCode != 200)
     {
         return theResponse;
@@ -500,7 +500,7 @@ response Core::PatchConfig(const query& theQuery, const postData& theData, const
             m_iniConfig.WriteIniFile();
             InitLogging();  //change logging if necessary
             m_manager.InitPaths();  //change paths if necessary
-            theResponse = GetConfig(theQuery, theData, theEndpoint, theUser);
+            theResponse = GetConfig(theQuery, vData, theEndpoint, theUser);
             theResponse.jsonData["result"] = true;
         }
     }
@@ -555,7 +555,7 @@ void Core::ResourceModified(enumType eType, const std::string& sUid, enumModific
     m_jsResources.append(jsValue);
 }
 
-response Core::PatchFile(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::PatchFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PatchFile" ;
 
@@ -564,7 +564,7 @@ response Core::PatchFile(const query& theQuery, const postData& theData, const e
     {
         std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
 
-        theResponse = ConvertPostDataToJson(theData);
+        theResponse = ConvertPostDataToJson(vData);
         if(theResponse.nHttpCode == 200)
         {
             theResponse = m_manager.ModifyFileMeta(vSplit.back(), theResponse.jsonData);
@@ -578,7 +578,7 @@ response Core::PatchFile(const query& theQuery, const postData& theData, const e
     return theResponse;
 }
 
-response Core::PutFile(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::PutFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PutFile" ;
 
@@ -587,32 +587,21 @@ response Core::PutFile(const query& theQuery, const postData& theData, const end
     {
         std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
 
-        if(theData.empty() == false)
-        {
-            response resp(404);
-            resp.jsonData["result"] = "No data sent or incorrect data sent";
-            return resp;
-        }
-        Json::Value jsData;
-        for(size_t i = 0; i < theData.size(); i++)
-        {
-            if(theData[i].sName.empty() == false)
-            {
-                jsData[theData[i].sName] = std::string(theData[i].vData.begin(), theData[i].vData.end());
-            }
-        }
-        //@todo put file
-        //theResponse = m_manager.ModifyFile(vSplit.back(), jsData);
-
+        theResponse = ConvertPostDataToJson(vData);
         if(theResponse.nHttpCode == 200)
         {
-            ResourceModified(FILE, vSplit.back(), MODIFIED);
+            theResponse = m_manager.ModifyFile(vSplit.back(), theResponse.jsonData);
+
+            if(theResponse.nHttpCode == 200)
+            {
+                ResourceModified(FILE, vSplit.back(), MODIFIED);
+            }
         }
     }
     return theResponse;
 }
 
-response Core::PutPlaylist(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::PutPlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PutPlaylist" ;
 
@@ -620,7 +609,7 @@ response Core::PutPlaylist(const query& theQuery, const postData& theData, const
     if(theResponse.nHttpCode != 423)
     {
         std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
-        theResponse = ConvertPostDataToJson(theData);
+        theResponse = ConvertPostDataToJson(vData);
         if(theResponse.nHttpCode == 200)
         {
             theResponse = m_manager.ModifyPlaylist(vSplit.back(), theResponse.jsonData);
@@ -633,7 +622,7 @@ response Core::PutPlaylist(const query& theQuery, const postData& theData, const
     return theResponse;
 }
 
-response Core::PutSchedule(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::PutSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PutSchedule" ;
 
@@ -641,7 +630,7 @@ response Core::PutSchedule(const query& theQuery, const postData& theData, const
     if(theResponse.nHttpCode != 423)
     {
         std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
-        theResponse = ConvertPostDataToJson(theData);
+        theResponse = ConvertPostDataToJson(vData);
         if(theResponse.nHttpCode == 200)
         {
             theResponse = m_manager.ModifySchedule(vSplit.back(), theResponse.jsonData);
@@ -655,7 +644,7 @@ response Core::PutSchedule(const query& theQuery, const postData& theData, const
 }
 
 
-response Core::DeleteFile(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::DeleteFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "DeleteFile" ;
 
@@ -680,7 +669,7 @@ response Core::DeleteFile(const query& theQuery, const postData& theData, const 
     return theResponse;
 }
 
-response Core::DeletePlaylist(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::DeletePlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "DeletePlaylist" ;
     response theResponse(m_manager.IsLocked());
@@ -704,7 +693,7 @@ response Core::DeletePlaylist(const query& theQuery, const postData& theData, co
     return theResponse;
 }
 
-response Core::DeleteSchedule(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::DeleteSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "DeleteSchedule" ;
     std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
@@ -729,42 +718,40 @@ response Core::DeleteSchedule(const query& theQuery, const postData& theData, co
 }
 
 
-response Core::PostFile(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::PostFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
-    //@todo PostFile
-    //pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PostFile " << theData;
-    //Json::Value jsonData(ConvertToJson(theData.Get()));
+    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PostFile ";
 
-//    response theResponse(m_manager.IsLocked());
-//    if(theResponse.nHttpCode != 423)
-//    {
-//        theResponse = m_manager.AddFiles(jsonData);
-//        pmlLog() << theResponse.jsonData ;
-//        pmlLog() << theResponse.nHttpCode ;
-//
-//        if(theResponse.nHttpCode == 201)
-//        {
-//            endpoint aUrl(endpoint(EP_FILES.Get()+"/"+theResponse.jsonData["uid"].asString()));
-//
-//            m_server.AddEndpoint(methodpoint(RestGoose::GET, aUrl), std::bind(&Core::GetFile, this, _1,_2,_3,_4));
-//            m_server.AddEndpoint(methodpoint(RestGoose::PATCH, aUrl), std::bind(&Core::PatchFile, this, _1,_2,_3,_4));
-//            m_server.AddEndpoint(methodpoint(RestGoose::PUT, aUrl), std::bind(&Core::PutFile, this, _1,_2,_3,_4));
-//            m_server.AddEndpoint(methodpoint(RestGoose::HTTP_DELETE, aUrl), std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
-//
-//            ResourceModified(FILE, theResponse.jsonData["uid"].asString(), ADDED);
-//        }
-//    }
-//    return theResponse;
+    response theResponse(m_manager.IsLocked());
+    if(theResponse.nHttpCode != 423)
+    {
+        theResponse = m_manager.AddFiles(ConvertPostDataToJson(vData).jsonData);
+        pmlLog() << theResponse.jsonData ;
+        pmlLog() << theResponse.nHttpCode ;
+
+        if(theResponse.nHttpCode == 201)
+        {
+            endpoint aUrl(endpoint(EP_FILES.Get()+"/"+theResponse.jsonData["uid"].asString()));
+
+            m_server.AddEndpoint(methodpoint(RestGoose::GET, aUrl), std::bind(&Core::GetFile, this, _1,_2,_3,_4));
+            m_server.AddEndpoint(methodpoint(RestGoose::PATCH, aUrl), std::bind(&Core::PatchFile, this, _1,_2,_3,_4));
+            m_server.AddEndpoint(methodpoint(RestGoose::PUT, aUrl), std::bind(&Core::PutFile, this, _1,_2,_3,_4));
+            m_server.AddEndpoint(methodpoint(RestGoose::HTTP_DELETE, aUrl), std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
+
+            ResourceModified(FILE, theResponse.jsonData["uid"].asString(), ADDED);
+        }
+    }
+    return theResponse;
 }
 
-response Core::PostPlaylist(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::PostPlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PostPlaylist" ;
 
     response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode != 423)
     {
-        theResponse = ConvertPostDataToJson(theData);
+        theResponse = ConvertPostDataToJson(vData);
         if(theResponse.nHttpCode == 200)
         {
             theResponse = m_manager.AddPlaylist(theResponse.jsonData);
@@ -783,13 +770,13 @@ response Core::PostPlaylist(const query& theQuery, const postData& theData, cons
     return theResponse;
 }
 
-response Core::PostSchedule(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::PostSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PostSchedule" ;
     response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode != 423)
     {
-        theResponse = ConvertPostDataToJson(theData);
+        theResponse = ConvertPostDataToJson(vData);
         if(theResponse.nHttpCode == 200)
         {
             theResponse = m_manager.AddSchedule(theResponse.jsonData);
@@ -912,7 +899,7 @@ void Core::LoopCallback(int nTook)
 }
 
 
-response Core::PutUpdate(const query& theQuery, const postData& theData, const endpoint& theEndpoint, const userName& theUser)
+response Core::PutUpdate(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PutUpdate" ;
     response theResponse(m_manager.IsLocked());
@@ -921,7 +908,7 @@ response Core::PutUpdate(const query& theQuery, const postData& theData, const e
         return theResponse;
     }
 
-    theResponse = ConvertPostDataToJson(theData);
+    theResponse = ConvertPostDataToJson(vData);
     if(theResponse.nHttpCode == 200)
     {
         return m_manager.UpdateApplication(theResponse.jsonData);
