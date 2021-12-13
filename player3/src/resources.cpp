@@ -2,7 +2,7 @@
 #include "log.h"
 #include <fstream>
 #include "inimanager.h"
-#include "utils.h"
+#include "epiutils.h"
 
 Resources& Resources::Get()
 {
@@ -23,7 +23,7 @@ bool Resources::Load(const iniManager& iniConfig)
     ifs.open(CreatePath(iniConfig.GetIniString("Paths", "Resources", "/var/ePi/resources"))+"resources.json", std::ifstream::in);
     if(!ifs.is_open())
     {
-        pml::Log::Get(pml::Log::LOG_CRITICAL) << "Schedule\tCould not open resources file!" << std::endl;
+        pmlLog(pml::LOG_CRITICAL) << "Schedule\tCould not open resources file!" << std::endl;
 		return false;
 	}
 

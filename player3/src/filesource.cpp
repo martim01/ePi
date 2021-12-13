@@ -4,7 +4,7 @@
 #include "mp3file.h"
 #include "soundfile.h"
 #include "epiwriter.h"
-#include "utils.h"
+#include "epiutils.h"
 #include "inimanager.h"
 #include "log.h"
 

@@ -63,6 +63,7 @@ response ConvertPostDataToJson(const postData& vData)
     else if(vData.size() > 1)
     {
         resp.nHttpCode = 200;
+        resp.jsonData.clear();
         for(size_t i = 0; i < vData.size(); i++)
         {
             if(vData[i].sName.empty() == false)

@@ -4,7 +4,7 @@
 #include "filesource.h"
 #include <fstream>
 #include "inimanager.h"
-#include "utils.h"
+#include "epiutils.h"
 #include "log.h"
 #include <thread>
 #include "epiwriter.h"
@@ -128,19 +128,19 @@ bool Schedule::CreateSchedule(const Json::Value& jsFiles, const Json::Value& jsP
         {
             if(jsSchedule["playlists"][i]["uid"].isString() == false)
             {
-                pml::Log::Get() << "uid" << std::endl;
+                pmlLog() << "uid" << std::endl;
             }
             if(jsSchedule["playlists"][i]["times_to_play"].isInt() == false)
             {
-                pml::Log::Get() << "times_to_play" << std::endl;
+                pmlLog() << "times_to_play" << std::endl;
             }
             if(jsSchedule["playlists"][i]["cron"].isString() == false)
             {
-                pml::Log::Get() << "cron" << std::endl;
+                pmlLog() << "cron" << std::endl;
             }
             if(jsSchedule["playlists"][i]["shuffle"].isBool() == false)
             {
-                pml::Log::Get() << "shuffle" << std::endl;
+                pmlLog() << "shuffle" << std::endl;
             }
 
 

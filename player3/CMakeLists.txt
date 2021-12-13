@@ -9,11 +9,10 @@ message(${PROJECT_SOURCE_DIR})
 add_executable(player3 "../common/src/epicron.cpp"
 					   "../common/src/inimanager.cpp"
 						"../common/src/inisection.cpp"
-						"../common/src/utils.cpp"
-                                                "../common/src/jsonutils.cpp"
+						"../common/src/epiutils.cpp"
+                        "../common/src/jsonutils.cpp"
 						"../common/src/logtofile.cpp"
-                        "../external/log/src/log.cpp"
-						"../external/jsoncpp/dist/jsoncpp.cpp"
+						${DIR_JSON}/dist/jsoncpp.cpp
 						"src/main.cpp"
 						"src/audiofile.cpp"
 						"../common/src/epiwriter.cpp"
@@ -25,23 +24,18 @@ add_executable(player3 "../common/src/epicron.cpp"
 						"src/resources.cpp"
 						"src/schedule.cpp"
 						"src/soundfile.cpp"
-                                                "src/version.cpp")
+                        "src/version.cpp")
 
-include_directories(${PROJECT_SOURCE_DIR}/../external/jsoncpp/dist)
-include_directories(${PROJECT_SOURCE_DIR}/../external/log/include)
+include_directories(${DIR_JSON}/dist)
+include_directories(${DIR_LOG}/include)
+						
 include_directories(${PROJECT_SOURCE_DIR}/../common/include)
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-list(APPEND flags "-fPIC" "-Wall" "-fpermissive" "-O3" "-pthread")
+list(APPEND flags "-fPIC" "-Wall" "-fpermissive" "-O3" "-pthread" )
 target_compile_options(player3 PRIVATE ${flags})
 target_compile_definitions(player3 PUBLIC NDEBUG)
 
-
-
-
-#log
-find_path(LOG_LIB_DIR NAMES "include/log.h" PATHS ${PROJECT_SOURCE_DIR}/../external/log)
-include_directories(${LOG_LIB_DIR}/include)
 
 #use pkgconfig to find the required libs
 find_package(PkgConfig REQUIRED QUIET)
@@ -63,7 +57,7 @@ if(TARGET PkgConfig::sndfile)
 	target_link_libraries(player3 PkgConfig::sndfile)
 endif()
 
-target_link_libraries(player3 pthread sndfile portaudio samplerate)
+target_link_libraries(player3 pthread sndfile portaudio samplerate pml_log)
 
 set_target_properties(player3 PROPERTIES RUNTIME_OUTPUT_DIRECTORY "../../bin/")
 

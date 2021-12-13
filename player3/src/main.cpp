@@ -9,7 +9,7 @@
 #include "soundfile.h"
 #include "resampler.h"
 #include <thread>
-#include "utils.h"
+#include "epiutils.h"
 #include <mutex>
 #include <condition_variable>
 #include "filesource.h"
@@ -122,13 +122,13 @@ int main(int argc, char* argv[])
 
     if(argc == DEBUG+1)
     {
-        pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
-        pml::Log::Get().SetOutputLevel(pml::Log::LOG_TRACE);
-        pml::Log::Get() << "Logging to console!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+        pml::LogStream::AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
+        pml::LogStream::SetOutputLevel(pml::LOG_TRACE);
+        pmlLog() << "Logging to console!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
     };
     if(iniConfig.GetIniInt("logging", "file", 0) == 1)
     {
-        pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new LogToFile(CreatePath(iniConfig.GetIniString("paths","logs","."))+"player3")));
+        pml::LogStream::AddOutput(std::unique_ptr<pml::LogOutput>(new LogToFile(CreatePath(iniConfig.GetIniString("paths","logs","."))+"player3")));
     }
 
     try

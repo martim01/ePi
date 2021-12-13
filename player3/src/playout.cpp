@@ -27,7 +27,7 @@ bool Playout::Init(double dLatency, unsigned long nSampleRate)
 
 bool Playout::OpenStream(double dLatency, unsigned long nSampleRate, PaStreamCallback *streamCallback)
 {
-    pml::Log::Get() << "Audio\tAttempt to open device " << m_nDevice << std::endl;
+    pmlLog() << "Audio\tAttempt to open device " << m_nDevice << std::endl;
 
 
     PaStreamParameters outputParameters;
@@ -38,7 +38,7 @@ bool Playout::OpenStream(double dLatency, unsigned long nSampleRate, PaStreamCal
         if(pInfo->maxOutputChannels < 2)
         {
             m_nChannelsOut = pInfo->maxInputChannels;
-            pml::Log::Get() << "Audio\tOutput channels changed to " << m_nChannelsOut << std::endl;
+            pmlLog() << "Audio\tOutput channels changed to " << m_nChannelsOut << std::endl;
         }
         else
         {
@@ -56,7 +56,7 @@ bool Playout::OpenStream(double dLatency, unsigned long nSampleRate, PaStreamCal
 
     PaError err;
 
-    pml::Log::Get() << "Audio\tAttempt to open " << m_nChannelsOut << " channel OUTPUT stream on device " <<  m_nDevice << std::endl;
+    pmlLog() << "Audio\tAttempt to open " << m_nChannelsOut << " channel OUTPUT stream on device " <<  m_nDevice << std::endl;
 
     err = Pa_OpenStream(&m_pStream, 0, &outputParameters, nSampleRate, 0, paNoFlag, streamCallback, reinterpret_cast<void*>(this) );
 
@@ -69,18 +69,18 @@ bool Playout::OpenStream(double dLatency, unsigned long nSampleRate, PaStreamCal
             const PaStreamInfo* pStreamInfo = Pa_GetStreamInfo(m_pStream);
             if(pStreamInfo)
             {
-                pml::Log::Get() << "Audio\tStreamInfo:  Output Latency " << pStreamInfo->outputLatency << " Sample Rate " << pStreamInfo->sampleRate << std::endl;
+                pmlLog() << "Audio\tStreamInfo:  Output Latency " << pStreamInfo->outputLatency << " Sample Rate " << pStreamInfo->sampleRate << std::endl;
             }
             else
             {
-                pml::Log::Get(pml::Log::LOG_ERROR) << "Audio\tOpened but no stream info." << std::endl;
+                pmlLog(pml::LOG_ERROR) << "Audio\tOpened but no stream info." << std::endl;
                 return false;
             }
             return true;
         }
     }
     m_pStream = 0;
-    pml::Log::Get(pml::Log::LOG_ERROR) << "Audio\tFailed to open device " << m_nDevice << " " << Pa_GetErrorText(err)
+    pmlLog(pml::LOG_ERROR) << "Audio\tFailed to open device " << m_nDevice << " " << Pa_GetErrorText(err)
                                        << " with sample rate="<<nSampleRate <<" and output channels=" << m_nChannelsOut << std::endl;
 
 
@@ -97,7 +97,7 @@ Playout::~Playout()
         err = Pa_CloseStream(m_pStream);
         if(err != paNoError)
         {
-            pml::Log::Get(pml::Log::LOG_ERROR) << "Audio\tFailed to stop PortAudio stream: " << Pa_GetErrorText(err) << std::endl;
+            pmlLog(pml::LOG_ERROR) << "Audio\tFailed to stop PortAudio stream: " << Pa_GetErrorText(err) << std::endl;
         }
     }
     Pa_Terminate();
@@ -106,7 +106,7 @@ Playout::~Playout()
 
 void Playout::OutputCallback(float* pBuffer, size_t nFrameCount, double dPlayoutLatency, int nFlags)
 {
-    pml::Log::Get(pml::Log::LOG_TRACE) << "OutputCallback";
+    pmlLog(pml::LOG_TRACE) << "OutputCallback";
 
     std::lock_guard<std::mutex> lg(m_mutex);
     size_t nUnderrun(0);
@@ -126,7 +126,7 @@ void Playout::OutputCallback(float* pBuffer, size_t nFrameCount, double dPlayout
 
     if(nUnderrun)
     {
-        pml::Log::Get(pml::Log::LOG_WARN) << "Buffer underrun: " << nUnderrun << std::endl;
+        pmlLog(pml::LOG_WARN) << "Buffer underrun: " << nUnderrun << std::endl;
     }
 
     if(m_qBuffer.size() < 16384)
