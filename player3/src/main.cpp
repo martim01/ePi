@@ -84,13 +84,13 @@ static const int TYPE=2;
 static const int UID=3;
 static const int LOOP=4;
 static const int SHUFFLE=5;
-static const int DEBUG=6;
+static const int _DEBUG=6;
 
 
 
 int main(int argc, char* argv[])
 {    //make sure got all the arguments
-    if(argc < DEBUG && argc != 2)
+    if(argc < _DEBUG && argc != 2)
     {
         return ErrorAndExit("Not enough arguments sent.");
     }
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
     Resources::Get().Load(iniConfig);
 
 
-    if(argc == DEBUG+1)
+    if(argc == _DEBUG+1)
     {
         pml::LogStream::AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
         pml::LogStream::SetOutputLevel(pml::LOG_TRACE);
