@@ -214,7 +214,7 @@ function storeFiles_Dashboard(loopi, jsonObj)
 
 function ws_connect(loopi, statusCallback, systemCallback, resourceCallback)
 {
-	g_loopi_array[loopi].setWebsocket(new WebSocket('ws://' + g_loopi_array[loopi].url));
+	g_loopi_array[loopi].setWebsocket(new WebSocket('ws://' + g_loopi_array[loopi].url+"/ws"));
 	g_loopi_array[loopi].ws.index = loopi;			
 	g_loopi_array[loopi].ws.timeout = true;
 	g_loopi_array[loopi].ws.onopen = function(ev)  { this.tm = setTimeout(loopiOffline, 4000, this.index) };
