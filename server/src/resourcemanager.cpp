@@ -59,11 +59,11 @@ ResourceManager::~ResourceManager()
     SaveResources();
 }
 
-response ResourceManager::AddFiles(const Json::Value& jsData)
+pml::restgoose::response ResourceManager::AddFiles(const Json::Value& jsData)
 {
     pmlLog() << "ResourceManager\tAddFile: " << jsData;
 
-    response theResponse(ParseFileData(jsData));
+    pml::restgoose::response theResponse(ParseFileData(jsData));
     if(theResponse.nHttpCode ==400)
     {
         pmlLog(pml::LOG_ERROR) << "failed - incorrect multipart data";
@@ -78,10 +78,10 @@ response ResourceManager::AddFiles(const Json::Value& jsData)
     return theResponse;
 }
 
-response ResourceManager::AddFile( const std::string& sTmpPathName, const std::string& sLabel, const std::string& sDescription)
+pml::restgoose::response ResourceManager::AddFile( const std::string& sTmpPathName, const std::string& sLabel, const std::string& sDescription)
 {
 
-    response theResponse(ParseFile(sTmpPathName, sLabel, sDescription));
+    pml::restgoose::response theResponse(ParseFile(sTmpPathName, sLabel, sDescription));
 
     if(theResponse.nHttpCode ==400)
     {
@@ -157,11 +157,11 @@ response ResourceManager::AddFile( const std::string& sTmpPathName, const std::s
 
 }
 
-response ResourceManager::AddSchedule(const Json::Value& jsData)
+pml::restgoose::response ResourceManager::AddSchedule(const Json::Value& jsData)
 {
     pmlLog() << "ResourceManager\tAddSchedule: ";
 
-    response theResponse(ParseSchedule(jsData));
+    pml::restgoose::response theResponse(ParseSchedule(jsData));
     if(theResponse.nHttpCode == 200)
     {
         if(ResourceExists(jsData["label"].asString(), m_mSchedules))
@@ -207,12 +207,12 @@ response ResourceManager::AddSchedule(const Json::Value& jsData)
 }
 
 
-response ResourceManager::AddPlaylist(const Json::Value& jsData)
+pml::restgoose::response ResourceManager::AddPlaylist(const Json::Value& jsData)
 {
     pml::LogStream lg;
     lg << "ResourceManager\tAddPlaylist: ";
 
-    response theResponse(ParsePlaylist(jsData));
+    pml::restgoose::response theResponse(ParsePlaylist(jsData));
     if(theResponse.nHttpCode == 200)
     {
         if(ResourceExists(jsData["label"].asString(), m_mPlaylists))
@@ -258,11 +258,11 @@ response ResourceManager::AddPlaylist(const Json::Value& jsData)
     return theResponse;
 }
 
-response ResourceManager::ModifyFile(const std::string& sUid, const Json::Value& jsData)
+pml::restgoose::response ResourceManager::ModifyFile(const std::string& sUid, const Json::Value& jsData)
 {
     pml::LogStream lg;
     lg << "ResourceManager\tModifyFile: ";
-    response theResponse;
+    pml::restgoose::response theResponse;
     auto itFile = m_mFiles.find(sUid);
     if(itFile == m_mFiles.end())
     {
@@ -323,12 +323,12 @@ response ResourceManager::ModifyFile(const std::string& sUid, const Json::Value&
     return theResponse;
 }
 
-response ResourceManager::ModifyFileMeta(const std::string& sUid, const Json::Value& jsData)
+pml::restgoose::response ResourceManager::ModifyFileMeta(const std::string& sUid, const Json::Value& jsData)
 {
     pml::LogStream lg;
     lg << "ResourceManager\tModifyFileMeta: ";
 
-    response theResponse;
+    pml::restgoose::response theResponse;
     auto itFile = m_mFiles.find(sUid);
     if(itFile == m_mFiles.end())
     {
@@ -377,12 +377,12 @@ response ResourceManager::ModifyFileMeta(const std::string& sUid, const Json::Va
     return theResponse;
 }
 
-response ResourceManager::ModifySchedule(const std::string& sUid, const Json::Value& jsData)
+pml::restgoose::response ResourceManager::ModifySchedule(const std::string& sUid, const Json::Value& jsData)
 {
     pml::LogStream lg;
     lg << "ResourceManager\tModifySchedule: ";
 
-    response theResponse;
+    pml::restgoose::response theResponse;
     auto itSchedule = m_mSchedules.find(sUid);
     if(itSchedule == m_mSchedules.end())
     {
@@ -427,12 +427,12 @@ response ResourceManager::ModifySchedule(const std::string& sUid, const Json::Va
     return theResponse;
 }
 
-response ResourceManager::ModifyPlaylist(const std::string& sUid, const Json::Value& jsData)
+pml::restgoose::response ResourceManager::ModifyPlaylist(const std::string& sUid, const Json::Value& jsData)
 {
     pml::LogStream lg;
     lg << "ResourceManager\tModifyPlaylist: ";
 
-    response theResponse;
+    pml::restgoose::response theResponse;
     auto itPlaylist = m_mPlaylists.find(sUid);
     if(itPlaylist == m_mPlaylists.end())
     {
@@ -477,12 +477,12 @@ response ResourceManager::ModifyPlaylist(const std::string& sUid, const Json::Va
     return theResponse;
 }
 
-response ResourceManager::DeleteFile(const std::string& sUid)
+pml::restgoose::response ResourceManager::DeleteFile(const std::string& sUid)
 {
     pml::LogStream lg;
     lg << "ResourceManager\tDeleteFile: ";
 
-    response theResponse;
+    pml::restgoose::response theResponse;
     auto itFile  = m_mFiles.find(sUid);
     if(itFile == m_mFiles.end())
     {
@@ -501,7 +501,7 @@ response ResourceManager::DeleteFile(const std::string& sUid)
     }
     else
     {
-        response contains(GetSchedulesAndPlaylistsContainingFile(sUid));
+        pml::restgoose::response contains(GetSchedulesAndPlaylistsContainingFile(sUid));
         if(contains.nHttpCode == 423)
         {
             theResponse.nHttpCode = 423;
@@ -523,12 +523,12 @@ response ResourceManager::DeleteFile(const std::string& sUid)
     return theResponse;
 }
 
-response ResourceManager::DeleteSchedule(const std::string& sUid)
+pml::restgoose::response ResourceManager::DeleteSchedule(const std::string& sUid)
 {
     pml::LogStream lg;
     lg << "ResourceManager\tDeleteSchedule: ";
 
-    response theResponse;
+    pml::restgoose::response theResponse;
     auto itSchedule  = m_mSchedules.find(sUid);
     if(itSchedule == m_mSchedules.end())
     {
@@ -555,12 +555,12 @@ response ResourceManager::DeleteSchedule(const std::string& sUid)
 
 }
 
-response ResourceManager::DeletePlaylist(const std::string& sUid)
+pml::restgoose::response ResourceManager::DeletePlaylist(const std::string& sUid)
 {
     pml::LogStream lg;
     lg << "ResourceManager\tDeletePlaylist: ";
 
-    response theResponse;
+    pml::restgoose::response theResponse;
     auto itPlaylist  = m_mPlaylists.find(sUid);
     if(itPlaylist == m_mPlaylists.end())
     {
@@ -586,10 +586,10 @@ response ResourceManager::DeletePlaylist(const std::string& sUid)
     return theResponse;
 }
 
-response ResourceManager::GetFiles()
+pml::restgoose::response ResourceManager::GetFiles()
 {
 
-    response theResponse;
+    pml::restgoose::response theResponse;
     theResponse.jsonData = Json::Value(Json::arrayValue);
     for(auto pairFile : m_mFiles)
     {
@@ -601,10 +601,10 @@ response ResourceManager::GetFiles()
     return theResponse;
 }
 
-response ResourceManager::GetSchedules()
+pml::restgoose::response ResourceManager::GetSchedules()
 {
 
-    response theResponse;
+    pml::restgoose::response theResponse;
     theResponse.jsonData = Json::Value(Json::arrayValue);
     for(auto pairSchedule : m_mSchedules)
     {
@@ -616,10 +616,10 @@ response ResourceManager::GetSchedules()
     return theResponse;
 }
 
-response ResourceManager::GetPlaylists()
+pml::restgoose::response ResourceManager::GetPlaylists()
 {
 
-    response theResponse;
+    pml::restgoose::response theResponse;
     theResponse.jsonData = Json::Value(Json::arrayValue);
     for(auto pairPlaylist : m_mPlaylists)
     {
@@ -631,10 +631,10 @@ response ResourceManager::GetPlaylists()
     return theResponse;
 }
 
-response ResourceManager::GetFile(const std::string& sUid)
+pml::restgoose::response ResourceManager::GetFile(const std::string& sUid)
 {
 
-    response theResponse;
+    pml::restgoose::response theResponse;
 
     auto itFile = m_mFiles.find(sUid);
     if(itFile != m_mFiles.end())
@@ -650,9 +650,9 @@ response ResourceManager::GetFile(const std::string& sUid)
     return theResponse;
 }
 
-response ResourceManager::GetSchedule(const std::string& sUid)
+pml::restgoose::response ResourceManager::GetSchedule(const std::string& sUid)
 {
-    response theResponse;
+    pml::restgoose::response theResponse;
 
     auto itSchedule = m_mSchedules.find(sUid);
     if(itSchedule != m_mSchedules.end())
@@ -668,9 +668,9 @@ response ResourceManager::GetSchedule(const std::string& sUid)
     return theResponse;
 }
 
-response ResourceManager::GetPlaylist(const std::string& sUid)
+pml::restgoose::response ResourceManager::GetPlaylist(const std::string& sUid)
 {
-    response theResponse;
+    pml::restgoose::response theResponse;
 
     auto itPlaylist = m_mPlaylists.find(sUid);
     if(itPlaylist != m_mPlaylists.end())
@@ -688,9 +688,9 @@ response ResourceManager::GetPlaylist(const std::string& sUid)
 
 
 
-response ResourceManager::ParseResource(const Json::Value& jsData)
+pml::restgoose::response ResourceManager::ParseResource(const Json::Value& jsData)
 {
-    response theResponse;
+    pml::restgoose::response theResponse;
     if(jsData["label"].isString() == false  || jsData["label"].asString().empty())
     {
         theResponse.nHttpCode = 400;
@@ -706,9 +706,9 @@ response ResourceManager::ParseResource(const Json::Value& jsData)
     return theResponse;
 }
 
-response ResourceManager::ParseFileData(const Json::Value& jsData)
+pml::restgoose::response ResourceManager::ParseFileData(const Json::Value& jsData)
 {
-    response theResponse;
+    pml::restgoose::response theResponse;
 
     if(jsData.isMember("file") == false || jsData["file"].asString().empty())
     {
@@ -724,9 +724,9 @@ response ResourceManager::ParseFileData(const Json::Value& jsData)
     }
 }
 
-response ResourceManager::ParseFile(const std::string& sUploadName, const std::string& sLabel, const std::string& sDescription)
+pml::restgoose::response ResourceManager::ParseFile(const std::string& sUploadName, const std::string& sLabel, const std::string& sDescription)
 {
-    response theResponse(201);
+    pml::restgoose::response theResponse(201);
 
     //now work out the file type...
     switch(WavFile::IsWavFile(sUploadName))
@@ -761,9 +761,9 @@ response ResourceManager::ParseFile(const std::string& sUploadName, const std::s
 
 }
 
-response ResourceManager::ParseSchedule(const Json::Value& jsData)
+pml::restgoose::response ResourceManager::ParseSchedule(const Json::Value& jsData)
 {
-    response theResponse(ParseResource(jsData));
+    pml::restgoose::response theResponse(ParseResource(jsData));
 
     /**
     {
@@ -804,9 +804,9 @@ response ResourceManager::ParseSchedule(const Json::Value& jsData)
     return theResponse;
 }
 
-response ResourceManager::ParseScheduleItems(const Json::Value& jsItems, std::function<response(const std::string&)> pFind, bool bCheckShuffle)
+pml::restgoose::response ResourceManager::ParseScheduleItems(const Json::Value& jsItems, std::function<pml::restgoose::response(const std::string&)> pFind, bool bCheckShuffle)
 {
-    response theResponse;
+    pml::restgoose::response theResponse;
     //now check the schedule is valid
     for(Json::ArrayIndex i=0; i < jsItems.size(); i++)
     {
@@ -843,9 +843,9 @@ response ResourceManager::ParseScheduleItems(const Json::Value& jsItems, std::fu
 }
 
 
-response ResourceManager::ParsePlaylist(const Json::Value& jsData)
+pml::restgoose::response ResourceManager::ParsePlaylist(const Json::Value& jsData)
 {
-    response theResponse(ParseResource(jsData));
+    pml::restgoose::response theResponse(ParseResource(jsData));
 
     /**
     {
@@ -1097,13 +1097,13 @@ void ResourceManager::LockResource(const std::string& sUid, bool bLock)
 }
 
 
-response ResourceManager::ModifyStatus(const Json::Value& jsData)
+pml::restgoose::response ResourceManager::ModifyStatus(const Json::Value& jsData)
 {
     pml::LogStream lg;
     lg.SetLevel(pml::LOG_DEBUG) << "ResourceManager\t" << "ModifyStatus: ";
     if(jsData["command"].isString() == false)
     {
-        response theResponse(400);
+        pml::restgoose::response theResponse(400);
         theResponse.jsonData["result"] = false;
         theResponse.jsonData["reason"].append("No command sent");
         lg.SetLevel(pml::LOG_ERROR) << " no command sent";
@@ -1113,7 +1113,7 @@ response ResourceManager::ModifyStatus(const Json::Value& jsData)
     if(CmpNoCase(jsData["command"].asString(), "play"))
     {
         lg.SetLevel(pml::LOG_INFO) << "play ";
-        response tr(IsLocked());
+        pml::restgoose::response tr(IsLocked());
         if(tr.nHttpCode == 423)
         {
             return tr;
@@ -1124,7 +1124,7 @@ response ResourceManager::ModifyStatus(const Json::Value& jsData)
     else if(CmpNoCase(jsData["command"].asString(), "pause"))
     {
         lg.SetLevel(pml::LOG_INFO) << "pause";
-                response tr(IsLocked());
+                pml::restgoose::response tr(IsLocked());
         if(tr.nHttpCode == 423)
         {
             return tr;
@@ -1135,7 +1135,7 @@ response ResourceManager::ModifyStatus(const Json::Value& jsData)
     else if(CmpNoCase(jsData["command"].asString(), "stop"))
     {
         lg.SetLevel(pml::LOG_INFO) << "stop";
-        response tr(IsLocked());
+        pml::restgoose::response tr(IsLocked());
         if(tr.nHttpCode == 423)
         {
             return tr;
@@ -1151,7 +1151,7 @@ response ResourceManager::ModifyStatus(const Json::Value& jsData)
     else if(CmpNoCase(jsData["command"].asString(), "kill"))
     {
         lg.SetLevel(pml::LOG_INFO) << "kill" << std::endl;
-        response tr(IsLocked());
+        pml::restgoose::response tr(IsLocked());
         if(tr.nHttpCode == 423)
         {
             return tr;
@@ -1161,7 +1161,7 @@ response ResourceManager::ModifyStatus(const Json::Value& jsData)
     }
     else
     {
-        response theResponse(400);
+        pml::restgoose::response theResponse(400);
         theResponse.jsonData["result"] = false;
         theResponse.jsonData["reason"].append("Invalid command sent");
         lg.SetLevel(pml::LOG_ERROR) << "'" << jsData["command"].asString() <<"' is not a valid command" << std::endl;
@@ -1170,7 +1170,7 @@ response ResourceManager::ModifyStatus(const Json::Value& jsData)
 
 }
 
-response ResourceManager::Play(const Json::Value& jsData)
+pml::restgoose::response ResourceManager::Play(const Json::Value& jsData)
 {
     pml::LogStream lg;
     lg.SetLevel(pml::LOG_DEBUG) << "ResourceManager\tPlay: ";
@@ -1180,7 +1180,7 @@ response ResourceManager::Play(const Json::Value& jsData)
     {
         if(m_iniConfig.GetIniInt("playout", "autostop",0) == 0) //this means we have to manually stop before playing
         {
-            response theResponse(409);
+            pml::restgoose::response theResponse(409);
             theResponse.jsonData["result"] = false;
             theResponse.jsonData["reason"].append("Player already running");
             lg.SetLevel(pml::LOG_WARN) << "- Player already running" << std::endl;
@@ -1188,7 +1188,7 @@ response ResourceManager::Play(const Json::Value& jsData)
         }
         else
         {
-            response theResponse(Kill(jsData));
+            pml::restgoose::response theResponse(Kill(jsData));
             if(theResponse.nHttpCode != 200)
             {
                 return theResponse;
@@ -1199,7 +1199,7 @@ response ResourceManager::Play(const Json::Value& jsData)
     //check if data is valid
     if(jsData["type"].isString() == false)
     {
-        response theResponse(400);
+        pml::restgoose::response theResponse(400);
         theResponse.jsonData["result"] = false;
         theResponse.jsonData["reason"].append("Type not set");
         lg.SetLevel(pml::LOG_ERROR) << "Type not set" << std::endl;
@@ -1207,7 +1207,7 @@ response ResourceManager::Play(const Json::Value& jsData)
     }
     else if(jsData["uid"].isString() == false)
     {
-        response theResponse(400);
+        pml::restgoose::response theResponse(400);
         theResponse.jsonData["result"] = false;
         theResponse.jsonData["reason"].append("uid not set");
         lg.SetLevel(pml::LOG_ERROR) << "uid not set" << std::endl;
@@ -1215,7 +1215,7 @@ response ResourceManager::Play(const Json::Value& jsData)
     }
 
     //play correct type
-    response theResponse(400);
+    pml::restgoose::response theResponse(400);
     if(CmpNoCase(jsData["type"].asString(), "file"))
     {
         theResponse = PlayFile(jsData);
@@ -1244,14 +1244,14 @@ response ResourceManager::Play(const Json::Value& jsData)
     return theResponse;
 }
 
-response ResourceManager::PlayFile(const Json::Value& jsData)
+pml::restgoose::response ResourceManager::PlayFile(const Json::Value& jsData)
 {
     pml::LogStream lg;
     lg.SetLevel(pml::LOG_DEBUG) << "Launcher\tPlay: ";
     auto itFile = FindFile(jsData["uid"].asString());
     if(itFile == GetFilesEnd())
     {
-        response theResponse(404);
+        pml::restgoose::response theResponse(404);
         theResponse.jsonData["result"] = false;
         theResponse.jsonData["reason"].append("file not found");
         lg.SetLevel(pml::LOG_ERROR) << "file not found" << std::endl;
@@ -1259,7 +1259,7 @@ response ResourceManager::PlayFile(const Json::Value& jsData)
     }
     else if(jsData["times_to_play"].isInt() == false)
     {
-        response theResponse(400);
+        pml::restgoose::response theResponse(400);
         theResponse.jsonData["result"] = false;
         theResponse.jsonData["reason"].append("times_to_play not set");
         lg.SetLevel(pml::LOG_ERROR) << "times_to_play not set" << std::endl;
@@ -1272,19 +1272,19 @@ response ResourceManager::PlayFile(const Json::Value& jsData)
 
 }
 
-response ResourceManager::PlayPlaylist(const Json::Value& jsData)
+pml::restgoose::response ResourceManager::PlayPlaylist(const Json::Value& jsData)
 {
     auto itPlaylist = FindPlaylist(jsData["uid"].asString());
     if(itPlaylist == GetPlaylistsEnd())
     {
-        response theResponse(404);
+        pml::restgoose::response theResponse(404);
         theResponse.jsonData["result"] = false;
         theResponse.jsonData["reason"].append("playlist not found");
         return theResponse;
     }
     else if(jsData["times_to_play"].isInt() == false)
     {
-        response theResponse(400);
+        pml::restgoose::response theResponse(400);
         theResponse.jsonData["result"] = false;
         theResponse.jsonData["reason"].append("times_to_play not set");
         pmlLog(pml::LOG_ERROR) << "times_to_play not set";
@@ -1292,7 +1292,7 @@ response ResourceManager::PlayPlaylist(const Json::Value& jsData)
     }
     else if(jsData["shuffle"].isBool() == false)
     {
-        response theResponse(400);
+        pml::restgoose::response theResponse(400);
         theResponse.jsonData["result"] = false;
         theResponse.jsonData["reason"].append("shuffle not set");
         pmlLog(pml::LOG_ERROR) << "shuffle not set";
@@ -1304,12 +1304,12 @@ response ResourceManager::PlayPlaylist(const Json::Value& jsData)
     }
 }
 
-response ResourceManager::PlaySchedule(const Json::Value& jsData)
+pml::restgoose::response ResourceManager::PlaySchedule(const Json::Value& jsData)
 {
     auto itSchedule = FindSchedule(jsData["uid"].asString());
     if(itSchedule == GetSchedulesEnd())
     {
-        response theResponse(404);
+        pml::restgoose::response theResponse(404);
         theResponse.jsonData["result"] = false;
         theResponse.jsonData["reason"].append("schedule not found");
         return theResponse;
@@ -1320,19 +1320,19 @@ response ResourceManager::PlaySchedule(const Json::Value& jsData)
     }
 }
 
-response ResourceManager::Pause(const Json::Value& jsData)
+pml::restgoose::response ResourceManager::Pause(const Json::Value& jsData)
 {
     return m_launcher.PausePlayer();
 }
 
-response ResourceManager::Stop(const Json::Value& jsData)
+pml::restgoose::response ResourceManager::Stop(const Json::Value& jsData)
 {
     return m_launcher.StopPlayer();
 }
 
-response ResourceManager::Kill(const Json::Value& jsData)
+pml::restgoose::response ResourceManager::Kill(const Json::Value& jsData)
 {
-    response theResponse;
+    pml::restgoose::response theResponse;
     theResponse.jsonData["result"] = true;
 
     int nError = KillProc("player3");
@@ -1351,9 +1351,9 @@ response ResourceManager::Kill(const Json::Value& jsData)
     return theResponse;
 }
 
-response ResourceManager::Lock(const Json::Value& jsData)
+pml::restgoose::response ResourceManager::Lock(const Json::Value& jsData)
 {
-    response theResponse(400);
+    pml::restgoose::response theResponse(400);
     if(jsData["lock"].isBool() == false)
     {
         theResponse.jsonData["result"] = false;
@@ -1413,9 +1413,9 @@ void ResourceManager::LockPlayingResource(bool bLock)
 }
 
 
-response ResourceManager::GetSchedulesAndPlaylistsContainingFile(const std::string& sUid)
+pml::restgoose::response ResourceManager::GetSchedulesAndPlaylistsContainingFile(const std::string& sUid)
 {
-    response theResponse;
+    pml::restgoose::response theResponse;
     theResponse.jsonData["schedules"] = GetResourcesFileIn(sUid, m_mSchedules);
     theResponse.jsonData["playlists"] = GetResourcesFileIn(sUid, m_mPlaylists);
 
@@ -1471,13 +1471,13 @@ std::shared_ptr<const Resource> ResourceManager::GetResource(const std::string& 
     return nullptr;
 }
 
-response ResourceManager::UpdateApplication(const Json::Value& jsData)
+pml::restgoose::response ResourceManager::UpdateApplication(const Json::Value& jsData)
 {
     pml::LogStream lg;
     lg <<  "ResourceManager\tUpdateApplication: " << jsData << " ";
-    return response(404, "not working again");
+    return pml::restgoose::response(404, "not working again");
     /*
-    response theResponse(ParseFiles(jsData));
+    pml::restgoose::response theResponse(ParseFiles(jsData));
     if(theResponse.nHttpCode ==400)
     {
         lg.SetLevel(pml::LOG_ERROR) << "failed - incorrect JSON";
@@ -1524,9 +1524,9 @@ response ResourceManager::UpdateApplication(const Json::Value& jsData)
     */
 }
 
-response ResourceManager::Update(const std::string& sApplication, const std::string& sPath, const std::string& sUpdateFile)
+pml::restgoose::response ResourceManager::Update(const std::string& sApplication, const std::string& sPath, const std::string& sUpdateFile)
 {
-    response theResponse;
+    pml::restgoose::response theResponse;
 
     std::stringstream ssApp;
     ssApp << sPath << sApplication;
@@ -1587,9 +1587,9 @@ response ResourceManager::Update(const std::string& sApplication, const std::str
     return theResponse;
 }
 
-response ResourceManager::IsLocked()
+pml::restgoose::response ResourceManager::IsLocked()
 {
-    response theResponse(200);
+    pml::restgoose::response theResponse(200);
     if(m_iniConfig.GetIniInt("restricted", "locked",0) == 1)
     {
         theResponse.nHttpCode = 423;

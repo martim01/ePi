@@ -1,5 +1,4 @@
 #include "../include/dlgUpload.h"
-#include "restfulclient.h"
 #include "json/json.h"
 #include "jsonutils.h"
 #include <wx/msgdlg.h>
@@ -11,11 +10,15 @@
 #include <sys/statfs.h>
 #include <unistd.h>
 #include "usbchecker.h"
+#include "httpclient.h"
+
 //(*InternalHeaders(dlgUpload)
 #include <wx/font.h>
 #include <wx/intl.h>
 #include <wx/string.h>
 //*)
+
+using namespace std::placeholders;
 
 //(*IdInit(dlgUpload)
 const long dlgUpload::ID_STATICTEXT30 = wxNewId();
@@ -30,8 +33,13 @@ BEGIN_EVENT_TABLE(dlgUpload,wxDialog)
 	//*)
 END_EVENT_TABLE()
 
-dlgUpload::dlgUpload(wxWindow* parent, const wxString& sHostname, const wxString& sIpAddress, wxWindowID id,const wxPoint& pos,const wxSize& size) : m_upload(this),
-    m_sIpAddress(sIpAddress)
+
+
+
+
+dlgUpload::dlgUpload(wxWindow* parent, const wxString& sHostname, const wxString& sIpAddress, wxWindowID id,const wxPoint& pos,const wxSize& size) :
+    m_sIpAddress(sIpAddress),
+    m_clientManager(this)
 {
 
 	wxBoxSizer* BoxSizer1;
@@ -101,9 +109,10 @@ dlgUpload::dlgUpload(wxWindow* parent, const wxString& sHostname, const wxString
 int dlgUpload::PutApp(const wxString& sApp)
 {
     m_sApp = sApp;
-    m_mData.insert(std::make_pair("application", sApp.ToStdString()));
+    m_vPart.push_back(pml::restgoose::partData(partName("application"), textData(sApp.ToStdString())));
+
     m_sEndpoint= "/x-epi/"+STR_ENDPOINTS[UPDATE];
-    m_nMethod = MultipartUpload::UPLOAD_PUT;
+    m_method = pml::restgoose::PUT;
     m_timer.Start(20,true);
     return ShowModal();
 }
@@ -112,7 +121,7 @@ int dlgUpload::PostAudioFile()
 {
     m_sEndpoint = ("/x-epi/"+STR_ENDPOINTS[FILES]);
     m_sApp = "*.wav";
-    m_nMethod = MultipartUpload::UPLOAD_POST;
+    m_method = pml::restgoose::POST;
     m_timer.Start(20,true);
     return ShowModal();
 }
@@ -121,7 +130,7 @@ int dlgUpload::PutAudioFile(const wxString& sUid)
 {
     m_sEndpoint = "/x-epi/"+STR_ENDPOINTS[FILES]+"/"+sUid;
     m_sApp = "*.wav";
-    m_nMethod = MultipartUpload::UPLOAD_PUT;
+    m_method = pml::restgoose::PUT;
     m_timer.Start(20,true);
     return ShowModal();
 }
@@ -139,26 +148,17 @@ void dlgUpload::OnTimer(const wxTimerEvent& event)
 
         if(m_sApp == "*.wav")
         {
-            m_mData.insert(std::make_pair("label", sFilename.ToStdString()));
-            m_mData.insert(std::make_pair("description", wxDateTime::Now().Format("Uploaded at %Y-%m-%d %H:%M:%S").ToStdString()));
+            m_vPart.push_back(pml::restgoose::partData(partName("label"), textData(sFilename.ToStdString())));
+            m_vPart.push_back(pml::restgoose::partData(partName("description"), textData(wxDateTime::Now().Format("Uploaded at %Y-%m-%d %H:%M:%S").ToStdString())));
         }
 
         if(UsbChecker::MountDevice(aDlg.m_sSelectedDevice) == 0)
         {
             m_pstDetails->SetLabel(wxString::Format("Uploading '%s'...", sFilename.c_str()));
 
-            std::map<std::string, muFile> mFiles;
-            mFiles.insert(std::make_pair("file", muFile(muFileName(sFilename.ToStdString()), muFilePath(sFilePath.ToStdString()))));
+            m_vPart.push_back(pml::restgoose::partData(partName("files"), textData(sFilename.ToStdString()), fileLocation(sFilePath.ToStdString())));
 
-            switch(m_nMethod)
-            {
-                case MultipartUpload::UPLOAD_PUT:
-                    m_upload.Put(m_sIpAddress.ToStdString(), m_sEndpoint.ToStdString(), m_mData, mFiles, 0);
-                    break;
-                case MultipartUpload::UPLOAD_POST:
-                    m_upload.Post(m_sIpAddress.ToStdString(), m_sEndpoint.ToStdString(), m_mData, mFiles, 0);
-                    break;
-            }
+            m_clientManager.Run(std::make_unique<pml::restgoose::HttpClient>(m_method, endpoint((m_sIpAddress+m_sEndpoint).ToStdString()), m_vPart), 0);
 
         }
         else
@@ -182,7 +182,7 @@ dlgUpload::~dlgUpload()
 
 void dlgUpload::OnbtnCancelClick(wxCommandEvent& event)
 {
-    m_upload.Cancel();
+    m_clientManager.Cancel(0);
     m_jsReply["result"] = false;
     m_jsReply["reason"].append("User cancelled");
     EndModal(wxID_CANCEL);
@@ -192,7 +192,6 @@ void dlgUpload::OnbtnCancelClick(wxCommandEvent& event)
 void dlgUpload::OnReply(const wxCommandEvent& event)
 {
     UsbChecker::UnmountDevice();
-
     m_jsReply = ConvertToJson(event.GetString().ToStdString());
     if(m_jsReply["result"].isBool() && m_jsReply["result"].asBool() == false)
     {
@@ -206,16 +205,13 @@ void dlgUpload::OnReply(const wxCommandEvent& event)
 
 void dlgUpload::OnProgress(const wxCommandEvent& event)
 {
-    m_pGuage->SetValue(event.GetInt());
-    m_pstProgress->SetLabel(wxString::Format("%03d%%", event.GetInt()));
-    if(event.GetInt() == 100)
+    double dPercent = (static_cast<double>(event.GetInt())/static_cast<double>(event.GetExtraLong()))*100.0;
+    m_pGuage->SetValue(dPercent);
+    m_pstProgress->SetLabel(wxString::Format("%.1f%%", dPercent));
+    if(event.GetInt() >= event.GetExtraLong())
     {
         m_pstDetails->SetLabel("Checking Upload...");
     }
 }
 
 
-void dlgUpload::SetMulitpartTextData(const std::map<std::string, std::string>& mData)
-{
-    m_mData = mData;
-}

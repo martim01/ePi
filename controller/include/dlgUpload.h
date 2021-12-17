@@ -9,12 +9,14 @@
 #include <wx/stattext.h>
 //*)
 
-#include "multipartupload.h"
 #include "json/json.h"
 #include "wmlabel.h"
 #include <map>
 #include <string>
 #include <wx/timer.h>
+#include "response.h"
+#include "httpclient.h"
+#include "wxhttpclientmanager.h"
 
 class dlgUpload: public wxDialog
 {
@@ -60,16 +62,17 @@ class dlgUpload: public wxDialog
         void OnTimer(const wxTimerEvent& event);
 
 
-		MultipartUpload m_upload;
-
 		wxString m_sIpAddress;
 		wxString m_sEndpoint;
 		wxString m_sApp;
-        int m_nMethod;
+        httpMethod m_method;
 
-		std::map<std::string, std::string> m_mData;
+		std::vector<pml::restgoose::partData> m_vPart;
+		wxHttpClientManager m_clientManager;
+
 
 		DECLARE_EVENT_TABLE()
 };
+
 
 #endif

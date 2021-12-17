@@ -63,7 +63,7 @@ dlgError::dlgError(wxWindow* parent,const wxString& sMessage, const Json::Value&
 
 	if(jsError["reason"].isArray())
 	{
-        for(size_t i = 0; i < jsError["reason"].size(); i++)
+        for(Json::ArrayIndex i = 0; i < jsError["reason"].size(); i++)
         {
             if(jsError["reason"][i].isString())
             {

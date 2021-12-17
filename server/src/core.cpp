@@ -52,13 +52,13 @@ const endpoint Core::EP_UPDATE      = endpoint(EP_EPI.Get()+"/"+UPDATE);
 const endpoint Core::EP_OUTPUTS     = endpoint(EP_EPI.Get()+"/"+OUTPUTS);
 const endpoint Core::EP_WS          = endpoint(ROOT+WS);
 
-response ConvertPostDataToJson(const postData& vData)
+static pml::restgoose::response ConvertPostDataToJson(const postData& vData)
 {
-    response resp(404, "No data sent or incorrect data sent");
+    pml::restgoose::response resp(404, "No data sent or incorrect data sent");
     if(vData.size() == 1)
     {
         resp.nHttpCode = 200;
-        resp.jsonData = ConvertToJson(vData[0].sData);
+        resp.jsonData = ConvertToJson(vData[0].data.Get());
     }
     else if(vData.size() > 1)
     {
@@ -66,9 +66,9 @@ response ConvertPostDataToJson(const postData& vData)
         resp.jsonData.clear();
         for(size_t i = 0; i < vData.size(); i++)
         {
-            if(vData[i].sName.empty() == false)
+            if(vData[i].name.Get().empty() == false)
             {
-                resp.jsonData[vData[i].sName] = vData[i].sData;
+                resp.jsonData[vData[i].name.Get()] = vData[i].data.Get();
             }
         }
     }
@@ -159,27 +159,27 @@ bool Core::CreateEndpoints()
 
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "CreateEndpoints" ;
 
-    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_ROOT), std::bind(&Core::GetRoot, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_EPI), std::bind(&Core::GetEpi, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_STATUS), std::bind(&Core::GetStatus, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_POWER), std::bind(&Core::GetPower, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_CONFIG), std::bind(&Core::GetConfig, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_SCHEDULES), std::bind(&Core::GetSchedules, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_PLAYLISTS), std::bind(&Core::GetPlaylists, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_FILES), std::bind(&Core::GetFiles, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_INFO), std::bind(&Core::GetInfo, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_UPDATE), std::bind(&Core::GetUpdate, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(RestGoose::GET, EP_OUTPUTS), std::bind(&Core::GetOutputs, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_ROOT), std::bind(&Core::GetRoot, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_EPI), std::bind(&Core::GetEpi, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_STATUS), std::bind(&Core::GetStatus, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_POWER), std::bind(&Core::GetPower, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_CONFIG), std::bind(&Core::GetConfig, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_SCHEDULES), std::bind(&Core::GetSchedules, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_PLAYLISTS), std::bind(&Core::GetPlaylists, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_FILES), std::bind(&Core::GetFiles, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_INFO), std::bind(&Core::GetInfo, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_UPDATE), std::bind(&Core::GetUpdate, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_OUTPUTS), std::bind(&Core::GetOutputs, this, _1,_2,_3,_4));
 
-    m_server.AddEndpoint(methodpoint(RestGoose::PATCH, EP_STATUS), std::bind(&Core::PatchStatus, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(RestGoose::PATCH, EP_CONFIG), std::bind(&Core::PatchConfig, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(pml::restgoose::PATCH, EP_STATUS), std::bind(&Core::PatchStatus, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(pml::restgoose::PATCH, EP_CONFIG), std::bind(&Core::PatchConfig, this, _1,_2,_3,_4));
 
-    m_server.AddEndpoint(methodpoint(RestGoose::PUT, EP_POWER), std::bind(&Core::PutPower, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(RestGoose::PUT, EP_UPDATE), std::bind(&Core::PutUpdate, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(pml::restgoose::PUT, EP_POWER), std::bind(&Core::PutPower, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(pml::restgoose::PUT, EP_UPDATE), std::bind(&Core::PutUpdate, this, _1,_2,_3,_4));
 
-    m_server.AddEndpoint(methodpoint(RestGoose::POST, EP_SCHEDULES), std::bind(&Core::PostSchedule, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(RestGoose::POST, EP_PLAYLISTS), std::bind(&Core::PostPlaylist, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(RestGoose::POST, EP_FILES), std::bind(&Core::PostFile, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(pml::restgoose::POST, EP_SCHEDULES), std::bind(&Core::PostSchedule, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(pml::restgoose::POST, EP_PLAYLISTS), std::bind(&Core::PostPlaylist, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(methodpoint(pml::restgoose::POST, EP_FILES), std::bind(&Core::PostFile, this, _1,_2,_3,_4));
 
 
     //now add all the dynamic methodpoints
@@ -187,19 +187,19 @@ bool Core::CreateEndpoints()
     {
         endpoint theEndpoint(endpoint(EP_FILES.Get()+"/"+itFile->first));
 
-        m_server.AddEndpoint(methodpoint(RestGoose::GET, theEndpoint), std::bind(&Core::GetFile, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(methodpoint(RestGoose::PATCH, theEndpoint), std::bind(&Core::PatchFile, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(methodpoint(RestGoose::PUT, theEndpoint), std::bind(&Core::PutFile, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(methodpoint(RestGoose::HTTP_DELETE, theEndpoint), std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(methodpoint(pml::restgoose::GET, theEndpoint), std::bind(&Core::GetFile, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(methodpoint(pml::restgoose::PATCH, theEndpoint), std::bind(&Core::PatchFile, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(methodpoint(pml::restgoose::PUT, theEndpoint), std::bind(&Core::PutFile, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(methodpoint(pml::restgoose::HTTP_DELETE, theEndpoint), std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
     }
 
     for(auto itPlaylist = m_manager.GetPlaylistsBegin(); itPlaylist != m_manager.GetPlaylistsEnd(); ++itPlaylist)
     {
         endpoint theEndpoint(endpoint(EP_PLAYLISTS.Get()+"/"+itPlaylist->first));
 
-        m_server.AddEndpoint(methodpoint(RestGoose::GET, theEndpoint), std::bind(&Core::GetPlaylist, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(methodpoint(RestGoose::PUT, theEndpoint), std::bind(&Core::PutPlaylist, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(methodpoint(RestGoose::HTTP_DELETE, theEndpoint), std::bind(&Core::DeletePlaylist, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(methodpoint(pml::restgoose::GET, theEndpoint), std::bind(&Core::GetPlaylist, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(methodpoint(pml::restgoose::PUT, theEndpoint), std::bind(&Core::PutPlaylist, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(methodpoint(pml::restgoose::HTTP_DELETE, theEndpoint), std::bind(&Core::DeletePlaylist, this, _1,_2,_3,_4));
     }
 
 
@@ -207,9 +207,9 @@ bool Core::CreateEndpoints()
     {
         endpoint theEndpoint(endpoint(EP_SCHEDULES.Get()+"/"+itSchedule->first));
 
-        m_server.AddEndpoint(methodpoint(RestGoose::GET, theEndpoint), std::bind(&Core::GetSchedule, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(methodpoint(RestGoose::PUT, theEndpoint), std::bind(&Core::PutSchedule, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(methodpoint(RestGoose::HTTP_DELETE, theEndpoint), std::bind(&Core::DeleteSchedule, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(methodpoint(pml::restgoose::GET, theEndpoint), std::bind(&Core::GetSchedule, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(methodpoint(pml::restgoose::PUT, theEndpoint), std::bind(&Core::PutSchedule, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(methodpoint(pml::restgoose::HTTP_DELETE, theEndpoint), std::bind(&Core::DeleteSchedule, this, _1,_2,_3,_4));
     }
 
     if(m_server.AddWebsocketEndpoint(EP_WS, std::bind(&Core::WebsocketAuthenticate, this, _1,_2,_3), std::bind(&Core::WebsocketMessage, this, _1,_2),
@@ -224,18 +224,18 @@ bool Core::CreateEndpoints()
     return true;
 }
 
-response Core::GetRoot(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::GetRoot(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetRoot" ;
-    response theResponse;
+    pml::restgoose::response theResponse;
     theResponse.jsonData.append(EPI);
     return theResponse;
 }
 
-response Core::GetEpi(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::GetEpi(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetEpi" ;
-    response theResponse;
+    pml::restgoose::response theResponse;
     theResponse.jsonData.append(FILES);
     theResponse.jsonData.append(PLAYLISTS);
     theResponse.jsonData.append(SCHEDULES);
@@ -248,28 +248,28 @@ response Core::GetEpi(const query& theQuery, const postData& vData, const endpoi
     return theResponse;
 }
 
-response Core::GetFiles(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::GetFiles(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetFiles" ;
     return m_manager.GetFiles();
 }
 
-response Core::GetPlaylists(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::GetPlaylists(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetPlaylists" ;
     return m_manager.GetPlaylists();
 }
 
-response Core::GetSchedules(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::GetSchedules(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetSchedules" ;
     return m_manager.GetSchedules();
 }
 
-response Core::GetConfig(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::GetConfig(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetConfig" ;
-    response theResponse;
+    pml::restgoose::response theResponse;
 
     char host[256];
     gethostname(host, 256);
@@ -292,11 +292,11 @@ response Core::GetConfig(const query& theQuery, const postData& vData, const end
     return theResponse;
 }
 
-response Core::GetUpdate(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::GetUpdate(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     //get all the version numbers...
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetUpdate" ;
-    response theResponse;
+    pml::restgoose::response theResponse;
     std::stringstream ssVersion;
     ssVersion << version::MAJOR << "." << version::MINOR << "." << version::PATCH << "." << version::BUILD;
     theResponse.jsonData["server"]["version"] = ssVersion.str();
@@ -310,11 +310,11 @@ response Core::GetUpdate(const query& theQuery, const postData& vData, const end
     return theResponse;
 }
 
-response Core::GetOutputs(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::GetOutputs(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     //get all the version numbers...
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetOutputs" ;
-    response theResponse;
+    pml::restgoose::response theResponse;
 
     //pmlLog(pml::LOG_DEBUG) << "
     theResponse.jsonData = ConvertToJson(Exec(CreatePath(m_iniConfig.GetIniString("paths", "player","."))+"player3 -d"));
@@ -324,7 +324,7 @@ response Core::GetOutputs(const query& theQuery, const postData& vData, const en
     return theResponse;
 }
 
-response Core::GetStatus(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::GetStatus(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     //lock as jsStatus can be called by pipe thread and server thread
     std::lock_guard<std::mutex> lg(m_mutex);
@@ -332,40 +332,40 @@ response Core::GetStatus(const query& theQuery, const postData& vData, const end
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetStatus" ;
     m_jsStatus["locked"] = (m_iniConfig.GetIniInt("restricted", "locked", 0)==1);
 
-    response theResponse;
+    pml::restgoose::response theResponse;
     theResponse.jsonData = m_jsStatus;
     return theResponse;
 }
 
 
-response Core::GetInfo(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::GetInfo(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetInfo" ;
 
-    response theResponse;
+    pml::restgoose::response theResponse;
     theResponse.jsonData = m_info.GetInfo();
 
 
     return theResponse;
 }
 
-response Core::GetPower(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::GetPower(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetPower" ;
-    response theResponse;
+    pml::restgoose::response theResponse;
     theResponse.jsonData["status"] = "On";
 
     return theResponse;
 }
 
-response Core::GetFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::GetFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetFile" ;
     std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
     return m_manager.GetFile(vSplit.back());
 }
 
-response Core::GetPlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::GetPlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetPlaylist" ;
     std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
@@ -373,7 +373,7 @@ response Core::GetPlaylist(const query& theQuery, const postData& vData, const e
     return m_manager.GetPlaylist(vSplit.back());
 }
 
-response Core::GetSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::GetSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetSchedule" ;
     std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
@@ -382,7 +382,7 @@ response Core::GetSchedule(const query& theQuery, const postData& vData, const e
 }
 
 
-response Core::PatchStatus(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::PatchStatus(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PatchStatus" ;
 
@@ -399,11 +399,11 @@ response Core::PatchStatus(const query& theQuery, const postData& vData, const e
     return theResponse;
 }
 
-response Core::PutPower(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::PutPower(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PutPower: ";
 
-    response theResponse(m_manager.IsLocked());
+    pml::restgoose::response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode == 423)
     {
         return theResponse;
@@ -451,7 +451,7 @@ response Core::PutPower(const query& theQuery, const postData& vData, const endp
     return theResponse;
 }
 
-response Core::PatchConfig(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::PatchConfig(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PatchConfig" ;
 
@@ -556,11 +556,11 @@ void Core::ResourceModified(enumType eType, const std::string& sUid, enumModific
     m_jsResources.append(jsValue);
 }
 
-response Core::PatchFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::PatchFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PatchFile" ;
 
-    response theResponse(m_manager.IsLocked());
+    pml::restgoose::response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode != 423)
     {
         std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
@@ -579,11 +579,11 @@ response Core::PatchFile(const query& theQuery, const postData& vData, const end
     return theResponse;
 }
 
-response Core::PutFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::PutFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PutFile" ;
 
-    response theResponse(m_manager.IsLocked());
+    pml::restgoose::response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode != 423)
     {
         std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
@@ -602,11 +602,11 @@ response Core::PutFile(const query& theQuery, const postData& vData, const endpo
     return theResponse;
 }
 
-response Core::PutPlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::PutPlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PutPlaylist" ;
 
-    response theResponse(m_manager.IsLocked());
+    pml::restgoose::response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode != 423)
     {
         std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
@@ -623,11 +623,11 @@ response Core::PutPlaylist(const query& theQuery, const postData& vData, const e
     return theResponse;
 }
 
-response Core::PutSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::PutSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PutSchedule" ;
 
-    response theResponse(m_manager.IsLocked());
+    pml::restgoose::response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode != 423)
     {
         std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
@@ -645,11 +645,11 @@ response Core::PutSchedule(const query& theQuery, const postData& vData, const e
 }
 
 
-response Core::DeleteFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::DeleteFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "DeleteFile" ;
 
-    response theResponse(m_manager.IsLocked());
+    pml::restgoose::response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode != 423)
     {
         std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
@@ -659,9 +659,9 @@ response Core::DeleteFile(const query& theQuery, const postData& vData, const en
         {
             endpoint aUrl(endpoint(EP_FILES.Get()+"/"+vSplit.back()));
 
-            m_server.DeleteEndpoint(methodpoint(RestGoose::GET, aUrl));
-            m_server.DeleteEndpoint(methodpoint(RestGoose::PATCH, aUrl));
-            m_server.DeleteEndpoint(methodpoint(RestGoose::HTTP_DELETE, aUrl));
+            m_server.DeleteEndpoint(methodpoint(pml::restgoose::GET, aUrl));
+            m_server.DeleteEndpoint(methodpoint(pml::restgoose::PATCH, aUrl));
+            m_server.DeleteEndpoint(methodpoint(pml::restgoose::HTTP_DELETE, aUrl));
 
             ResourceModified(FILE, vSplit.back(), DELETED);
         }
@@ -670,10 +670,10 @@ response Core::DeleteFile(const query& theQuery, const postData& vData, const en
     return theResponse;
 }
 
-response Core::DeletePlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::DeletePlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "DeletePlaylist" ;
-    response theResponse(m_manager.IsLocked());
+    pml::restgoose::response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode != 423)
     {
         std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
@@ -684,9 +684,9 @@ response Core::DeletePlaylist(const query& theQuery, const postData& vData, cons
         {
             endpoint aUrl(endpoint(EP_PLAYLISTS.Get()+"/"+vSplit.back()));
 
-            m_server.DeleteEndpoint(methodpoint(RestGoose::GET, aUrl));
-            m_server.DeleteEndpoint(methodpoint(RestGoose::PATCH, aUrl));
-            m_server.DeleteEndpoint(methodpoint(RestGoose::HTTP_DELETE, aUrl));
+            m_server.DeleteEndpoint(methodpoint(pml::restgoose::GET, aUrl));
+            m_server.DeleteEndpoint(methodpoint(pml::restgoose::PATCH, aUrl));
+            m_server.DeleteEndpoint(methodpoint(pml::restgoose::HTTP_DELETE, aUrl));
 
             ResourceModified(PLAYLIST, vSplit.back(), DELETED);
         }
@@ -694,12 +694,12 @@ response Core::DeletePlaylist(const query& theQuery, const postData& vData, cons
     return theResponse;
 }
 
-response Core::DeleteSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::DeleteSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "DeleteSchedule" ;
     std::vector<std::string> vSplit(SplitString(theEndpoint.Get(), '/'));
 
-    response theResponse(m_manager.IsLocked());
+    pml::restgoose::response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode != 423)
     {
         theResponse = m_manager.DeleteSchedule(vSplit.back());
@@ -708,9 +708,9 @@ response Core::DeleteSchedule(const query& theQuery, const postData& vData, cons
         {
             endpoint aUrl(endpoint(EP_SCHEDULES.Get()+"/"+vSplit.back()));
 
-            m_server.DeleteEndpoint(methodpoint(RestGoose::GET, aUrl));
-            m_server.DeleteEndpoint(methodpoint(RestGoose::PATCH, aUrl));
-            m_server.DeleteEndpoint(methodpoint(RestGoose::HTTP_DELETE, aUrl));
+            m_server.DeleteEndpoint(methodpoint(pml::restgoose::GET, aUrl));
+            m_server.DeleteEndpoint(methodpoint(pml::restgoose::PATCH, aUrl));
+            m_server.DeleteEndpoint(methodpoint(pml::restgoose::HTTP_DELETE, aUrl));
 
             ResourceModified(SCHEDULE, vSplit.back(), DELETED);
         }
@@ -719,11 +719,11 @@ response Core::DeleteSchedule(const query& theQuery, const postData& vData, cons
 }
 
 
-response Core::PostFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::PostFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PostFile ";
 
-    response theResponse(m_manager.IsLocked());
+    pml::restgoose::response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode != 423)
     {
         theResponse = m_manager.AddFiles(ConvertPostDataToJson(vData).jsonData);
@@ -734,10 +734,10 @@ response Core::PostFile(const query& theQuery, const postData& vData, const endp
         {
             endpoint aUrl(endpoint(EP_FILES.Get()+"/"+theResponse.jsonData["uid"].asString()));
 
-            m_server.AddEndpoint(methodpoint(RestGoose::GET, aUrl), std::bind(&Core::GetFile, this, _1,_2,_3,_4));
-            m_server.AddEndpoint(methodpoint(RestGoose::PATCH, aUrl), std::bind(&Core::PatchFile, this, _1,_2,_3,_4));
-            m_server.AddEndpoint(methodpoint(RestGoose::PUT, aUrl), std::bind(&Core::PutFile, this, _1,_2,_3,_4));
-            m_server.AddEndpoint(methodpoint(RestGoose::HTTP_DELETE, aUrl), std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
+            m_server.AddEndpoint(methodpoint(pml::restgoose::GET, aUrl), std::bind(&Core::GetFile, this, _1,_2,_3,_4));
+            m_server.AddEndpoint(methodpoint(pml::restgoose::PATCH, aUrl), std::bind(&Core::PatchFile, this, _1,_2,_3,_4));
+            m_server.AddEndpoint(methodpoint(pml::restgoose::PUT, aUrl), std::bind(&Core::PutFile, this, _1,_2,_3,_4));
+            m_server.AddEndpoint(methodpoint(pml::restgoose::HTTP_DELETE, aUrl), std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
 
             ResourceModified(FILE, theResponse.jsonData["uid"].asString(), ADDED);
         }
@@ -745,11 +745,11 @@ response Core::PostFile(const query& theQuery, const postData& vData, const endp
     return theResponse;
 }
 
-response Core::PostPlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::PostPlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PostPlaylist" ;
 
-    response theResponse(m_manager.IsLocked());
+    pml::restgoose::response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode != 423)
     {
         theResponse = ConvertPostDataToJson(vData);
@@ -760,9 +760,9 @@ response Core::PostPlaylist(const query& theQuery, const postData& vData, const 
             {
                 endpoint aUrl(endpoint(EP_PLAYLISTS.Get()+"/"+theResponse.jsonData["uid"].asString()));
 
-                m_server.AddEndpoint(methodpoint(RestGoose::GET, aUrl), std::bind(&Core::GetPlaylist, this, _1,_2,_3,_4));
-                m_server.AddEndpoint(methodpoint(RestGoose::PATCH, aUrl), std::bind(&Core::PutPlaylist, this, _1,_2,_3,_4));
-                m_server.AddEndpoint(methodpoint(RestGoose::HTTP_DELETE, aUrl), std::bind(&Core::DeletePlaylist, this, _1,_2,_3,_4));
+                m_server.AddEndpoint(methodpoint(pml::restgoose::GET, aUrl), std::bind(&Core::GetPlaylist, this, _1,_2,_3,_4));
+                m_server.AddEndpoint(methodpoint(pml::restgoose::PATCH, aUrl), std::bind(&Core::PutPlaylist, this, _1,_2,_3,_4));
+                m_server.AddEndpoint(methodpoint(pml::restgoose::HTTP_DELETE, aUrl), std::bind(&Core::DeletePlaylist, this, _1,_2,_3,_4));
 
                 ResourceModified(PLAYLIST, theResponse.jsonData["uid"].asString(), ADDED);
             }
@@ -771,10 +771,10 @@ response Core::PostPlaylist(const query& theQuery, const postData& vData, const 
     return theResponse;
 }
 
-response Core::PostSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::PostSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PostSchedule" ;
-    response theResponse(m_manager.IsLocked());
+    pml::restgoose::response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode != 423)
     {
         theResponse = ConvertPostDataToJson(vData);
@@ -784,9 +784,9 @@ response Core::PostSchedule(const query& theQuery, const postData& vData, const 
             if(theResponse.nHttpCode == 201)
             {
                 endpoint aUrl(endpoint(EP_SCHEDULES.Get()+"/"+theResponse.jsonData["uid"].asString()));
-                m_server.AddEndpoint(methodpoint(RestGoose::GET, aUrl), std::bind(&Core::GetSchedule, this, _1,_2,_3,_4));
-                m_server.AddEndpoint(methodpoint(RestGoose::PUT, aUrl), std::bind(&Core::PutSchedule, this, _1,_2,_3,_4));
-                m_server.AddEndpoint(methodpoint(RestGoose::HTTP_DELETE,aUrl), std::bind(&Core::DeleteSchedule, this, _1,_2,_3,_4));
+                m_server.AddEndpoint(methodpoint(pml::restgoose::GET, aUrl), std::bind(&Core::GetSchedule, this, _1,_2,_3,_4));
+                m_server.AddEndpoint(methodpoint(pml::restgoose::PUT, aUrl), std::bind(&Core::PutSchedule, this, _1,_2,_3,_4));
+                m_server.AddEndpoint(methodpoint(pml::restgoose::HTTP_DELETE,aUrl), std::bind(&Core::DeleteSchedule, this, _1,_2,_3,_4));
 
                 ResourceModified(SCHEDULE, theResponse.jsonData["uid"].asString(), ADDED);
             }
@@ -900,10 +900,10 @@ void Core::LoopCallback(int nTook)
 }
 
 
-response Core::PutUpdate(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
+pml::restgoose::response Core::PutUpdate(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PutUpdate" ;
-    response theResponse(m_manager.IsLocked());
+    pml::restgoose::response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode == 423)
     {
         return theResponse;
@@ -922,9 +922,9 @@ response Core::PutUpdate(const query& theQuery, const postData& vData, const end
 
 
 
-response Core::Reboot(int nCommand)
+pml::restgoose::response Core::Reboot(int nCommand)
 {
-    response theResponse;
+    pml::restgoose::response theResponse;
     sync(); //make sure filesystem is synced
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
     int nError = reboot(nCommand);

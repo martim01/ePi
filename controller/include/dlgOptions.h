@@ -12,17 +12,22 @@
 //*)
 #include <string>
 #include "json/json.h"
-#include "restfulclient.h"
-#include "multipartupload.h"
 #include "wmlabel.h"
 
-class WebSocketClient;
+namespace pml
+{
+    namespace restgoose
+    {
+        class HttpClient;
+    }
+}
 
+class wxWebSocketClient;
 class dlgOptions: public wxDialog
 {
 	public:
 
-		dlgOptions(wxWindow* parent, int nType, WebSocketClient& wsClient, const wxString& sHostname, const wxString& sIpAddress, const wxString& sUrl, const std::string& sUid, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
+		dlgOptions(wxWindow* parent, int nType, wxWebSocketClient& wsClient, const wxString& sHostname, const wxString& sIpAddress, const wxString& sUrl, const std::string& sUid, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
 		virtual ~dlgOptions();
 
 		wmButton* m_pbtnBack;
@@ -171,11 +176,10 @@ class dlgOptions: public wxDialog
 
 
         int m_nType;
-        WebSocketClient& m_wsClient;
+        wxWebSocketClient& m_wsClient;
         wxString m_sIpAddress;
         wxString m_sUrl;
         std::string m_sUid;
-        RestfulClient m_client;
 
 
 		DECLARE_EVENT_TABLE()

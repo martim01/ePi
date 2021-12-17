@@ -1,5 +1,4 @@
 #include "dlgOptions.h"
-#include "restfulclient.h"
 #include "constants.h"
 #include "jsonutils.h"
 #include "version.h"
@@ -13,8 +12,11 @@
 #include <map>
 #include "dlgUpload.h"
 #include "dlgError.h"
-#include <sys/capability.h>
+//#include <sys/capability.h>
 #include "dlgInfo.h"
+#include "response.h"
+#include <fstream>
+#include "wxwebsocketclient.h"
 //(*InternalHeaders(dlgOptions)
 #include <wx/font.h>
 #include <wx/intl.h>
@@ -76,14 +78,12 @@ BEGIN_EVENT_TABLE(dlgOptions,wxDialog)
 	//*)
 END_EVENT_TABLE()
 
-dlgOptions::dlgOptions(wxWindow* parent, int nType, WebSocketClient& wsClient, const wxString& sHostname, const wxString& sIpAddress, const wxString& sUrl, const std::string& sUid, wxWindowID id,const wxPoint& pos,const wxSize& size) :
+dlgOptions::dlgOptions(wxWindow* parent, int nType, wxWebSocketClient& wsClient, const wxString& sHostname, const wxString& sIpAddress, const wxString& sUrl, const std::string& sUid, wxWindowID id,const wxPoint& pos,const wxSize& size) :
     m_nType(nType),
     m_wsClient(wsClient),
     m_sIpAddress(sIpAddress),
     m_sUrl(sUrl),
-    m_sUid(sUid),
-    m_client(this)
-
+    m_sUid(sUid)
 {
 
 	wxBoxSizer* BoxSizer0;
@@ -435,7 +435,6 @@ dlgOptions::dlgOptions(wxWindow* parent, int nType, WebSocketClient& wsClient, c
 
 
 	m_pstHostname->SetLabel(sHostname);
-	Connect(wxID_ANY, wxEVT_R_REPLY, (wxObjectEventFunction)&dlgOptions::OnRestfulReply);
 
 	if(m_nType != CART_SYSTEM)
 	{
@@ -444,7 +443,13 @@ dlgOptions::dlgOptions(wxWindow* parent, int nType, WebSocketClient& wsClient, c
 
 	if(m_nType != CART_FILE)
 	{
-        m_client.Get((m_sUrl+STR_ENDPOINTS[UPDATE]).ToStdString(), UPDATE);
+        pml::restgoose::HttpClient client(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[UPDATE]).ToStdString()));
+        auto resp = client.Run();
+        if(resp.nCode > 100)
+        {
+            ShowConnectedButtons(true);
+            VersionReply(ConvertToJson(resp.sData));
+        }
     }
 
 }
@@ -470,8 +475,8 @@ void dlgOptions::OnbtnFileUpdateClick(wxCommandEvent& event)
         std::string sEndpoint((m_sUrl+STR_ENDPOINTS[FILES]+"/").ToStdString());
         sEndpoint += m_sUid;
 
-        m_client.Patch(sEndpoint, ssData.str().c_str(), FILE_UPDATE);
-
+        pml::restgoose::HttpClient client(pml::restgoose::PATCH, endpoint(sEndpoint), textData(ssData.str()));
+        FileUpdateReply(ConvertToJson(client.Run().sData));
     }
 }
 
@@ -513,7 +518,9 @@ void dlgOptions::OnbtnDeleteClick(wxCommandEvent& event)
     {
         std::string sEndpoint((m_sUrl+STR_ENDPOINTS[FILES]+"/").ToStdString());
         sEndpoint += m_sUid;
-        m_client.Delete(sEndpoint, FILE_DELETE);
+
+        pml::restgoose::HttpClient client(pml::restgoose::HTTP_DELETE, endpoint(sEndpoint));
+        FileDeleteReply(ConvertToJson(client.Run().sData));
     }
 }
 
@@ -527,7 +534,10 @@ void dlgOptions::UpdateApp(const wxString& sApp)
 {
     dlgUpload aDlg(this, m_pstHostname->GetLabel(), m_sIpAddress);
     aDlg.PutApp(sApp);
-    m_client.Get((m_sUrl+STR_ENDPOINTS[UPDATE]).ToStdString(), UPDATE);
+
+    pml::restgoose::HttpClient client(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[UPDATE]).ToStdString()));
+    VersionReply(ConvertToJson(client.Run().sData));
+
 
 }
 
@@ -634,21 +644,28 @@ void dlgOptions::OnbtnRestartServerClick(wxCommandEvent& event)
 {
     std::string sEndpoint = (m_sUrl+STR_ENDPOINTS[POWER]).ToStdString();
     std::string sCommand = "{ \"command\": \"restart server\"}";
-    m_client.Put(sEndpoint, sCommand.c_str(), POWER);
+
+    pml::restgoose::HttpClient client(pml::restgoose::PUT, endpoint(sEndpoint), textData(sCommand));
+    PowerReply(ConvertToJson(client.Run().sData));
 }
 
 void dlgOptions::OnbtnRestartOSClick(wxCommandEvent& event)
 {
     std::string sEndpoint = (m_sUrl+STR_ENDPOINTS[POWER]).ToStdString();
     std::string sCommand = "{ \"command\": \"restart os\"}";
-    m_client.Put(sEndpoint, sCommand.c_str(), POWER);
+
+    pml::restgoose::HttpClient client(pml::restgoose::PUT, endpoint(sEndpoint), textData(sCommand));
+    PowerReply(ConvertToJson(client.Run().sData));
+
 }
 
 void dlgOptions::OnbtnShutdownOSClick(wxCommandEvent& event)
 {
-   std::string sEndpoint = (m_sUrl+STR_ENDPOINTS[POWER]).ToStdString();
+    std::string sEndpoint = (m_sUrl+STR_ENDPOINTS[POWER]).ToStdString();
     std::string sCommand = "{ \"command\": \"shutdown\"}";
-    m_client.Put(sEndpoint, sCommand.c_str(), POWER);
+
+    pml::restgoose::HttpClient client(pml::restgoose::PUT, endpoint(sEndpoint), textData(sCommand));
+    PowerReply(ConvertToJson(client.Run().sData));
 }
 
 void dlgOptions::OnbtnShutdownControllerClick(wxCommandEvent& event)
@@ -667,36 +684,6 @@ void dlgOptions::OnbtnBackClick(wxCommandEvent& event)
     EndModal(wxID_OK);
 }
 
-
-void dlgOptions::OnRestfulReply(const wxCommandEvent &event)
-{
-    ShowConnectedButtons(true);
-    Json::Value jsValue(ConvertToJson(event.GetString().ToStdString()));
-
-    switch(event.GetInt())
-    {
-        case FILE_GET:
-            FileGetReply(jsValue);
-            break;
-        case FILE_UPDATE:
-            FileUpdateReply(jsValue);
-        case FILE_REPLACE:
-            FileUpdateReply(jsValue);
-            break;
-        case FILE_DELETE:
-            FileDeleteReply(jsValue);
-            break;
-        case FILES:
-            FilesReply(jsValue);
-            break;
-        case UPDATE:
-            VersionReply(jsValue);
-            break;
-        case POWER:
-            PowerReply(jsValue);
-
-    }
-}
 
 void dlgOptions::ShowStringValue(const Json::Value& jsData, const std::string& sKey, wmLabel* pLabel)
 {
@@ -811,7 +798,12 @@ void dlgOptions::FileDeleteReply(const Json::Value& jsData)
         ShowFileDetails(jsData);    //clear the file details
         if(m_nType == CONTROLLER)
         {
-            m_client.Get((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString(), FILES);   //see if any other files on the server
+            pml::restgoose::HttpClient client(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString()));
+            auto resp = client.Run();
+            if(resp.nCode > 100)
+            {
+                FileGetReply(ConvertToJson(resp.sData));
+            }
         }
     }
 }
@@ -834,7 +826,11 @@ void dlgOptions::GetFileDetails()
 {
     if(m_sUid.empty() == false)
 	{
-	    m_client.Get((m_sUrl+STR_ENDPOINTS[FILES]+"/").ToStdString()+m_sUid, FILE_GET);
+	    std::string sEnd = (m_sUrl+STR_ENDPOINTS[FILES]+"/").ToStdString()+m_sUid;
+
+	    pml::restgoose::HttpClient client(pml::restgoose::GET, endpoint(sEnd));
+        FileGetReply(ConvertToJson(client.Run().sData));
+
 	    m_pbtnDelete->Show();
 	    m_pbtnReplace->SetLabel("Replace");
 	}

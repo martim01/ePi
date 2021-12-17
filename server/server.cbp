@@ -40,6 +40,8 @@
 					<Add library="sndfile" />
 					<Add library="ssl" />
 					<Add library="crypto" />
+					<Add library="pml_log" />
+					<Add library="restgoose" />
 				</Linker>
 			</Target>
 		</Build>
@@ -54,30 +56,29 @@
 			<Add option="-Winline" />
 			<Add option="-Wunreachable-code" />
 			<Add option="-Wmissing-declarations" />
-			<Add option="-Wmissing-include-dirs" />
 			<Add option="-Wswitch-enum" />
 			<Add option="-Wswitch-default" />
-			<Add option="-Wzero-as-null-pointer-constant" />
 			<Add option="-Wmain" />
 			<Add option="-pedantic" />
 			<Add option="-Wextra" />
+			<Add option="-Wmissing-include-dirs" />
+			<Add option="-Wzero-as-null-pointer-constant" />
 			<Add option="-std=c++14" />
 			<Add option="-fexceptions" />
 			<Add option="-DMG_ENABLE_HTTP_STREAMING_MULTIPART" />
 			<Add option="-DMG_ENABLE_SSL" />
-			<Add directory="../external/jsoncpp/dist" />
-			<Add directory="../external/log/include" />
+			<Add directory="$(#json.INCLUDE)" />
+			<Add directory="$(#log.INCLUDE)" />
 			<Add directory="include" />
 			<Add directory="../external/uuid" />
 			<Add directory="../common/include" />
+			<Add directory="$(#restgoose.INCLUDE)" />
 		</Compiler>
 		<Linker>
 			<Add library="pthread" />
-			<Add directory="../external/log/lib" />
+			<Add directory="$(#log.LIB)" />
+			<Add directory="$(#restgoose.LIB)" />
 		</Linker>
-		<ExtraCommands>
-			<Add before="../autoversion src/version.cpp" />
-		</ExtraCommands>
 		<Unit filename="../common/include/epicron.h" />
 		<Unit filename="../common/include/epiutils.h" />
 		<Unit filename="../common/include/inimanager.h" />

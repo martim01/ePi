@@ -9,8 +9,7 @@
 
 #ifndef CONTROLLERMAIN_H
 #define CONTROLLERMAIN_H
-#include "websocketclient.h"
-#include "restfulclient.h"
+#include "wxwebsocketclient.h"
 #include "json/json.h"
 #include <wx/datetime.h>
 //(*Headers(controllerDialog)
@@ -20,6 +19,14 @@
 #include "uirect.h"
 #include <random>
 
+namespace pml
+{
+    namespace restgoose
+    {
+        class HttpClient;
+        class WebSocketClient;
+    }
+}
 class controllerDialog: public wxDialog
 {
     public:
@@ -58,9 +65,7 @@ class controllerDialog: public wxDialog
         wxTimer m_timerCheck;
 
         void OnWebsocketConnection(const wxCommandEvent& event);
-        void OnWebsocketHandshake(const wxCommandEvent& event);
-        void OnWebsocketFrame(const wxCommandEvent& event);
-        void OnWebsocketFinished(const wxCommandEvent& event);
+        void OnWebsocketMessage(const wxCommandEvent& event);
         void OnRestfulReply(const wxCommandEvent& event);
         void OnTimerTimeout(const wxTimerEvent& event);
 
@@ -78,8 +83,7 @@ class controllerDialog: public wxDialog
         uiRect m_uiStatus;
 
 
-        WebSocketClient m_wsClient;
-        RestfulClient m_rClient;
+        wxWebSocketClient m_wsClient;
 
         wxString m_sWSEndpoint;
         wxString m_sUrl;

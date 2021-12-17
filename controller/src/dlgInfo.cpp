@@ -1,8 +1,8 @@
 #include "../include/dlgInfo.h"
 #include "websocketclient.h"
-#include "restfulclient.h"
 #include "jsonutils.h"
 #include <iostream>
+#include "wxwebsocketclient.h"
 
 //(*InternalHeaders(dlgInfo)
 #include <wx/font.h>
@@ -75,7 +75,7 @@ BEGIN_EVENT_TABLE(dlgInfo,wxDialog)
 	//*)
 END_EVENT_TABLE()
 
-dlgInfo::dlgInfo(wxWindow* parent,WebSocketClient& wsClient, const wxString& sHostname, wxWindowID id,const wxPoint& pos,const wxSize& size) :
+dlgInfo::dlgInfo(wxWindow* parent,wxWebSocketClient& wsClient, const wxString& sHostname, wxWindowID id,const wxPoint& pos,const wxSize& size) :
 m_wsClient(wsClient)
 {
 	wxBoxSizer* BoxSizer0;
@@ -337,9 +337,7 @@ m_wsClient(wsClient)
 	Connect(ID_BUTTON1, wxEVT_COMMAND_BUTTON_CLICKED, (wxObjectEventFunction)&dlgInfo::OnbtnCloseClick);
 
 	Connect(wxID_ANY, wxEVT_WS_CONNECTION, (wxObjectEventFunction)&dlgInfo::OnWebsocketConnection);
-    Connect(wxID_ANY, wxEVT_WS_HANDSHAKE, (wxObjectEventFunction)&dlgInfo::OnWebsocketHandshake);
-    Connect(wxID_ANY, wxEVT_WS_FRAME, (wxObjectEventFunction)&dlgInfo::OnWebsocketFrame);
-    Connect(wxID_ANY, wxEVT_WS_FINISHED, (wxObjectEventFunction)&dlgInfo::OnWebsocketFinished);
+    Connect(wxID_ANY, wxEVT_WS_MESSAGE, (wxObjectEventFunction)&dlgInfo::OnWebsocketFrame);
 
 
     m_wsClient.AddHandler(this);

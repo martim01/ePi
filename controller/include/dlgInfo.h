@@ -9,13 +9,14 @@
 //*)
 #include "wmlabel.h"
 #include "wmbutton.h"
-class WebSocketClient;
+
+class wxWebSocketClient;
 
 class dlgInfo: public wxDialog
 {
 	public:
 
-		dlgInfo(wxWindow* parent,WebSocketClient& wsClient, const wxString& sHostname, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
+		dlgInfo(wxWindow* parent, wxWebSocketClient& wsClient, const wxString& sHostname, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
 		virtual ~dlgInfo();
 
 		//(*Declarations(dlgInfo)
@@ -149,7 +150,7 @@ class dlgInfo: public wxDialog
 		void OnbtnCloseClick(wxCommandEvent& event);
 		//*)
 
-		WebSocketClient& m_wsClient;
+		wxWebSocketClient& m_wsClient;
 
 		void OnWebsocketConnection(const wxCommandEvent& event);
         void OnWebsocketHandshake(const wxCommandEvent& event);

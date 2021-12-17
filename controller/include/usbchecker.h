@@ -16,8 +16,9 @@ class UsbChecker
     private:
         void Abort();
         void MountAndSearch(const wxString& sDevice, const wxString& sFilename);
-        std::unique_ptr<std::thread> m_pThread;
         wxEvtHandler* m_pHandler;
+        std::unique_ptr<std::thread> m_pThread;
+
 
 };
 

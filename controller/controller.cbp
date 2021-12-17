@@ -84,13 +84,13 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option parameters="4 3 0 127.0.0.1 8080" />
+				<Option parameters="4 3 1 127.0.0.1 8080" />
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
+					<Add option="-fPIC" />
 					<Add option="`wx-config --cxxflags`" />
 					<Add option="-pthread" />
 					<Add option="-DNDEBUG" />
-					<Add directory="$(#wx)/lib/gcc_dll/mswud" />
 				</Compiler>
 				<ResourceCompiler>
 					<Add directory="$(#wx)/lib/gcc_dll/mswud" />
@@ -100,7 +100,8 @@
 					<Add option="`wx-config --libs`" />
 					<Add option="-pthread" />
 					<Add library="cap" />
-					<Add directory="$(#wx)/lib/gcc_dll" />
+					<Add library="pml_log" />
+					<Add library="restgoose" />
 				</Linker>
 			</Target>
 		</Build>
@@ -113,13 +114,18 @@
 			<Add directory="$(#wx)/include" />
 			<Add directory="../common/include" />
 			<Add directory="include" />
-			<Add directory="../external/log/include" />
-			<Add directory="../external/jsoncpp/dist" />
 			<Add directory="icons" />
+			<Add directory="$(#json.INCLUDE)" />
+			<Add directory="$(#log.INCLUDE)" />
+			<Add directory="$(#restgoose.INCLUDE)" />
 		</Compiler>
 		<ResourceCompiler>
 			<Add directory="$(#wx)/include" />
 		</ResourceCompiler>
+		<Linker>
+			<Add directory="$(#log.LIB)" />
+			<Add directory="$(#restgoose.LIB)" />
+		</Linker>
 		<ExtraCommands>
 			<Add before="../autoversion src/version.cpp" />
 		</ExtraCommands>
@@ -127,18 +133,10 @@
 		<Unit filename="../common/include/inimanager.h" />
 		<Unit filename="../common/include/inisection.h" />
 		<Unit filename="../common/include/jsonutils.h" />
-		<Unit filename="../common/include/mongoose.h" />
-		<Unit filename="../common/include/namedtype.h" />
 		<Unit filename="../common/src/epiwriter.cpp" />
 		<Unit filename="../common/src/inimanager.cpp" />
 		<Unit filename="../common/src/inisection.cpp" />
 		<Unit filename="../common/src/jsonutils.cpp" />
-		<Unit filename="../common/src/mongoose.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="../external/jsoncpp/dist/jsoncpp.cpp" />
-		<Unit filename="../external/log/include/log.h" />
-		<Unit filename="../external/log/src/log.cpp" />
 		<Unit filename="include/constants.h" />
 		<Unit filename="include/controllerApp.h" />
 		<Unit filename="include/controllerMain.h" />
@@ -148,9 +146,7 @@
 		<Unit filename="include/dlgOptions.h" />
 		<Unit filename="include/dlgUpload.h" />
 		<Unit filename="include/dlgUsb.h" />
-		<Unit filename="include/multipartupload.h" />
 		<Unit filename="include/progress.h" />
-		<Unit filename="include/restfulclient.h" />
 		<Unit filename="include/uirect.h" />
 		<Unit filename="include/usbchecker.h" />
 		<Unit filename="include/version.h" />
@@ -162,6 +158,8 @@
 		<Unit filename="include/wmkeyboard.h" />
 		<Unit filename="include/wmlabel.h" />
 		<Unit filename="include/wmlist.h" />
+		<Unit filename="include/wxhttpclientmanager.h" />
+		<Unit filename="include/wxwebsocketclient.h" />
 		<Unit filename="resource.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>
@@ -174,19 +172,18 @@
 		<Unit filename="src/dlgOptions.cpp" />
 		<Unit filename="src/dlgUpload.cpp" />
 		<Unit filename="src/dlgUsb.cpp" />
-		<Unit filename="src/multipartupload.cpp" />
 		<Unit filename="src/progress.cpp" />
-		<Unit filename="src/restfulclient.cpp" />
 		<Unit filename="src/uirect.cpp" />
 		<Unit filename="src/usbchecker.cpp" />
 		<Unit filename="src/version.cpp" />
-		<Unit filename="src/websocketclient.cpp" />
 		<Unit filename="src/wmbutton.cpp" />
 		<Unit filename="src/wmedit.cpp" />
 		<Unit filename="src/wmfocusmanager.cpp" />
 		<Unit filename="src/wmkeyboard.cpp" />
 		<Unit filename="src/wmlabel.cpp" />
 		<Unit filename="src/wmlist.cpp" />
+		<Unit filename="src/wxhttpclientmanager.cpp" />
+		<Unit filename="src/wxwebsocketclient.cpp" />
 		<Unit filename="wxsmith/controllerdialog.wxs" />
 		<Unit filename="wxsmith/dlgEdit.wxs" />
 		<Unit filename="wxsmith/dlgInfo.wxs" />
@@ -194,9 +191,6 @@
 		<Unit filename="wxsmith/dlgUpload.wxs" />
 		<Unit filename="wxsmith/dlgUsb.wxs" />
 		<Extensions>
-			<code_completion />
-			<envvars />
-			<debugger />
 			<lib_finder disable_auto="1" />
 			<wxsmith version="1">
 				<gui name="wxWidgets" src="controllerApp.cpp" main="controllerDialog" init_handlers="necessary" language="CPP" />

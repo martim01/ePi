@@ -10,7 +10,6 @@
 #include "controllerMain.h"
 #include <wx/msgdlg.h>
 #include <wx/log.h>
-#include "restfulclient.h"
 #include "jsonutils.h"
 #include "epiwriter.h"
 #include <sstream>
@@ -18,7 +17,8 @@
 #include <wx/display.h>
 #include "dlgOptions.h"
 #include "constants.h"
-
+#include "httpclient.h"
+#include "log.h"
 
 const wxColour controllerDialog::CLR_PLAYING = wxColour(146,208,80);
 const wxColour controllerDialog::CLR_IDLE = wxColour(141,180,226);
@@ -73,7 +73,6 @@ END_EVENT_TABLE()
 
 controllerDialog::controllerDialog(wxWindow* parent,  const wxPoint pntLayout, unsigned int nController, const wxString& sIpAddress, unsigned short nPort, wxWindowID id) :
 m_wsClient(),
-m_rClient(this),
 m_sIpAddress(sIpAddress),
 m_nConnected(DISCONNECTED),
 m_nPlaying(STOPPED),
@@ -100,6 +99,7 @@ m_dist(500,1000)
     Connect(wxEVT_LEFT_UP,(wxObjectEventFunction)&controllerDialog::OnLeftUp);
     //*)
 
+    pml::LogStream::AddOutput(std::make_unique<pml::LogOutput>());
 
     int nWidth = (wxGetClientDisplayRect().GetWidth()-1)/pntLayout.x;
     int nHeight = (wxGetClientDisplayRect().GetHeight()-1)/pntLayout.y;
@@ -122,10 +122,7 @@ m_dist(500,1000)
     m_uiStatus.SetForegroundColour(*wxBLACK);
 
     Connect(wxID_ANY, wxEVT_WS_CONNECTION, (wxObjectEventFunction)&controllerDialog::OnWebsocketConnection);
-    Connect(wxID_ANY, wxEVT_WS_HANDSHAKE, (wxObjectEventFunction)&controllerDialog::OnWebsocketHandshake);
-    Connect(wxID_ANY, wxEVT_WS_FRAME, (wxObjectEventFunction)&controllerDialog::OnWebsocketFrame);
-    Connect(wxID_ANY, wxEVT_WS_FINISHED, (wxObjectEventFunction)&controllerDialog::OnWebsocketFinished);
-    Connect(wxID_ANY, wxEVT_R_REPLY, (wxObjectEventFunction)&controllerDialog::OnRestfulReply);
+    Connect(wxID_ANY, wxEVT_WS_MESSAGE, (wxObjectEventFunction)&controllerDialog::OnWebsocketMessage);
 
 
 
@@ -137,11 +134,12 @@ m_dist(500,1000)
 
     m_sIpAddress.Printf("%s:%u", sIpAddress.c_str(), nPort);
 
-    m_sWSEndpoint.Printf("ws://%s", m_sIpAddress.c_str());
+    m_sWSEndpoint.Printf("ws://%s/ws", m_sIpAddress.c_str());
     m_sUrl.Printf("http://%s/x-epi/", m_sIpAddress.c_str());
 
     m_wsClient.AddHandler(this);
-    m_wsClient.Connect(std::string(m_sWSEndpoint.mb_str()));
+    m_wsClient.Connect(endpoint(m_sWSEndpoint.ToStdString()));
+    m_wsClient.Run();
 
     m_timerTimeout.SetOwner(this, wxNewId());
     Connect(m_timerTimeout.GetId(), wxEVT_TIMER, (wxObjectEventFunction)&controllerDialog::OnTimerTimeout);
@@ -168,39 +166,24 @@ void controllerDialog::OnAbout(wxCommandEvent& event)
 
 void controllerDialog::OnWebsocketConnection(const wxCommandEvent& event)
 {
-    if(event.GetInt() != 0)
+    if(event.GetExtraLong() != 0)
     {
-        m_nConnected = DISCONNECTED;
-        UpdateLabels();
-        m_timerConnection.Start(m_dist(m_gen),true);
-    }
-    else
-    {
-        m_nConnected = CONNECTING;
+        m_nConnected = CONNECTED;
         m_timerCheck.Start(100,true);
 
         UpdateLabels();
-    }
-}
 
-void controllerDialog::OnWebsocketHandshake(const wxCommandEvent& event)
-{
-    if(event.GetInt() == 101)
-    {
-        m_nConnected = CONNECTED;
-        UpdateLabels();
-        m_uiStatus.SetLabel("Connected");
     }
     else
     {
         m_nConnected = DISCONNECTED;
         UpdateLabels();
-        m_uiStatus.SetLabel(wxString::Format("HTTP: %d", event.GetInt()));
-
+        m_uiStatus.SetLabel("Offline");
+        m_timerConnection.Start(m_dist(m_gen),true);
     }
 }
 
-void controllerDialog::OnWebsocketFrame(const wxCommandEvent& event)
+void controllerDialog::OnWebsocketMessage(const wxCommandEvent& event)
 {
     m_timerTimeout.Stop();
     m_timerTimeout.Start(5000, true);
@@ -238,21 +221,10 @@ void controllerDialog::UpdatePlayingStatus(const Json::Value& jsData)
     UpdateLabels();
 }
 
-void controllerDialog::OnWebsocketFinished(const wxCommandEvent& event)
-{
-    m_nConnected = DISCONNECTED;
-    UpdateLabels();
-    m_uiStatus.SetLabel("Offline");
-
-
-    m_timerConnection.Start(m_dist(m_gen),true);
-}
-
-
 
 void controllerDialog::OntimerConnectionTrigger(wxTimerEvent& event)
 {
-    m_wsClient.Connect(std::string(m_sWSEndpoint.mb_str()));
+    m_wsClient.Connect(endpoint(m_sWSEndpoint.ToStdString()));
 }
 
 
@@ -408,7 +380,8 @@ void controllerDialog::Play()
     std::stringstream ss;
     epiWriter::Get().writeToSStream(jsCommand, ss);
 
-    m_rClient.Patch((m_sUrl+STR_ENDPOINTS[STATUS]).ToStdString(), ss.str().data(), STATUS);
+    pml::restgoose::HttpClient client(pml::restgoose::PATCH, endpoint((m_sUrl+STR_ENDPOINTS[STATUS]).ToStdString()), textData(ss.str()));
+    client.Run();
 }
 
 void controllerDialog::Stop()
@@ -427,7 +400,8 @@ void controllerDialog::Stop()
     std::stringstream ss;
     epiWriter::Get().writeToSStream(jsCommand, ss);
 
-    m_rClient.Patch((m_sUrl+STR_ENDPOINTS[STATUS]).ToStdString(), ss.str().data(), STATUS);
+    pml::restgoose::HttpClient client(pml::restgoose::PATCH, endpoint((m_sUrl+STR_ENDPOINTS[STATUS]).ToStdString()), textData(ss.str()));
+    client.Run();
 }
 
 void controllerDialog::OnPaint(wxPaintEvent& event)
@@ -472,7 +446,8 @@ void controllerDialog::OntimerMenuTrigger(wxTimerEvent& event)
     }
     else
     {
-        m_rClient.Get((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString(), FILES);
+        pml::restgoose::HttpClient files(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString()));
+        ReplyFiles(ConvertToJson(files.Run().sData));
     }
 }
 
@@ -481,8 +456,13 @@ void controllerDialog::OnTimerCheck(const wxTimerEvent& event)
 {
     wxLogDebug("OnTimerCheck");
     //Ask for status and info...
-    m_rClient.Get((m_sUrl+STR_ENDPOINTS[CONFIG]).ToStdString(), CONFIG);
-    m_rClient.Get((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString(), FILES);
+    pml::restgoose::HttpClient config(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[CONFIG]).ToStdString()));
+    ReplyConfig(ConvertToJson(config.Run().sData));
+
+    pml::restgoose::HttpClient files(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString()));
+    ReplyFiles(ConvertToJson(files.Run().sData));
+
+
     m_timerCheck.Start(10000, true);
 }
 

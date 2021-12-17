@@ -88,14 +88,14 @@ bool Launcher::IsPlaying() const
 
 
 
-response Launcher::LaunchPlayer(std::string sType, std::string sUid, int nLoop, bool bShuffle)
+pml::restgoose::response Launcher::LaunchPlayer(std::string sType, std::string sUid, int nLoop, bool bShuffle)
 {
     pmlLog(pml::LOG_DEBUG) << "Launcher\tLaunchPlayer: ";
 
     int nError = pipe(m_nPipe);
     if(nError != 0)
     {
-        response theResponse(500);
+        pml::restgoose::response theResponse(500);
         theResponse.jsonData["result"] = "Could not open pipe";
         theResponse.jsonData["error_code"] = nError;
         theResponse.jsonData["error"] = strerror(nError);
@@ -111,7 +111,7 @@ response Launcher::LaunchPlayer(std::string sType, std::string sUid, int nLoop, 
     {
         close(m_nPipe[WRITE]);
         close(m_nPipe[READ]);
-        response theResponse(500);
+        pml::restgoose::response theResponse(500);
         theResponse.jsonData["result"] = "Could not fork";
         theResponse.jsonData["error_code"] = nError;
         theResponse.jsonData["error"] = strerror(nError);
@@ -124,7 +124,7 @@ response Launcher::LaunchPlayer(std::string sType, std::string sUid, int nLoop, 
     {   // Parent
         close(m_nPipe[WRITE]);  //close write end
 
-        response theResponse(200);
+        pml::restgoose::response theResponse(200);
         theResponse.jsonData["result"] = true;
 
         //launch the pipe thread
@@ -162,13 +162,13 @@ response Launcher::LaunchPlayer(std::string sType, std::string sUid, int nLoop, 
             exit(-1);
         }
     }
-    return response(200);
+    return pml::restgoose::response(200);
 }
 
 
-response Launcher::StopPlayer()
+pml::restgoose::response Launcher::StopPlayer()
 {
-    response theResponse;
+    pml::restgoose::response theResponse;
     if(m_pid == 0)
     {
         theResponse.nHttpCode = 409;
@@ -195,9 +195,9 @@ response Launcher::StopPlayer()
     return theResponse;
 }
 
-response Launcher::PausePlayer()
+pml::restgoose::response Launcher::PausePlayer()
 {
-    response theResponse;
+    pml::restgoose::response theResponse;
     if(m_pid == 0)
     {
         theResponse.nHttpCode = 409;

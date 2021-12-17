@@ -22,31 +22,31 @@ class ResourceManager
 
         void Init();
 
-        response AddFiles(const Json::Value& jsData);
-        response AddSchedule(const Json::Value& jsData);
-        response AddPlaylist(const Json::Value& jsData);
+        pml::restgoose::response AddFiles(const Json::Value& jsData);
+        pml::restgoose::response AddSchedule(const Json::Value& jsData);
+        pml::restgoose::response AddPlaylist(const Json::Value& jsData);
 
-        response ModifyFile(const std::string& sUid, const Json::Value& jsData);
-        response ModifyFileMeta(const std::string& sUid, const Json::Value& jsData);
+        pml::restgoose::response ModifyFile(const std::string& sUid, const Json::Value& jsData);
+        pml::restgoose::response ModifyFileMeta(const std::string& sUid, const Json::Value& jsData);
 
-        response ModifySchedule(const std::string& sUid, const Json::Value& jsData);
-        response ModifyPlaylist(const std::string& sUid, const Json::Value& jsData);
+        pml::restgoose::response ModifySchedule(const std::string& sUid, const Json::Value& jsData);
+        pml::restgoose::response ModifyPlaylist(const std::string& sUid, const Json::Value& jsData);
 
-        response DeleteFile(const std::string& sUid);
-        response DeleteSchedule(const std::string& sUid);
-        response DeletePlaylist(const std::string& sUid);
+        pml::restgoose::response DeleteFile(const std::string& sUid);
+        pml::restgoose::response DeleteSchedule(const std::string& sUid);
+        pml::restgoose::response DeletePlaylist(const std::string& sUid);
 
-        response GetFiles();
-        response GetSchedules();
-        response GetPlaylists();
+        pml::restgoose::response GetFiles();
+        pml::restgoose::response GetSchedules();
+        pml::restgoose::response GetPlaylists();
 
-        response GetFile(const std::string& sUid);
-        response GetSchedule(const std::string& sUid);
-        response GetPlaylist(const std::string& sUid);
+        pml::restgoose::response GetFile(const std::string& sUid);
+        pml::restgoose::response GetSchedule(const std::string& sUid);
+        pml::restgoose::response GetPlaylist(const std::string& sUid);
 
-        response ModifyStatus(const Json::Value& jsData);
+        pml::restgoose::response ModifyStatus(const Json::Value& jsData);
 
-        response UpdateApplication(const Json::Value& jsData);
+        pml::restgoose::response UpdateApplication(const Json::Value& jsData);
 
 
         std::map<std::string, std::shared_ptr<AudioFile> >::const_iterator GetFilesBegin() const;
@@ -66,7 +66,7 @@ class ResourceManager
 
         std::shared_ptr<const Resource> GetPlayingResource();
 
-        response IsLocked();
+        pml::restgoose::response IsLocked();
         void InitPaths();
 
     private:
@@ -75,37 +75,37 @@ class ResourceManager
 
         void LockResource(const std::string& sUid, bool bLock);
 
-        response AddFile(const std::string& sUploadName, const std::string& sLabel, const std::string& sDescription);
+        pml::restgoose::response AddFile(const std::string& sUploadName, const std::string& sLabel, const std::string& sDescription);
 
 
 
-        response ParseFileData(const Json::Value& jsData);
-        response ParseResource(const Json::Value& jsData);
-        response ParseFile(const std::string& sUploadName, const std::string& sLabel, const std::string& sDescription);
-        response ParseSchedule(const Json::Value& jsData);
+        pml::restgoose::response ParseFileData(const Json::Value& jsData);
+        pml::restgoose::response ParseResource(const Json::Value& jsData);
+        pml::restgoose::response ParseFile(const std::string& sUploadName, const std::string& sLabel, const std::string& sDescription);
+        pml::restgoose::response ParseSchedule(const Json::Value& jsData);
 
-        response ParseScheduleItems(const Json::Value& jsItems, std::function<response(const std::string&)> pFind, bool bCheckShuffle);
-        response ParsePlaylist(const Json::Value& jsData);
+        pml::restgoose::response ParseScheduleItems(const Json::Value& jsItems, std::function<pml::restgoose::response(const std::string&)> pFind, bool bCheckShuffle);
+        pml::restgoose::response ParsePlaylist(const Json::Value& jsData);
 
 
         bool FileExists(const std::string& sLabel, const std::string& sUid="");
         bool ResourceExists(const std::string& sLabel, const std::map<std::string, std::shared_ptr<Resource> >& mResource, const std::string& sUid="");
 
 
-        response Play(const Json::Value& jsData);
-        response Pause(const Json::Value& jsData);
-        response Stop(const Json::Value& jsData);
-        response Lock(const Json::Value& jsData);
-        response Kill(const Json::Value& jsData);
+        pml::restgoose::response Play(const Json::Value& jsData);
+        pml::restgoose::response Pause(const Json::Value& jsData);
+        pml::restgoose::response Stop(const Json::Value& jsData);
+        pml::restgoose::response Lock(const Json::Value& jsData);
+        pml::restgoose::response Kill(const Json::Value& jsData);
 
-        response PlayFile(const Json::Value& jsData);
-        response PlayPlaylist(const Json::Value& jsData);
-        response PlaySchedule(const Json::Value& jsData);
+        pml::restgoose::response PlayFile(const Json::Value& jsData);
+        pml::restgoose::response PlayPlaylist(const Json::Value& jsData);
+        pml::restgoose::response PlaySchedule(const Json::Value& jsData);
 
-        response GetSchedulesAndPlaylistsContainingFile(const std::string& sUid);
+        pml::restgoose::response GetSchedulesAndPlaylistsContainingFile(const std::string& sUid);
         Json::Value GetResourcesFileIn(const std::string& sUid, std::map<std::string, std::shared_ptr<Resource> >& mResource);
 
-        response Update(const std::string& sApplication, const std::string& sPath, const std::string& sUpdateFile);
+        pml::restgoose::response Update(const std::string& sApplication, const std::string& sPath, const std::string& sUpdateFile);
 
 
 

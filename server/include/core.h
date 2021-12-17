@@ -6,6 +6,7 @@
 #include "json/json.h"
 #include "RestGoose.h"
 
+using postData = std::vector<pml::restgoose::partData>;
 class Core
 {
     public:
@@ -15,42 +16,42 @@ class Core
 
 
 
-        response GetRoot(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-        response GetEpi(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response GetRoot(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response GetEpi(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
 
-        response GetFiles(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-        response GetPlaylists(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-        response GetSchedules(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-        response GetConfig(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-        response GetInfo(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-        response GetPower(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-        response GetFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-        response GetPlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-        response GetSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-        response GetStatus(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-        response GetUpdate(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-        response GetOutputs(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-
-
-        response PatchStatus(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-        response PatchConfig(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-        response PatchFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-
-        response PutFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-
-        response PutPlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-        response PutSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-        response PutPower(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-        response PutUpdate(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response GetFiles(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response GetPlaylists(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response GetSchedules(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response GetConfig(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response GetInfo(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response GetPower(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response GetFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response GetPlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response GetSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response GetStatus(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response GetUpdate(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response GetOutputs(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
 
 
-        response DeleteFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-        response DeletePlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-        response DeleteSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response PatchStatus(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response PatchConfig(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response PatchFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
 
-        response PostFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-        response PostPlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
-        response PostSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response PutFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+
+        pml::restgoose::response PutPlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response PutSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response PutPower(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response PutUpdate(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+
+
+        pml::restgoose::response DeleteFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response DeletePlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response DeleteSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+
+        pml::restgoose::response PostFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response PostPlaylist(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
+        pml::restgoose::response PostSchedule(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser);
 
 
         void StatusCallback(const std::string& sData);
@@ -65,14 +66,14 @@ class Core
     private:
         Launcher m_launcher;
         ResourceManager m_manager;
-        RestGoose m_server;
+        pml::restgoose::Server m_server;
         SysInfoManager m_info;
         iniManager m_iniConfig;
 
         void InitLogging();
         bool CreateEndpoints();
 
-        response Reboot(int nCommand);
+        pml::restgoose::response Reboot(int nCommand);
 
         void GetInitialPlayerStatus();
 
