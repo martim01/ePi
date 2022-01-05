@@ -228,6 +228,7 @@ pml::restgoose::response Core::GetRoot(const query& theQuery, const postData& vD
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetRoot" ;
     pml::restgoose::response theResponse;
+    theResponse.jsonData = Json::Value(Json::arrayValue);
     theResponse.jsonData.append(EPI);
     return theResponse;
 }
@@ -236,6 +237,7 @@ pml::restgoose::response Core::GetEpi(const query& theQuery, const postData& vDa
 {
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetEpi" ;
     pml::restgoose::response theResponse;
+    theResponse.jsonData = Json::Value(Json::arrayValue);
     theResponse.jsonData.append(FILES);
     theResponse.jsonData.append(PLAYLISTS);
     theResponse.jsonData.append(SCHEDULES);
