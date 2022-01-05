@@ -2,14 +2,14 @@ cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(epiworkspace)
 
 option(BUILD_SERVER "Build episerver and player3" ON)
-option(BUILD_CONTROLLER "Build controller and launcher" OFF)
+option(BUILD_CONTROLLER "Build controller and launcher" ON)
 
 SET(DIR_BASE $ENV{HOME} CACHE STRING "base location for libraries")
 SET(DIR_LOG ${DIR_BASE}/log CACHE STRING "location of pml log")
 SET(DIR_RESTGOOSE ${DIR_BASE}/Restgoose CACHE STRING "location of Restgoose")
 SET(DIR_JSON ${DIR_BASE}/jsoncpp CACHE STRING "location of jsoncpp")
 
-SET(BUILD_LOG ON CACHE BOOL "set to ON as pml::log built by Restgoose")
+SET(BUILD_LOG OFF)
 
 message(STATUS "Find external libraries")
 
@@ -28,6 +28,8 @@ else()
     message(STATUS "log found - update to latest version")
     execute_process(COMMAND git -C ${DIR_LOG} pull)
 endif()
+
+add_subdirectory(${DIR_LOG} ${CMAKE_SOURCE_DIR}/build/log)
 
 #Get Restgoose
 find_path(EPI_TEMP_DIR NAMES "CMakeLists.txt" PATHS ${DIR_RESTGOOSE})
@@ -54,11 +56,11 @@ if(BUILD_SERVER MATCHES ON)
     add_subdirectory(server)
 endif() 
 
-#if(BUILD_CONTROLLER MATCHES ON)
-#    message(STATUS "Configure controller")
-#    add_subdirectory(controller)
-#    message(STATUS "Configure launcher")
-#    add_subdirectory(launcher)
-#    message(STATUS "Configure cartcontroller")
-#    add_subdirectory(cartcontroller)
-#endif()
+if(BUILD_CONTROLLER MATCHES ON)
+    message(STATUS "Configure controller")
+    add_subdirectory(controller)
+    message(STATUS "Configure launcher")
+    add_subdirectory(launcher)
+    message(STATUS "Configure cartcontroller")
+    add_subdirectory(cartcontroller)
+endif()

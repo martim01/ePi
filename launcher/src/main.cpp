@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
     iniManager ini;
     if(ini.ReadIniFile(argv[1]) == false)
     {
-        pml::Log::Get(pml::Log::LOG_ERROR) << "Could not read ini file" << std::endl;
+        pmlLog(pml::LOG_ERROR) << "Could not read ini file" << std::endl;
         return -1;
     }
 

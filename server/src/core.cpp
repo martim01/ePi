@@ -141,7 +141,7 @@ void Core::Run(const std::string& sConfigFile)
     m_manager.Init();
     m_info.SetDiskPath(m_manager.GetAudioPath());
 
-    if(m_server.Init(m_iniConfig.GetIniString("api", "sslCert", ""), m_iniConfig.GetIniString("api", "ssKey", ""), m_iniConfig.GetIniInt("api", "port", 8080), "", true))
+    if(m_server.Init(fileLocation(m_iniConfig.GetIniString("api", "sslCert", "")), fileLocation(m_iniConfig.GetIniString("api", "ssKey", "")), m_iniConfig.GetIniInt("api", "port", 8080), endpoint(""), true))
     {
         //add server callbacks
         CreateEndpoints();
@@ -150,7 +150,7 @@ void Core::Run(const std::string& sConfigFile)
         m_launcher.AddCallbacks(std::bind(&Core::StatusCallback, this, _1), std::bind(&Core::ExitCallback, this, _1));
         m_launcher.SetPlayer(CreatePath(m_iniConfig.GetIniString("paths", "player", "/home/pi/ePi/bin")), m_iniConfig.GetIniString("playout", "app", "player3"),sConfigFile);
         //start the server loop
-        m_server.Run(false,50);
+        m_server.Run(false, std::chrono::milliseconds(50));
     }
 }
 
@@ -159,27 +159,27 @@ bool Core::CreateEndpoints()
 
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "CreateEndpoints" ;
 
-    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_ROOT), std::bind(&Core::GetRoot, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_EPI), std::bind(&Core::GetEpi, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_STATUS), std::bind(&Core::GetStatus, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_POWER), std::bind(&Core::GetPower, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_CONFIG), std::bind(&Core::GetConfig, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_SCHEDULES), std::bind(&Core::GetSchedules, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_PLAYLISTS), std::bind(&Core::GetPlaylists, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_FILES), std::bind(&Core::GetFiles, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_INFO), std::bind(&Core::GetInfo, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_UPDATE), std::bind(&Core::GetUpdate, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(pml::restgoose::GET, EP_OUTPUTS), std::bind(&Core::GetOutputs, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(pml::restgoose::GET, EP_ROOT, std::bind(&Core::GetRoot, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(pml::restgoose::GET, EP_EPI, std::bind(&Core::GetEpi, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(pml::restgoose::GET, EP_STATUS, std::bind(&Core::GetStatus, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(pml::restgoose::GET, EP_POWER, std::bind(&Core::GetPower, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(pml::restgoose::GET, EP_CONFIG, std::bind(&Core::GetConfig, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(pml::restgoose::GET, EP_SCHEDULES, std::bind(&Core::GetSchedules, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(pml::restgoose::GET, EP_PLAYLISTS, std::bind(&Core::GetPlaylists, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(pml::restgoose::GET, EP_FILES, std::bind(&Core::GetFiles, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(pml::restgoose::GET, EP_INFO, std::bind(&Core::GetInfo, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(pml::restgoose::GET, EP_UPDATE, std::bind(&Core::GetUpdate, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(pml::restgoose::GET, EP_OUTPUTS, std::bind(&Core::GetOutputs, this, _1,_2,_3,_4));
 
-    m_server.AddEndpoint(methodpoint(pml::restgoose::PATCH, EP_STATUS), std::bind(&Core::PatchStatus, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(pml::restgoose::PATCH, EP_CONFIG), std::bind(&Core::PatchConfig, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(pml::restgoose::PATCH, EP_STATUS, std::bind(&Core::PatchStatus, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(pml::restgoose::PATCH, EP_CONFIG, std::bind(&Core::PatchConfig, this, _1,_2,_3,_4));
 
-    m_server.AddEndpoint(methodpoint(pml::restgoose::PUT, EP_POWER), std::bind(&Core::PutPower, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(pml::restgoose::PUT, EP_UPDATE), std::bind(&Core::PutUpdate, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(pml::restgoose::PUT, EP_POWER, std::bind(&Core::PutPower, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(pml::restgoose::PUT, EP_UPDATE, std::bind(&Core::PutUpdate, this, _1,_2,_3,_4));
 
-    m_server.AddEndpoint(methodpoint(pml::restgoose::POST, EP_SCHEDULES), std::bind(&Core::PostSchedule, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(pml::restgoose::POST, EP_PLAYLISTS), std::bind(&Core::PostPlaylist, this, _1,_2,_3,_4));
-    m_server.AddEndpoint(methodpoint(pml::restgoose::POST, EP_FILES), std::bind(&Core::PostFile, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(pml::restgoose::POST, EP_SCHEDULES, std::bind(&Core::PostSchedule, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(pml::restgoose::POST, EP_PLAYLISTS, std::bind(&Core::PostPlaylist, this, _1,_2,_3,_4));
+    m_server.AddEndpoint(pml::restgoose::POST, EP_FILES, std::bind(&Core::PostFile, this, _1,_2,_3,_4));
 
 
     //now add all the dynamic methodpoints
@@ -187,19 +187,19 @@ bool Core::CreateEndpoints()
     {
         endpoint theEndpoint(endpoint(EP_FILES.Get()+"/"+itFile->first));
 
-        m_server.AddEndpoint(methodpoint(pml::restgoose::GET, theEndpoint), std::bind(&Core::GetFile, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(methodpoint(pml::restgoose::PATCH, theEndpoint), std::bind(&Core::PatchFile, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(methodpoint(pml::restgoose::PUT, theEndpoint), std::bind(&Core::PutFile, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(methodpoint(pml::restgoose::HTTP_DELETE, theEndpoint), std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(pml::restgoose::GET, theEndpoint, std::bind(&Core::GetFile, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(pml::restgoose::PATCH, theEndpoint, std::bind(&Core::PatchFile, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(pml::restgoose::PUT, theEndpoint, std::bind(&Core::PutFile, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(pml::restgoose::HTTP_DELETE, theEndpoint, std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
     }
 
     for(auto itPlaylist = m_manager.GetPlaylistsBegin(); itPlaylist != m_manager.GetPlaylistsEnd(); ++itPlaylist)
     {
         endpoint theEndpoint(endpoint(EP_PLAYLISTS.Get()+"/"+itPlaylist->first));
 
-        m_server.AddEndpoint(methodpoint(pml::restgoose::GET, theEndpoint), std::bind(&Core::GetPlaylist, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(methodpoint(pml::restgoose::PUT, theEndpoint), std::bind(&Core::PutPlaylist, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(methodpoint(pml::restgoose::HTTP_DELETE, theEndpoint), std::bind(&Core::DeletePlaylist, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(pml::restgoose::GET, theEndpoint, std::bind(&Core::GetPlaylist, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(pml::restgoose::PUT, theEndpoint, std::bind(&Core::PutPlaylist, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(pml::restgoose::HTTP_DELETE, theEndpoint, std::bind(&Core::DeletePlaylist, this, _1,_2,_3,_4));
     }
 
 
@@ -207,9 +207,9 @@ bool Core::CreateEndpoints()
     {
         endpoint theEndpoint(endpoint(EP_SCHEDULES.Get()+"/"+itSchedule->first));
 
-        m_server.AddEndpoint(methodpoint(pml::restgoose::GET, theEndpoint), std::bind(&Core::GetSchedule, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(methodpoint(pml::restgoose::PUT, theEndpoint), std::bind(&Core::PutSchedule, this, _1,_2,_3,_4));
-        m_server.AddEndpoint(methodpoint(pml::restgoose::HTTP_DELETE, theEndpoint), std::bind(&Core::DeleteSchedule, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(pml::restgoose::GET, theEndpoint, std::bind(&Core::GetSchedule, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(pml::restgoose::PUT, theEndpoint, std::bind(&Core::PutSchedule, this, _1,_2,_3,_4));
+        m_server.AddEndpoint(pml::restgoose::HTTP_DELETE, theEndpoint, std::bind(&Core::DeleteSchedule, this, _1,_2,_3,_4));
     }
 
     if(m_server.AddWebsocketEndpoint(EP_WS, std::bind(&Core::WebsocketAuthenticate, this, _1,_2,_3), std::bind(&Core::WebsocketMessage, this, _1,_2),
@@ -659,9 +659,9 @@ pml::restgoose::response Core::DeleteFile(const query& theQuery, const postData&
         {
             endpoint aUrl(endpoint(EP_FILES.Get()+"/"+vSplit.back()));
 
-            m_server.DeleteEndpoint(methodpoint(pml::restgoose::GET, aUrl));
-            m_server.DeleteEndpoint(methodpoint(pml::restgoose::PATCH, aUrl));
-            m_server.DeleteEndpoint(methodpoint(pml::restgoose::HTTP_DELETE, aUrl));
+            m_server.DeleteEndpoint(pml::restgoose::GET, aUrl);
+            m_server.DeleteEndpoint(pml::restgoose::PATCH, aUrl);
+            m_server.DeleteEndpoint(pml::restgoose::HTTP_DELETE, aUrl);
 
             ResourceModified(FILE, vSplit.back(), DELETED);
         }
@@ -684,9 +684,9 @@ pml::restgoose::response Core::DeletePlaylist(const query& theQuery, const postD
         {
             endpoint aUrl(endpoint(EP_PLAYLISTS.Get()+"/"+vSplit.back()));
 
-            m_server.DeleteEndpoint(methodpoint(pml::restgoose::GET, aUrl));
-            m_server.DeleteEndpoint(methodpoint(pml::restgoose::PATCH, aUrl));
-            m_server.DeleteEndpoint(methodpoint(pml::restgoose::HTTP_DELETE, aUrl));
+            m_server.DeleteEndpoint(pml::restgoose::GET, aUrl);
+            m_server.DeleteEndpoint(pml::restgoose::PATCH, aUrl);
+            m_server.DeleteEndpoint(pml::restgoose::HTTP_DELETE, aUrl);
 
             ResourceModified(PLAYLIST, vSplit.back(), DELETED);
         }
@@ -708,9 +708,9 @@ pml::restgoose::response Core::DeleteSchedule(const query& theQuery, const postD
         {
             endpoint aUrl(endpoint(EP_SCHEDULES.Get()+"/"+vSplit.back()));
 
-            m_server.DeleteEndpoint(methodpoint(pml::restgoose::GET, aUrl));
-            m_server.DeleteEndpoint(methodpoint(pml::restgoose::PATCH, aUrl));
-            m_server.DeleteEndpoint(methodpoint(pml::restgoose::HTTP_DELETE, aUrl));
+            m_server.DeleteEndpoint(pml::restgoose::GET, aUrl);
+            m_server.DeleteEndpoint(pml::restgoose::PATCH, aUrl);
+            m_server.DeleteEndpoint(pml::restgoose::HTTP_DELETE, aUrl);
 
             ResourceModified(SCHEDULE, vSplit.back(), DELETED);
         }
@@ -734,10 +734,10 @@ pml::restgoose::response Core::PostFile(const query& theQuery, const postData& v
         {
             endpoint aUrl(endpoint(EP_FILES.Get()+"/"+theResponse.jsonData["uid"].asString()));
 
-            m_server.AddEndpoint(methodpoint(pml::restgoose::GET, aUrl), std::bind(&Core::GetFile, this, _1,_2,_3,_4));
-            m_server.AddEndpoint(methodpoint(pml::restgoose::PATCH, aUrl), std::bind(&Core::PatchFile, this, _1,_2,_3,_4));
-            m_server.AddEndpoint(methodpoint(pml::restgoose::PUT, aUrl), std::bind(&Core::PutFile, this, _1,_2,_3,_4));
-            m_server.AddEndpoint(methodpoint(pml::restgoose::HTTP_DELETE, aUrl), std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
+            m_server.AddEndpoint(pml::restgoose::GET, aUrl, std::bind(&Core::GetFile, this, _1,_2,_3,_4));
+            m_server.AddEndpoint(pml::restgoose::PATCH, aUrl, std::bind(&Core::PatchFile, this, _1,_2,_3,_4));
+            m_server.AddEndpoint(pml::restgoose::PUT, aUrl, std::bind(&Core::PutFile, this, _1,_2,_3,_4));
+            m_server.AddEndpoint(pml::restgoose::HTTP_DELETE, aUrl, std::bind(&Core::DeleteFile, this, _1,_2,_3,_4));
 
             ResourceModified(FILE, theResponse.jsonData["uid"].asString(), ADDED);
         }
@@ -760,9 +760,9 @@ pml::restgoose::response Core::PostPlaylist(const query& theQuery, const postDat
             {
                 endpoint aUrl(endpoint(EP_PLAYLISTS.Get()+"/"+theResponse.jsonData["uid"].asString()));
 
-                m_server.AddEndpoint(methodpoint(pml::restgoose::GET, aUrl), std::bind(&Core::GetPlaylist, this, _1,_2,_3,_4));
-                m_server.AddEndpoint(methodpoint(pml::restgoose::PATCH, aUrl), std::bind(&Core::PutPlaylist, this, _1,_2,_3,_4));
-                m_server.AddEndpoint(methodpoint(pml::restgoose::HTTP_DELETE, aUrl), std::bind(&Core::DeletePlaylist, this, _1,_2,_3,_4));
+                m_server.AddEndpoint(pml::restgoose::GET, aUrl, std::bind(&Core::GetPlaylist, this, _1,_2,_3,_4));
+                m_server.AddEndpoint(pml::restgoose::PATCH, aUrl, std::bind(&Core::PutPlaylist, this, _1,_2,_3,_4));
+                m_server.AddEndpoint(pml::restgoose::HTTP_DELETE, aUrl, std::bind(&Core::DeletePlaylist, this, _1,_2,_3,_4));
 
                 ResourceModified(PLAYLIST, theResponse.jsonData["uid"].asString(), ADDED);
             }
@@ -784,9 +784,9 @@ pml::restgoose::response Core::PostSchedule(const query& theQuery, const postDat
             if(theResponse.nHttpCode == 201)
             {
                 endpoint aUrl(endpoint(EP_SCHEDULES.Get()+"/"+theResponse.jsonData["uid"].asString()));
-                m_server.AddEndpoint(methodpoint(pml::restgoose::GET, aUrl), std::bind(&Core::GetSchedule, this, _1,_2,_3,_4));
-                m_server.AddEndpoint(methodpoint(pml::restgoose::PUT, aUrl), std::bind(&Core::PutSchedule, this, _1,_2,_3,_4));
-                m_server.AddEndpoint(methodpoint(pml::restgoose::HTTP_DELETE,aUrl), std::bind(&Core::DeleteSchedule, this, _1,_2,_3,_4));
+                m_server.AddEndpoint(pml::restgoose::GET, aUrl, std::bind(&Core::GetSchedule, this, _1,_2,_3,_4));
+                m_server.AddEndpoint(pml::restgoose::PUT, aUrl, std::bind(&Core::PutSchedule, this, _1,_2,_3,_4));
+                m_server.AddEndpoint(pml::restgoose::HTTP_DELETE,aUrl, std::bind(&Core::DeleteSchedule, this, _1,_2,_3,_4));
 
                 ResourceModified(SCHEDULE, theResponse.jsonData["uid"].asString(), ADDED);
             }
@@ -857,10 +857,10 @@ void Core::ExitCallback(int nExit)
 }
 
 
-void Core::LoopCallback(int nTook)
+void Core::LoopCallback(std::chrono::milliseconds durationSince)
 {
 
-    m_nTimeSinceLastCall += nTook;
+    m_nTimeSinceLastCall += durationSince.count();
 
     if(m_jsResources.size() > 0)
     {

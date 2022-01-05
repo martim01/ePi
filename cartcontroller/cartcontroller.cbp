@@ -38,14 +38,11 @@
 				<Compiler>
 					<Add option="-O2" />
 					<Add option="-DNDEBUG" />
-					<Add directory="$(#wx)/lib/gcc_dll/mswu" />
 				</Compiler>
-				<ResourceCompiler>
-					<Add directory="$(#wx)/lib/gcc_dll/mswu" />
-				</ResourceCompiler>
 				<Linker>
 					<Add option="-s" />
-					<Add directory="$(#wx)/lib/gcc_dll" />
+					<Add library="pml_log" />
+					<Add library="restgoose" />
 				</Linker>
 				<ExtraCommands>
 					<Add after="sudo setcap cap_sys_admin+ep /home/pi/ePi/bin/cartcontroller" />
@@ -65,8 +62,9 @@
 			<Add directory="../common/include" />
 			<Add directory="../controller/include" />
 			<Add directory="../controller/icons" />
-			<Add directory="../external/jsoncpp/dist" />
-			<Add directory="../external/log/include" />
+			<Add directory="$(#json.INCLUDE)" />
+			<Add directory="$(#log.INCLUDE)" />
+			<Add directory="$(#restgoose.INCLUDE)" />
 		</Compiler>
 		<ResourceCompiler>
 			<Add directory="$(#wx)/include" />
@@ -75,16 +73,14 @@
 			<Add option="`wx-config --libs`" />
 			<Add option="-pthread" />
 			<Add library="cap" />
+			<Add directory="$(#log.LIB)" />
+			<Add directory="$(#restgoose.LIB)" />
 		</Linker>
 		<Unit filename="../common/src/epiwriter.cpp" />
 		<Unit filename="../common/src/inimanager.cpp" />
 		<Unit filename="../common/src/inisection.cpp" />
 		<Unit filename="../common/src/jsonutils.cpp" />
-		<Unit filename="../common/src/mongoose.c">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Unit filename="../controller/include/dlgOptions.h" />
-		<Unit filename="../controller/include/restfulclient.h" />
 		<Unit filename="../controller/src/constants.cpp" />
 		<Unit filename="../controller/src/dlgEdit.cpp" />
 		<Unit filename="../controller/src/dlgError.cpp" />
@@ -92,20 +88,17 @@
 		<Unit filename="../controller/src/dlgOptions.cpp" />
 		<Unit filename="../controller/src/dlgUpload.cpp" />
 		<Unit filename="../controller/src/dlgUsb.cpp" />
-		<Unit filename="../controller/src/multipartupload.cpp" />
 		<Unit filename="../controller/src/progress.cpp" />
-		<Unit filename="../controller/src/restfulclient.cpp" />
 		<Unit filename="../controller/src/uirect.cpp" />
 		<Unit filename="../controller/src/usbchecker.cpp" />
-		<Unit filename="../controller/src/websocketclient.cpp" />
 		<Unit filename="../controller/src/wmbutton.cpp" />
 		<Unit filename="../controller/src/wmedit.cpp" />
 		<Unit filename="../controller/src/wmfocusmanager.cpp" />
 		<Unit filename="../controller/src/wmkeyboard.cpp" />
 		<Unit filename="../controller/src/wmlabel.cpp" />
 		<Unit filename="../controller/src/wmlist.cpp" />
-		<Unit filename="../external/jsoncpp/dist/jsoncpp.cpp" />
-		<Unit filename="../external/log/src/log.cpp" />
+		<Unit filename="../controller/src/wxhttpclientmanager.cpp" />
+		<Unit filename="../controller/src/wxwebsocketclient.cpp" />
 		<Unit filename="include/cartcontrollerApp.h" />
 		<Unit filename="include/cartcontrollerMain.h" />
 		<Unit filename="include/pnlResource.h" />
@@ -120,9 +113,6 @@
 		<Unit filename="wxsmith/cartcontrollerdialog.wxs" />
 		<Unit filename="wxsmith/pnlResource.wxs" />
 		<Extensions>
-			<code_completion />
-			<envvars />
-			<debugger />
 			<wxsmith version="1">
 				<gui name="wxWidgets" src="cartcontrollerApp.cpp" main="cartcontrollerDialog" init_handlers="necessary" language="CPP" />
 				<resources>

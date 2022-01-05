@@ -12,8 +12,8 @@
 
 #include "uirect.h"
 #include <random>
-#include "websocketclient.h"
-#include "restfulclient.h"
+#include "wxwebsocketclient.h"
+//#include "restfulclient.h"
 #include "json/json.h"
 #include <wx/datetime.h>
 #include <wx/panel.h>
@@ -75,10 +75,7 @@ class cartcontrollerDialog: public wxDialog
         wmLabel* m_plblPage;
 
         void OnWebsocketConnection(const wxCommandEvent& event);
-        void OnWebsocketHandshake(const wxCommandEvent& event);
         void OnWebsocketFrame(const wxCommandEvent& event);
-        void OnWebsocketFinished(const wxCommandEvent& event);
-        void OnRestfulReply(const wxCommandEvent& event);
         void OnTimerTimeout(const wxTimerEvent& event);
 
         void OnResourcePlay(const wxCommandEvent& event);
@@ -112,8 +109,8 @@ class cartcontrollerDialog: public wxDialog
         uiRect m_uiStatus;
 
 
-        WebSocketClient m_wsClient;
-        RestfulClient m_rClient;
+        wxWebSocketClient m_wsClient;
+        //RestfulClient m_rClient;
 
         wxString m_sWSEndpoint;
         wxString m_sUrl;

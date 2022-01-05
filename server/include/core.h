@@ -56,7 +56,7 @@ class Core
 
         void StatusCallback(const std::string& sData);
         void ExitCallback(int nPid);
-        void LoopCallback(int nData);
+        void LoopCallback(std::chrono::milliseconds durationSince);
 
         bool WebsocketAuthenticate(const endpoint& theEndpoint, const userName& theUser, const ipAddress& peer);
         bool WebsocketMessage(const endpoint& theEndpoint, const Json::Value& jsData);

@@ -448,7 +448,7 @@ dlgOptions::dlgOptions(wxWindow* parent, int nType, wxWebSocketClient& wsClient,
         if(resp.nCode > 100)
         {
             ShowConnectedButtons(true);
-            VersionReply(ConvertToJson(resp.sData));
+            VersionReply(ConvertToJson(resp.data.Get()));
         }
     }
 
@@ -476,7 +476,7 @@ void dlgOptions::OnbtnFileUpdateClick(wxCommandEvent& event)
         sEndpoint += m_sUid;
 
         pml::restgoose::HttpClient client(pml::restgoose::PATCH, endpoint(sEndpoint), textData(ssData.str()));
-        FileUpdateReply(ConvertToJson(client.Run().sData));
+        FileUpdateReply(ConvertToJson(client.Run().data.Get()));
     }
 }
 
@@ -520,7 +520,7 @@ void dlgOptions::OnbtnDeleteClick(wxCommandEvent& event)
         sEndpoint += m_sUid;
 
         pml::restgoose::HttpClient client(pml::restgoose::HTTP_DELETE, endpoint(sEndpoint));
-        FileDeleteReply(ConvertToJson(client.Run().sData));
+        FileDeleteReply(ConvertToJson(client.Run().data.Get()));
     }
 }
 
@@ -536,7 +536,7 @@ void dlgOptions::UpdateApp(const wxString& sApp)
     aDlg.PutApp(sApp);
 
     pml::restgoose::HttpClient client(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[UPDATE]).ToStdString()));
-    VersionReply(ConvertToJson(client.Run().sData));
+    VersionReply(ConvertToJson(client.Run().data.Get()));
 
 
 }
@@ -646,7 +646,7 @@ void dlgOptions::OnbtnRestartServerClick(wxCommandEvent& event)
     std::string sCommand = "{ \"command\": \"restart server\"}";
 
     pml::restgoose::HttpClient client(pml::restgoose::PUT, endpoint(sEndpoint), textData(sCommand));
-    PowerReply(ConvertToJson(client.Run().sData));
+    PowerReply(ConvertToJson(client.Run().data.Get()));
 }
 
 void dlgOptions::OnbtnRestartOSClick(wxCommandEvent& event)
@@ -655,7 +655,7 @@ void dlgOptions::OnbtnRestartOSClick(wxCommandEvent& event)
     std::string sCommand = "{ \"command\": \"restart os\"}";
 
     pml::restgoose::HttpClient client(pml::restgoose::PUT, endpoint(sEndpoint), textData(sCommand));
-    PowerReply(ConvertToJson(client.Run().sData));
+    PowerReply(ConvertToJson(client.Run().data.Get()));
 
 }
 
@@ -665,7 +665,7 @@ void dlgOptions::OnbtnShutdownOSClick(wxCommandEvent& event)
     std::string sCommand = "{ \"command\": \"shutdown\"}";
 
     pml::restgoose::HttpClient client(pml::restgoose::PUT, endpoint(sEndpoint), textData(sCommand));
-    PowerReply(ConvertToJson(client.Run().sData));
+    PowerReply(ConvertToJson(client.Run().data.Get()));
 }
 
 void dlgOptions::OnbtnShutdownControllerClick(wxCommandEvent& event)
@@ -802,7 +802,7 @@ void dlgOptions::FileDeleteReply(const Json::Value& jsData)
             auto resp = client.Run();
             if(resp.nCode > 100)
             {
-                FileGetReply(ConvertToJson(resp.sData));
+                FileGetReply(ConvertToJson(resp.data.Get()));
             }
         }
     }
@@ -829,7 +829,7 @@ void dlgOptions::GetFileDetails()
 	    std::string sEnd = (m_sUrl+STR_ENDPOINTS[FILES]+"/").ToStdString()+m_sUid;
 
 	    pml::restgoose::HttpClient client(pml::restgoose::GET, endpoint(sEnd));
-        FileGetReply(ConvertToJson(client.Run().sData));
+        FileGetReply(ConvertToJson(client.Run().data.Get()));
 
 	    m_pbtnDelete->Show();
 	    m_pbtnReplace->SetLabel("Replace");

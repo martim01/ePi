@@ -10,7 +10,7 @@
 #include "cartcontrollerMain.h"
 #include <wx/msgdlg.h>
 #include <wx/log.h>
-#include "restfulclient.h"
+#include "httpclient.h"
 #include "jsonutils.h"
 #include "epiwriter.h"
 #include <sstream>
@@ -75,7 +75,6 @@ END_EVENT_TABLE()
 
 cartcontrollerDialog::cartcontrollerDialog(wxWindow* parent,  const wxString& sIpAddress, unsigned short nPort, wxWindowID id) :
 m_wsClient(),
-m_rClient(this),
 m_sIpAddress(sIpAddress),
 m_nConnected(DISCONNECTED),
 m_bCountUp(true),
@@ -98,7 +97,7 @@ m_dist(500,1000)
     m_ppnlStatus->SetBackgroundColour(CLR_ERROR);
     BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
     m_pbtnPrev = new wmButton(this, wxNewId(), wxT("Previous"), wxDefaultPosition, wxSize(-1,34));
-    m_pbtnPrev->SetForegroundColour(*wxWHIT
+    m_pbtnPrev->SetForegroundColour(*wxWHITE);
     m_pbtnPrev->SetBackgroundColour(wxColour(0,60,140));
 
     BoxSizer2->Add(m_pbtnPrev, 0, wxLEFT|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 10);
@@ -162,10 +161,7 @@ m_dist(500,1000)
 
 
     Connect(wxID_ANY, wxEVT_WS_CONNECTION, (wxObjectEventFunction)&cartcontrollerDialog::OnWebsocketConnection);
-    Connect(wxID_ANY, wxEVT_WS_HANDSHAKE, (wxObjectEventFunction)&cartcontrollerDialog::OnWebsocketHandshake);
-    Connect(wxID_ANY, wxEVT_WS_FRAME, (wxObjectEventFunction)&cartcontrollerDialog::OnWebsocketFrame);
-    Connect(wxID_ANY, wxEVT_WS_FINISHED, (wxObjectEventFunction)&cartcontrollerDialog::OnWebsocketFinished);
-    Connect(wxID_ANY, wxEVT_R_REPLY, (wxObjectEventFunction)&cartcontrollerDialog::OnRestfulReply);
+    Connect(wxID_ANY, wxEVT_WS_MESSAGE, (wxObjectEventFunction)&cartcontrollerDialog::OnWebsocketFrame);
 
     Connect(m_pbtnSystem->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, (wxObjectEventFunction)&cartcontrollerDialog::OnbtnSystem);
 
@@ -186,7 +182,7 @@ m_dist(500,1000)
     m_sUrl.Printf("http://%s/x-epi/", m_sIpAddress.c_str());
 
     m_wsClient.AddHandler(this);
-    m_wsClient.Connect(std::string(m_sWSEndpoint.mb_str()));
+    m_wsClient.Connect(endpoint(m_sWSEndpoint.ToStdString()));
 
     m_timerTimeout.SetOwner(this, wxNewId());
     Connect(m_timerTimeout.GetId(), wxEVT_TIMER, (wxObjectEventFunction)&cartcontrollerDialog::OnTimerTimeout);
@@ -213,36 +209,22 @@ void cartcontrollerDialog::OnAbout(wxCommandEvent& event)
 
 void cartcontrollerDialog::OnWebsocketConnection(const wxCommandEvent& event)
 {
-    if(event.GetInt() != 0)
+    if(event.GetExtraLong() != 0)
     {
-        m_nConnected = DISCONNECTED;
-        UpdateLabels();
-        m_timerConnection.Start(m_dist(m_gen),true);
-    }
-    else
-    {
-        m_nConnected = CONNECTING;
+        m_nConnected = CONNECTED;
         m_timerCheck.Start(100,true);
 
         UpdateLabels();
-    }
-}
 
-void cartcontrollerDialog::OnWebsocketHandshake(const wxCommandEvent& event)
-{
-    if(event.GetInt() == 101)
-    {
-        m_nConnected = CONNECTED;
-        UpdateLabels();
-        //m_uiStatus.SetLabel("Connected");
     }
     else
     {
         m_nConnected = DISCONNECTED;
         UpdateLabels();
-        //m_uiStatus.SetLabel(wxString::Format("HTTP: %d", event.GetInt()));
-
+        m_uiStatus.SetLabel("Offline");
+        m_timerConnection.Start(m_dist(m_gen),true);
     }
+
 }
 
 void cartcontrollerDialog::OnWebsocketFrame(const wxCommandEvent& event)
@@ -275,43 +257,33 @@ void cartcontrollerDialog::UpdatePlayingStatus(const Json::Value& jsData)
 
 
 }
-void cartcontrollerDialog::OnWebsocketFinished(const wxCommandEvent& event)
-{
-    m_nConnected = DISCONNECTED;
-    UpdateLabels();
-    //m_uiStatus.SetLabel("Offline");
-
-
-    m_timerConnection.Start(m_dist(m_gen),true);
-}
-
 
 
 void cartcontrollerDialog::OntimerConnectionTrigger(wxTimerEvent& event)
 {
-    m_wsClient.Connect(std::string(m_sWSEndpoint.mb_str()));
+    m_wsClient.Connect(endpoint(m_sWSEndpoint.ToStdString()));
 }
 
 
-void cartcontrollerDialog::OnRestfulReply(const wxCommandEvent& event)
-{
-    wxLogDebug("OnRestfulReply");
-    Json::Value jsValue(ConvertToJson(event.GetString().ToStdString()));
-    switch(event.GetInt())
-    {
-        case CONFIG:
-            ReplyConfig(jsValue);
-            break;
-        case FILES:
-            ReplyFiles(jsValue);
-            break;
-        case FILE_GET:
-            ReplyAddFile(jsValue);
-            break;
-        case FILE_UPDATE:
-            ReplyModifyFile(jsValue);
-    }
-}
+//void cartcontrollerDialog::OnRestfulReply(const wxCommandEvent& event)
+//{
+//    wxLogDebug("OnRestfulReply");
+//    Json::Value jsValue(ConvertToJson(event.GetString().ToStdString()));
+//    switch(event.GetInt())
+//    {
+//        case CONFIG:
+//            ReplyConfig(jsValue);
+//            break;
+//        case FILES:
+//            ReplyFiles(jsValue);
+//            break;
+//        case FILE_GET:
+//            ReplyAddFile(jsValue);
+//            break;
+//        case FILE_UPDATE:
+//            ReplyModifyFile(jsValue);
+//    }
+//}
 
 
 void cartcontrollerDialog::ReplyConfig(const Json::Value& jsData)
@@ -334,7 +306,7 @@ void cartcontrollerDialog::ReplyFiles(const Json::Value& jsData)
     if(jsData.isArray() && jsData.size() > 0)
     {
 
-        for(size_t i = 0; i < jsData.size(); i++)
+        for(Json::ArrayIndex i = 0; i < jsData.size(); i++)
         {
             m_mFiles.insert(std::make_pair(jsData[i]["label"].asString(), jsData[i]["uid"].asString()));
         }
@@ -410,7 +382,9 @@ void cartcontrollerDialog::Play(const wxString& sUid)
     std::stringstream ss;
     epiWriter::Get().writeToSStream(jsCommand, ss);
 
-    m_rClient.Patch((m_sUrl+STR_ENDPOINTS[STATUS]).ToStdString(), ss.str().data(), STATUS);
+    pml::restgoose::HttpClient client(pml::restgoose::PATCH, endpoint((m_sUrl+STR_ENDPOINTS[STATUS]).ToStdString()), textData(ss.str()));
+    client.Run();
+
 }
 
 void cartcontrollerDialog::Stop(bool bKill)
@@ -428,7 +402,8 @@ void cartcontrollerDialog::Stop(bool bKill)
     std::stringstream ss;
     epiWriter::Get().writeToSStream(jsCommand, ss);
 
-    m_rClient.Patch((m_sUrl+STR_ENDPOINTS[STATUS]).ToStdString(), ss.str().data(), STATUS);
+    pml::restgoose::HttpClient client(pml::restgoose::PATCH, endpoint((m_sUrl+STR_ENDPOINTS[STATUS]).ToStdString()), textData(ss.str()));
+    client.Run();
 
 }
 
@@ -438,9 +413,12 @@ void cartcontrollerDialog::Stop(bool bKill)
 void cartcontrollerDialog::OnTimerCheck(const wxTimerEvent& event)
 {
     //Ask for status and info...
-    m_rClient.Get((m_sUrl+STR_ENDPOINTS[CONFIG]).ToStdString(), CONFIG);
-    m_rClient.Get((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString(), FILES);
-//    m_timerCheck.Start(10000, true);
+    pml::restgoose::HttpClient config(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[CONFIG]).ToStdString()));
+    ReplyConfig(ConvertToJson(config.Run().data.Get()));
+
+    pml::restgoose::HttpClient files(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString()));
+    ReplyFiles(ConvertToJson(files.Run().data.Get()));
+
 }
 
 
@@ -481,14 +459,15 @@ void cartcontrollerDialog::OnResourceMenu(const wxCommandEvent& event)
     }
     else
     {
-        m_rClient.Get((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString(), FILES);
+        pml::restgoose::HttpClient files(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString()));
+        ReplyFiles(ConvertToJson(files.Run().data.Get()));
     }
 }
 
 
 void cartcontrollerDialog::UpdateResources(Json::Value& jsResources)
 {
-    for(size_t i = 0; i < jsResources.size(); i++)
+    for(Json::ArrayIndex i = 0; i < jsResources.size(); i++)
     {
         if(jsResources[i]["modification"].isString() && jsResources[i]["type"].isString() && jsResources[i]["uid"].isString())
         {
@@ -510,7 +489,8 @@ void cartcontrollerDialog::UpdateResources(Json::Value& jsResources)
 
 void cartcontrollerDialog::AddResource(const wxString& sUid)
 {
-    m_rClient.Get((m_sUrl+STR_ENDPOINTS[FILES]+"/"+sUid).ToStdString(), FILE_GET);
+    pml::restgoose::HttpClient files(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[FILES]+"/"+sUid).ToStdString()));
+    ReplyAddFile(ConvertToJson(files.Run().data.Get()));
 }
 
 void cartcontrollerDialog::DeleteResource(const wxString& sUid)
@@ -527,7 +507,9 @@ void cartcontrollerDialog::DeleteResource(const wxString& sUid)
 
 void cartcontrollerDialog::ModifyResource(const wxString& sUid)
 {
-    m_rClient.Get((m_sUrl+STR_ENDPOINTS[FILES]+"/"+sUid).ToStdString(), FILE_UPDATE);
+    pml::restgoose::HttpClient files(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[FILES]+"/"+sUid).ToStdString()));
+    ReplyModifyFile(ConvertToJson(files.Run().data.Get()));
+
 }
 
 

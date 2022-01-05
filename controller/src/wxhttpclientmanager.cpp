@@ -34,7 +34,7 @@ void wxHttpClientManager::Reply(const pml::restgoose::clientResponse& resp, unsi
             auto pEvent = new wxCommandEvent(wxEVT_R_PROGRESS);
             pEvent->SetInt(resp.nCode);
             pEvent->SetExtraLong(itId->second);
-            pEvent->SetString(resp.sData);
+            pEvent->SetString(resp.data.Get());
             wxQueueEvent(m_pHandler, pEvent);
         }
         m_mIds.erase(nRunId);
@@ -48,8 +48,8 @@ void wxHttpClientManager::Run(std::unique_ptr<pml::restgoose::HttpClient> pClien
     m_mClients.insert(std::make_pair(nInternalId, std::move(pClient)));
     m_mIds.insert({nInternalId, nId});
 
-    pClient->SetProgressCallback(std::bind(&wxHttpClientManager::Progress, this, _1,_2));
-    pClient->RunAsync(std::bind(&wxHttpClientManager::Reply, this, _1, _2), nInternalId);
+    pClient->SetUploadProgressCallback(std::bind(&wxHttpClientManager::Progress, this, _1,_2));
+    pClient->Run(std::bind(&wxHttpClientManager::Reply, this, _1, _2), nInternalId);
 }
 
 void wxHttpClientManager::Cancel(unsigned int nId)

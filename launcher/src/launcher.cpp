@@ -9,7 +9,7 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <fcntl.h>
-#include "utils.h"
+#include "epiutils.h"
 #include <string.h>
 #include <sys/capability.h>
 #include <sys/prctl.h>
@@ -49,7 +49,7 @@ bool ReadFromPipe(int nFd, Launcher::controller& aController)
 
 Launcher::Launcher(iniManager& ini, const std::string& sType) : m_ini(ini), m_nType(CONTROLLER)
 {
-    pml::Log::Get().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
+    pml::LogStream::AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
 
     if(sType == "1")
     {
@@ -116,20 +116,20 @@ bool Launcher::Launch(const iniSection* pSection)
 
     if((m_nType == CARTCONTROLLER || sPosition != "-1") && sIpAddress.empty() == false && sPort.empty() == false)
     {
-        pml::Log::Get(pml::Log::LOG_INFO) << "Launch: " << pSection->GetSectionName() << std::endl;
+        pmlLog(pml::LOG_INFO) << "Launch: " << pSection->GetSectionName() << std::endl;
 
         int nPipe[2];
         int nError = pipe(nPipe);
         if(nError != 0)
         {
-            pml::Log::Get(pml::Log::LOG_ERROR) << "Could not pipe: " << strerror(errno) << std::endl;
+            pmlLog(pml::LOG_ERROR) << "Could not pipe: " << strerror(errno) << std::endl;
             return false;
         }
 
         int nPid = fork();
         if(nPid < 0)
         {
-            pml::Log::Get(pml::Log::LOG_ERROR) << "Could not fork!" << std::endl;
+            pmlLog(pml::LOG_ERROR) << "Could not fork!" << std::endl;
             close(nPipe[1]);
             close(nPipe[0]);
             return false;
@@ -172,7 +172,7 @@ bool Launcher::Launch(const iniSection* pSection)
 
             if(nError)
             {
-                    pml::Log::Get(pml::Log::LOG_ERROR) << "Exec failed: " << sController << std::endl;
+                    pmlLog(pml::LOG_ERROR) << "Exec failed: " << sController << std::endl;
                     exit(-1);
             }
             return true;
@@ -203,7 +203,7 @@ void Launcher::Loop()
         }
         else    //error
         {
-            pml::Log::Get() << "PipeThread\tSelect Error" << std::endl;
+            pmlLog() << "PipeThread\tSelect Error" << std::endl;
             break;
         }
     }
@@ -317,7 +317,7 @@ bool Launcher::InheritCapabilities()
     cap_t caps = cap_get_proc();
     if(caps == nullptr)
     {
-        pml::Log::Get(pml::Log::LOG_ERROR) << "Failed to load cap" << std::endl;
+        pmlLog(pml::LOG_ERROR) << "Failed to load cap" << std::endl;
         return false;
     }
     std::cout << "Loaded caps = " << cap_to_text(caps, nullptr) << std::endl;
@@ -326,7 +326,7 @@ bool Launcher::InheritCapabilities()
     cap_list[0] = CAP_SYS_ADMIN;
     if(cap_set_flag(caps, CAP_INHERITABLE, 1, cap_list, CAP_SET) == -1)
     {
-        pml::Log::Get(pml::Log::LOG_ERROR) << "Failed to set inheritable " << strerror(errno) << std::endl;
+        pmlLog(pml::LOG_ERROR) << "Failed to set inheritable " << strerror(errno) << std::endl;
         return false;
     }
 
@@ -334,14 +334,14 @@ bool Launcher::InheritCapabilities()
 
     if(cap_set_proc(caps) == -1)
     {
-        pml::Log::Get(pml::Log::LOG_ERROR) << "Failed to set proc " << strerror(errno) << std::endl;
+        pmlLog(pml::LOG_ERROR) << "Failed to set proc " << strerror(errno) << std::endl;
         return false;
     }
 
     caps = cap_get_proc();
     if(caps == nullptr)
     {
-        pml::Log::Get(pml::Log::LOG_ERROR) << "Failed to load cap" << std::endl;
+        pmlLog(pml::LOG_ERROR) << "Failed to load cap" << std::endl;
         return false;
     }
 
@@ -349,7 +349,7 @@ bool Launcher::InheritCapabilities()
 
     if(prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, CAP_SYS_ADMIN,0,0) == -1)
     {
-        pml::Log::Get(pml::Log::LOG_ERROR) << "Failed to rasie cap" << std::endl;
+        pmlLog(pml::LOG_ERROR) << "Failed to rasie cap" << std::endl;
         return false;
     }
 
