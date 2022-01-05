@@ -9,5 +9,6 @@
 		<Project filename="controller/controller.cbp" />
 		<Project filename="launcher/launcher.cbp" />
 		<Project filename="cartcontroller/cartcontroller.cbp" />
+		<Project filename="../Restgoose/Restgoose.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>

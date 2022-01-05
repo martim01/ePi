@@ -1,5 +1,7 @@
 #include "wxhttpclientmanager.h"
 #include "httpclient.h"
+#include "log.h"
+
 
 using namespace std::placeholders;
 
@@ -26,12 +28,13 @@ void wxHttpClientManager::Progress(unsigned long nSent, unsigned long nTotal)
 
 void wxHttpClientManager::Reply(const pml::restgoose::clientResponse& resp, unsigned int nRunId)
 {
+    pmlLog(pml::LOG_TRACE) << "wxHttpClientManager::Reply " << nRunId << " code: " << resp.nCode;
     auto itId = m_mIds.find(nRunId);
     if(itId != m_mIds.end())
     {
         if(m_pHandler)
         {
-            auto pEvent = new wxCommandEvent(wxEVT_R_PROGRESS);
+            auto pEvent = new wxCommandEvent(wxEVT_R_REPLY);
             pEvent->SetInt(resp.nCode);
             pEvent->SetExtraLong(itId->second);
             pEvent->SetString(resp.data.Get());
@@ -40,16 +43,17 @@ void wxHttpClientManager::Reply(const pml::restgoose::clientResponse& resp, unsi
         m_mIds.erase(nRunId);
         m_mClients.erase(nRunId);
     }
+    pmlLog(pml::LOG_TRACE) << "wxHttpClientManager::Reply Done";
 }
 
 void wxHttpClientManager::Run(std::unique_ptr<pml::restgoose::HttpClient> pClient, unsigned int nId)
 {
     int nInternalId = wxNewId();
-    m_mClients.insert(std::make_pair(nInternalId, std::move(pClient)));
+    auto itClient = m_mClients.insert(std::make_pair(nInternalId, std::move(pClient))).first;
     m_mIds.insert({nInternalId, nId});
 
-    pClient->SetUploadProgressCallback(std::bind(&wxHttpClientManager::Progress, this, _1,_2));
-    pClient->Run(std::bind(&wxHttpClientManager::Reply, this, _1, _2), nInternalId);
+    itClient->second->SetUploadProgressCallback(std::bind(&wxHttpClientManager::Progress, this, _1,_2));
+    itClient->second->Run(std::bind(&wxHttpClientManager::Reply, this, _1, _2), nInternalId);
 }
 
 void wxHttpClientManager::Cancel(unsigned int nId)

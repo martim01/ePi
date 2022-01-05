@@ -488,7 +488,7 @@ void dlgOptions::OnbtnReplaceClick(wxCommandEvent& event)
     {
         if(aDlg.PostAudioFile() == wxID_OK)
         {
-            if(aDlg.m_jsReply["result"].asBool() == false)
+            if(aDlg.m_jsReply.isMember("success") == false || aDlg.m_jsReply["success"].asBool() == false)
             {
                 ShowError("Failed to upload file", aDlg.m_jsReply);
             }
@@ -717,7 +717,7 @@ void dlgOptions::FileGetReply(const Json::Value& jsData)
 
 void dlgOptions::FileUpdateReply(const Json::Value& jsData)
 {
-    if(jsData["result"].isBool() && jsData["result"] == false)
+    if(jsData.isMember("success") == false || jsData["success"] == false)
     {
         ShowError("Failed to update file!", jsData);
     }
@@ -789,7 +789,7 @@ void dlgOptions::ShowError(wxString sMessage, const Json::Value& jsData)
 
 void dlgOptions::FileDeleteReply(const Json::Value& jsData)
 {
-    if(jsData["result"].isBool() && jsData["result"] == false)
+    if(jsData["success"].isBool() && jsData["success"] == false)
     {
         ShowError("Unable to delete file!", jsData);
     }
@@ -845,7 +845,7 @@ void dlgOptions::GetFileDetails()
 
 void dlgOptions::PowerReply(const Json::Value& jsData)
 {
-    if(jsData["result"].isBool() && jsData["result"] == false)
+    if(jsData["success"].isBool() && jsData["success"] == false)
     {
         ShowError("Power command failed!", jsData);
     }

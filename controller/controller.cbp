@@ -58,7 +58,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option parameters="4 3 0 192.168.0.101 8080" />
+				<Option parameters="4 3 0 192.168.1.119 8080" />
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
 					<Add option="-std=c++14" />
@@ -66,17 +66,17 @@
 					<Add option="`wx-config --cxxflags`" />
 					<Add option="-pthread" />
 					<Add option="-D__WXDEBUG__" />
-					<Add directory="$(#wx)/lib/gcc_dll/mswud" />
 				</Compiler>
-				<ResourceCompiler>
-					<Add directory="$(#wx)/lib/gcc_dll/mswud" />
-				</ResourceCompiler>
 				<Linker>
 					<Add option="`wx-config --libs`" />
 					<Add option="-pthread" />
 					<Add library="cap" />
-					<Add directory="$(#wx)/lib/gcc_dll" />
+					<Add library="pml_log" />
+					<Add library="restgoose" />
 				</Linker>
+				<ExtraCommands>
+					<Add after="sudo setcap cap_sys_admin+ep /home/pi/ePi/bin/controllerd" />
+				</ExtraCommands>
 			</Target>
 			<Target title="Linux Release">
 				<Option platforms="Unix;" />
@@ -84,7 +84,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option parameters="4 3 1 127.0.0.1 8080" />
+				<Option parameters="4 3 1 192.168.1.119 8080" />
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
 					<Add option="-fPIC" />
@@ -92,9 +92,6 @@
 					<Add option="-pthread" />
 					<Add option="-DNDEBUG" />
 				</Compiler>
-				<ResourceCompiler>
-					<Add directory="$(#wx)/lib/gcc_dll/mswud" />
-				</ResourceCompiler>
 				<Linker>
 					<Add option="-O3" />
 					<Add option="`wx-config --libs`" />
@@ -103,6 +100,9 @@
 					<Add library="pml_log" />
 					<Add library="restgoose" />
 				</Linker>
+				<ExtraCommands>
+					<Add after="sudo setcap cap_sys_admin+ep /home/pi/ePi/bin/controller" />
+				</ExtraCommands>
 			</Target>
 		</Build>
 		<Compiler>
@@ -203,6 +203,9 @@
 					<wxDialog wxs="wxsmith/dlgInfo.wxs" src="src/dlgInfo.cpp" hdr="include/dlgInfo.h" fwddecl="0" i18n="1" name="dlgInfo" language="CPP" />
 				</resources>
 			</wxsmith>
+			<code_completion />
+			<envvars />
+			<debugger />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

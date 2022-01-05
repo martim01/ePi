@@ -50,9 +50,9 @@ m_checker(this)
 	BoxSizer1->Add(m_plblUSB, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
 
     wxBoxSizer* BoxSizer3 = new wxBoxSizer(wxHORIZONTAL);
-    m_plstLog = new wmList(this, wxNewId(), wxDefaultPosition, wxSize(380,300), 0, 0, wxSize(-1,40), 1, wxSize(-1,-1));
+    m_plstLog = new wmList(this, wxNewId(), wxDefaultPosition, wxSize(380,300), 0, wmList::SCROLL_VERTICAL, wxSize(-1,40), 1, wxSize(-1,-1));
 	BoxSizer3->Add(m_plstLog, 0, wxALL|wxEXPAND, 5);
-	m_plstFiles = new wmList(this, ID_M_PLST1, wxDefaultPosition, wxSize(380,300), wmList::STYLE_SELECT, 0, wxSize(-1,30), 1, wxSize(-1,-1));
+	m_plstFiles = new wmList(this, ID_M_PLST1, wxDefaultPosition, wxSize(380,300), wmList::STYLE_SELECT, wmList::SCROLL_VERTICAL, wxSize(-1,30), 1, wxSize(-1,-1));
 	BoxSizer3->Add(m_plstFiles, 0, wxALL|wxEXPAND, 5);
 
 

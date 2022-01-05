@@ -188,8 +188,9 @@ void controllerDialog::OnWebsocketMessage(const wxCommandEvent& event)
     m_timerTimeout.Stop();
     m_timerTimeout.Start(5000, true);
 
+
     Json::Value jsValue(ConvertToJson(event.GetString().ToStdString()));
-    if(jsValue["player"].isString())
+    if(jsValue.isObject() && jsValue.isMember("player") && jsValue["player"].isString())
     {
         UpdatePlayingStatus(jsValue);
     }

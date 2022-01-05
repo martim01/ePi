@@ -42,7 +42,6 @@ bool wxWebSocketClient::ConnectionCallback(const endpoint& theEndpoint, bool bCo
 {
     int nId = wxNewId();
     m_mId.insert({theEndpoint, nId});
-
     for(auto pHandler : m_setHandlers)
     {
         auto pEvent = new wxCommandEvent(wxEVT_WS_CONNECTION);

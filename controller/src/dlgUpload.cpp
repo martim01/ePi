@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include "usbchecker.h"
 #include "httpclient.h"
+#include "log.h"
 
 //(*InternalHeaders(dlgUpload)
 #include <wx/font.h>
@@ -119,6 +120,8 @@ int dlgUpload::PutApp(const wxString& sApp)
 
 int dlgUpload::PostAudioFile()
 {
+    pmlLog(pml::LOG_TRACE) << "dlgUpload::PostAudioFile";
+
     m_sEndpoint = ("/x-epi/"+STR_ENDPOINTS[FILES]);
     m_sApp = "*.wav";
     m_method = pml::restgoose::POST;
@@ -146,6 +149,7 @@ void dlgUpload::OnTimer(const wxTimerEvent& event)
         wxString sFilename=aDlg.m_sSelectedFile.AfterLast('/');
         wxString sFilePath = aDlg.m_sSelectedFile.BeforeLast('/');
 
+        pmlLog(pml::LOG_TRACE) << "dlgUpload - Filename: " << sFilename.ToStdString() << " path: " << sFilePath.ToStdString();
         if(m_sApp == "*.wav")
         {
             m_vPart.push_back(pml::restgoose::partData(partName("label"), textData(sFilename.ToStdString())));
@@ -156,8 +160,9 @@ void dlgUpload::OnTimer(const wxTimerEvent& event)
         {
             m_pstDetails->SetLabel(wxString::Format("Uploading '%s'...", sFilename.c_str()));
 
-            m_vPart.push_back(pml::restgoose::partData(partName("files"), textData(sFilename.ToStdString()), fileLocation(sFilePath.ToStdString())));
+            m_vPart.push_back(pml::restgoose::partData(partName("files"), textData(sFilename.ToStdString()), fileLocation(sFilePath.ToStdString()+"/"+sFilename.ToStdString())));
 
+            pmlLog(pml::LOG_TRACE) << "dlgUpload - start upload";
             m_clientManager.Run(std::make_unique<pml::restgoose::HttpClient>(m_method, endpoint((m_sIpAddress+m_sEndpoint).ToStdString()), m_vPart), 0);
 
         }
@@ -183,7 +188,7 @@ dlgUpload::~dlgUpload()
 void dlgUpload::OnbtnCancelClick(wxCommandEvent& event)
 {
     m_clientManager.Cancel(0);
-    m_jsReply["result"] = false;
+    m_jsReply["success"] = false;
     m_jsReply["reason"].append("User cancelled");
     EndModal(wxID_CANCEL);
 }
@@ -191,9 +196,12 @@ void dlgUpload::OnbtnCancelClick(wxCommandEvent& event)
 
 void dlgUpload::OnReply(const wxCommandEvent& event)
 {
+    pmlLog() << "dlgUpload::OnReply: " << event.GetString().ToStdString();
+
     UsbChecker::UnmountDevice();
+
     m_jsReply = ConvertToJson(event.GetString().ToStdString());
-    if(m_jsReply["result"].isBool() && m_jsReply["result"].asBool() == false)
+    if(event.GetInt() != 200)
     {
         EndModal(wxID_CANCEL);
     }

@@ -39,7 +39,7 @@ const std::string Core::UPDATE      = "update";        //GET PUT
 const std::string Core::OUTPUTS     = "outputs";        //GET PUT
 const std::string Core::WS          = "ws";        //GET PUT
 
-const endpoint Core::EP_ROOT        = endpoint(ROOT);
+const endpoint Core::EP_ROOT        = endpoint("");
 const endpoint Core::EP_EPI         = endpoint(ROOT+EPI);
 const endpoint Core::EP_STATUS      = endpoint(EP_EPI.Get()+"/"+STATUS);
 const endpoint Core::EP_POWER       = endpoint(EP_EPI.Get()+"/"+POWER);
@@ -68,7 +68,15 @@ static pml::restgoose::response ConvertPostDataToJson(const postData& vData)
         {
             if(vData[i].name.Get().empty() == false)
             {
-                resp.jsonData[vData[i].name.Get()] = vData[i].data.Get();
+                if(vData[i].filepath.Get().empty() == true)
+                {
+                    resp.jsonData[vData[i].name.Get()] = vData[i].data.Get();
+                }
+                else
+                {
+                    resp.jsonData[vData[i].name.Get()]["name"] = vData[i].data.Get();
+                    resp.jsonData[vData[i].name.Get()]["location"] = vData[i].filepath.Get();
+                }
             }
         }
     }
@@ -420,7 +428,7 @@ pml::restgoose::response Core::PutPower(const query& theQuery, const postData& v
     if(theResponse.jsonData.isMember("command") == false || theResponse.jsonData["command"].isString() == false)
     {
         theResponse.nHttpCode = 400;
-        theResponse.jsonData["result"] = "No command sent";
+        theResponse.jsonData["success"] = "No command sent";
         pmlLog(pml::LOG_ERROR) << " no command sent" ;
     }
     else if(CmpNoCase(theResponse.jsonData["command"].asString(), "restart server"))
@@ -445,7 +453,7 @@ pml::restgoose::response Core::PutPower(const query& theQuery, const postData& v
     else
     {
         theResponse.nHttpCode = 400;
-        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["success"] = false;
         theResponse.jsonData["reason"].append("Invalid command sent");
         pmlLog(pml::LOG_ERROR) << "'" << theResponse.jsonData["command"].asString() <<"' is not a valid command" ;
     }
@@ -469,7 +477,7 @@ pml::restgoose::response Core::PatchConfig(const query& theQuery, const postData
         if(theResponse.jsonData.isObject() == false)
         {
             theResponse.nHttpCode  = 400;
-            theResponse.jsonData["result"] = false;
+            theResponse.jsonData["success"] = false;
             theResponse.jsonData["reason"].append("Invalid JSON");
         }
         else
@@ -504,7 +512,7 @@ pml::restgoose::response Core::PatchConfig(const query& theQuery, const postData
             InitLogging();  //change logging if necessary
             m_manager.InitPaths();  //change paths if necessary
             theResponse = GetConfig(theQuery, vData, theEndpoint, theUser);
-            theResponse.jsonData["result"] = true;
+            theResponse.jsonData["success"] = true;
         }
     }
     return theResponse;
@@ -933,12 +941,12 @@ pml::restgoose::response Core::Reboot(int nCommand)
     if(nError == -1)
     {
         theResponse.nHttpCode = 500;
-        theResponse.jsonData["result"] = false;
+        theResponse.jsonData["success"] = false;
         theResponse.jsonData["reason"].append(strerror(errno));
     }
     else
     {
-        theResponse.jsonData["result"] = true;
+        theResponse.jsonData["success"] = true;
     }
     return theResponse;
 }
