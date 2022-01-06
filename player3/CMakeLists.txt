@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
-project(player3 LANGUAGES CXX C)
+project(player3 LANGUAGES CXX C VERSION 1.1.0)
 
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-execute_process(COMMAND ${CMAKE_COMMAND} -DNAMESPACE=epi -P ${CMAKE_CURRENT_SOURCE_DIR}/version.cmake)
+execute_process(COMMAND ${CMAKE_COMMAND} -DNAMESPACE=epi -DMAJOR=${PROJECT_VERSION_MAJOR} -DMINOR=${PROJECT_VERSION_MINOR} -DPATCH=${PROJECT_VERSION_PATCH} -P ${CMAKE_CURRENT_SOURCE_DIR}/version.cmake)
 
 add_executable(player3 "../common/src/epicron.cpp"
 					   "../common/src/inimanager.cpp"
