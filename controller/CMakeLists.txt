@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
-project(cartcontroller LANGUAGES CXX C)
+project(controller LANGUAGES CXX C)
 
-#add_custom_command(TARGET controller PRE_BUILD COMMAND ${PROJECT_SOURCE_DIR}/../autoversion ARGS ${PROJECT_SOURCE_DIR}/include/version.h)
+execute_process(COMMAND ${CMAKE_COMMAND} -DNAMESPACE=epi -P ${CMAKE_CURRENT_SOURCE_DIR}/version.cmake)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 message(${PROJECT_SOURCE_DIR})
 
-add_executable(cartcontroller "../common/src/epiwriter.cpp"
+add_executable(controller "../common/src/epiwriter.cpp"
  "../common/src/inimanager.cpp"
  "../common/src/inisection.cpp"
  "../common/src/jsonutils.cpp"
@@ -18,6 +18,7 @@ add_executable(cartcontroller "../common/src/epiwriter.cpp"
  "src/dlgError.cpp"
  "src/dlgInfo.cpp"
  "src/dlgOptions.cpp"
+ "src/dlgUpload.cpp"
  "src/dlgUsb.cpp"
  "src/progress.cpp"
  "src/uirect.cpp"
@@ -34,26 +35,27 @@ add_executable(cartcontroller "../common/src/epiwriter.cpp"
 
 include_directories(${DIR_JSON}/dist)
 include_directories(${DIR_LOG}/include)
+include_directories(${DIR_RESTGOOSE}/include)
 include_directories(${PROJECT_SOURCE_DIR}/../common/include)
 include_directories(${PROJECT_SOURCE_DIR}/../controller/icons)
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/../controller/include)
 
 list(APPEND flags "-fPIC" "-Wall" "-fpermissive" "-O3" "-pthread")
-target_compile_options(cartcontroller PRIVATE ${flags})
-target_compile_definitions(cartcontroller PUBLIC NDEBUG WXUSINGDLL WXUSE_UNICODE)
+target_compile_options(controller PRIVATE ${flags})
+target_compile_definitions(controller PUBLIC NDEBUG WXUSINGDLL WXUSE_UNICODE)
 
 #find external libraries
 find_package(wxWidgets REQUIRED)
 include(${wxWidgets_USE_FILE})
 
 
-target_link_libraries(cartcontroller ${wxWidgets_LIBRARIES} pthread cap)
+target_link_libraries(controller ${wxWidgets_LIBRARIES} pthread cap restgoose pml_log)
 
-set_target_properties(cartcontroller PROPERTIES RUNTIME_OUTPUT_DIRECTORY "../../bin/")
+set_target_properties(controller PROPERTIES RUNTIME_OUTPUT_DIRECTORY "../../bin/")
 
 
 #install
-install(TARGETS cartcontroller RUNTIME DESTINATION /usr/local/bin)
+install(TARGETS controller RUNTIME DESTINATION /usr/local/bin)
 
  

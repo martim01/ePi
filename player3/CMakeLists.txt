@@ -4,7 +4,7 @@ project(player3 LANGUAGES CXX C)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-message(${PROJECT_SOURCE_DIR})
+execute_process(COMMAND ${CMAKE_COMMAND} -DNAMESPACE=epi -P ${CMAKE_CURRENT_SOURCE_DIR}/version.cmake)
 
 add_executable(player3 "../common/src/epicron.cpp"
 					   "../common/src/inimanager.cpp"

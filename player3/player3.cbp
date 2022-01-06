@@ -56,6 +56,7 @@
 			<Add before="../autoversion src/version.cpp" />
 		</ExtraCommands>
 		<Unit filename="../../jsoncpp/dist/jsoncpp.cpp" />
+		<Unit filename="../common/include/epi_version.h" />
 		<Unit filename="../common/include/epicron.h" />
 		<Unit filename="../common/include/epiwriter.h" />
 		<Unit filename="../common/include/logtofile.h" />
@@ -75,7 +76,6 @@
 		<Unit filename="include/resources.h" />
 		<Unit filename="include/schedule.h" />
 		<Unit filename="include/soundfile.h" />
-		<Unit filename="include/version.h" />
 		<Unit filename="src/audiofile.cpp" />
 		<Unit filename="src/filesource.cpp" />
 		<Unit filename="src/main.cpp" />
@@ -87,6 +87,10 @@
 		<Unit filename="src/schedule.cpp" />
 		<Unit filename="src/soundfile.cpp" />
 		<Unit filename="src/version.cpp" />
-		<Extensions />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

@@ -3,7 +3,7 @@
 #include <sys/statvfs.h>
 #include <fstream>
 #include "epiutils.h"
-#include "version.h"
+#include "epi_version.h"
 #include <algorithm>
 #include "log.h"
 #include <unistd.h>
@@ -179,9 +179,9 @@ Json::Value SysInfoManager::GetApplicationInfo()
 
     //@todo(martim01) Get version number of this app and also the player
     std::stringstream ssVersion;
-    ssVersion << version::MAJOR << "." << version::MINOR << "." << version::PATCH << "." << version::BUILD;
+    ssVersion << pml::epi::VERSION_MAJOR << "." << pml::epi::VERSION_MINOR << ":" << pml::epi::GIT_REV;
     jsInfo["version"] = ssVersion.str();
-    jsInfo["date"] = ConvertTimeToIsoString(std::time_t(version::DATE));
+    jsInfo["date"] = pml::epi::GIT_DATE;
     jsInfo["start_time"] = ConvertTimeToIsoString(m_startTime);
 
 

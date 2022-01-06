@@ -1,7 +1,7 @@
 #include "dlgOptions.h"
 #include "constants.h"
 #include "jsonutils.h"
-#include "version.h"
+#include "epi_version.h"
 #include <wx/log.h>
 #include "dlgEdit.h"
 #include <sstream>
@@ -777,7 +777,7 @@ void dlgOptions::VersionReply(const Json::Value& jsData)
         m_pstVersionPlayer67->SetLabel(wxEmptyString);
     }
 
-    m_pstVersionController->SetLabel(wxString::Format("%d.%d.%d.%d", version::MAJOR, version::MINOR, version::PATCH, version::BUILD));
+    m_pstVersionController->SetLabel(wxString::Format("%d.%d:%s", pml::epi::VERSION_MAJOR, pml::epi::VERSION_MINOR, pml::epi::GIT_REV));
     //todo(@martim01) launcher
 }
 

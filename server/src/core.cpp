@@ -13,7 +13,7 @@
 #include "resource.h"
 #include "inimanager.h"
 #include "inisection.h"
-#include "version.h"
+#include "epi_version.h"
 #include "logtofile.h"
 #include <unistd.h>
 #include <linux/reboot.h>
@@ -308,9 +308,9 @@ pml::restgoose::response Core::GetUpdate(const query& theQuery, const postData& 
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetUpdate" ;
     pml::restgoose::response theResponse;
     std::stringstream ssVersion;
-    ssVersion << version::MAJOR << "." << version::MINOR << "." << version::PATCH << "." << version::BUILD;
+    ssVersion << pml::epi::VERSION_MAJOR << "." << pml::epi::VERSION_MINOR << ":" << pml::epi::GIT_REV;
     theResponse.jsonData["server"]["version"] = ssVersion.str();
-    theResponse.jsonData["server"]["date"] = ConvertTimeToIsoString(std::time_t(version::DATE));
+    theResponse.jsonData["server"]["date"] = pml::epi::GIT_DATE;
 
 
     theResponse.jsonData["player3"] = ConvertToJson(Exec(CreatePath(m_iniConfig.GetIniString("paths", "player","/home/pi/ePi/bin"))+"player3 -v"));

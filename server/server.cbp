@@ -97,6 +97,7 @@
 		<Unit filename="../external/uuid/md5.h" />
 		<Unit filename="include/audiofile.h" />
 		<Unit filename="include/core.h" />
+		<Unit filename="include/epi_server_version.h" />
 		<Unit filename="include/launcher.h" />
 		<Unit filename="include/mp3file.h" />
 		<Unit filename="include/ntpstatus.h" />
@@ -105,7 +106,6 @@
 		<Unit filename="include/resourcemanager.h" />
 		<Unit filename="include/sysinfomanager.h" />
 		<Unit filename="include/uidutils.h" />
-		<Unit filename="include/version.h" />
 		<Unit filename="include/wavfile.h" />
 		<Unit filename="src/audiofile.cpp" />
 		<Unit filename="src/core.cpp" />
@@ -128,6 +128,9 @@
 				<Changes_Log show_changes_editor="0" app_title="released version %M.%m.%b of %p" changeslog_path="ChangesLog.txt" />
 				<Code header_guard="VERSION_H" namespace="AutoVersion" prefix="" />
 			</AutoVersioning>
+			<code_completion />
+			<envvars />
+			<debugger />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

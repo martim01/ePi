@@ -42,3 +42,5 @@
 /controller/obj/Release/controller/*.res
 
 /loopi/data/*
+
+**/version.cpp

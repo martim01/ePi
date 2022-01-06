@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(episerver LANGUAGES CXX C)
 
-
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+execute_process(COMMAND ${CMAKE_COMMAND} -DNAMESPACE=epi -P ${CMAKE_CURRENT_SOURCE_DIR}/version.cmake)
 
 add_executable(episerver 
  "../common/src/epicron.cpp" 

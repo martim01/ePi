@@ -150,7 +150,6 @@
 		<Unit filename="include/uirect.h" />
 		<Unit filename="include/usbchecker.h" />
 		<Unit filename="include/version.h" />
-		<Unit filename="include/websocketclient.h" />
 		<Unit filename="include/wmbutton.h" />
 		<Unit filename="include/wmbuttonfactory.h" />
 		<Unit filename="include/wmedit.h" />
