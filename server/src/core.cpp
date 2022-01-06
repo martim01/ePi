@@ -113,6 +113,7 @@ void Core::InitLogging()
     if(m_iniConfig.GetIniInt("logging", "console",0) == 1 && m_nLogToConsole == 0)
     {
         m_nLogToConsole = pmlLog().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
+        pmlLog().SetOutputLevel(m_nLogToConsole, m_iniConfig.GetIniInt("logging", "console_level", pml::LOG_TRACE));
     }
     else if(m_nLogToConsole != 0)
     {
@@ -123,6 +124,7 @@ void Core::InitLogging()
     if(m_iniConfig.GetIniInt("logging", "file",0) == 1 &&  m_nLogToFile == 0)
     {
         m_nLogToFile = pmlLog().AddOutput(std::unique_ptr<pml::LogOutput>(new LogToFile(CreatePath(m_iniConfig.GetIniString("paths","logs","."))+"episerver")));
+        pmlLog().SetOutputLevel(m_nLogToFile, m_iniConfig.GetIniInt("logging", "file_level", pml::LOG_INFO));
     }
     else if(m_nLogToFile != 0)
     {

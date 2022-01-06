@@ -712,7 +712,7 @@ pml::restgoose::response ResourceManager::ParseFileData(const Json::Value& jsDat
 {
     pml::restgoose::response theResponse;
 
-    if(jsData.isMember("files") == false || jsData["files"].asString().empty())
+    if(jsData.isMember("files") == false)
     {
         theResponse.nHttpCode = 400;
         theResponse.jsonData["success"] = false;

@@ -1,5 +1,6 @@
 #include "jsonutils.h"
 #include <iostream>
+#include "log.h"
 
 void UpdateJsonObject(Json::Value& dest, const Json::Value& source)
 {
@@ -63,17 +64,11 @@ Json::Value ConvertToJson(const std::string& str)
     }
     catch(const Json::RuntimeError& e)
     {
-        std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-        std::cout << str << std::endl;
-        std::cout << e.what() << std::endl;
-        std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+        pmlLog(pml::LOG_ERROR) << "Could not convert '" << str << "' to JSON: " << e.what();
     }
     catch(const Json::LogicError& e)
     {
-        std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-        std::cout << str << std::endl;
-        std::cout << e.what() << std::endl;
-        std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+        pmlLog(pml::LOG_ERROR) << "Could not convert '" << str << "' to JSON: " << e.what();
     }
 
     return jsData;
