@@ -38,12 +38,11 @@ void LogToFile::Flush(pml::enumLevel eLogLevel, const std::stringstream&  logStr
 
     std::stringstream ssFilePath;
     std::stringstream ssFileName;
-    ssFilePath << m_sRootPath << std::put_time(localtime(&in_time_t), "%Y/%m/%d");
-    ssFileName << std::put_time(localtime(&in_time_t), "/%H") << ".log";
+    ssFileName << std::put_time(localtime(&in_time_t), "/%Y-%m-%dT%H") << ".log";
 
-    if(m_ofLog.is_open() == false || ssFilePath.str() != m_sFilePath || ssFileName.str() != m_sFileName)
+    if(m_ofLog.is_open() == false || m_sRootPath != m_sFilePath || ssFileName.str() != m_sFileName)
     {
-        OpenFile(ssFilePath.str(), ssFileName.str());
+        OpenFile(m_sRootPath, ssFileName.str());
     }
 
     if(m_ofLog.is_open())
