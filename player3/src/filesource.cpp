@@ -46,7 +46,7 @@ bool FileSource::Play()
 
         //Init the resampler
         int nSampleRate(m_iniConfig.GetIniInt("player3", "samplerate", 48000));
-        if(m_pFile->GetSampleRate() != nSampleRate)
+        if(m_pFile->GetSampleRate() != nSampleRate && m_iniConfig.GetIniInt("player3", "resample", 0) == 1)
         {
             m_pSampler = std::unique_ptr<Resampler>(new Resampler(nSampleRate));
             if(m_pSampler->Init(m_pFile->GetChannels(), m_pFile->GetSampleRate()) == false)
@@ -56,7 +56,6 @@ bool FileSource::Play()
                 epiWriter::Get().writeToStdOut(m_jsStatus);
                 return false;
             }
-            pmlLog(pml::LOG_DEBUG) << "Resample on";
             m_jsStatus["playing"]["samplerate"]["out"] = nSampleRate;
             m_jsStatus["playing"]["samplerate"]["in"] = m_pFile->GetSampleRate();
             m_jsStatus["playing"]["resampler"] = true;
