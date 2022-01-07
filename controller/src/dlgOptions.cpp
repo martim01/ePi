@@ -777,7 +777,7 @@ void dlgOptions::VersionReply(const Json::Value& jsData)
         m_pstVersionPlayer67->SetLabel(wxEmptyString);
     }
 
-    m_pstVersionController->SetLabel(wxString::Format("%d.%d:%s", pml::epi::VERSION_MAJOR, pml::epi::VERSION_MINOR, pml::epi::GIT_REV));
+    m_pstVersionController->SetLabel(pml::epi::VERSION_STRING);
     //todo(@martim01) launcher
 }
 

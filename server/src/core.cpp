@@ -309,11 +309,10 @@ pml::restgoose::response Core::GetUpdate(const query& theQuery, const postData& 
     //get all the version numbers...
     pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "GetUpdate" ;
     pml::restgoose::response theResponse;
-    std::stringstream ssVersion;
-    ssVersion << pml::epi::VERSION_MAJOR << "." << pml::epi::VERSION_MINOR << ":" << pml::epi::GIT_REV;
-    theResponse.jsonData["server"]["version"] = ssVersion.str();
+    theResponse.jsonData["server"]["version"] = pml::epi::VERSION_STRING;
     theResponse.jsonData["server"]["date"] = pml::epi::GIT_DATE;
-
+    theResponse.jsonData["server"]["branch"] = pml::epi::GIT_BRANCH;
+    theResponse.jsonData["server"]["tag"] = pml::epi::GIT_TAG;
 
     theResponse.jsonData["player3"] = ConvertToJson(Exec(CreatePath(m_iniConfig.GetIniString("paths", "player","/home/pi/ePi/bin"))+"player3 -v"));
 

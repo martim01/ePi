@@ -178,10 +178,10 @@ Json::Value SysInfoManager::GetApplicationInfo()
     Json::Value jsInfo;
 
     //@todo(martim01) Get version number of this app and also the player
-    std::stringstream ssVersion;
-    ssVersion << pml::epi::VERSION_MAJOR << "." << pml::epi::VERSION_MINOR << ":" << pml::epi::GIT_REV;
-    jsInfo["version"] = ssVersion.str();
+    jsInfo["version"] = pml::epi::VERSION_STRING;
     jsInfo["date"] = pml::epi::GIT_DATE;
+    jsInfo["branch"] = pml::epi::GIT_BRANCH;
+    jsInfo["tag"] = pml::epi::GIT_TAG;
     jsInfo["start_time"] = ConvertTimeToIsoString(m_startTime);
 
 

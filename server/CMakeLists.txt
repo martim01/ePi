@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
-project(episerver LANGUAGES CXX C VERSION 2.0.0)
+project(episerver LANGUAGES CXX C VERSION 2.0.1)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
