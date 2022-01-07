@@ -111,6 +111,7 @@ bool FileSource::PlayOnce()
                 }
                 else
                 {
+                    pmlLog(pml::LOG_TRACE) << "Sampler: In=" << vRead.size() << "\tOut=" << vResample.size();
                     m_player.AddSamples(vResample);
                 }
             }
