@@ -99,11 +99,11 @@ int main(int argc, char* argv[])
 
         if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "--version")==0)
         {
-            std::stringstream ssVersion;
-            ssVersion << pml::epi::VERSION_MAJOR << "." << pml::epi::VERSION_MINOR << ":" << pml::epi::GIT_REV;
             Json::Value jsValue;
-            jsValue["version"] = ssVersion.str();
+            jsValue["version"] = pml::epi::VERSION_STRING;
             jsValue["date"] = pml::epi::GIT_DATE;
+            jsValue["branch"] = pml::epi::GIT_BRANCH;
+            jsValue["tag"] = pml::epi::GIT_TAG;
             epiWriter::Get().writeToStdOut(jsValue);
         }
         else if(strcmp(argv[1], "-d")==0 || strcmp(argv[1], "--devices")==0)

@@ -56,6 +56,7 @@ bool FileSource::Play()
                 epiWriter::Get().writeToStdOut(m_jsStatus);
                 return false;
             }
+            pmlLog(pml::LOG_DEBUG) << "Resample on";
             m_jsStatus["playing"]["samplerate"]["out"] = nSampleRate;
             m_jsStatus["playing"]["samplerate"]["in"] = m_pFile->GetSampleRate();
             m_jsStatus["playing"]["resampler"] = true;
