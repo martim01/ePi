@@ -314,6 +314,7 @@ dlgOptions::dlgOptions(wxWindow* parent, int nType, wxWebSocketClient& wsClient,
 
     StaticBoxSizer3->Add(-1,-1,1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
 
+    m_pstVersionController->SetLabel(pml::epi::VERSION_STRING);
 
 	if(m_nType != CART_FILE)
 	{
@@ -777,7 +778,7 @@ void dlgOptions::VersionReply(const Json::Value& jsData)
         m_pstVersionPlayer67->SetLabel(wxEmptyString);
     }
 
-    m_pstVersionController->SetLabel(pml::epi::VERSION_STRING);
+
     //todo(@martim01) launcher
 }
 
