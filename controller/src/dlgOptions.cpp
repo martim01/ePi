@@ -503,6 +503,10 @@ void dlgOptions::OnbtnReplaceClick(wxCommandEvent& event)
                 ShowError("Uploaded but odd response", aDlg.m_jsReply);
             }
         }
+        else
+        {
+            ShowError("Failed to upload - no response");
+        }
     }
     else
     {
