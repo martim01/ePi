@@ -449,7 +449,7 @@ void controllerDialog::OntimerMenuTrigger(wxTimerEvent& event)
     {
         pml::restgoose::HttpClient files(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString()));
         auto reply = files.Run();
-        if(reply.nCode > 99)
+        if(reply.nHttpCode > 99)
         {
             ReplyFiles(ConvertToJson(reply.data.Get()));
         }
@@ -463,7 +463,7 @@ void controllerDialog::OnTimerCheck(const wxTimerEvent& event)
     //Ask for status and info...
     pml::restgoose::HttpClient config(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[CONFIG]).ToStdString()));
     auto reply = config.Run();
-    if(reply.nCode > 99)
+    if(reply.nHttpCode > 99)
     {
         ReplyConfig(ConvertToJson(reply.data.Get()));
     }
@@ -472,7 +472,7 @@ void controllerDialog::OnTimerCheck(const wxTimerEvent& event)
 
     pml::restgoose::HttpClient files(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString()));
     reply = files.Run();
-    if(reply.nCode > 99)
+    if(reply.nHttpCode > 99)
     {
         ReplyFiles(ConvertToJson(reply.data.Get()));
     }

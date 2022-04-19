@@ -445,7 +445,7 @@ dlgOptions::dlgOptions(wxWindow* parent, int nType, wxWebSocketClient& wsClient,
 	{
         pml::restgoose::HttpClient client(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[UPDATE]).ToStdString()));
         auto resp = client.Run();
-        if(resp.nCode > 100)
+        if(resp.nHttpCode > 100)
         {
             ShowConnectedButtons(true);
             VersionReply(ConvertToJson(resp.data.Get()));
@@ -800,7 +800,7 @@ void dlgOptions::FileDeleteReply(const Json::Value& jsData)
         {
             pml::restgoose::HttpClient client(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString()));
             auto resp = client.Run();
-            if(resp.nCode > 100)
+            if(resp.nHttpCode > 100)
             {
                 FileGetReply(ConvertToJson(resp.data.Get()));
             }

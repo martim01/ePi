@@ -151,7 +151,7 @@ void Core::Run(const std::string& sConfigFile)
     m_manager.Init();
     m_info.SetDiskPath(m_manager.GetAudioPath());
 
-    if(m_server.Init(fileLocation(m_iniConfig.GetIniString("api", "sslCert", "")), fileLocation(m_iniConfig.GetIniString("api", "ssKey", "")), m_iniConfig.GetIniInt("api", "port", 8080), endpoint(""), true))
+    if(m_server.Init(fileLocation(m_iniConfig.GetIniString("api", "sslCert", "")), fileLocation(m_iniConfig.GetIniString("api", "ssKey", "")), ipAddress("0.0.0.0"), m_iniConfig.GetIniInt("api", "port", 8080), endpoint(""), true))
     {
         //add server callbacks
         CreateEndpoints();

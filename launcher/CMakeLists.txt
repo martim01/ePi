@@ -30,4 +30,4 @@ set_target_properties(launcher PROPERTIES RUNTIME_OUTPUT_DIRECTORY "../../bin/")
 
 #install
 install(TARGETS launcher RUNTIME DESTINATION /usr/local/bin)
-install(CODE "execute_process(COMMAND setcap cap_sys_admin+ep /usr/local/bin/launcher")
+install(CODE "execute_process(COMMAND setcap cap_sys_admin+ep /usr/local/bin/launcher)")
