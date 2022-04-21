@@ -91,7 +91,7 @@ include ("../include/overview.inc");
 						<label class="uk-form-label" for="upload_file">File</label>
 						<div class="uk-form-controls">
 							<div uk-form-custom="target: true">
-								<input type="file" id="upload_file" name="file" onchange="fileChosen()">
+								<input type="file" id="upload_file" name="files" onchange="fileChosen()">
 								<input class="uk-input uk-form-width-medium" type="text" placeholder="Select file" disabled>
 								<input class="uk-input" type="hidden" name="uid" id="upload_uid">
 							</div>
