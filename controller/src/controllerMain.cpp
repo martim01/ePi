@@ -177,6 +177,7 @@ void controllerDialog::OnWebsocketConnection(const wxCommandEvent& event)
     else
     {
         m_nConnected = DISCONNECTED;
+        m_wsClient.Stop();
         UpdateLabels();
         m_uiStatus.SetLabel("Offline");
         m_timerConnection.Start(m_dist(m_gen),true);
@@ -226,6 +227,7 @@ void controllerDialog::UpdatePlayingStatus(const Json::Value& jsData)
 void controllerDialog::OntimerConnectionTrigger(wxTimerEvent& event)
 {
     m_wsClient.Connect(endpoint(m_sWSEndpoint.ToStdString()));
+    m_wsClient.Run();
 }
 
 
