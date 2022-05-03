@@ -141,9 +141,9 @@ m_dist(500,1000)
     wxWebSocketClient::Get().Connect(m_endpointWS, this);
     wxWebSocketClient::Get().Run();
 
-    m_timerTimeout.SetOwner(this, wxNewId());
-    Connect(m_timerTimeout.GetId(), wxEVT_TIMER, (wxObjectEventFunction)&controllerDialog::OnTimerTimeout);
-    m_timerTimeout.Start(5000, true);
+    //m_timerTimeout.SetOwner(this, wxNewId());
+    //Connect(m_timerTimeout.GetId(), wxEVT_TIMER, (wxObjectEventFunction)&controllerDialog::OnTimerTimeout);
+    //m_timerTimeout.Start(5000, true);
 }
 
 controllerDialog::~controllerDialog()
@@ -187,8 +187,8 @@ void controllerDialog::OnWebsocketConnection(const wxCommandEvent& event)
 
 void controllerDialog::OnWebsocketMessage(const wxCommandEvent& event)
 {
-    m_timerTimeout.Stop();
-    m_timerTimeout.Start(5000, true);
+    //m_timerTimeout.Stop();
+    //m_timerTimeout.Start(5000, true);
 
 
     Json::Value jsValue(ConvertToJson(event.GetString().ToStdString()));
@@ -462,6 +462,7 @@ void controllerDialog::OntimerMenuTrigger(wxTimerEvent& event)
 
 void controllerDialog::OnTimerCheck(const wxTimerEvent& event)
 {
+
     wxLogDebug("OnTimerCheck");
     //Ask for status and info...
     pml::restgoose::HttpClient config(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[CONFIG]).ToStdString()));
@@ -487,6 +488,7 @@ void controllerDialog::OnTimerCheck(const wxTimerEvent& event)
 
 void controllerDialog::OnTimerTimeout(const wxTimerEvent& event)
 {
+//    pmlLog() << "OnTimerTimeout";
     m_nConnected = DISCONNECTED;
     wxWebSocketClient::Get().CloseConnection(m_endpointWS);
 
