@@ -462,7 +462,6 @@ void controllerDialog::OntimerMenuTrigger(wxTimerEvent& event)
 
 void controllerDialog::OnTimerCheck(const wxTimerEvent& event)
 {
-    return;
     wxLogDebug("OnTimerCheck");
     //Ask for status and info...
     pml::restgoose::HttpClient config(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[CONFIG]).ToStdString()));
