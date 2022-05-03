@@ -75,8 +75,7 @@ BEGIN_EVENT_TABLE(dlgInfo,wxDialog)
 	//*)
 END_EVENT_TABLE()
 
-dlgInfo::dlgInfo(wxWindow* parent,wxWebSocketClient& wsClient, const wxString& sHostname, wxWindowID id,const wxPoint& pos,const wxSize& size) :
-m_wsClient(wsClient)
+dlgInfo::dlgInfo(wxWindow* parent, const endpoint& endWS, const wxString& sHostname, wxWindowID id,const wxPoint& pos,const wxSize& size)
 {
 	wxBoxSizer* BoxSizer0;
 	wxBoxSizer* BoxSizer1;
@@ -340,7 +339,7 @@ m_wsClient(wsClient)
     Connect(wxID_ANY, wxEVT_WS_MESSAGE, (wxObjectEventFunction)&dlgInfo::OnWebsocketFrame);
 
 
-    m_wsClient.AddHandler(this);
+    wxWebSocketClient::Get().AddHandler(endWS, this);
 }
 
 dlgInfo::~dlgInfo()
@@ -352,7 +351,7 @@ dlgInfo::~dlgInfo()
 
 void dlgInfo::OnbtnCloseClick(wxCommandEvent& event)
 {
-    m_wsClient.RemoveHandler(this);
+    wxWebSocketClient::Get().RemoveHandler(this);
     EndModal(wxID_OK);
 }
 
@@ -436,7 +435,6 @@ void dlgInfo::OnWebsocketFrame(const wxCommandEvent& event)
         {
             m_plblHighTotal->SetLabel(wxString::Format("%llu MB", jsValue["system"]["high"]["total"].asUInt64()/MBYTES));
         }
-
         if(jsValue["disk"]["inodes"]["available"].isUInt64())
         {
             m_plblInodesAvailable->SetLabel(wxString::Format("%llu", jsValue["disk"]["inodes"]["available"].asUInt64()));

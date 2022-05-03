@@ -16,6 +16,11 @@ class wxWebSocketClient
         void Run();
         bool Connect(const endpoint& theEndpoint, wxEvtHandler* pHandler);
         void CloseConnection(const endpoint& theEndpoint);
+
+        void AddHandler(const endpoint& theEndpoint, wxEvtHandler* pHandler);
+        void RemoveHandler(const endpoint& theEndpoint, wxEvtHandler* pHandler);
+        void RemoveHandler(wxEvtHandler* pHandler);
+
         void Stop();
 
         void SendAuthentication(const endpoint& theEndpoint, const wxString& sUser, const wxString& sPassword);
@@ -29,7 +34,7 @@ class wxWebSocketClient
         bool MessageCallback(const endpoint& theEndpoint, const std::string& sMessage);
         pml::restgoose::WebSocketClient m_client;
 
-        std::map<endpoint, wxEvtHandler*> m_mHandlers;
+        std::map<endpoint, std::set<wxEvtHandler*>> m_mHandlers;
 
         std::unique_ptr<Json::StreamWriter> m_pWriter;
 

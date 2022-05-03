@@ -72,7 +72,6 @@ BEGIN_EVENT_TABLE(controllerDialog,wxDialog)
 END_EVENT_TABLE()
 
 controllerDialog::controllerDialog(wxWindow* parent,  const wxPoint pntLayout, unsigned int nController, const wxString& sIpAddress, unsigned short nPort, wxWindowID id) :
-m_wsClient(),
 m_sIpAddress(sIpAddress),
 m_nConnected(DISCONNECTED),
 m_nPlaying(STOPPED),
@@ -134,12 +133,13 @@ m_dist(500,1000)
 
     m_sIpAddress.Printf("%s:%u", sIpAddress.c_str(), nPort);
 
-    m_sWSEndpoint.Printf("ws://%s/ws", m_sIpAddress.c_str());
+
+    m_endpointWS = endpoint("ws://"+m_sIpAddress.ToStdString()+"/ws");
+
     m_sUrl.Printf("http://%s/x-epi/", m_sIpAddress.c_str());
 
-    m_wsClient.AddHandler(this);
-    m_wsClient.Connect(endpoint(m_sWSEndpoint.ToStdString()));
-    m_wsClient.Run();
+    wxWebSocketClient::Get().Connect(m_endpointWS, this);
+    wxWebSocketClient::Get().Run();
 
     m_timerTimeout.SetOwner(this, wxNewId());
     Connect(m_timerTimeout.GetId(), wxEVT_TIMER, (wxObjectEventFunction)&controllerDialog::OnTimerTimeout);
@@ -177,7 +177,8 @@ void controllerDialog::OnWebsocketConnection(const wxCommandEvent& event)
     else
     {
         m_nConnected = DISCONNECTED;
-        m_wsClient.Stop();
+        //wxWebSocketClient::Get().CloseConnection(m_endpointWS);
+
         UpdateLabels();
         m_uiStatus.SetLabel("Offline");
         m_timerConnection.Start(m_dist(m_gen),true);
@@ -226,8 +227,8 @@ void controllerDialog::UpdatePlayingStatus(const Json::Value& jsData)
 
 void controllerDialog::OntimerConnectionTrigger(wxTimerEvent& event)
 {
-    m_wsClient.Connect(endpoint(m_sWSEndpoint.ToStdString()));
-    m_wsClient.Run();
+    wxWebSocketClient::Get().Connect(m_endpointWS, this);
+    //m_wsClient.Run();
 }
 
 
@@ -442,7 +443,7 @@ void controllerDialog::OntimerMenuTrigger(wxTimerEvent& event)
     m_bDown = false;
     UpdateLabels();
 
-    dlgOptions aDlg(this, dlgOptions::CONTROLLER, m_wsClient, m_uiName.GetLabel(), m_sIpAddress, m_sUrl, m_sDefaultFileUid, wxNewId(), wxPoint(0,0), wxSize(800,480));
+    dlgOptions aDlg(this, dlgOptions::CONTROLLER, m_endpointWS, m_uiName.GetLabel(), m_sIpAddress, m_sUrl, m_sDefaultFileUid, wxNewId(), wxPoint(0,0), wxSize(800,480));
     if(aDlg.ShowModal() == wxID_CANCEL)
     {
         EndModal(wxID_OK);
@@ -461,6 +462,7 @@ void controllerDialog::OntimerMenuTrigger(wxTimerEvent& event)
 
 void controllerDialog::OnTimerCheck(const wxTimerEvent& event)
 {
+    return;
     wxLogDebug("OnTimerCheck");
     //Ask for status and info...
     pml::restgoose::HttpClient config(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[CONFIG]).ToStdString()));
@@ -487,7 +489,8 @@ void controllerDialog::OnTimerCheck(const wxTimerEvent& event)
 void controllerDialog::OnTimerTimeout(const wxTimerEvent& event)
 {
     m_nConnected = DISCONNECTED;
-    m_wsClient.Stop();
+    wxWebSocketClient::Get().CloseConnection(m_endpointWS);
+
     UpdateLabels();
     m_timerConnection.Start(m_dist(m_gen),true);
 }

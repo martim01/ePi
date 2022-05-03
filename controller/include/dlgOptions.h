@@ -13,6 +13,7 @@
 #include <string>
 #include "json/json.h"
 #include "wmlabel.h"
+#include "response.h"
 
 namespace pml
 {
@@ -27,7 +28,7 @@ class dlgOptions: public wxDialog
 {
 	public:
 
-		dlgOptions(wxWindow* parent, int nType, wxWebSocketClient& wsClient, const wxString& sHostname, const wxString& sIpAddress, const wxString& sUrl, const std::string& sUid, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
+		dlgOptions(wxWindow* parent, int nType, const endpoint& endWS, const wxString& sHostname, const wxString& sIpAddress, const wxString& sUrl, const std::string& sUid, wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
 		virtual ~dlgOptions();
 
 		wmButton* m_pbtnBack;
@@ -176,7 +177,7 @@ class dlgOptions: public wxDialog
 
 
         int m_nType;
-        wxWebSocketClient& m_wsClient;
+        endpoint m_endpointWS;
         wxString m_sIpAddress;
         wxString m_sUrl;
         std::string m_sUid;
