@@ -592,7 +592,7 @@ pml::restgoose::response Core::PatchFile(const query& theQuery, const postData& 
 
 pml::restgoose::response Core::PutFile(const query& theQuery, const postData& vData, const endpoint& theEndpoint, const userName& theUser)
 {
-    pmlLog(pml::LOG_DEBUG) << "Endpoints\t" << "PutFile" ;
+    pmlLog(pml::LOG_INFO) << "Endpoints\t" << "PutFile: " << vData.size();
 
     pml::restgoose::response theResponse(m_manager.IsLocked());
     if(theResponse.nHttpCode != 423)
