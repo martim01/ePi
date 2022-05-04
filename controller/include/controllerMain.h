@@ -83,9 +83,8 @@ class controllerDialog: public wxDialog
         uiRect m_uiStatus;
 
 
-        wxWebSocketClient m_wsClient;
 
-        wxString m_sWSEndpoint;
+        endpoint m_endpointWS;
         wxString m_sUrl;
         wxString m_sIpAddress;
 

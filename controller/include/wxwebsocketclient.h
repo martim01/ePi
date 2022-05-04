@@ -3,29 +3,40 @@
 #include <wx/event.h>
 #include <set>
 
+namespace Json
+{
+    class StreamWriter;
+}
+
 class wxWebSocketClient
 {
     public:
-        wxWebSocketClient();
 
-        void AddHandler(wxEvtHandler* pHandler);
-        void RemoveHandler(wxEvtHandler* pHandler);
-
+        static wxWebSocketClient& Get();
         void Run();
-        bool Connect(const endpoint& theEndpoint);
+        bool Connect(const endpoint& theEndpoint, wxEvtHandler* pHandler);
+        void CloseConnection(const endpoint& theEndpoint);
+
+        void AddHandler(const endpoint& theEndpoint, wxEvtHandler* pHandler);
+        void RemoveHandler(const endpoint& theEndpoint, wxEvtHandler* pHandler);
+        void RemoveHandler(wxEvtHandler* pHandler);
 
         void Stop();
 
-
+        void SendAuthentication(const endpoint& theEndpoint, const wxString& sUser, const wxString& sPassword);
 
     private:
+
+        wxWebSocketClient();
+        ~wxWebSocketClient();
+
         bool ConnectionCallback(const endpoint& theEndpoint, bool bConnected);
         bool MessageCallback(const endpoint& theEndpoint, const std::string& sMessage);
         pml::restgoose::WebSocketClient m_client;
 
-        std::set<wxEvtHandler*> m_setHandlers;
+        std::map<endpoint, std::set<wxEvtHandler*>> m_mHandlers;
 
-        std::map<endpoint, int> m_mId;
+        std::unique_ptr<Json::StreamWriter> m_pWriter;
 
 };
 

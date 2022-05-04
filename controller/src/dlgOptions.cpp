@@ -78,9 +78,9 @@ BEGIN_EVENT_TABLE(dlgOptions,wxDialog)
 	//*)
 END_EVENT_TABLE()
 
-dlgOptions::dlgOptions(wxWindow* parent, int nType, wxWebSocketClient& wsClient, const wxString& sHostname, const wxString& sIpAddress, const wxString& sUrl, const std::string& sUid, wxWindowID id,const wxPoint& pos,const wxSize& size) :
+dlgOptions::dlgOptions(wxWindow* parent, int nType, const endpoint& endWS, const wxString& sHostname, const wxString& sIpAddress, const wxString& sUrl, const std::string& sUid, wxWindowID id,const wxPoint& pos,const wxSize& size) :
     m_nType(nType),
-    m_wsClient(wsClient),
+    m_endpointWS(endWS),
     m_sIpAddress(sIpAddress),
     m_sUrl(sUrl),
     m_sUid(sUid)
@@ -446,7 +446,7 @@ dlgOptions::dlgOptions(wxWindow* parent, int nType, wxWebSocketClient& wsClient,
 	{
         pml::restgoose::HttpClient client(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[UPDATE]).ToStdString()));
         auto resp = client.Run();
-        if(resp.nCode > 100)
+        if(resp.nHttpCode > 100)
         {
             ShowConnectedButtons(true);
             VersionReply(ConvertToJson(resp.data.Get()));
@@ -801,7 +801,7 @@ void dlgOptions::FileDeleteReply(const Json::Value& jsData)
         {
             pml::restgoose::HttpClient client(pml::restgoose::GET, endpoint((m_sUrl+STR_ENDPOINTS[FILES]).ToStdString()));
             auto resp = client.Run();
-            if(resp.nCode > 100)
+            if(resp.nHttpCode > 100)
             {
                 FileGetReply(ConvertToJson(resp.data.Get()));
             }
@@ -860,7 +860,7 @@ void dlgOptions::OnbtnRestartAllClick(const wxCommandEvent& event)
 
 void dlgOptions::OnbtnInfoClick(const wxCommandEvent& event)
 {
-    dlgInfo aDlg(this, m_wsClient, m_pstHostname->GetLabel());
+    dlgInfo aDlg(this, m_endpointWS, m_pstHostname->GetLabel());
     aDlg.ShowModal();
 
 }

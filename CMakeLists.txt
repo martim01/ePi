@@ -48,10 +48,10 @@ endif()
 unset(EPI_TEMP_DIR2)
 
 
+message(STATUS "Configure Restgoose")
+add_subdirectory(${DIR_RESTGOOSE} ${DIR_RESTGOOSE}/build)
 
 if(BUILD_SERVER MATCHES ON)
-    message(STATUS "Configure Restgoose")
-    add_subdirectory(${DIR_RESTGOOSE} ${DIR_RESTGOOSE}/build)
     message(STATUS "Configure player3")
     add_subdirectory(player3)
     message(STATUS "Configure episerver")

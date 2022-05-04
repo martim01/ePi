@@ -201,14 +201,7 @@ void dlgUpload::OnReply(const wxCommandEvent& event)
     UsbChecker::UnmountDevice();
 
     m_jsReply = ConvertToJson(event.GetString().ToStdString());
-    if(event.GetInt() != 200)
-    {
-        EndModal(wxID_CANCEL);
-    }
-    else
-    {
-        EndModal(wxID_OK);
-    }
+    EndModal(wxID_OK);
 }
 
 void dlgUpload::OnProgress(const wxCommandEvent& event)

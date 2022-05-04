@@ -28,14 +28,14 @@ void wxHttpClientManager::Progress(unsigned long nSent, unsigned long nTotal)
 
 void wxHttpClientManager::Reply(const pml::restgoose::clientResponse& resp, unsigned int nRunId)
 {
-    pmlLog(pml::LOG_TRACE) << "wxHttpClientManager::Reply " << nRunId << " code: " << resp.nCode;
+    pmlLog(pml::LOG_TRACE) << "wxHttpClientManager::Reply " << nRunId << " code: " << resp.nHttpCode;
     auto itId = m_mIds.find(nRunId);
     if(itId != m_mIds.end())
     {
         if(m_pHandler)
         {
             auto pEvent = new wxCommandEvent(wxEVT_R_REPLY);
-            pEvent->SetInt(resp.nCode);
+            pEvent->SetInt(resp.nHttpCode);
             pEvent->SetExtraLong(itId->second);
             pEvent->SetString(resp.data.Get());
             wxQueueEvent(m_pHandler, pEvent);
