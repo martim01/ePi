@@ -58,7 +58,7 @@ class Core
         void ExitCallback(int nPid);
         void LoopCallback(std::chrono::milliseconds durationSince);
 
-        bool WebsocketAuthenticate(const endpoint& theEndpoint, const userName& theUser, const ipAddress& peer);
+        bool WebsocketAuthenticate(const endpoint& theEndpoint, const query& theQuery, const userName& theUser, const ipAddress& peer);
         bool WebsocketMessage(const endpoint& theEndpoint, const Json::Value& jsData);
         void WebsocketClosed(const endpoint& theEndpoint, const ipAddress& peer);
 

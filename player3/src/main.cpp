@@ -122,13 +122,13 @@ int main(int argc, char* argv[])
 
     if(argc == _DEBUG+1)
     {
-        pml::LogStream::AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
+        pml::LogStream::AddOutput(std::make_unique<pml::LogOutput>());
         pml::LogStream::SetOutputLevel(pml::LOG_TRACE);
         pmlLog() << "Logging to console!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
     };
     if(iniConfig.GetIniInt("logging", "file", 0) == 1)
     {
-        pml::LogStream::AddOutput(std::unique_ptr<pml::LogOutput>(new LogToFile(CreatePath(iniConfig.GetIniString("paths","logs","."))+"player3")));
+        pml::LogStream::AddOutput(std::make_unique<pml::LogToFile>(CreatePath(iniConfig.GetIniString("paths","logs","."))+"player3"));
     }
 
     try

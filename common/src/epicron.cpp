@@ -127,8 +127,14 @@ range CronJob::GetRange(const std::string& sRange)
                 nSecond = nFirst;
             }
         }
-        catch(const std::invalid_argument& e)
+        catch(std::invalid_argument& e)
         {
+            pmlLog(pml::LOG_WARN) << "Failed to get range for cron - invalid_argument " << e.what();
+            bOk = false;
+        }
+        catch(std::out_of_range& e)
+        {
+            pmlLog(pml::LOG_WARN) << "Failed to get range for cron - out_of_range " << e.what();
             bOk = false;
         }
     }

@@ -158,8 +158,14 @@ void SysInfoManager::ExtractTicks(const std::string& sLine)
             {
                 nTicks[i] = std::stoul(vSplit[i+1]);
             }
-            catch(const std::invalid_argument& e)
+            catch(std::invalid_argument& e)
             {
+                pmlLog(pml::LOG_WARN) << "Failed to get ticks - invalid_argument " << e.what();
+                nTicks[i] = 0;
+            }
+            catch(std::out_of_range& e)
+            {
+                pmlLog(pml::LOG_WARN) << "Failed to get ticks - out_of_range " << e.what();
                 nTicks[i] = 0;
             }
 

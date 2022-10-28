@@ -11,7 +11,6 @@ add_executable(player3 "../common/src/epicron.cpp"
 						"../common/src/inisection.cpp"
 						"../common/src/epiutils.cpp"
                         "../common/src/jsonutils.cpp"
-						"../common/src/logtofile.cpp"
 						${DIR_JSON}/dist/jsoncpp.cpp
 						"src/main.cpp"
 						"src/audiofile.cpp"
@@ -28,7 +27,6 @@ add_executable(player3 "../common/src/epicron.cpp"
 
 include_directories(${DIR_JSON}/dist)
 include_directories(${DIR_LOG}/include)
-						
 include_directories(${PROJECT_SOURCE_DIR}/../common/include)
 include_directories(${PROJECT_SOURCE_DIR}/include)
 

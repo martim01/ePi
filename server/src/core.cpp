@@ -112,7 +112,7 @@ void Core::InitLogging()
 {
     if(m_iniConfig.GetIniInt("logging", "console",0) == 1 && m_nLogToConsole == 0)
     {
-        m_nLogToConsole = pmlLog().AddOutput(std::unique_ptr<pml::LogOutput>(new pml::LogOutput()));
+        m_nLogToConsole = pmlLog().AddOutput(std::make_unique<pml::LogOutput>());
         pmlLog().SetOutputLevel(m_nLogToConsole, m_iniConfig.GetIniInt("logging", "console_level", pml::LOG_TRACE));
     }
     else if(m_nLogToConsole != 0)
@@ -123,7 +123,7 @@ void Core::InitLogging()
 
     if(m_iniConfig.GetIniInt("logging", "file",0) == 1 &&  m_nLogToFile == 0)
     {
-        m_nLogToFile = pmlLog().AddOutput(std::unique_ptr<pml::LogOutput>(new LogToFile(CreatePath(m_iniConfig.GetIniString("paths","logs","."))+"episerver")));
+        m_nLogToFile = pmlLog().AddOutput(std::make_unique<pml::LogToFile>(CreatePath(m_iniConfig.GetIniString("paths","logs","."))+"episerver"));
         pmlLog().SetOutputLevel(m_nLogToFile, m_iniConfig.GetIniInt("logging", "file_level", pml::LOG_INFO));
     }
     else if(m_nLogToFile != 0)
@@ -222,7 +222,7 @@ bool Core::CreateEndpoints()
         m_server.AddEndpoint(pml::restgoose::HTTP_DELETE, theEndpoint, std::bind(&Core::DeleteSchedule, this, _1,_2,_3,_4));
     }
 
-    if(m_server.AddWebsocketEndpoint(EP_WS, std::bind(&Core::WebsocketAuthenticate, this, _1,_2,_3), std::bind(&Core::WebsocketMessage, this, _1,_2),
+    if(m_server.AddWebsocketEndpoint(EP_WS, std::bind(&Core::WebsocketAuthenticate, this, _1,_2,_3,_4), std::bind(&Core::WebsocketMessage, this, _1,_2),
                                   std::bind(&Core::WebsocketClosed, this, _1,_2)) == false)
     {
         pmlLog(pml::LOG_ERROR) << "Failed to add websocket endpoints";
@@ -952,7 +952,7 @@ pml::restgoose::response Core::Reboot(int nCommand)
     return theResponse;
 }
 
-bool Core::WebsocketAuthenticate(const endpoint& theEndpoint, const userName& theUser, const ipAddress& peer)
+bool Core::WebsocketAuthenticate(const endpoint& theEndpoint, const query& theQuery, const userName& theUser, const ipAddress& peer)
 {
     pmlLog() << "Websocket connection request from " << peer;
     return true;

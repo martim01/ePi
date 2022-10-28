@@ -19,7 +19,7 @@ add_executable(episerver
  "src/main.cpp"
  "src/version.cpp"
  "src/mp3file.cpp" "src/proccheck.cpp" "src/resource.cpp" "src/ntpstatus.cpp"
- "src/resourcemanager.cpp" "src/sysinfomanager.cpp" "src/uidutils.cpp" "src/wavfile.cpp" "../common/src/logtofile.cpp")
+ "src/resourcemanager.cpp" "src/sysinfomanager.cpp" "src/uidutils.cpp" "src/wavfile.cpp")
 
 
 list(APPEND flags "-fPIC" "-Wall" "-fpermissive" "-O3" "-pthread")
