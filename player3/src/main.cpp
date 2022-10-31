@@ -125,10 +125,15 @@ int main(int argc, char* argv[])
         pml::LogStream::AddOutput(std::make_unique<pml::LogOutput>());
         pml::LogStream::SetOutputLevel(pml::LOG_TRACE);
         pmlLog() << "Logging to console!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-    };
+    }
+    else
+    {
+        pml::LogStream::SetOutputLevel(pml::LOG_INFO);
+    }
     if(iniConfig.GetIniInt("logging", "file", 0) == 1)
     {
-        pml::LogStream::AddOutput(std::make_unique<pml::LogToFile>(CreatePath(iniConfig.GetIniString("paths","logs","."))+"player3"));
+        auto nLogToFile = pml::LogStream::AddOutput(std::make_unique<pml::LogToFile>(CreatePath(iniConfig.GetIniString("paths","logs","."))+"player3"));
+        pmlLog().SetOutputLevel(nLogToFile, iniConfig.GetIniInt("logging", "file_level", pml::LOG_INFO));
     }
 
     try
