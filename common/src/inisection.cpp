@@ -27,9 +27,9 @@
 
 using namespace std;
 
-string getlower(string str)
+std::string getlower(std::string str)
 {
-    transform(str.begin(), str.end(), str.begin(), ::tolower);
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
     return str;
 }
 
